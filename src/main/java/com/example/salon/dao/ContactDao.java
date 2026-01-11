@@ -9,4 +9,6 @@ public interface ContactDao
     void addContactForBusiness(Long businessId, Contact contact);
 
     void AddContactsForBusiness(Long businessId, List<Contact> contacts);
+
+    List<Contact> getContactsForBusiness(Long businessId);
 }

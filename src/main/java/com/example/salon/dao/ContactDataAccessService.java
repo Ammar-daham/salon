@@ -45,4 +45,22 @@ public class ContactDataAccessService implements ContactDao
             addContactForBusiness(businessId, contact);
         }
     }
+
+    @Override
+    public List<Contact> getContactsForBusiness(Long businessId)
+    {
+        String sql = """
+                SELECT id, type, value, created_at
+                FROM contacts WHERE business_id = ?;
+                """;
+
+        return jdbcTemplate.query(sql, (rs, i) ->
+                new Contact(
+                        rs.getLong("id"),
+                        rs.getString("type"),
+                        rs.getString("value"),
+                        rs.getTimestamp("created_at").toInstant()
+                ), businessId
+        );
+    }
 }

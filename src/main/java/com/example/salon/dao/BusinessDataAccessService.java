@@ -65,6 +65,10 @@ public class BusinessDataAccessService implements BusinessDao{
             business.setAddresses(
                     addressDao.getAddressesForBusiness(business.getId())
             );
+
+            business.setContacts(
+                    contactDao.getContactsForBusiness(business.getId())
+            );
         }
 
         return businesses;

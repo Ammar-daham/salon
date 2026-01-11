@@ -1,5 +1,7 @@
 package com.example.salon.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.time.Instant;
 
 public class Contact {
@@ -8,14 +10,14 @@ public class Contact {
     public String type;
     public String value;
     public Instant createdAt;
+    @JsonIgnore
     public Long businessId;
 
-    public Contact(Long id, String type, String value, Instant createdAt, Long businessId) {
+    public Contact(Long id, String type, String value, Instant createdAt) {
         this.id = id;
         this.type = type;
         this.value = value;
         this.createdAt = createdAt;
-        this.businessId = businessId;
     }
 
     public Long getId() {
