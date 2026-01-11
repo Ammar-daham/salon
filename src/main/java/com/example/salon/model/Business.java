@@ -4,22 +4,22 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.time.Instant;
-import java.util.UUID;
+import java.util.List;
 
-public  class Business {
+public class Business {
 
     public Long id;
     public String name;
     public  String description;
     public Instant createdAt;
-
+    private List<Address> addresses;
 
     public Business(@JsonProperty("id") Long id, @JsonProperty("name") String name,
                     @JsonProperty("description") String description,  @JsonProperty("created_at") Instant createdAt) {
         this.id = id;
         this.name = name;
         this.description = description;
-        this.createdAt = createdAt; // ⏱ timestamp created automatically
+        this.createdAt = createdAt;
     }
 
     @JsonCreator
@@ -27,9 +27,12 @@ public  class Business {
                     @JsonProperty("description") String description) {
         this.name = name;
         this.description = description;
-        this.createdAt = Instant.now(); // ⏱ timestamp created automatically
+        this.createdAt = Instant.now();
     }
 
+    public Long getId() {
+        return id;
+    }
 
     public String getName() {
         return name;
@@ -43,6 +46,10 @@ public  class Business {
         return createdAt;
     }
 
+    public void setId(Long id) {
+        this.id = id;
+    }
+
     public void setName(String name) {
         this.name = name;
     }
@@ -53,5 +60,13 @@ public  class Business {
 
     public void setCreatedAt(Instant createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public List<Address> getAddresses() {
+        return addresses;
+    }
+
+    public void setAddresses(List<Address> addresses) {
+        this.addresses = addresses;
     }
 }
