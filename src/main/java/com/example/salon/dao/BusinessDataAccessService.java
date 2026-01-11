@@ -13,11 +13,13 @@ public class BusinessDataAccessService implements BusinessDao{
 
     private final JdbcTemplate jdbcTemplate;
     private final AddressDao addressDao;
+    private final ContactDao contactDao;
 
     @Autowired
-    public BusinessDataAccessService(JdbcTemplate jdbcTemplate, AddressDao addressDao) {
+    public BusinessDataAccessService(JdbcTemplate jdbcTemplate, AddressDao addressDao, ContactDao contactDao) {
         this.jdbcTemplate = jdbcTemplate;
         this.addressDao = addressDao;
+        this.contactDao = contactDao;
     }
 
     @Override
@@ -40,6 +42,10 @@ public class BusinessDataAccessService implements BusinessDao{
         // Insert addresses if present
         if (business.getAddresses() != null) {
             addressDao.AddAddressesForBusiness(businessId, business.getAddresses());
+        }
+
+        if (business.getContacts() != null) {
+            contactDao.AddContactsForBusiness(businessId, business.getContacts());
         }
         return businessId;
     }

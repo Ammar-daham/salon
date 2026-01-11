@@ -12,7 +12,9 @@ public class Business {
     public String name;
     public  String description;
     public Instant createdAt;
-    private List<Address> addresses;
+    public List<Address> addresses;
+    public List<Contact> contacts;
+
 
     public Business(@JsonProperty("id") Long id, @JsonProperty("name") String name,
                     @JsonProperty("description") String description,  @JsonProperty("created_at") Instant createdAt) {
@@ -68,5 +70,13 @@ public class Business {
 
     public void setAddresses(List<Address> addresses) {
         this.addresses = addresses;
+    }
+
+    public List<Contact> getContacts() {
+        return contacts;
+    }
+
+    public void setContacts(List<Contact> contacts) {
+        this.contacts = contacts;
     }
 }
