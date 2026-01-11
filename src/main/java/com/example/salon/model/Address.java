@@ -1,5 +1,6 @@
 package com.example.salon.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.time.Instant;
@@ -14,6 +15,7 @@ public class Address {
     public String latitude;
     public String longitude;
     public Instant createdAt;
+    @JsonIgnore
     public Long businessId;
 
     public Address(@JsonProperty("id") Long id,

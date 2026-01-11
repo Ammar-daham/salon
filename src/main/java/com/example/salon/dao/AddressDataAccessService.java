@@ -8,18 +8,20 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public class AddressDataAccessService implements AddressDao {
-
+public class AddressDataAccessService implements AddressDao
+{
     private final JdbcTemplate jdbcTemplate;
 
     @Autowired
-    public AddressDataAccessService(JdbcTemplate jdbcTemplate) {
+    public AddressDataAccessService(JdbcTemplate jdbcTemplate)
+    {
         this.jdbcTemplate = jdbcTemplate;
     }
 
 
     @Override
-    public void addAddressForBusiness(Long businessId, Address address) {
+    public void addAddressForBusiness(Long businessId, Address address)
+    {
         String sql = """
                 INSERT INTO addresses
                 (street, city, country, postal_code, latitude, longitude, business_id)
@@ -42,9 +44,31 @@ public class AddressDataAccessService implements AddressDao {
     }
 
     @Override
-    public void AddAddressesForBusiness(Long businessId, List<Address> addresses) {
+    public void AddAddressesForBusiness(Long businessId, List<Address> addresses)
+    {
         for (Address address : addresses) {
             addAddressForBusiness(businessId, address);
         }
+    }
+
+    public List<Address> getAddressesForBusiness(Long businessId)
+    {
+        String sql = """
+                SELECT id, street, city, country, postal_code, latitude, longitude, created_at
+                FROM addresses WHERE business_id = ?;
+                """;
+
+        return jdbcTemplate.query(sql, (rs, i) ->
+             new Address(
+                    rs.getLong("id"),
+                    rs.getString("street"),
+                    rs.getString("city"),
+                    rs.getString("country"),
+                    rs.getString("postal_code"),
+                    rs.getString("latitude"),
+                    rs.getString("longitude"),
+                    rs.getTimestamp("created_at").toInstant()
+            ),businessId
+        );
     }
 }

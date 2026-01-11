@@ -51,14 +51,22 @@ public class BusinessDataAccessService implements BusinessDao{
     }
 
     public List<Business> getBusinesses() {
-        String sql = "select * from business";
-        return jdbcTemplate.query(sql, (rs, i) -> {
-            return new Business(
+        String sql = "SELECT id, name, description, created_at FROM businesses";
+        List<Business> businesses = jdbcTemplate.query(sql, (rs, i) ->
+            new Business(
                     rs.getLong("id"),
                     rs.getString("name"),
                     rs.getString("description"),
                     rs.getTimestamp("created_at").toInstant()
+            )
+        );
+
+        for (Business business : businesses) {
+            business.setAddresses(
+                    addressDao.getAddressesForBusiness(business.getId())
             );
-        });
+        }
+
+        return businesses;
     }
 }
