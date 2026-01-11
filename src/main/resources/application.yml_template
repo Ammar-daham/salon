@@ -1,0 +1,6 @@
+app:
+  datasource:
+    jdbc-url: jdbc:postgresql://localhost:5432/salondb
+    username: add_your_user_name
+    password: add_your_password_here
+    pool-size: 30
