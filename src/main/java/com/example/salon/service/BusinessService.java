@@ -10,8 +10,8 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
-public class BusinessService {
-
+public class BusinessService
+{
     private final BusinessDao businessDao;
 
     @Autowired
@@ -21,12 +21,13 @@ public class BusinessService {
     }
 
     @Transactional
-    public void addBusiness(Business business) {
+    public void addBusiness(Business business)
+    {
         businessDao.addBusiness(business);
     }
 
-    public List<Business> getAllBusiness() {
+    public List<Business> getAllBusiness()
+    {
         return businessDao.getBusinesses();
     }
-
 }

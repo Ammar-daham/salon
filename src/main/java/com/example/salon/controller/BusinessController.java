@@ -9,22 +9,25 @@ import java.util.List;
 
 @RequestMapping("api/v1/business")
 @RestController
-public class BusinessController {
-
+public class BusinessController
+{
     private final BusinessService businessService;
 
     @Autowired
-    public BusinessController(BusinessService businessService) {
+    public BusinessController(BusinessService businessService)
+    {
         this.businessService = businessService;
     }
 
     @PostMapping
-    public void addBusiness(@RequestBody Business business) {
+    public void addBusiness(@RequestBody Business business)
+    {
         businessService.addBusiness(business);
     }
 
     @GetMapping
-    public List<Business> getAllBusiness() {
+    public List<Business> getAllBusiness()
+    {
        return businessService.getAllBusiness();
     }
 }

@@ -6,77 +6,104 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.Instant;
 import java.util.List;
 
-public class Business {
-
+public class Business
+{
     public Long id;
     public String name;
     public  String description;
     public Instant createdAt;
+    public String image;
     public List<Address> addresses;
     public List<Contact> contacts;
 
 
     public Business(@JsonProperty("id") Long id, @JsonProperty("name") String name,
-                    @JsonProperty("description") String description,  @JsonProperty("created_at") Instant createdAt) {
+                    @JsonProperty("description") String description,  @JsonProperty("created_at") Instant createdAt,
+                    @JsonProperty("image") String image)
+    {
         this.id = id;
         this.name = name;
         this.description = description;
         this.createdAt = createdAt;
+        this.image = image;
     }
 
     @JsonCreator
     public Business(@JsonProperty("name") String name,
-                    @JsonProperty("description") String description) {
+                    @JsonProperty("description") String description)
+    {
         this.name = name;
         this.description = description;
         this.createdAt = Instant.now();
     }
 
-    public Long getId() {
+    public Long getId()
+    {
         return id;
     }
 
-    public String getName() {
+    public String getName()
+    {
         return name;
     }
 
-    public String getDescription() {
+    public String getDescription()
+    {
         return description;
     }
 
-    public Instant getCreatedAt() {
+    public Instant getCreatedAt()
+    {
         return createdAt;
     }
 
-    public void setId(Long id) {
+    public void setId(Long id)
+    {
         this.id = id;
     }
 
-    public void setName(String name) {
+    public void setName(String name)
+    {
         this.name = name;
     }
 
-    public void setDescription(String description) {
+    public void setDescription(String description)
+    {
         this.description = description;
     }
 
-    public void setCreatedAt(Instant createdAt) {
+    public void setCreatedAt(Instant createdAt)
+    {
         this.createdAt = createdAt;
     }
 
-    public List<Address> getAddresses() {
+    public List<Address> getAddresses()
+    {
         return addresses;
     }
 
-    public void setAddresses(List<Address> addresses) {
+    public void setAddresses(List<Address> addresses)
+    {
         this.addresses = addresses;
     }
 
-    public List<Contact> getContacts() {
+    public List<Contact> getContacts()
+    {
         return contacts;
     }
 
-    public void setContacts(List<Contact> contacts) {
+    public void setContacts(List<Contact> contacts)
+    {
         this.contacts = contacts;
+    }
+
+    public String getImage()
+    {
+        return image;
+    }
+
+    public void setImage(String image)
+    {
+        this.image = image;
     }
 }

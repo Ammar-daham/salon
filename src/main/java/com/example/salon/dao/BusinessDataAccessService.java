@@ -9,14 +9,15 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository("postgres")
-public class BusinessDataAccessService implements BusinessDao{
-
+public class BusinessDataAccessService implements BusinessDao
+{
     private final JdbcTemplate jdbcTemplate;
     private final AddressDao addressDao;
     private final ContactDao contactDao;
 
     @Autowired
-    public BusinessDataAccessService(JdbcTemplate jdbcTemplate, AddressDao addressDao, ContactDao contactDao) {
+    public BusinessDataAccessService(JdbcTemplate jdbcTemplate, AddressDao addressDao, ContactDao contactDao)
+    {
         this.jdbcTemplate = jdbcTemplate;
         this.addressDao = addressDao;
         this.contactDao = contactDao;
@@ -24,10 +25,11 @@ public class BusinessDataAccessService implements BusinessDao{
 
     @Override
     @Transactional // Ensures atomicity: either both inserts succeed or rollback
-    public Long addBusiness(Business business) {
+    public Long addBusiness(Business business)
+    {
         String sqlBusiness = """
-                INSERT INTO businesses (name, description)
-                VALUES (?, ?)
+                INSERT INTO businesses (name, description, image)
+                VALUES (?, ?, ?)
                 RETURNING id
                 """;
 
@@ -35,33 +37,39 @@ public class BusinessDataAccessService implements BusinessDao{
                 sqlBusiness,
                 Long.class,
                 business.getName(),
-                business.getDescription()
+                business.getDescription(),
+                business.getImage()
         );
         business.setId(businessId);
 
         // Insert addresses if present
-        if (business.getAddresses() != null) {
+        if (business.getAddresses() != null)
+        {
             addressDao.AddAddressesForBusiness(businessId, business.getAddresses());
         }
 
-        if (business.getContacts() != null) {
+        if (business.getContacts() != null)
+        {
             contactDao.AddContactsForBusiness(businessId, business.getContacts());
         }
         return businessId;
     }
 
-    public List<Business> getBusinesses() {
-        String sql = "SELECT id, name, description, created_at FROM businesses";
+    public List<Business> getBusinesses()
+    {
+        String sql = "SELECT id, name, description, created_at, image FROM businesses";
         List<Business> businesses = jdbcTemplate.query(sql, (rs, i) ->
             new Business(
                     rs.getLong("id"),
                     rs.getString("name"),
                     rs.getString("description"),
-                    rs.getTimestamp("created_at").toInstant()
+                    rs.getTimestamp("created_at").toInstant(),
+                    rs.getString("image")
             )
         );
 
-        for (Business business : businesses) {
+        for (Business business : businesses)
+        {
             business.setAddresses(
                     addressDao.getAddressesForBusiness(business.getId())
             );
