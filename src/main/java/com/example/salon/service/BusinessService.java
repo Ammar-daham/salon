@@ -1,10 +1,14 @@
 package com.example.salon.service;
 
 import com.example.salon.dao.BusinessDao;
+import com.example.salon.exception.BaseException;
+import com.example.salon.exception.ErrorCode;
 import com.example.salon.model.Business;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.dao.DataAccessException;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -21,13 +25,32 @@ public class BusinessService
     }
 
     @Transactional
-    public void addBusiness(Business business)
+    public Business addBusiness(Business business)
     {
-        businessDao.addBusiness(business);
+        try
+        {
+            businessDao.addBusiness(business);
+        } catch (DuplicateKeyException ex)
+        {
+            System.out.println("ex.getMessage() " + ex.getMessage());
+            if (ex.getMessage().contains("businesses_name_unique"))
+                throw new BaseException("Business with name " + business.getName() + " already exists.", "CONFLICT", ErrorCode.DUPLICATE_RESOURCE.getStatus());
+            else if (ex.getMessage().contains("contacts_value_key"))
+                throw new BaseException("Contact already exists.", "CONFLICT", ErrorCode.DUPLICATE_RESOURCE.getStatus());
+        } catch (DataAccessException ex)
+        {
+            throw new BaseException("Database error occurred.", "DATABASE_ERROR",  ErrorCode.DATABASE_ERROR.getStatus());
+        }
+        return business;
     }
 
     public List<Business> getAllBusiness()
     {
         return businessDao.getBusinesses();
+    }
+
+    public void deleteBusiness(Long id)
+    {
+        businessDao.deleteBusiness(id);
     }
 }

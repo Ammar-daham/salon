@@ -4,17 +4,17 @@ import org.springframework.http.HttpStatus;
 
 public enum ErrorCode
 {
-    DATABASE_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "DB_500", "Database error");
+    NOT_FOUND(HttpStatus.NOT_FOUND, "404", "NOT_FOUND"),
+    DUPLICATE_RESOURCE(HttpStatus.CONFLICT, "DUPLICATE_RESOURCES_409", "CONFLICT"),
+
+    DATABASE_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "DB_500", "DATABASE_ERROR");
+
 
     private final HttpStatus status;
-    private final String message;
-    private final String code;
 
     ErrorCode(HttpStatus status, String message, String code)
     {
         this.status = status;
-        this.message = message;
-        this.code = code;
     }
 
     public HttpStatus getStatus()
@@ -22,13 +22,4 @@ public enum ErrorCode
         return status;
     }
 
-    public String getMessage()
-    {
-        return message;
-    }
-
-    public String getCode()
-    {
-        return code;
-    }
 }

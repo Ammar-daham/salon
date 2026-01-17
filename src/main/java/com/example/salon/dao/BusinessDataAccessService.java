@@ -81,4 +81,12 @@ public class BusinessDataAccessService implements BusinessDao
 
         return businesses;
     }
+
+    @Override
+    public Long deleteBusiness(Long id)
+    {
+        String sql = "DELETE FROM businesses WHERE id = ?";
+        int businessId = jdbcTemplate.update(sql, id);
+        return businessId > 0 ? id : null;
+    }
 }

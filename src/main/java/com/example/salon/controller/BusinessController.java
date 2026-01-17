@@ -3,8 +3,11 @@ package com.example.salon.controller;
 import com.example.salon.model.Business;
 import com.example.salon.service.BusinessService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.net.URI;
 import java.util.List;
 
 @RequestMapping("api/v1/business")
@@ -20,14 +23,27 @@ public class BusinessController
     }
 
     @PostMapping
-    public void addBusiness(@RequestBody Business business)
+    public Business addBusiness(@RequestBody Business business)
     {
-        businessService.addBusiness(business);
+        Business b = businessService.addBusiness(business);
+        URI location = ServletUriComponentsBuilder
+                .fromCurrentRequest()
+                .path("/{id}")
+                .buildAndExpand(business.getId())
+                .toUri();
+
+        return ResponseEntity.created(location).body(b).getBody();
     }
 
     @GetMapping
     public List<Business> getAllBusiness()
     {
        return businessService.getAllBusiness();
+    }
+
+    @DeleteMapping("/{id}")
+    public void deleteBusiness(@PathVariable Long id)
+    {
+        businessService.deleteBusiness(id);
     }
 }
