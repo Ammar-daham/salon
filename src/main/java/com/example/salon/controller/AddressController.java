@@ -4,6 +4,7 @@ import com.example.salon.model.Address;
 import com.example.salon.service.AddressService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -24,6 +25,12 @@ public class AddressController
     public List<Address> getAllAddresses()
     {
         return addressService.getAllAddresses();
+    }
+
+    @GetMapping("/{id}")
+    public Address getAddress(@PathVariable int id)
+    {
+        return addressService.getAddressById(id);
     }
 
 

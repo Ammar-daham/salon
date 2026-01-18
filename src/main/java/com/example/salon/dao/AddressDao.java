@@ -13,4 +13,6 @@ public interface AddressDao {
     List<Address> getAddressesForBusiness(Long businessId);
 
     List<Address> getAllAddresses();
+
+    Address getAddressById(int id);
 }

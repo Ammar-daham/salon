@@ -61,32 +61,51 @@ public class AddressDataAccessService implements AddressDao
 
         return jdbcTemplate.query(sql, (rs, i) ->
              new Address(
-                rs.getLong("id"),
-                rs.getString("street"),
-                rs.getString("city"),
-                rs.getString("country"),
-                rs.getString("postal_code"),
-                rs.getString("latitude"),
-                rs.getString("longitude"),
-                rs.getTimestamp("created_at").toInstant()
+                    rs.getLong("id"),
+                    rs.getString("street"),
+                    rs.getString("city"),
+                    rs.getString("country"),
+                    rs.getString("postal_code"),
+                    rs.getString("latitude"),
+                    rs.getString("longitude"),
+                    rs.getTimestamp("created_at").toInstant()
             ),businessId
         );
     }
 
     @Override
-    public List<Address> getAllAddresses() {
+    public List<Address> getAllAddresses()
+    {
         String sql = "SELECT id, street, city, country, postal_code, latitude, longitude, created_at from addresses";
         return jdbcTemplate.query(sql, (rs, i) ->
             new Address(
-                rs.getLong("id"),
-                rs.getString("street"),
-                rs.getString("city"),
-                rs.getString("country"),
-                rs.getString("postal_code"),
-                rs.getString("latitude"),
-                rs.getString("longitude"),
-                rs.getTimestamp("created_at").toInstant()
+                    rs.getLong("id"),
+                    rs.getString("street"),
+                    rs.getString("city"),
+                    rs.getString("country"),
+                    rs.getString("postal_code"),
+                    rs.getString("latitude"),
+                    rs.getString("longitude"),
+                    rs.getTimestamp("created_at").toInstant()
             )
+        );
+    }
+
+    @Override
+    public Address getAddressById(int id) {
+        String sql = "SELECT id, street, city, country, postal_code, latitude, longitude, created_at FROM addresses WHERE id = ?";
+        return jdbcTemplate.queryForObject(sql, (rs, i) ->
+            new Address(
+                    rs.getLong("id"),
+                    rs.getString("street"),
+                    rs.getString("city"),
+                    rs.getString("country"),
+                    rs.getString("postal_code"),
+                    rs.getString("latitude"),
+                    rs.getString("longitude"),
+                    rs.getTimestamp("created_at").toInstant()
+            ),
+            id
         );
     }
 }
