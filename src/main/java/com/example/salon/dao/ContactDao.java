@@ -11,4 +11,6 @@ public interface ContactDao
     void AddContactsForBusiness(Long businessId, List<Contact> contacts);
 
     List<Contact> getContactsForBusiness(Long businessId);
+
+    int deleteContactById(int id);
 }

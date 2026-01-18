@@ -63,4 +63,10 @@ public class ContactDataAccessService implements ContactDao
                 ), businessId
         );
     }
+
+    @Override
+    public int deleteContactById(int id) {
+        String sql = "DELETE FROM contacts WHERE id = ?";
+        return jdbcTemplate.update(sql, id);
+    }
 }

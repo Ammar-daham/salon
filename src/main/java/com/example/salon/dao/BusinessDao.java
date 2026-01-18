@@ -10,5 +10,5 @@ public interface BusinessDao
 
     List<Business> getBusinesses();
 
-    Long deleteBusiness(Long id);
+    int deleteBusiness(int id);
 }

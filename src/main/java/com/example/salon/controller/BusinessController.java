@@ -42,8 +42,8 @@ public class BusinessController
     }
 
     @DeleteMapping("/{id}")
-    public void deleteBusiness(@PathVariable Long id)
+    public void deleteBusiness(@PathVariable int id)
     {
-        businessService.deleteBusiness(id);
+         businessService.deleteBusiness(id);
     }
 }

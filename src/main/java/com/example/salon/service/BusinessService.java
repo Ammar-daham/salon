@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DuplicateKeyException;
+import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -19,7 +20,7 @@ public class BusinessService
     private final BusinessDao businessDao;
 
     @Autowired
-    public BusinessService(@Qualifier("postgres") BusinessDao businessDao)
+    public BusinessService(BusinessDao businessDao)
     {
         this.businessDao = businessDao;
     }
@@ -49,8 +50,10 @@ public class BusinessService
         return businessDao.getBusinesses();
     }
 
-    public void deleteBusiness(Long id)
+    public void deleteBusiness(int id)
     {
-        businessDao.deleteBusiness(id);
+            int row = businessDao.deleteBusiness(id);
+            if (row == 0)
+                throw new BaseException("Business with id " + id + " not found.", "NOT_FOUND", ErrorCode.NOT_FOUND.getStatus() );
     }
 }

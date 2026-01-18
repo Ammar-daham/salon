@@ -8,7 +8,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
-@Repository("postgres")
+@Repository
 public class BusinessDataAccessService implements BusinessDao
 {
     private final JdbcTemplate jdbcTemplate;
@@ -83,10 +83,9 @@ public class BusinessDataAccessService implements BusinessDao
     }
 
     @Override
-    public Long deleteBusiness(Long id)
+    public int deleteBusiness(int id)
     {
         String sql = "DELETE FROM businesses WHERE id = ?";
-        int businessId = jdbcTemplate.update(sql, id);
-        return businessId > 0 ? id : null;
+        return jdbcTemplate.update(sql, id);
     }
 }
