@@ -65,6 +65,20 @@ public class ContactDataAccessService implements ContactDao
     }
 
     @Override
+    public List<Contact> getAllContacts() {
+        String sql = "SELECT id, type, value, created_at FROM contacts;";
+        List<Contact> contacts = jdbcTemplate.query(sql, (rs, i) ->
+                new Contact(
+                        rs.getLong("id"),
+                        rs.getString("type"),
+                        rs.getString("value"),
+                        rs.getTimestamp("created_at").toInstant()
+                )
+        );
+        return contacts;
+    }
+
+    @Override
     public int deleteContactById(int id) {
         String sql = "DELETE FROM contacts WHERE id = ?";
         return jdbcTemplate.update(sql, id);

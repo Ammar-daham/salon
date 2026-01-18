@@ -8,7 +8,6 @@ public enum ErrorCode
     DUPLICATE_RESOURCE(HttpStatus.CONFLICT, "DUPLICATE_RESOURCES_409", "CONFLICT"),
     DATABASE_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "DB_500", "DATABASE_ERROR");
 
-
     private final HttpStatus status;
 
     ErrorCode(HttpStatus status, String message, String code)

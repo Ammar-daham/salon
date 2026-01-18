@@ -3,9 +3,12 @@ package com.example.salon.service;
 import com.example.salon.dao.ContactDao;
 import com.example.salon.exception.BaseException;
 import com.example.salon.exception.ErrorCode;
+import com.example.salon.model.Contact;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 public class ContactService {
@@ -16,6 +19,11 @@ public class ContactService {
     public ContactService(ContactDao contactDao)
     {
         this.contactDao = contactDao;
+    }
+
+    public List<Contact> getAllContacts()
+    {
+        return contactDao.getAllContacts();
     }
 
     public void delectContactById(int id)

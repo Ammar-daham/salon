@@ -12,5 +12,7 @@ public interface ContactDao
 
     List<Contact> getContactsForBusiness(Long businessId);
 
+    List<Contact> getAllContacts();
+
     int deleteContactById(int id);
 }
