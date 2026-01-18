@@ -51,6 +51,7 @@ public class AddressDataAccessService implements AddressDao
         }
     }
 
+    @Override
     public List<Address> getAddressesForBusiness(Long businessId)
     {
         String sql = """
@@ -60,15 +61,32 @@ public class AddressDataAccessService implements AddressDao
 
         return jdbcTemplate.query(sql, (rs, i) ->
              new Address(
-                    rs.getLong("id"),
-                    rs.getString("street"),
-                    rs.getString("city"),
-                    rs.getString("country"),
-                    rs.getString("postal_code"),
-                    rs.getString("latitude"),
-                    rs.getString("longitude"),
-                    rs.getTimestamp("created_at").toInstant()
+                rs.getLong("id"),
+                rs.getString("street"),
+                rs.getString("city"),
+                rs.getString("country"),
+                rs.getString("postal_code"),
+                rs.getString("latitude"),
+                rs.getString("longitude"),
+                rs.getTimestamp("created_at").toInstant()
             ),businessId
+        );
+    }
+
+    @Override
+    public List<Address> getAllAddresses() {
+        String sql = "SELECT id, street, city, country, postal_code, latitude, longitude, created_at from addresses";
+        return jdbcTemplate.query(sql, (rs, i) ->
+            new Address(
+                rs.getLong("id"),
+                rs.getString("street"),
+                rs.getString("city"),
+                rs.getString("country"),
+                rs.getString("postal_code"),
+                rs.getString("latitude"),
+                rs.getString("longitude"),
+                rs.getTimestamp("created_at").toInstant()
+            )
         );
     }
 }

@@ -29,11 +29,11 @@ public class ContactDataAccessService implements ContactDao
                 """;
 
         Long contactId = jdbcTemplate.queryForObject(
-                sql,
-                Long.class,
-                contact.getType(),
-                contact.getValue(),
-                businessId
+            sql,
+            Long.class,
+            contact.getType(),
+            contact.getValue(),
+            businessId
         );
         contact.setId(contactId);
     }
@@ -55,19 +55,19 @@ public class ContactDataAccessService implements ContactDao
                 """;
 
         return jdbcTemplate.query(sql, (rs, i) ->
-                new Contact(
-                        rs.getLong("id"),
-                        rs.getString("type"),
-                        rs.getString("value"),
-                        rs.getTimestamp("created_at").toInstant()
-                ), businessId
+            new Contact(
+                rs.getLong("id"),
+                rs.getString("type"),
+                rs.getString("value"),
+                rs.getTimestamp("created_at").toInstant()
+            ), businessId
         );
     }
 
     @Override
     public List<Contact> getAllContacts() {
         String sql = "SELECT id, type, value, created_at FROM contacts";
-        List<Contact> contacts = jdbcTemplate.query(sql, (rs, i) ->
+        return jdbcTemplate.query(sql, (rs, i) ->
                 new Contact(
                         rs.getLong("id"),
                         rs.getString("type"),
@@ -75,25 +75,24 @@ public class ContactDataAccessService implements ContactDao
                         rs.getTimestamp("created_at").toInstant()
                 )
         );
-        return contacts;
     }
 
     @Override
     public Contact getContactById(int id)
     {
         String sql = "SELECT id, type, value, created_at FROM contacts WHERE id = ?";
-        Contact contact = jdbcTemplate.queryForObject(sql, (rs, i) ->
-                new Contact(
-                        rs.getLong("id"),
-                        rs.getString("type"),
-                        rs.getString("value"),
-                        rs.getTimestamp("created_at").toInstant()
-                ),
-                id
+        return jdbcTemplate.queryForObject(sql, (rs, i) ->
+            new Contact(
+                rs.getLong("id"),
+                rs.getString("type"),
+                rs.getString("value"),
+                rs.getTimestamp("created_at").toInstant()
+            ),
+            id
         );
-        return contact;
     }
 
+    @Override
     public int updateContactById(int id, Contact contact)
     {
         String sql = "UPDATE contacts SET type = ?, value = ? WHERE id = ?";

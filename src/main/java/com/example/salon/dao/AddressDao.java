@@ -11,4 +11,6 @@ public interface AddressDao {
     void AddAddressesForBusiness(Long businessId, List<Address> addresses);
 
     List<Address> getAddressesForBusiness(Long businessId);
+
+    List<Address> getAllAddresses();
 }
