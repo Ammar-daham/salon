@@ -25,6 +25,12 @@ public class ContactController
         return contactService.getAllContacts();
     }
 
+    @GetMapping("/{id}")
+    public Contact getContactById(@PathVariable int id)
+    {
+        return contactService.getContactById(id);
+    }
+
     @DeleteMapping("/{id}")
     public void deleteContactById(@PathVariable int id)
     {

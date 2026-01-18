@@ -6,6 +6,7 @@ import com.example.salon.exception.ErrorCode;
 import com.example.salon.model.Contact;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -24,6 +25,17 @@ public class ContactService {
     public List<Contact> getAllContacts()
     {
         return contactDao.getAllContacts();
+    }
+
+    public Contact getContactById(int id)
+    {
+        Contact c;
+        try {
+            c = contactDao.getContactById(id);
+        } catch (EmptyResultDataAccessException e) {
+            throw new BaseException("Contact with id " + id + " not found", "NOT_FOUND", ErrorCode.NOT_FOUND.getStatus());
+        }
+        return c;
     }
 
     public void delectContactById(int id)
