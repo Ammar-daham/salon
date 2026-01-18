@@ -94,6 +94,12 @@ public class ContactDataAccessService implements ContactDao
         return contact;
     }
 
+    public int updateContactById(int id, Contact contact)
+    {
+        String sql = "UPDATE contacts SET type = ?, value = ? WHERE id = ?";
+        return jdbcTemplate.update(sql, contact.getType(), contact.getValue(), id);
+    }
+
     @Override
     public int deleteContactById(int id) {
         String sql = "DELETE FROM contacts WHERE id = ?";

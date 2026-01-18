@@ -31,6 +31,12 @@ public class ContactController
         return contactService.getContactById(id);
     }
 
+    @PutMapping("/{id}")
+    public void updateContactById(@PathVariable int id, @RequestBody Contact contact)
+    {
+        contactService.updateContactById(id, contact);
+    }
+
     @DeleteMapping("/{id}")
     public void deleteContactById(@PathVariable int id)
     {

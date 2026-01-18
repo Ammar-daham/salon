@@ -38,6 +38,13 @@ public class ContactService {
         return c;
     }
 
+    public void updateContactById(int id, Contact contact)
+    {
+        int row = contactDao.updateContactById(id, contact);
+        if (row == 0)
+            throw new BaseException("Contact with id " + id + " not found", "NOT_FOUND", ErrorCode.NOT_FOUND.getStatus());
+    }
+
     public void delectContactById(int id)
     {
         int row = contactDao.deleteContactById(id);
