@@ -108,4 +108,19 @@ public class AddressDataAccessService implements AddressDao
             id
         );
     }
+
+    @Override
+    public int updateAddressById(int id, Address address)
+    {
+        String sql = "UPDATE addresses SET street = ?, city = ?, country = ?, postal_code = ?, latitude = ?, longitude = ? WHERE id = ?";
+        return jdbcTemplate.update(
+                sql,
+                address.getStreet(),
+                address.getCity(),
+                address.getCountry(),
+                address.getPostalCode(),
+                address.getLatitude(),
+                address.getLongitude(),
+                id);
+    }
 }

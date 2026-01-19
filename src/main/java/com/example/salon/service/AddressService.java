@@ -35,4 +35,11 @@ public class AddressService {
         }
         return address;
     }
+
+    public void updateAddressById(int id, Address address)
+    {
+        int row = addressDao.updateAddressById(id, address);
+        if (row == 0)
+            throw new BaseException("Address with id " + id + " not found", "NOT_FOUND", ErrorCode.NOT_FOUND.getStatus());
+    }
 }

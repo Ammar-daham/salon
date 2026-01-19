@@ -15,4 +15,6 @@ public interface AddressDao {
     List<Address> getAllAddresses();
 
     Address getAddressById(int id);
+
+    int updateAddressById(int id, Address address);
 }
