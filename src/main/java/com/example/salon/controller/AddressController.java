@@ -30,10 +30,16 @@ public class AddressController
         return addressService.getAddressById(id);
     }
 
-    @PutMapping("{id}")
+    @PutMapping("/{id}")
     public void updateAddress(@PathVariable int id, @RequestBody Address address)
     {
         addressService.updateAddressById(id, address);
+    }
+
+    @DeleteMapping("/{id}")
+    public void deleteAddress(@PathVariable int id)
+    {
+        addressService.deleteAddressById(id);
     }
 
 

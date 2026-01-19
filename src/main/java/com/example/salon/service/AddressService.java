@@ -42,4 +42,11 @@ public class AddressService {
         if (row == 0)
             throw new BaseException("Address with id " + id + " not found", "NOT_FOUND", ErrorCode.NOT_FOUND.getStatus());
     }
+
+    public void deleteAddressById(int id)
+    {
+        int row = addressDao.deleteAddressById(id);
+        if (row == 0)
+            throw new BaseException("Address with id " + id + " not found", "NOT_FOUND", ErrorCode.NOT_FOUND.getStatus());
+    }
 }

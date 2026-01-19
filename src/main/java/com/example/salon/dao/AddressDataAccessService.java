@@ -123,4 +123,11 @@ public class AddressDataAccessService implements AddressDao
                 address.getLongitude(),
                 id);
     }
+
+    @Override
+    public int deleteAddressById(int id)
+    {
+        String sql = "DELETE FROM addresses WHERE id = ?";
+        return jdbcTemplate.update(sql, id);
+    }
 }
