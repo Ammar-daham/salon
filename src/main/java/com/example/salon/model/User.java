@@ -1,6 +1,7 @@
 package com.example.salon.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.time.Instant;
 import java.util.List;
@@ -16,13 +17,14 @@ public class User {
     public List<Contact> contacts;
     public Instant createdAt;
 
-    public User(Long id, String firstName, String lastName, Role role, List<Address> addresses, List<Contact> contacts, Instant createdAt) {
+    public User () {
+    }
+
+    public User(Long id, String firstName, String lastName, Role role, Instant createdAt) {
         this.id = id;
         this.firstName = firstName;
         this.lastName = lastName;
         this.role = role;
-        this.addresses = addresses;
-        this.contacts = contacts;
         this.createdAt = createdAt;
     }
 
@@ -56,5 +58,37 @@ public class User {
 
     public Instant getCreatedAt() {
         return createdAt;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
+
+    public void setRole(Role role) {
+        this.role = role;
+    }
+
+    public void setBusinessId(Long businessId) {
+        this.businessId = businessId;
+    }
+
+    public void setAddresses(List<Address> addresses) {
+        this.addresses = addresses;
+    }
+
+    public void setContacts(List<Contact> contacts) {
+        this.contacts = contacts;
+    }
+
+    public void setCreatedAt(Instant createdAt) {
+        this.createdAt = createdAt;
     }
 }
