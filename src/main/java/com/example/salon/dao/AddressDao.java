@@ -6,9 +6,7 @@ import java.util.List;
 
 public interface AddressDao {
 
-    void addAddressForBusiness(Long businessId, Address address);
-
-    void AddAddressesForBusiness(Long businessId, List<Address> addresses);
+    Long addAddress(Address address);
 
     List<Address> getAddressesForBusiness(Long businessId);
 

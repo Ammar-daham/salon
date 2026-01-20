@@ -20,12 +20,12 @@ public class AddressDataAccessService implements AddressDao
 
 
     @Override
-    public void addAddressForBusiness(Long businessId, Address address)
+    public Long addAddress(Address address)
     {
         String sql = """
                 INSERT INTO addresses
-                (street, city, country, postal_code, latitude, longitude, business_id)
-                VALUES (?, ?, ?, ?, ?, ?, ?)
+                (street, city, country, postal_code, latitude, longitude, business_id, user_id)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
                 RETURNING id;
                 """;
 
@@ -38,17 +38,11 @@ public class AddressDataAccessService implements AddressDao
                 address.getPostalCode(),
                 address.getLatitude(),
                 address.getLongitude(),
-                businessId
+                address.getBusinessId(),
+                address.getUserId()
         );
         address.setId(addressId);
-    }
-
-    @Override
-    public void AddAddressesForBusiness(Long businessId, List<Address> addresses)
-    {
-        for (Address address : addresses) {
-            addAddressForBusiness(businessId, address);
-        }
+        return addressId;
     }
 
     @Override
