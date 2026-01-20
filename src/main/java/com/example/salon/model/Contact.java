@@ -12,6 +12,7 @@ public class Contact {
     public Instant createdAt;
     @JsonIgnore
     public Long businessId;
+    @JsonIgnore
     public Long userId;
 
     public Contact(Long id, String type, String value, Instant createdAt) {

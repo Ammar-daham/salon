@@ -7,7 +7,7 @@ import java.util.List;
 public interface ContactDao
 {
     Long addContact(Contact contact);
-    
+
     List<Contact> getContactsForBusiness(Long businessId);
 
     List<Contact> getAllContacts();
