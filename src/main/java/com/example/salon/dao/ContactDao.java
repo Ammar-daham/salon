@@ -6,10 +6,8 @@ import java.util.List;
 
 public interface ContactDao
 {
-    void addContactForBusiness(Long businessId, Contact contact);
-
-    void AddContactsForBusiness(Long businessId, List<Contact> contacts);
-
+    Long addContact(Contact contact);
+    
     List<Contact> getContactsForBusiness(Long businessId);
 
     List<Contact> getAllContacts();

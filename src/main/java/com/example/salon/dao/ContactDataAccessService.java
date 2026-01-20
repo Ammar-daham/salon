@@ -19,12 +19,12 @@ public class ContactDataAccessService implements ContactDao
     }
 
     @Override
-    public void addContactForBusiness(Long businessId, Contact contact)
+    public Long addContact(Contact contact)
     {
         String sql = """
                 INSERT INTO contacts
-                (type, value, business_id)
-                VALUES (?, ?, ?)
+                (type, value, business_id, user_id)
+                VALUES (?, ?, ?, ?)
                 RETURNING id;
                 """;
 
@@ -33,18 +33,13 @@ public class ContactDataAccessService implements ContactDao
             Long.class,
             contact.getType(),
             contact.getValue(),
-            businessId
+            contact.getBusinessId(),
+            contact.getUserId()
         );
         contact.setId(contactId);
+        return contactId;
     }
 
-    @Override
-    public void AddContactsForBusiness(Long businessId, List<Contact> contacts)
-    {
-        for (Contact contact : contacts) {
-            addContactForBusiness(businessId, contact);
-        }
-    }
 
     @Override
     public List<Contact> getContactsForBusiness(Long businessId)

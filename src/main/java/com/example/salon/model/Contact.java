@@ -12,6 +12,7 @@ public class Contact {
     public Instant createdAt;
     @JsonIgnore
     public Long businessId;
+    public Long userId;
 
     public Contact(Long id, String type, String value, Instant createdAt) {
         this.id = id;
@@ -40,6 +41,11 @@ public class Contact {
         return businessId;
     }
 
+    public Long getUserId()
+    {
+        return userId;
+    }
+
     public void setId(Long id) {
         this.id = id;
     }
@@ -58,5 +64,10 @@ public class Contact {
 
     public void setBusinessId(Long businessId) {
         this.businessId = businessId;
+    }
+
+    public void setUserId(Long userId)
+    {
+        this.userId = userId;
     }
 }
