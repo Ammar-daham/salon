@@ -46,5 +46,17 @@ public class UserService {
         return userDao.getAllUsers();
     }
 
+    public User getUserById(int id)
+    {
+        User user;
+        try
+        {
+            user = userDao.getUserById(id);
+        } catch (EmptyResultDataAccessException ex) {
+            throw new BaseException("User with id " + id + " not found", "NOT_FOUND", ErrorCode.NOT_FOUND.getStatus());
+        }
+        return user;
+    }
+
 
 }

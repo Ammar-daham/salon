@@ -84,8 +84,22 @@ public class UserDataAccessService implements UserDao
     }
 
     @Override
-    public User getUserById(int id) {
-        return null;
+    public User getUserById(int id)
+    {
+        String sql = "SELECT * FROM users WHERE id = ?";
+        User user = jdbcTemplate.queryForObject(sql, (rs, i) ->
+                new User (
+                        rs.getLong("id"),
+                        rs.getString("first_name"),
+                        rs.getString("last_name"),
+                        Role.valueOf(rs.getString("role")),
+                        rs.getTimestamp("created_at").toInstant()
+                ),
+                id
+        );
+        user.setAddresses(addressDao.getAddressesForUser(user.getId()));
+        user.setContacts(contactDao.getContactsForUser(user.getId()));
+        return user;
     }
 
     @Override
