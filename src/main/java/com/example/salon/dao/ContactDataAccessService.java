@@ -40,14 +40,12 @@ public class ContactDataAccessService implements ContactDao
         return contactId;
     }
 
-
-    @Override
-    public List<Contact> getContactsForBusiness(Long businessId)
+    public List<Contact> getContactsByColumn(String column, Long businessId)
     {
         String sql = """
                 SELECT id, type, value, created_at
-                FROM contacts WHERE business_id = ?;
-                """;
+                FROM contacts WHERE %s = ?;
+                """.formatted(column);
 
         return jdbcTemplate.query(sql, (rs, i) ->
             new Contact(
@@ -60,7 +58,20 @@ public class ContactDataAccessService implements ContactDao
     }
 
     @Override
-    public List<Contact> getAllContacts() {
+    public List<Contact> getContactsForBusiness(Long businessId)
+    {
+        return getContactsByColumn("business_id", businessId);
+    }
+
+    @Override
+    public List<Contact> getContactsForUser(Long userId)
+    {
+        return getContactsByColumn("user_id", userId);
+    }
+
+    @Override
+    public List<Contact> getAllContacts()
+    {
         String sql = "SELECT id, type, value, created_at FROM contacts";
         return jdbcTemplate.query(sql, (rs, i) ->
                 new Contact(

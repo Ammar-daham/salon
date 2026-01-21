@@ -10,6 +10,8 @@ public interface ContactDao
 
     List<Contact> getContactsForBusiness(Long businessId);
 
+    List<Contact> getContactsForUser(Long userId);
+
     List<Contact> getAllContacts();
 
     Contact getContactById(int id);
