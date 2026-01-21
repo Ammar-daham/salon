@@ -18,7 +18,7 @@ public class Business
 
 
     public Business(@JsonProperty("id") Long id, @JsonProperty("name") String name,
-                    @JsonProperty("description") String description,  @JsonProperty("created_at") Instant createdAt,
+                    @JsonProperty("description") String description, @JsonProperty("created_at") Instant createdAt,
                     @JsonProperty("image") String image)
     {
         this.id = id;
