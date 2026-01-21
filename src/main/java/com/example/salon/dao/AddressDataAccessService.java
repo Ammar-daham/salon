@@ -46,12 +46,23 @@ public class AddressDataAccessService implements AddressDao
     }
 
     @Override
-    public List<Address> getAddressesForBusiness(Long businessId)
+    public List<Address> getAddressesForBusiness(Long id)
+    {
+        return getAddressesByColumn("business_id", id);
+    }
+
+    @Override
+    public List<Address> getAddressesForUser(Long id)
+    {
+        return getAddressesByColumn("user_id", id);
+    }
+
+    public List<Address> getAddressesByColumn(String column, Long businessId)
     {
         String sql = """
                 SELECT id, street, city, country, postal_code, latitude, longitude, created_at
-                FROM addresses WHERE business_id = ?;
-                """;
+                FROM addresses WHERE %s = ?;
+                """.formatted(column);
 
         return jdbcTemplate.query(sql, (rs, i) ->
              new Address(

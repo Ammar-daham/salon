@@ -8,7 +8,9 @@ public interface AddressDao {
 
     Long addAddress(Address address);
 
-    List<Address> getAddressesForBusiness(Long businessId);
+    List<Address> getAddressesForBusiness(Long id);
+
+    List<Address> getAddressesForUser(Long id);
 
     List<Address> getAllAddresses();
 
