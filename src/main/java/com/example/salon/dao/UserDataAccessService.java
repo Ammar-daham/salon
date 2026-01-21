@@ -21,9 +21,10 @@ public class UserDataAccessService implements UserDao
         this.contactDao = contactDao;
         this.addressDao = addressDao;
     }
-    
+
     @Override
-    public Long addUser(User user) {
+    public Long addUser(User user)
+    {
         String sql = """
                 INSERT INTO users (first_name, last_name, role)
                 VALUES (?, ?, ?)
@@ -42,7 +43,8 @@ public class UserDataAccessService implements UserDao
         // Insert addresses
         if (user.getAddresses() != null)
         {
-            user.getAddresses().forEach(address -> {
+            user.getAddresses().forEach(address ->
+            {
                 address.setUserId(userId);
                 addressDao.addAddress(address);
             });
@@ -51,7 +53,8 @@ public class UserDataAccessService implements UserDao
         // Insert contacts
         if (user.getContacts() != null)
         {
-            user.getContacts().forEach(contact -> {
+            user.getContacts().forEach(contact ->
+            {
                 contact.setUserId(userId);
                 contactDao.addContact(contact);
             });
@@ -60,11 +63,11 @@ public class UserDataAccessService implements UserDao
     }
 
     @Override
-    public List<User> getAllUsers() {
+    public List<User> getAllUsers()
+    {
         String sql = "SELECT * FROM users";
-
-        return jdbcTemplate.query(sql, (rs, i) ->
-                new User(
+        List<User> users = jdbcTemplate.query(sql, (rs, i) ->
+                new User (
                         rs.getLong("id"),
                         rs.getString("first_name"),
                         rs.getString("last_name"),
@@ -72,7 +75,12 @@ public class UserDataAccessService implements UserDao
                         rs.getTimestamp("created_at").toInstant()
                 )
         );
-
+        for (User user : users)
+        {
+            user.setAddresses(addressDao.getAddressesForUser(user.getId()));
+            user.setContacts(contactDao.getContactsForUser(user.getId()));
+        }
+        return users;
     }
 
     @Override

@@ -45,7 +45,8 @@ public class BusinessDataAccessService implements BusinessDao
         // Insert addresses if present
         if (business.getAddresses() != null)
         {
-            business.getAddresses().forEach(address -> {
+            business.getAddresses().forEach(address ->
+            {
                 address.setBusinessId(businessId);
                 addressDao.addAddress(address);
             });
@@ -54,7 +55,8 @@ public class BusinessDataAccessService implements BusinessDao
         // Insert contacts if present
         if (business.getContacts() != null)
         {
-           business.getContacts().forEach(contact -> {
+           business.getContacts().forEach(contact ->
+           {
                contact.setBusinessId(businessId);
                contactDao.addContact(contact);
            });
@@ -77,15 +79,9 @@ public class BusinessDataAccessService implements BusinessDao
 
         for (Business business : businesses)
         {
-            business.setAddresses(
-                    addressDao.getAddressesForBusiness(business.getId())
-            );
-
-            business.setContacts(
-                    contactDao.getContactsForBusiness(business.getId())
-            );
+            business.setAddresses(addressDao.getAddressesForBusiness(business.getId()));
+            business.setContacts(contactDao.getContactsForBusiness(business.getId()));
         }
-
         return businesses;
     }
 
