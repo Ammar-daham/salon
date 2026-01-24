@@ -99,7 +99,7 @@ public class ContactDataAccessService implements ContactDao
     }
 
     @Override
-    public int updateContactById(int id, Contact contact)
+    public int updateContactById(long id, Contact contact)
     {
         String sql = "UPDATE contacts SET type = ?, value = ? WHERE id = ?";
         return jdbcTemplate.update(sql, contact.getType(), contact.getValue(), id);

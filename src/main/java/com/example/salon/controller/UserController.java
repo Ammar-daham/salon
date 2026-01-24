@@ -48,4 +48,10 @@ public class UserController
     {
         return userService.getUserById(id);
     }
+
+    @PutMapping("/{id}")
+    public void updateUserById(@PathVariable long id, @RequestBody User user)
+    {
+        userService.updateUserById(id, user);
+    }
 }

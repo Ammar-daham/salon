@@ -1,15 +1,11 @@
 package com.example.salon.service;
 
-import com.example.salon.dao.AddressDao;
 import com.example.salon.dao.UserDao;
 import com.example.salon.exception.BaseException;
 import com.example.salon.exception.ErrorCode;
-import com.example.salon.model.Address;
-import com.example.salon.model.Business;
 import com.example.salon.model.User;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
@@ -56,6 +52,13 @@ public class UserService {
             throw new BaseException("User with id " + id + " not found", "NOT_FOUND", ErrorCode.NOT_FOUND.getStatus());
         }
         return user;
+    }
+
+    public void updateUserById(long id, User user)
+    {
+        long row = userDao.updateUserById(id, user);
+        if (row == 0)
+            throw new BaseException("User with id " + id + " not found", "NOT_FOUND", ErrorCode.NOT_FOUND.getStatus());
     }
 
 

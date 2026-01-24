@@ -115,7 +115,7 @@ public class AddressDataAccessService implements AddressDao
     }
 
     @Override
-    public int updateAddressById(int id, Address address)
+    public int updateAddressById(long id, Address address)
     {
         String sql = "UPDATE addresses SET street = ?, city = ?, country = ?, postal_code = ?, latitude = ?, longitude = ? WHERE id = ?";
         return jdbcTemplate.update(

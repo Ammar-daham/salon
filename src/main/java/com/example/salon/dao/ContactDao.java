@@ -16,7 +16,7 @@ public interface ContactDao
 
     Contact getContactById(int id);
 
-    int updateContactById(int id, Contact contact);
+    int updateContactById(long id, Contact contact);
 
     int deleteContactById(int id);
 }

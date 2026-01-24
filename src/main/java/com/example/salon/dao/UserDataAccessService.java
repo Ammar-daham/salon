@@ -103,8 +103,30 @@ public class UserDataAccessService implements UserDao
     }
 
     @Override
-    public int updateUserById(User user) {
-        return 0;
+    public long updateUserById(long id, User user) {
+        String sql = "UPDATE users SET first_name = ?, last_name = ?, role = ? WHERE id = ?";
+        long userId = (long) jdbcTemplate.update(sql, user.getFirstName(), user.getLastName(), user.getRole().name(), id);
+
+        // Update contacts
+        if (user.getContacts() != null)
+        {
+            user.getContacts().forEach(contact ->
+            {
+                contact.setUserId(id);
+                contactDao.updateContactById(contact.getId(), contact);
+            });
+        }
+
+        // Update addresses
+        if (user.getAddresses() != null)
+        {
+            user.getAddresses().forEach(address ->
+            {
+                address.setUserId(id);
+                addressDao.updateAddressById(address.getId(), address);
+            });
+        }
+        return id;
     }
 
     @Override

@@ -16,7 +16,7 @@ public interface AddressDao {
 
     Address getAddressById(int id);
 
-    int updateAddressById(int id, Address address);
+    int updateAddressById(long id, Address address);
 
     int deleteAddressById(int id);
 }
