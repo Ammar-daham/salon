@@ -10,5 +10,5 @@ public interface UserDao
     List<User> getAllUsers();
     User getUserById(int id);
     long updateUserById(long id, User user);
-    int deleteUserById(int id);
+    long deleteUserById(long id, User user);
 }

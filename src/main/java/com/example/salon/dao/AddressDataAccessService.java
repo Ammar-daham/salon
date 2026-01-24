@@ -130,7 +130,7 @@ public class AddressDataAccessService implements AddressDao
     }
 
     @Override
-    public int deleteAddressById(int id)
+    public int deleteAddressById(long id)
     {
         String sql = "DELETE FROM addresses WHERE id = ?";
         return jdbcTemplate.update(sql, id);

@@ -126,11 +126,32 @@ public class UserDataAccessService implements UserDao
                 addressDao.updateAddressById(address.getId(), address);
             });
         }
-        return id;
+        return userId;
     }
 
     @Override
-    public int deleteUserById(int id) {
-        return 0;
+    public long deleteUserById(long id, User user) {
+        String sql = "DELETE FROM users WHERE id = ?";
+        long userId = (long) jdbcTemplate.update(sql, id);
+
+        // Delete contacts and addresses
+        if (user.getContacts() != null)
+        {
+            user.getContacts().forEach(contact ->
+            {
+                contact.setUserId(id);
+                contactDao.deleteContactById(contact.getId());
+            });
+        } else if (user.getAddresses() != null)
+        {
+            user.getAddresses().forEach(address ->
+            {
+                address.setUserId(id);
+                addressDao.deleteAddressById(address.getId());
+            });
+        } else {
+            return -1;
+        }
+        return userId;
     }
 }

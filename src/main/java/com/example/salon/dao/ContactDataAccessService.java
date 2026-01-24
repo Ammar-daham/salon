@@ -106,7 +106,7 @@ public class ContactDataAccessService implements ContactDao
     }
 
     @Override
-    public int deleteContactById(int id) {
+    public int deleteContactById(long id) {
         String sql = "DELETE FROM contacts WHERE id = ?";
         return jdbcTemplate.update(sql, id);
     }

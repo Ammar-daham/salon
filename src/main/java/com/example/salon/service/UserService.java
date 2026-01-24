@@ -61,5 +61,12 @@ public class UserService {
             throw new BaseException("User with id " + id + " not found", "NOT_FOUND", ErrorCode.NOT_FOUND.getStatus());
     }
 
+    public void deleteUserById(long id, User user)
+    {
+        long row = userDao.deleteUserById(id, user);
+        if (row == 0)
+            throw new BaseException("User with id " + id + " not found", "NOT_FOUND", ErrorCode.NOT_FOUND.getStatus());
+    }
+
 
 }
