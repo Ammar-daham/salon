@@ -1,6 +1,7 @@
 package com.example.salon.exception;
 
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -48,5 +49,28 @@ public class GlobalControllerExceptionHandler
         return ResponseEntity.status(ErrorCode.BAD_REQUEST.getStatus()).body(error);
     }
 
+    @ExceptionHandler(DataAccessException.class)
+    public ResponseEntity<ErrorResponse> handleDataAccessException(DataAccessException ex, HttpServletRequest request)
+    {
+        ErrorResponse error = new ErrorResponse();
+        error.setErrorCode("DATABASE_ERROR");
+        error.setMessage("Database error occurred.");
+        error.setStatus(ErrorCode.DATABASE_ERROR.getStatus());
+        error.setTimestamp(Instant.now());
+        error.setPath(request.getRequestURI());
+        return ResponseEntity.status(ErrorCode.DATABASE_ERROR.getStatus()).body(error);
+    }
+
+    @ExceptionHandler(NullPointerException.class)
+    public ResponseEntity<ErrorResponse> handleNullPointerException(NullPointerException ex, HttpServletRequest request)
+    {
+        ErrorResponse error = new ErrorResponse();
+        error.setErrorCode("NULL_ARGUMENT");
+        error.setMessage("Null argument");
+        error.setStatus(ErrorCode.NULL_VALUE.getStatus());
+        error.setTimestamp(Instant.now());
+        error.setPath(request.getRequestURI());
+        return ResponseEntity.status(ErrorCode.NULL_VALUE.getStatus()).body(error);
+    }
 }
 
