@@ -5,9 +5,11 @@
  */
 CREATE TABLE businesses (
     id BIGSERIAL NOT NULL PRIMARY KEY,
-    name VARCHAR(100) not null,
+    name VARCHAR(100) not null UNIQUE,
     description TEXT,
-    created_at timestamp NOT NULL DEFAULT now()
+    image TEXT NOT NULL,
+    created_at timestamp NOT NULL DEFAULT now(),
+    updated_at timestamp
 );
 
 CREATE TABLE users
@@ -17,7 +19,8 @@ CREATE TABLE users
     last_name varchar(100) NOT NULL,
     role varchar(50)  NOT NULL,
     business_id BIGINT,
-    created_at timestamp NOT NULL DEFAULT now()
+    created_at timestamp NOT NULL DEFAULT now(),
+    updated_at timestamp
 );
 
 CREATE TABLE staff (
@@ -26,7 +29,8 @@ CREATE TABLE staff (
     business_id bigint not null,
     title varchar(50) NOT NULL,
     is_active boolean NOT NULL,
-    created_at timestamp NOT NULL DEFAULT now()
+    created_at timestamp NOT NULL DEFAULT now(),
+    updated_at timestamp
 );
 
 /*
@@ -53,14 +57,20 @@ CREATE TABLE addresses (
     postal_code varchar(20),
     latitude varchar(255),
     longitude varchar(255),
-    created_at timestamp NOT NULL DEFAULT now()
+    business_id bigint,
+    user_id bigint,
+    created_at timestamp NOT NULL DEFAULT now(),
+    updated_at timestamp
 );
 
 CREATE TABLE contacts (
     id BIGSERIAL NOT NULL PRIMARY KEY,
     type varchar(20),
     value varchar(255) unique,
-    created_at timestamp NOT NULL DEFAULT now()
+    business_id bigint,
+    user_id bigint,
+    created_at timestamp NOT NULL DEFAULT now(),
+    updated_at timestamp
 );
 
 /*
