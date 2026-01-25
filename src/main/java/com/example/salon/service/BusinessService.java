@@ -38,9 +38,6 @@ public class BusinessService
                 throw new BaseException("Business with name " + business.getName() + " already exists.", "CONFLICT", ErrorCode.DUPLICATE_RESOURCE.getStatus());
             else if (ex.getMessage().contains("contacts_value_key"))
                 throw new BaseException("Contact already exists.", "CONFLICT", ErrorCode.DUPLICATE_RESOURCE.getStatus());
-        } catch (DataAccessException ex)
-        {
-            throw new BaseException("Database error occurred.", "DATABASE_ERROR",  ErrorCode.DATABASE_ERROR.getStatus());
         }
         return business;
     }

@@ -6,17 +6,17 @@ import java.util.List;
 
 public interface ContactDao
 {
-    void addContactForBusiness(Long businessId, Contact contact);
-
-    void AddContactsForBusiness(Long businessId, List<Contact> contacts);
+    Long addContact(Contact contact);
 
     List<Contact> getContactsForBusiness(Long businessId);
+
+    List<Contact> getContactsForUser(Long userId);
 
     List<Contact> getAllContacts();
 
     Contact getContactById(int id);
 
-    int updateContactById(int id, Contact contact);
+    int updateContactById(long id, Contact contact);
 
-    int deleteContactById(int id);
+    int deleteContactById(long id);
 }

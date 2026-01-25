@@ -20,12 +20,12 @@ public class AddressDataAccessService implements AddressDao
 
 
     @Override
-    public void addAddressForBusiness(Long businessId, Address address)
+    public Long addAddress(Address address)
     {
         String sql = """
                 INSERT INTO addresses
-                (street, city, country, postal_code, latitude, longitude, business_id)
-                VALUES (?, ?, ?, ?, ?, ?, ?)
+                (street, city, country, postal_code, latitude, longitude, business_id, user_id)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
                 RETURNING id;
                 """;
 
@@ -38,26 +38,31 @@ public class AddressDataAccessService implements AddressDao
                 address.getPostalCode(),
                 address.getLatitude(),
                 address.getLongitude(),
-                businessId
+                address.getBusinessId(),
+                address.getUserId()
         );
         address.setId(addressId);
+        return addressId;
     }
 
     @Override
-    public void AddAddressesForBusiness(Long businessId, List<Address> addresses)
+    public List<Address> getAddressesForBusiness(Long id)
     {
-        for (Address address : addresses) {
-            addAddressForBusiness(businessId, address);
-        }
+        return getAddressesByColumn("business_id", id);
     }
 
     @Override
-    public List<Address> getAddressesForBusiness(Long businessId)
+    public List<Address> getAddressesForUser(Long id)
+    {
+        return getAddressesByColumn("user_id", id);
+    }
+
+    public List<Address> getAddressesByColumn(String column, Long businessId)
     {
         String sql = """
                 SELECT id, street, city, country, postal_code, latitude, longitude, created_at
-                FROM addresses WHERE business_id = ?;
-                """;
+                FROM addresses WHERE %s = ?;
+                """.formatted(column);
 
         return jdbcTemplate.query(sql, (rs, i) ->
              new Address(
@@ -110,7 +115,7 @@ public class AddressDataAccessService implements AddressDao
     }
 
     @Override
-    public int updateAddressById(int id, Address address)
+    public int updateAddressById(long id, Address address)
     {
         String sql = "UPDATE addresses SET street = ?, city = ?, country = ?, postal_code = ?, latitude = ?, longitude = ? WHERE id = ?";
         return jdbcTemplate.update(
@@ -125,7 +130,7 @@ public class AddressDataAccessService implements AddressDao
     }
 
     @Override
-    public int deleteAddressById(int id)
+    public int deleteAddressById(long id)
     {
         String sql = "DELETE FROM addresses WHERE id = ?";
         return jdbcTemplate.update(sql, id);

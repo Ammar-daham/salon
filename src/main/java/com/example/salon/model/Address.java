@@ -17,6 +17,7 @@ public class Address {
     public Instant createdAt;
     @JsonIgnore
     public Long businessId;
+    public Long userId;
 
     public Address(@JsonProperty("id") Long id,
                    @JsonProperty("country") String country,
@@ -62,7 +63,8 @@ public class Address {
         this.latitude = latitude;
     }
 
-    public void setLongitude(String longitude) {
+    public void setLongitude(String longitude)
+    {
         this.longitude = longitude;
     }
 
@@ -108,5 +110,15 @@ public class Address {
 
     public void setBusinessId(Long businessId) {
         this.businessId = businessId;
+    }
+
+    public Long getUserId()
+    {
+        return userId;
+    }
+
+    public void setUserId(Long userId)
+    {
+        this.userId = userId;
     }
 }

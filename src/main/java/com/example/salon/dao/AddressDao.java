@@ -6,17 +6,17 @@ import java.util.List;
 
 public interface AddressDao {
 
-    void addAddressForBusiness(Long businessId, Address address);
+    Long addAddress(Address address);
 
-    void AddAddressesForBusiness(Long businessId, List<Address> addresses);
+    List<Address> getAddressesForBusiness(Long id);
 
-    List<Address> getAddressesForBusiness(Long businessId);
+    List<Address> getAddressesForUser(Long id);
 
     List<Address> getAllAddresses();
 
     Address getAddressById(int id);
 
-    int updateAddressById(int id, Address address);
+    int updateAddressById(long id, Address address);
 
-    int deleteAddressById(int id);
+    int deleteAddressById(long id);
 }

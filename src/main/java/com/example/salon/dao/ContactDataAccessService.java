@@ -19,12 +19,12 @@ public class ContactDataAccessService implements ContactDao
     }
 
     @Override
-    public void addContactForBusiness(Long businessId, Contact contact)
+    public Long addContact(Contact contact)
     {
         String sql = """
                 INSERT INTO contacts
-                (type, value, business_id)
-                VALUES (?, ?, ?)
+                (type, value, business_id, user_id)
+                VALUES (?, ?, ?, ?)
                 RETURNING id;
                 """;
 
@@ -33,26 +33,19 @@ public class ContactDataAccessService implements ContactDao
             Long.class,
             contact.getType(),
             contact.getValue(),
-            businessId
+            contact.getBusinessId(),
+            contact.getUserId()
         );
         contact.setId(contactId);
+        return contactId;
     }
 
-    @Override
-    public void AddContactsForBusiness(Long businessId, List<Contact> contacts)
-    {
-        for (Contact contact : contacts) {
-            addContactForBusiness(businessId, contact);
-        }
-    }
-
-    @Override
-    public List<Contact> getContactsForBusiness(Long businessId)
+    public List<Contact> getContactsByColumn(String column, Long businessId)
     {
         String sql = """
                 SELECT id, type, value, created_at
-                FROM contacts WHERE business_id = ?;
-                """;
+                FROM contacts WHERE %s = ?;
+                """.formatted(column);
 
         return jdbcTemplate.query(sql, (rs, i) ->
             new Contact(
@@ -65,7 +58,20 @@ public class ContactDataAccessService implements ContactDao
     }
 
     @Override
-    public List<Contact> getAllContacts() {
+    public List<Contact> getContactsForBusiness(Long businessId)
+    {
+        return getContactsByColumn("business_id", businessId);
+    }
+
+    @Override
+    public List<Contact> getContactsForUser(Long userId)
+    {
+        return getContactsByColumn("user_id", userId);
+    }
+
+    @Override
+    public List<Contact> getAllContacts()
+    {
         String sql = "SELECT id, type, value, created_at FROM contacts";
         return jdbcTemplate.query(sql, (rs, i) ->
                 new Contact(
@@ -93,14 +99,14 @@ public class ContactDataAccessService implements ContactDao
     }
 
     @Override
-    public int updateContactById(int id, Contact contact)
+    public int updateContactById(long id, Contact contact)
     {
         String sql = "UPDATE contacts SET type = ?, value = ? WHERE id = ?";
         return jdbcTemplate.update(sql, contact.getType(), contact.getValue(), id);
     }
 
     @Override
-    public int deleteContactById(int id) {
+    public int deleteContactById(long id) {
         String sql = "DELETE FROM contacts WHERE id = ?";
         return jdbcTemplate.update(sql, id);
     }
