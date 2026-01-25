@@ -8,8 +8,7 @@ import java.time.Instant;
 
 @Data
 @NoArgsConstructor
-public class ErrorResponse
-{
+public class ErrorResponse {
     private String errorCode;
     private String message;
     private HttpStatus status;

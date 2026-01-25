@@ -9,8 +9,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("api/v1/addresses")
-public class AddressController
-{
+public class AddressController {
     private final AddressService addressService;
 
     @Autowired
@@ -19,26 +18,22 @@ public class AddressController
     }
 
     @GetMapping
-    public List<Address> getAllAddresses()
-    {
+    public List<Address> getAllAddresses() {
         return addressService.getAllAddresses();
     }
 
     @GetMapping("/{id}")
-    public Address getAddress(@PathVariable int id)
-    {
+    public Address getAddress(@PathVariable int id) {
         return addressService.getAddressById(id);
     }
 
     @PutMapping("/{id}")
-    public void updateAddress(@PathVariable int id, @RequestBody Address address)
-    {
+    public void updateAddress(@PathVariable int id, @RequestBody Address address) {
         addressService.updateAddressById(id, address);
     }
 
     @DeleteMapping("/{id}")
-    public void deleteAddress(@PathVariable int id)
-    {
+    public void deleteAddress(@PathVariable int id) {
         addressService.deleteAddressById(id);
     }
 

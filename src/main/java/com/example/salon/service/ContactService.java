@@ -16,18 +16,15 @@ public class ContactService {
     private final ContactDao contactDao;
 
     @Autowired
-    public ContactService(ContactDao contactDao)
-    {
+    public ContactService(ContactDao contactDao) {
         this.contactDao = contactDao;
     }
 
-    public List<Contact> getAllContacts()
-    {
+    public List<Contact> getAllContacts() {
         return contactDao.getAllContacts();
     }
 
-    public Contact getContactById(int id)
-    {
+    public Contact getContactById(int id) {
         Contact c;
         try {
             c = contactDao.getContactById(id);
@@ -37,15 +34,13 @@ public class ContactService {
         return c;
     }
 
-    public void updateContactById(int id, Contact contact)
-    {
+    public void updateContactById(int id, Contact contact) {
         int row = contactDao.updateContactById(id, contact);
         if (row == 0)
             throw new BaseException("Contact with id " + id + " not found", "NOT_FOUND", ErrorCode.NOT_FOUND.getStatus());
     }
 
-    public void delectContactById(int id)
-    {
+    public void delectContactById(int id) {
         int row = contactDao.deleteContactById(id);
         if (row == 0)
             throw new BaseException("Contact with id " + id + " not found", "NOT_FOUNT", ErrorCode.NOT_FOUND.getStatus());

@@ -20,31 +20,27 @@ public class AddressService {
         this.addressDao = addressDao;
     }
 
-    public List<Address> getAllAddresses()
-    {
+    public List<Address> getAllAddresses() {
         return addressDao.getAllAddresses();
     }
 
-    public Address getAddressById(int id)
-    {
+    public Address getAddressById(int id) {
         Address address;
         try {
-           address = addressDao.getAddressById(id);
+            address = addressDao.getAddressById(id);
         } catch (EmptyResultDataAccessException e) {
             throw new BaseException("Address with id " + id + " not found", "NOT_FOUND", ErrorCode.NOT_FOUND.getStatus());
         }
         return address;
     }
 
-    public void updateAddressById(int id, Address address)
-    {
+    public void updateAddressById(int id, Address address) {
         int row = addressDao.updateAddressById(id, address);
         if (row == 0)
             throw new BaseException("Address with id " + id + " not found", "NOT_FOUND", ErrorCode.NOT_FOUND.getStatus());
     }
 
-    public void deleteAddressById(int id)
-    {
+    public void deleteAddressById(int id) {
         int row = addressDao.deleteAddressById(id);
         if (row == 0)
             throw new BaseException("Address with id " + id + " not found", "NOT_FOUND", ErrorCode.NOT_FOUND.getStatus());

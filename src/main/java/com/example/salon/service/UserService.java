@@ -18,35 +18,28 @@ public class UserService {
     private final UserDao userDao;
 
     @Autowired
-    public UserService(UserDao userDao)
-    {
+    public UserService(UserDao userDao) {
         this.userDao = userDao;
     }
 
     @Transactional
-    public User addUser(User user)
-    {
-        try
-        {
+    public User addUser(User user) {
+        try {
             userDao.addUser(user);
-        }  catch (DuplicateKeyException ex)
-        {
+        } catch (DuplicateKeyException ex) {
             if (ex.getMessage().contains("contacts_value_key"))
                 throw new BaseException("Contact already exists.", "CONFLICT", ErrorCode.DUPLICATE_RESOURCE.getStatus());
         }
         return user;
     }
 
-    public List<User> getAllUsers()
-    {
+    public List<User> getAllUsers() {
         return userDao.getAllUsers();
     }
 
-    public User getUserById(int id)
-    {
+    public User getUserById(int id) {
         User user;
-        try
-        {
+        try {
             user = userDao.getUserById(id);
         } catch (EmptyResultDataAccessException ex) {
             throw new BaseException("User with id " + id + " not found", "NOT_FOUND", ErrorCode.NOT_FOUND.getStatus());
@@ -54,15 +47,13 @@ public class UserService {
         return user;
     }
 
-    public void updateUserById(long id, User user)
-    {
+    public void updateUserById(long id, User user) {
         long row = userDao.updateUserById(id, user);
         if (row == 0)
             throw new BaseException("User with id " + id + " not found", "NOT_FOUND", ErrorCode.NOT_FOUND.getStatus());
     }
 
-    public void deleteUserById(long id, User user)
-    {
+    public void deleteUserById(long id, User user) {
         long row = userDao.deleteUserById(id, user);
         if (row == 0)
             throw new BaseException("User with id " + id + " not found", "NOT_FOUND", ErrorCode.NOT_FOUND.getStatus());

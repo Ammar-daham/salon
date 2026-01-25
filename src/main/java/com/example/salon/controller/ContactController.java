@@ -9,37 +9,31 @@ import java.util.List;
 
 @RestController
 @RequestMapping("api/v1/contacts")
-public class ContactController
-{
+public class ContactController {
     private final ContactService contactService;
 
     @Autowired
-    public ContactController(ContactService contactService)
-    {
+    public ContactController(ContactService contactService) {
         this.contactService = contactService;
     }
 
     @GetMapping
-    public List<Contact> getAllContacts()
-    {
+    public List<Contact> getAllContacts() {
         return contactService.getAllContacts();
     }
 
     @GetMapping("/{id}")
-    public Contact getContactById(@PathVariable int id)
-    {
+    public Contact getContactById(@PathVariable int id) {
         return contactService.getContactById(id);
     }
 
     @PutMapping("/{id}")
-    public void updateContactById(@PathVariable int id, @RequestBody Contact contact)
-    {
+    public void updateContactById(@PathVariable int id, @RequestBody Contact contact) {
         contactService.updateContactById(id, contact);
     }
 
     @DeleteMapping("/{id}")
-    public void deleteContactById(@PathVariable int id)
-    {
+    public void deleteContactById(@PathVariable int id) {
         contactService.delectContactById(id);
     }
 }

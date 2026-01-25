@@ -4,8 +4,7 @@ import com.example.salon.model.Contact;
 
 import java.util.List;
 
-public interface ContactDao
-{
+public interface ContactDao {
     Long addContact(Contact contact);
 
     List<Contact> getContactsForBusiness(Long businessId);

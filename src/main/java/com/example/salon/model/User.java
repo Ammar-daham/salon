@@ -16,8 +16,9 @@ public class User {
     public List<Address> addresses;
     public List<Contact> contacts;
     public Instant createdAt;
+    public Instant updatedAt;
 
-    public User () {
+    public User() {
     }
 
     public User(Long id, String firstName, String lastName, Role role, Instant createdAt) {
@@ -60,6 +61,10 @@ public class User {
         return createdAt;
     }
 
+    public Instant getUpdatedAt() {
+        return updatedAt;
+    }
+
     public void setId(Long id) {
         this.id = id;
     }
@@ -90,5 +95,9 @@ public class User {
 
     public void setCreatedAt(Instant createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public void setUpdatedAt(Instant updatedAt) {
+        this.updatedAt = updatedAt;
     }
 }

@@ -1,65 +1,73 @@
 package com.example.salon.model;
 
-public class Staff
-{
+import java.time.Instant;
+
+public class Staff {
     public long id;
     public String title;
     public boolean isActive;
     public long userId;
     public long businessId;
+    public Instant createdAt;
+    public Instant updatedAt;
 
-    public Staff(long id, String title, boolean isActive, long userId, long businessId)
-    {
+    public Staff(long id, String title, boolean isActive, long userId, long businessId) {
         this.id = id;
     }
 
-    public long getId()
-    {
+    public long getId() {
         return id;
     }
 
-    public String getTitle()
-    {
+    public String getTitle() {
         return title;
     }
 
-    public boolean isActive()
-    {
+    public boolean isActive() {
         return isActive;
     }
 
-    public long getUserId()
-    {
+    public long getUserId() {
         return userId;
     }
 
-    public long getBusinessId()
-    {
+    public long getBusinessId() {
         return businessId;
     }
 
-    public void setId(long id)
-    {
+    public Instant getCreatedAt() {
+        return createdAt;
+    }
+
+    public Instant getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setId(long id) {
         this.id = id;
     }
 
-    public void setTitle(String title)
-    {
+    public void setTitle(String title) {
         this.title = title;
     }
 
-    public void setActive(boolean active)
-    {
+    public void setActive(boolean active) {
         isActive = active;
     }
 
-    public void setUserId(long userId)
-    {
+    public void setUserId(long userId) {
         this.userId = userId;
     }
 
-    public void setBusinessId(long businessId)
-    {
+    public void setBusinessId(long businessId) {
         this.businessId = businessId;
+    }
+
+    public void setCreatedAt(Instant createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public void setUpdatedAt(Instant updatedAt) {
+        this.updatedAt = updatedAt;
     }
 }

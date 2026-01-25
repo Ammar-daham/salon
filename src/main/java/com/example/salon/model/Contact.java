@@ -10,6 +10,7 @@ public class Contact {
     public String type;
     public String value;
     public Instant createdAt;
+    public Instant updatedAt;
     @JsonIgnore
     public Long businessId;
     @JsonIgnore
@@ -38,12 +39,15 @@ public class Contact {
         return createdAt;
     }
 
+    public Instant getUpdatedAt() {
+        return updatedAt;
+    }
+
     public Long getBusinessId() {
         return businessId;
     }
 
-    public Long getUserId()
-    {
+    public Long getUserId() {
         return userId;
     }
 
@@ -63,12 +67,15 @@ public class Contact {
         this.createdAt = createdAt;
     }
 
+    public void setUpdatedAt(Instant updatedAt) {
+        this.updatedAt = updatedAt;
+    }
+
     public void setBusinessId(Long businessId) {
         this.businessId = businessId;
     }
 
-    public void setUserId(Long userId)
-    {
+    public void setUserId(Long userId) {
         this.userId = userId;
     }
 }

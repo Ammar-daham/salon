@@ -12,19 +12,16 @@ import java.util.List;
 
 @RequestMapping("api/v1/business")
 @RestController
-public class BusinessController
-{
+public class BusinessController {
     private final BusinessService businessService;
 
     @Autowired
-    public BusinessController(BusinessService businessService)
-    {
+    public BusinessController(BusinessService businessService) {
         this.businessService = businessService;
     }
 
     @PostMapping
-    public Business addBusiness(@RequestBody Business business)
-    {
+    public Business addBusiness(@RequestBody Business business) {
         Business b = businessService.addBusiness(business);
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest()
@@ -36,14 +33,12 @@ public class BusinessController
     }
 
     @GetMapping
-    public List<Business> getAllBusiness()
-    {
-       return businessService.getAllBusiness();
+    public List<Business> getAllBusiness() {
+        return businessService.getAllBusiness();
     }
 
     @DeleteMapping("/{id}")
-    public void deleteBusiness(@PathVariable int id)
-    {
-         businessService.deleteBusiness(id);
+    public void deleteBusiness(@PathVariable int id) {
+        businessService.deleteBusiness(id);
     }
 }

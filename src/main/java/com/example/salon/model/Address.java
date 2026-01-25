@@ -15,6 +15,7 @@ public class Address {
     public String latitude;
     public String longitude;
     public Instant createdAt;
+    public Instant updatedAt;
     @JsonIgnore
     public Long businessId;
     public Long userId;
@@ -27,8 +28,7 @@ public class Address {
                    @JsonProperty("latitude") String latitude,
                    @JsonProperty("longitude") String longitude,
                    @JsonProperty("created_at") Instant createdAt
-                )
-    {
+    ) {
         this.id = id;
         this.country = country;
         this.city = city;
@@ -36,39 +36,6 @@ public class Address {
         this.postalCode = postalCode;
         this.latitude = latitude;
         this.longitude = longitude;
-        this.createdAt = createdAt;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public void setCountry(String country) {
-        this.country = country;
-    }
-
-    public void setCity(String city) {
-        this.city = city;
-    }
-
-    public void setStreet(String street) {
-        this.street = street;
-    }
-
-    public void setPostalCode(String postalCode) {
-        this.postalCode = postalCode;
-    }
-
-    public void setLatitude(String latitude) {
-        this.latitude = latitude;
-    }
-
-    public void setLongitude(String longitude)
-    {
-        this.longitude = longitude;
-    }
-
-    public void setCreatedAt(Instant createdAt) {
         this.createdAt = createdAt;
     }
 
@@ -104,21 +71,59 @@ public class Address {
         return createdAt;
     }
 
+    public Instant getUpdatedAt() {
+        return updatedAt;
+    }
+
     public Long getBusinessId() {
         return businessId;
+    }
+
+    public Long getUserId() {
+        return userId;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public void setCountry(String country) {
+        this.country = country;
+    }
+
+    public void setCity(String city) {
+        this.city = city;
+    }
+
+    public void setStreet(String street) {
+        this.street = street;
+    }
+
+    public void setPostalCode(String postalCode) {
+        this.postalCode = postalCode;
+    }
+
+    public void setLatitude(String latitude) {
+        this.latitude = latitude;
+    }
+
+    public void setLongitude(String longitude) {
+        this.longitude = longitude;
+    }
+
+    public void setCreatedAt(Instant createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public void setUpdatedAt(Instant updatedAt) {
+        this.updatedAt = updatedAt;
     }
 
     public void setBusinessId(Long businessId) {
         this.businessId = businessId;
     }
 
-    public Long getUserId()
-    {
-        return userId;
-    }
-
-    public void setUserId(Long userId)
-    {
+    public void setUserId(Long userId) {
         this.userId = userId;
     }
 }
