@@ -38,6 +38,12 @@ public class BusinessService {
         return businessDao.getBusinesses();
     }
 
+    public void updateBusinessById(int id, Business business) {
+        int row = businessDao.updateBusinessByid(id, business);
+        if (row == 0)
+            throw new BaseException("Business with id " + id + " not found.", "NOT_FOUND", ErrorCode.NOT_FOUND.getStatus());
+    }
+
     public void deleteBusiness(int id) {
         int row = businessDao.deleteBusiness(id);
         if (row == 0)

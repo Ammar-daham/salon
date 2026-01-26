@@ -9,5 +9,7 @@ public interface BusinessDao {
 
     List<Business> getBusinesses();
 
+    int updateBusinessByid(int id, Business business);
+
     int deleteBusiness(int id);
 }

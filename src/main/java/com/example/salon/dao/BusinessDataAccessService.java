@@ -24,14 +24,15 @@ public class BusinessDataAccessService implements BusinessDao {
     @Override
     @Transactional // Ensures atomicity: either both inserts succeed or rollback
     public Long addBusiness(Business business) {
-        String sqlBusiness = """
-                INSERT INTO businesses (name, description, image)
+        String sql = """
+                INSERT INTO businesses
+                (name, description, image)
                 VALUES (?, ?, ?)
                 RETURNING id
                 """;
 
         Long businessId = jdbcTemplate.queryForObject(
-                sqlBusiness,
+                sql,
                 Long.class,
                 business.getName(),
                 business.getDescription(),
@@ -60,13 +61,18 @@ public class BusinessDataAccessService implements BusinessDao {
     }
 
     public List<Business> getBusinesses() {
-        String sql = "SELECT id, name, description, created_at, image FROM businesses";
+        String sql = """
+                SELECT id, name, description,
+                updated_at, created_at, image
+                 FROM businesses
+                """;
         List<Business> businesses = jdbcTemplate.query(sql, (rs, i) ->
                 new Business(
                         rs.getLong("id"),
                         rs.getString("name"),
                         rs.getString("description"),
                         rs.getTimestamp("created_at").toInstant(),
+                        rs.getTimestamp("updated_at").toInstant(),
                         rs.getString("image")
                 )
         );
@@ -75,7 +81,38 @@ public class BusinessDataAccessService implements BusinessDao {
             business.setAddresses(addressDao.getAddressesForBusiness(business.getId()));
             business.setContacts(contactDao.getContactsForBusiness(business.getId()));
         }
+
         return businesses;
+    }
+
+    @Override
+    public int updateBusinessByid(int id, Business business) {
+        String sql = """
+                UPDATE businesses SET name = ?,
+                description = ?, image = ?,
+                 updated_at = now() WHERE id = ?
+                """;
+        int row = jdbcTemplate.update(sql, business.getName(), business.getDescription(), business.getImage(), id);
+
+        // Update addresses
+        if (business.getAddresses() != null) {
+            business.getAddresses().forEach(address ->
+            {
+                address.setBusinessId(business.getId());
+                addressDao.updateAddressById(address.getId(), address);
+            });
+        }
+
+        // Update contacts
+        if (business.getContacts() != null) {
+            business.getContacts().forEach(contact ->
+            {
+                contact.setBusinessId(business.getId());
+                contactDao.updateContactById(contact.getId(), contact);
+            });
+        }
+
+        return row;
     }
 
     @Override

@@ -19,11 +19,12 @@ public class Business {
 
     public Business(@JsonProperty("id") Long id, @JsonProperty("name") String name,
                     @JsonProperty("description") String description, @JsonProperty("created_at") Instant createdAt,
-                    @JsonProperty("image") String image) {
+                    @JsonProperty("updated_at") Instant updatedAt, @JsonProperty("image") String image) {
         this.id = id;
         this.name = name;
         this.description = description;
         this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
         this.image = image;
     }
 

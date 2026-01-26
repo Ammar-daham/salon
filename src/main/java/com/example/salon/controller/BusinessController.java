@@ -37,6 +37,11 @@ public class BusinessController {
         return businessService.getAllBusiness();
     }
 
+    @PutMapping("/{id}")
+    public void updateBusiness(@PathVariable int id,  @RequestBody Business business) {
+        businessService.updateBusinessById(id, business);
+    }
+
     @DeleteMapping("/{id}")
     public void deleteBusiness(@PathVariable int id) {
         businessService.deleteBusiness(id);
