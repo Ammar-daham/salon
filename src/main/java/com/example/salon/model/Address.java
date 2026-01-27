@@ -27,7 +27,8 @@ public class Address {
                    @JsonProperty("postal_code") String postalCode,
                    @JsonProperty("latitude") String latitude,
                    @JsonProperty("longitude") String longitude,
-                   @JsonProperty("created_at") Instant createdAt
+                   @JsonProperty("created_at") Instant createdAt,
+                   @JsonProperty("updated_at") Instant updatedAt
     ) {
         this.id = id;
         this.country = country;
@@ -37,6 +38,7 @@ public class Address {
         this.latitude = latitude;
         this.longitude = longitude;
         this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
     }
 
     public Long getId() {
