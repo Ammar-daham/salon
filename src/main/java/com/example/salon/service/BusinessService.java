@@ -38,6 +38,7 @@ public class BusinessService {
         return businessDao.getBusinesses();
     }
 
+    @Transactional
     public void updateBusinessById(int id, Business business) {
         int row = businessDao.updateBusinessByid(id, business);
         if (row == 0)

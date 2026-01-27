@@ -1,6 +1,7 @@
 package com.example.salon.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.time.Instant;
 
@@ -16,11 +17,17 @@ public class Contact {
     @JsonIgnore
     public Long userId;
 
-    public Contact(Long id, String type, String value, Instant createdAt) {
+    public Contact(@JsonProperty("id") Long id,
+                   @JsonProperty("type") String type,
+                   @JsonProperty("value") String value,
+                   @JsonProperty("created_at") Instant createdAt,
+                   @JsonProperty("updated_at") Instant updatedAt
+    ) {
         this.id = id;
         this.type = type;
         this.value = value;
         this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
     }
 
     public Long getId() {

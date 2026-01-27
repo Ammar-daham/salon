@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
+import java.sql.Timestamp;
 import java.util.List;
 
 @Repository
@@ -39,18 +40,21 @@ public class ContactDataAccessService implements ContactDao {
 
     public List<Contact> getContactsByColumn(String column, Long businessId) {
         String sql = """
-                SELECT id, type, value, created_at
+                SELECT id, type, value,
+                created_at, updated_at
                 FROM contacts WHERE %s = ?;
                 """.formatted(column);
 
-        return jdbcTemplate.query(sql, (rs, i) ->
-                new Contact(
-                        rs.getLong("id"),
-                        rs.getString("type"),
-                        rs.getString("value"),
-                        rs.getTimestamp("created_at").toInstant()
-                ), businessId
-        );
+        return jdbcTemplate.query(sql, (rs, i) -> {
+            Timestamp updatedAt = rs.getTimestamp("updated_at");
+            return new Contact(
+                    rs.getLong("id"),
+                    rs.getString("type"),
+                    rs.getString("value"),
+                    rs.getTimestamp("created_at").toInstant(),
+                    updatedAt != null ? updatedAt.toInstant() : null
+            );
+        }, businessId);
     }
 
     @Override
@@ -65,26 +69,37 @@ public class ContactDataAccessService implements ContactDao {
 
     @Override
     public List<Contact> getAllContacts() {
-        String sql = "SELECT id, type, value, created_at FROM contacts";
-        return jdbcTemplate.query(sql, (rs, i) ->
-                new Contact(
-                        rs.getLong("id"),
-                        rs.getString("type"),
-                        rs.getString("value"),
-                        rs.getTimestamp("created_at").toInstant()
-                )
-        );
+        String sql = """
+                SELECT id, type, value,
+                created_at,  updated_at
+                FROM contacts
+                """;
+        return jdbcTemplate.query(sql, (rs, i) -> {
+            Timestamp updatedAt = rs.getTimestamp("updated_at");
+            return new Contact(
+                    rs.getLong("id"),
+                    rs.getString("type"),
+                    rs.getString("value"),
+                    rs.getTimestamp("created_at").toInstant(),
+                    updatedAt != null ? updatedAt.toInstant() : null
+            );
+        });
     }
 
     @Override
     public Contact getContactById(int id) {
-        String sql = "SELECT id, type, value, created_at FROM contacts WHERE id = ?";
+        String sql = """
+                SELECT id, type, value,
+                created_at, updated_at,
+                FROM contacts WHERE id = ?
+                """;
         return jdbcTemplate.queryForObject(sql, (rs, i) ->
                         new Contact(
                                 rs.getLong("id"),
                                 rs.getString("type"),
                                 rs.getString("value"),
-                                rs.getTimestamp("created_at").toInstant()
+                                rs.getTimestamp("created_at").toInstant(),
+                                rs.getTimestamp("updated_at").toInstant()
                         ),
                 id
         );
@@ -92,7 +107,11 @@ public class ContactDataAccessService implements ContactDao {
 
     @Override
     public int updateContactById(long id, Contact contact) {
-        String sql = "UPDATE contacts SET type = ?, value = ? WHERE id = ?";
+        String sql = """
+                UPDATE contacts SET type = ?, value = ?,
+                updated_at = now()
+                WHERE id = ?
+                """;
         return jdbcTemplate.update(sql, contact.getType(), contact.getValue(), id);
     }
 

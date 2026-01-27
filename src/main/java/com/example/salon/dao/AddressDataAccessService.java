@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
+import java.sql.Timestamp;
 import java.util.List;
 
 @Repository
@@ -61,8 +62,9 @@ public class AddressDataAccessService implements AddressDao {
                 FROM addresses WHERE %s = ?;
                 """.formatted(column);
 
-        return jdbcTemplate.query(sql, (rs, i) ->
-                new Address(
+        return jdbcTemplate.query(sql, (rs, i) -> {
+                Timestamp updatedAt = rs.getTimestamp("updated_at");
+                return new Address(
                         rs.getLong("id"),
                         rs.getString("street"),
                         rs.getString("city"),
@@ -71,8 +73,9 @@ public class AddressDataAccessService implements AddressDao {
                         rs.getString("latitude"),
                         rs.getString("longitude"),
                         rs.getTimestamp("created_at").toInstant(),
-                        rs.getTimestamp("updated_at").toInstant()
-                ), businessId
+                        updatedAt != null ? updatedAt.toInstant() : null
+                );
+            }, businessId
         );
     }
 
@@ -86,19 +89,20 @@ public class AddressDataAccessService implements AddressDao {
                 from addresses
                 """;
 
-        return jdbcTemplate.query(sql, (rs, i) ->
-                new Address(
-                        rs.getLong("id"),
-                        rs.getString("street"),
-                        rs.getString("city"),
-                        rs.getString("country"),
-                        rs.getString("postal_code"),
-                        rs.getString("latitude"),
-                        rs.getString("longitude"),
-                        rs.getTimestamp("created_at").toInstant(),
-                        rs.getTimestamp("updated_at").toInstant()
-                )
-        );
+        return jdbcTemplate.query(sql, (rs, i) -> {
+            Timestamp updatedAt = rs.getTimestamp("updated_at");
+            return new Address(
+                    rs.getLong("id"),
+                    rs.getString("street"),
+                    rs.getString("city"),
+                    rs.getString("country"),
+                    rs.getString("postal_code"),
+                    rs.getString("latitude"),
+                    rs.getString("longitude"),
+                    rs.getTimestamp("created_at").toInstant(),
+                    updatedAt != null ? updatedAt.toInstant() : null
+            );
+        });
     }
 
     @Override
@@ -111,17 +115,17 @@ public class AddressDataAccessService implements AddressDao {
                 FROM addresses WHERE id = ?
                 """;
         return jdbcTemplate.queryForObject(sql, (rs, i) ->
-                new Address(
-                        rs.getLong("id"),
-                        rs.getString("street"),
-                        rs.getString("city"),
-                        rs.getString("country"),
-                        rs.getString("postal_code"),
-                        rs.getString("latitude"),
-                        rs.getString("longitude"),
-                        rs.getTimestamp("created_at").toInstant(),
-                        rs.getTimestamp("updated_at").toInstant()
-                ),
+                        new Address(
+                                rs.getLong("id"),
+                                rs.getString("street"),
+                                rs.getString("city"),
+                                rs.getString("country"),
+                                rs.getString("postal_code"),
+                                rs.getString("latitude"),
+                                rs.getString("longitude"),
+                                rs.getTimestamp("created_at").toInstant(),
+                                rs.getTimestamp("updated_at").toInstant()
+                        ),
                 id
         );
     }

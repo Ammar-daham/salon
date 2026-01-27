@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
+import java.sql.Timestamp;
 import java.util.List;
 
 @Repository
@@ -64,18 +65,19 @@ public class BusinessDataAccessService implements BusinessDao {
         String sql = """
                 SELECT id, name, description,
                 updated_at, created_at, image
-                 FROM businesses
+                FROM businesses
                 """;
-        List<Business> businesses = jdbcTemplate.query(sql, (rs, i) ->
-                new Business(
-                        rs.getLong("id"),
-                        rs.getString("name"),
-                        rs.getString("description"),
-                        rs.getTimestamp("created_at").toInstant(),
-                        rs.getTimestamp("updated_at").toInstant(),
-                        rs.getString("image")
-                )
-        );
+        List<Business> businesses = jdbcTemplate.query(sql, (rs, i) -> {
+            Timestamp updatedAt = rs.getTimestamp("updated_at");
+            return new Business(
+                    rs.getLong("id"),
+                    rs.getString("name"),
+                    rs.getString("description"),
+                    rs.getTimestamp("created_at").toInstant(),
+                    updatedAt != null ? updatedAt.toInstant() : null,
+                    rs.getString("image")
+            );
+        });
 
         for (Business business : businesses) {
             business.setAddresses(addressDao.getAddressesForBusiness(business.getId()));
