@@ -23,7 +23,7 @@ public class BusinessDataAccessService implements BusinessDao {
     }
 
     @Override
-    @Transactional // Ensures atomicity: either both inserts succeed or rollback
+    @Transactional
     public Long addBusiness(Business business) {
         String sql = """
                 INSERT INTO businesses
@@ -88,7 +88,34 @@ public class BusinessDataAccessService implements BusinessDao {
     }
 
     @Override
-    public int updateBusinessByid(int id, Business business) {
+    public Business getBusinessById(int id) {
+        String sql = """
+                SELECT id, name, description,
+                updated_at, created_at, image
+                FROM businesses
+                WHERE id = ?
+                """;
+        Business business = jdbcTemplate.queryForObject(sql, (rs, i) -> {
+                    Timestamp updatedAt = rs.getTimestamp("updated_at");
+                    return new Business(
+                            rs.getLong("id"),
+                            rs.getString("name"),
+                            rs.getString("description"),
+                            rs.getTimestamp("created_at").toInstant(),
+                            updatedAt != null ? updatedAt.toInstant() : null,
+                            rs.getString("image")
+                    );
+                }, id
+        );
+
+        business.setAddresses(addressDao.getAddressesForBusiness(business.getId()));
+        business.setContacts(contactDao.getContactsForBusiness(business.getId()));
+
+        return business;
+    }
+
+    @Override
+    public int updateBusinessById(int id, Business business) {
         String sql = """
                 UPDATE businesses SET name = ?,
                 description = ?, image = ?,

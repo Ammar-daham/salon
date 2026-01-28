@@ -7,6 +7,7 @@ import com.example.salon.model.Business;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -38,9 +39,19 @@ public class BusinessService {
         return businessDao.getBusinesses();
     }
 
+    public Business getBusinessById(int id) {
+        Business business;
+        try {
+            business = businessDao.getBusinessById(id);
+        } catch (EmptyResultDataAccessException ex) {
+            throw new BaseException("Business with id " + id + " not found", "NOT_FOUND", ErrorCode.NOT_FOUND.getStatus());
+        }
+        return business;
+    }
+
     @Transactional
     public void updateBusinessById(int id, Business business) {
-        int row = businessDao.updateBusinessByid(id, business);
+        int row = businessDao.updateBusinessById(id, business);
         if (row == 0)
             throw new BaseException("Business with id " + id + " not found.", "NOT_FOUND", ErrorCode.NOT_FOUND.getStatus());
     }

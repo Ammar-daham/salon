@@ -37,6 +37,11 @@ public class BusinessController {
         return businessService.getAllBusiness();
     }
 
+    @GetMapping("/{id}")
+    public Business getBusinessById(@PathVariable int id) {
+        return businessService.getBusinessById(id);
+    }
+
     @PutMapping("/{id}")
     public void updateBusiness(@PathVariable int id,  @RequestBody Business business) {
         businessService.updateBusinessById(id, business);
