@@ -56,8 +56,9 @@ public class BusinessService {
             throw new BaseException("Business with id " + id + " not found.", "NOT_FOUND", ErrorCode.NOT_FOUND.getStatus());
     }
 
-    public void deleteBusiness(int id) {
-        int row = businessDao.deleteBusiness(id);
+    @Transactional
+    public void deleteBusiness(int id, Business business) {
+        int row = businessDao.deleteBusiness(id, business);
         if (row == 0)
             throw new BaseException("Business with id " + id + " not found.", "NOT_FOUND", ErrorCode.NOT_FOUND.getStatus());
     }

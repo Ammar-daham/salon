@@ -13,5 +13,5 @@ public interface BusinessDao {
 
     int updateBusinessById(int id, Business business);
 
-    int deleteBusiness(int id);
+    int deleteBusiness(int id, Business business);
 }

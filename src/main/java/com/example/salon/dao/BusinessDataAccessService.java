@@ -1,6 +1,7 @@
 package com.example.salon.dao;
 
 import com.example.salon.model.Business;
+import com.example.salon.model.User;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -145,8 +146,25 @@ public class BusinessDataAccessService implements BusinessDao {
     }
 
     @Override
-    public int deleteBusiness(int id) {
+    public int deleteBusiness(int id, Business business) {
         String sql = "DELETE FROM businesses WHERE id = ?";
-        return jdbcTemplate.update(sql, id);
+        int row = jdbcTemplate.update(sql, id);
+
+        // Delete addresses
+        if (business.getAddresses() != null) {
+            System.out.println("address " + business.getAddresses().toString());
+            business.getAddresses().forEach(address -> {
+                addressDao.deleteAddressById(address.getId());
+            });
+        }
+
+        // Delete contacts
+        if (business.getContacts() != null) {
+            business.getContacts().forEach(contact -> {
+                contactDao.deleteContactById(contact.getId());
+            });
+        }
+
+        return row;
     }
 }
