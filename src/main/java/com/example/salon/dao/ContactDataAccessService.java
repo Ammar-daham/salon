@@ -38,7 +38,7 @@ public class ContactDataAccessService implements ContactDao {
         return contactId;
     }
 
-    public List<Contact> getContactsByColumn(String column, Long businessId) {
+    public List<Contact> getContactsByColumn(String column, Long id) {
         String sql = """
                 SELECT id, type, value,
                 created_at, updated_at
@@ -54,7 +54,7 @@ public class ContactDataAccessService implements ContactDao {
                     rs.getTimestamp("created_at").toInstant(),
                     updatedAt != null ? updatedAt.toInstant() : null
             );
-        }, businessId);
+        }, id);
     }
 
     @Override

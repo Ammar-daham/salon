@@ -53,7 +53,7 @@ public class AddressDataAccessService implements AddressDao {
         return getAddressesByColumn("user_id", id);
     }
 
-    public List<Address> getAddressesByColumn(String column, Long businessId) {
+    public List<Address> getAddressesByColumn(String column, Long id) {
         String sql = """
                 SELECT id, street, city,
                 country, postal_code,
@@ -75,7 +75,7 @@ public class AddressDataAccessService implements AddressDao {
                         rs.getTimestamp("created_at").toInstant(),
                         updatedAt != null ? updatedAt.toInstant() : null
                 );
-            }, businessId
+            }, id
         );
     }
 
