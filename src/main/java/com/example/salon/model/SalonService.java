@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.time.Instant;
 
-public class Service {
+public class SalonService {
     public Long id;
     public String name;
     public String description;
@@ -14,7 +14,7 @@ public class Service {
     public Instant createdAt;
     public Instant updatedAt;
 
-    public Service(
+    public SalonService(
             @JsonProperty("id") Long id,
             @JsonProperty("name") String name,
             @JsonProperty("description") String description,
