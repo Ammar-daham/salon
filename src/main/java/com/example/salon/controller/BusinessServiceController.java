@@ -1,7 +1,7 @@
 package com.example.salon.controller;
 
 import com.example.salon.model.SalonService;
-import com.example.salon.service.BusinessServiceService;
+import com.example.salon.service.BusinessSalonServiceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -13,11 +13,11 @@ import java.net.URI;
 @RequestMapping("api/v1/business")
 public class BusinessServiceController {
 
-    private final BusinessServiceService businessServiceService;
+    private final BusinessSalonServiceService businessSalonServiceService;
 
     @Autowired
-    public BusinessServiceController(BusinessServiceService businessServiceService) {
-        this.businessServiceService = businessServiceService;
+    public BusinessServiceController(BusinessSalonServiceService businessSalonServiceService) {
+        this.businessSalonServiceService = businessSalonServiceService;
     }
 
     @PostMapping("/{businessId}/services")
@@ -25,7 +25,7 @@ public class BusinessServiceController {
             @PathVariable Long businessId,
             @RequestBody SalonService salonService
     ) {
-        SalonService s = businessServiceService
+        SalonService s = businessSalonServiceService
                 .createServiceForBusiness(businessId, salonService);
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest()

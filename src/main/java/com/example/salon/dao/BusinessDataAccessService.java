@@ -14,12 +14,17 @@ public class BusinessDataAccessService implements BusinessDao {
     private final JdbcTemplate jdbcTemplate;
     private final AddressDao addressDao;
     private final ContactDao contactDao;
+    private final SalonServiceDao salonServiceDao;
 
     @Autowired
-    public BusinessDataAccessService(JdbcTemplate jdbcTemplate, AddressDao addressDao, ContactDao contactDao) {
+    public BusinessDataAccessService(JdbcTemplate jdbcTemplate,
+                                     AddressDao addressDao,
+                                     ContactDao contactDao,
+                                     SalonServiceDao salonServiceDao) {
         this.jdbcTemplate = jdbcTemplate;
         this.addressDao = addressDao;
         this.contactDao = contactDao;
+        this.salonServiceDao = salonServiceDao;
     }
 
     @Override
@@ -82,6 +87,7 @@ public class BusinessDataAccessService implements BusinessDao {
         for (Business business : businesses) {
             business.setAddresses(addressDao.getAddressesForBusiness(business.getId()));
             business.setContacts(contactDao.getContactsForBusiness(business.getId()));
+            business.setServices(salonServiceDao.getServicesForBusiness(business.getId()));
         }
 
         return businesses;
@@ -110,6 +116,7 @@ public class BusinessDataAccessService implements BusinessDao {
 
         business.setAddresses(addressDao.getAddressesForBusiness(business.getId()));
         business.setContacts(contactDao.getContactsForBusiness(business.getId()));
+        business.setServices(salonServiceDao.getServicesForBusiness(business.getId()));
 
         return business;
     }

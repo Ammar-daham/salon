@@ -15,6 +15,7 @@ public class Business {
     public String image;
     public List<Address> addresses;
     public List<Contact> contacts;
+    public List<SalonService> services;
 
 
     public Business(@JsonProperty("id") Long id, @JsonProperty("name") String name,
@@ -68,6 +69,10 @@ public class Business {
         return contacts;
     }
 
+    public List<SalonService> getServices() {
+        return services;
+    }
+
     public void setId(Long id) {
         this.id = id;
     }
@@ -98,5 +103,9 @@ public class Business {
 
     public void setContacts(List<Contact> contacts) {
         this.contacts = contacts;
+    }
+
+    public void setServices(List<SalonService> services) {
+        this.services = services;
     }
 }
