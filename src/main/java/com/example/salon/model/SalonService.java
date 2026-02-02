@@ -10,7 +10,7 @@ public class SalonService {
     public String description;
     public Integer duration;
     public double price;
-    public boolean isActive;
+    public boolean active;
     public Instant createdAt;
     public Instant updatedAt;
 
@@ -20,7 +20,7 @@ public class SalonService {
             @JsonProperty("description") String description,
             @JsonProperty("duration_minutes") Integer duration,
             @JsonProperty("price") double price,
-            @JsonProperty("is_active") boolean isActive,
+            @JsonProperty("is_active") boolean active,
             @JsonProperty("created_at") Instant createdAt,
             @JsonProperty("updated_at") Instant updatedAt) {
         this.id = id;
@@ -28,7 +28,7 @@ public class SalonService {
         this.description = description;
         this.duration = duration;
         this.price = price;
-        this.isActive = isActive;
+        this.active = active;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
     }
@@ -54,7 +54,7 @@ public class SalonService {
     }
 
     public boolean isActive() {
-        return isActive;
+        return active;
     }
 
     public Instant getCreatedAt() {
@@ -86,7 +86,7 @@ public class SalonService {
     }
 
     public void setActive(boolean active) {
-        isActive = active;
+        this.active = active;
     }
 
     public void setCreatedAt(Instant createdAt) {
