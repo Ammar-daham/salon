@@ -148,6 +148,14 @@ public class BusinessDataAccessService implements BusinessDao {
             });
         }
 
+        // Update services
+        if (business.getServices() != null) {
+            business.getServices().forEach(service ->
+            {
+                salonServiceDao.updateService(service.getId(), service);
+            });
+        }
+
         return row;
     }
 

@@ -65,19 +65,9 @@ public class SalonServiceDataAccessService implements SalonServiceDao {
                     updated_at != null ? updated_at.toInstant() : null
             );
         }, businessId);
-    };
-
-
-    @Override
-    public List<SalonService> getAllServices() {
-        String sql = """
-            SELECT id, name,
-            description, price, is_active
-            created_at, updated_at FROM services
-            """;
-
-        return List.of();
     }
+
+    ;
 
     @Override
     public SalonService getServiceById(long id) {
@@ -85,8 +75,23 @@ public class SalonServiceDataAccessService implements SalonServiceDao {
     }
 
     @Override
-    public int updateService(int id, SalonService service) {
-        return 0;
+    public int updateService(long id, SalonService service) {
+        String sql = """
+                UPDATE services SET name = ?,
+                description = ?, duration_minutes = ?,
+                price = ?, is_active = ?,
+                updated_at = now()
+                WHERE id = ?;
+                """;
+        return jdbcTemplate.update(
+                sql,
+                service.getName(),
+                service.getDescription(),
+                service.getDuration(),
+                service.getPrice(),
+                service.isActive(),
+                id
+        );
     }
 
     @Override
