@@ -95,7 +95,8 @@ public class SalonServiceDataAccessService implements SalonServiceDao {
     }
 
     @Override
-    public int deleteService(int id) {
-        return 0;
+    public int deleteService(long id) {
+        String sql = "DELETE FROM services WHERE id = ?";
+        return jdbcTemplate.update(sql, id);
     }
 }

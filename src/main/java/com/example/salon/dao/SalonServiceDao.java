@@ -12,5 +12,5 @@ public interface SalonServiceDao {
 
     int updateService(long id, SalonService service);
 
-    int deleteService(int id);
+    int deleteService(long id);
 }

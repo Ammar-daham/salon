@@ -179,6 +179,13 @@ public class BusinessDataAccessService implements BusinessDao {
             });
         }
 
+        // Delete services
+        if (business.getServices() != null) {
+            business.getServices().forEach(service -> {
+                salonServiceDao.deleteService(service.getId());
+            });
+        }
+
         return row;
     }
 }
