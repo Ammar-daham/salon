@@ -1,5 +1,6 @@
 package com.example.salon.dao;
 
+import com.example.salon.model.Business;
 import com.example.salon.model.SalonService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -45,7 +46,7 @@ public class SalonServiceDataAccessService implements SalonServiceDao {
                 SELECT s.id,
                 s.name, s.description,
                 s.duration_minutes,
-                s.price, is_active,
+                s.price, s.is_active,
                 s.created_at, s.updated_at
                 FROM services s
                 JOIN business_service bs ON bs.service_id = s.id
@@ -53,7 +54,7 @@ public class SalonServiceDataAccessService implements SalonServiceDao {
                 """;
 
         return jdbcTemplate.query(sql, (rs, i) -> {
-            Timestamp updated_at = rs.getTimestamp("updated_at");
+            Timestamp updatedAt = rs.getTimestamp("updated_at");
             return new SalonService(
                     rs.getLong("id"),
                     rs.getString("name"),
@@ -62,7 +63,7 @@ public class SalonServiceDataAccessService implements SalonServiceDao {
                     rs.getDouble("price"),
                     rs.getBoolean("is_active"),
                     rs.getTimestamp("created_at").toInstant(),
-                    updated_at != null ? updated_at.toInstant() : null
+                    updatedAt != null ? updatedAt.toInstant() : null
             );
         }, businessId);
     }
@@ -70,12 +71,38 @@ public class SalonServiceDataAccessService implements SalonServiceDao {
     ;
 
     @Override
-    public SalonService getServiceById(long id) {
-        return null;
+    public SalonService getServiceById(int businessId, int serviceId) {
+        String sql = """
+                SELECT s.id,
+                s.name, s.description,
+                s.duration_minutes,
+                s.price, s.is_active,
+                s.created_at, s.updated_at
+                FROM services s
+                JOIN business_service bs ON bs.service_id = s.id
+                WHERE bs.business_id = ?
+                and s.id = ?;
+                """;
+
+        return jdbcTemplate.queryForObject(sql, (rs, i) -> {
+                    Timestamp updatedAt = rs.getTimestamp("updated_at");
+                    return new SalonService(
+                            rs.getLong("id"),
+                            rs.getString("name"),
+                            rs.getString("description"),
+                            rs.getInt("duration_minutes"),
+                            rs.getDouble("price"),
+                            rs.getBoolean("is_active"),
+                            rs.getTimestamp("created_at").toInstant(),
+                            updatedAt != null ? updatedAt.toInstant() : null
+                    );
+                }, businessId, serviceId
+        );
     }
 
+
     @Override
-    public int updateService(long id, SalonService service) {
+    public int updateServiceById(long id, SalonService service) {
         String sql = """
                 UPDATE services SET name = ?,
                 description = ?, duration_minutes = ?,
@@ -95,7 +122,7 @@ public class SalonServiceDataAccessService implements SalonServiceDao {
     }
 
     @Override
-    public int deleteService(long id) {
+    public int deleteServiceById(long id) {
         String sql = "DELETE FROM services WHERE id = ?";
         return jdbcTemplate.update(sql, id);
     }

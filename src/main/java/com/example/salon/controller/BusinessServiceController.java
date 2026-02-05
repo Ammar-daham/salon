@@ -36,13 +36,18 @@ public class BusinessServiceController {
         return ResponseEntity.created(location).body(s).getBody();
     }
 
+    @GetMapping("/{businessId}/services/{serviceId}")
+    public SalonService getServiceForBusiness(@PathVariable int businessId, @PathVariable int serviceId) {
+        return businessSalonServiceService.getServiceById(businessId, serviceId);
+    }
+
     @PutMapping("/{businessId}/services/{serviceId}")
     public void updateServiceForBusiness(@PathVariable int serviceId,  @RequestBody SalonService salonService) {
         businessSalonServiceService.updateServiceForBusiness(serviceId, salonService);
     }
 
     @DeleteMapping("/{businessId}/services/{serviceId}")
-    public void deleteServiceForBusiness(@PathVariable int serviceId) {
-        businessSalonServiceService.deleteServiceForBusiness(serviceId);
+    public void deleteServiceForBusiness(@PathVariable int id) {
+        businessSalonServiceService.deleteServiceForBusiness(id);
     }
 }

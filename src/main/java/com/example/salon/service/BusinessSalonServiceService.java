@@ -8,6 +8,8 @@ import com.example.salon.model.SalonService;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
+import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -34,17 +36,27 @@ public class BusinessSalonServiceService {
         return salonService;
     }
 
+    public SalonService getServiceById(int businessId, int serviceId) {
+        SalonService ss;
+        try {
+            ss = salonServiceDao.getServiceById(businessId, serviceId);
+        } catch (EmptyResultDataAccessException ex) {
+            throw new BaseException("Service with id " + serviceId + " not found.", "NOT_FOUND", ErrorCode.NOT_FOUND.getStatus());
+        }
+        return ss;
+    }
+
     @Transactional
     public void updateServiceForBusiness(int id, SalonService salonService) {
-        int row = salonServiceDao.updateService(id, salonService);
+        int row = salonServiceDao.updateServiceById(id, salonService);
         if (row == 0)
-            throw new BaseException("Service with id " + id + " not found.","NOT_FOUND", ErrorCode.NOT_FOUND.getStatus());
+            throw new BaseException("Service with id " + id + " not found.", "NOT_FOUND", ErrorCode.NOT_FOUND.getStatus());
     }
 
     @Transactional
     public void deleteServiceForBusiness(int id) {
-        int row = salonServiceDao.deleteService(id);
+        int row = salonServiceDao.deleteServiceById(id);
         if (row == 0)
-            throw new BaseException("Service with id " + id + " not found.","NOT_FOUND", ErrorCode.NOT_FOUND.getStatus());
+            throw new BaseException("Service with id " + id + " not found.", "NOT_FOUND", ErrorCode.NOT_FOUND.getStatus());
     }
 }
