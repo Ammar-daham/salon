@@ -1,7 +1,6 @@
 package com.example.salon.dao;
 
 import com.example.salon.model.Business;
-import com.example.salon.model.User;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -15,12 +14,17 @@ public class BusinessDataAccessService implements BusinessDao {
     private final JdbcTemplate jdbcTemplate;
     private final AddressDao addressDao;
     private final ContactDao contactDao;
+    private final SalonServiceDao salonServiceDao;
 
     @Autowired
-    public BusinessDataAccessService(JdbcTemplate jdbcTemplate, AddressDao addressDao, ContactDao contactDao) {
+    public BusinessDataAccessService(JdbcTemplate jdbcTemplate,
+                                     AddressDao addressDao,
+                                     ContactDao contactDao,
+                                     SalonServiceDao salonServiceDao) {
         this.jdbcTemplate = jdbcTemplate;
         this.addressDao = addressDao;
         this.contactDao = contactDao;
+        this.salonServiceDao = salonServiceDao;
     }
 
     @Override
@@ -83,6 +87,7 @@ public class BusinessDataAccessService implements BusinessDao {
         for (Business business : businesses) {
             business.setAddresses(addressDao.getAddressesForBusiness(business.getId()));
             business.setContacts(contactDao.getContactsForBusiness(business.getId()));
+            business.setServices(salonServiceDao.getServicesForBusiness(business.getId()));
         }
 
         return businesses;
@@ -111,6 +116,7 @@ public class BusinessDataAccessService implements BusinessDao {
 
         business.setAddresses(addressDao.getAddressesForBusiness(business.getId()));
         business.setContacts(contactDao.getContactsForBusiness(business.getId()));
+        business.setServices(salonServiceDao.getServicesForBusiness(business.getId()));
 
         return business;
     }
@@ -142,6 +148,14 @@ public class BusinessDataAccessService implements BusinessDao {
             });
         }
 
+        // Update services
+        if (business.getServices() != null) {
+            business.getServices().forEach(service ->
+            {
+                salonServiceDao.updateServiceById(service.getId(), service);
+            });
+        }
+
         return row;
     }
 
@@ -162,6 +176,13 @@ public class BusinessDataAccessService implements BusinessDao {
         if (business.getContacts() != null) {
             business.getContacts().forEach(contact -> {
                 contactDao.deleteContactById(contact.getId());
+            });
+        }
+
+        // Delete services
+        if (business.getServices() != null) {
+            business.getServices().forEach(service -> {
+                salonServiceDao.deleteServiceById(service.getId());
             });
         }
 

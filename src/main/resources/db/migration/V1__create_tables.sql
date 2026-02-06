@@ -80,9 +80,23 @@ CREATE TABLE contacts (
  */
  CREATE TABLE services (
      id BIGSERIAL NOT NULL PRIMARY KEY,
-     name varchar(100),
+     name varchar(100) NOT NULL,
      description TEXT,
-     duration_minutes int,
-     price decimal NOT NULL,
-     is_active boolean
+     duration_minutes INTEGER NOT NULL,
+     price DECIMAL(10,2) NOT NULL,
+     is_active BOOLEAN NOT NULL DEFAULT true,
+     created_at TIMESTAMP NOT NULL DEFAULT now(),
+     updated_at TIMESTAMP
  );
+
+/*
+  =======================
+   Services and business (many-to-many)
+  =======================
+ */
+CREATE TABLE business_service (
+      business_id bigint NOT NULL,
+      service_id bigint NOT NULL,
+
+      PRIMARY KEY (business_id, service_id)
+);
