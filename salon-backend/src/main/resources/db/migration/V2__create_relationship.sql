@@ -47,6 +47,10 @@ ALTER TABLE users
 ADD CONSTRAINT users_role_check
 CHECK (role IN ('CUSTOMER', 'EMPLOYEE', 'ADMIN', 'SUPER_ADMIN'));
 
+ALTER TABLE businesses
+ADD CONSTRAINT businesses_status_check
+CHECK (status IN ('PENDING', 'APPROVED', 'REJECTED', 'SUSPENDED'));
+
 ALTER TABLE business_service
 ADD CONSTRAINT fk_business
 FOREIGN KEY (business_id)

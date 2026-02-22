@@ -8,6 +8,7 @@ CREATE TABLE businesses (
     name VARCHAR(100) not null UNIQUE,
     description TEXT,
     image TEXT NOT NULL,
+    status varchar(50) NOT NULL DEFAULT 'PENDING',
     created_at timestamp NOT NULL DEFAULT now(),
     updated_at timestamp
 );
@@ -17,7 +18,7 @@ CREATE TABLE users
     id BIGSERIAL NOT NULL primary key,
     first_name varchar(100) NOT NULL,
     last_name varchar(100) NOT NULL,
-    role varchar(50)  NOT NULL,
+    role varchar(50) NOT NULL,
     business_id BIGINT,
     created_at timestamp NOT NULL DEFAULT now(),
     updated_at timestamp

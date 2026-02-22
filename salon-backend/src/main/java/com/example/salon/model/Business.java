@@ -13,6 +13,7 @@ public class Business {
     public Instant createdAt;
     public Instant updatedAt;
     public String image;
+    public Status status;
     public List<Address> addresses;
     public List<Contact> contacts;
     public List<SalonService> services;
@@ -20,13 +21,15 @@ public class Business {
 
     public Business(@JsonProperty("id") Long id, @JsonProperty("name") String name,
                     @JsonProperty("description") String description, @JsonProperty("created_at") Instant createdAt,
-                    @JsonProperty("updated_at") Instant updatedAt, @JsonProperty("image") String image) {
+                    @JsonProperty("updated_at") Instant updatedAt, @JsonProperty("image") String image,
+                    @JsonProperty("status") Status status) {
         this.id = id;
         this.name = name;
         this.description = description;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
         this.image = image;
+        this.status = status;
     }
 
     @JsonCreator
@@ -73,6 +76,10 @@ public class Business {
         return services;
     }
 
+    public Status getStatus() {
+        return status;
+    }
+
     public void setId(Long id) {
         this.id = id;
     }
@@ -107,5 +114,9 @@ public class Business {
 
     public void setServices(List<SalonService> services) {
         this.services = services;
+    }
+
+    public void setStatus(Status status) {
+        this.status = status;
     }
 }

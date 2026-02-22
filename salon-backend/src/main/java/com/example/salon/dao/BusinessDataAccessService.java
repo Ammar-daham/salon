@@ -1,6 +1,7 @@
 package com.example.salon.dao;
 
 import com.example.salon.model.Business;
+import com.example.salon.model.Status;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -28,12 +29,14 @@ public class BusinessDataAccessService implements BusinessDao {
     }
 
     @Override
-    @Transactional
     public Long addBusiness(Business business) {
+
+        if (business.getStatus() == null) business.setStatus(Status.PENDING);
+
         String sql = """
                 INSERT INTO businesses
-                (name, description, image)
-                VALUES (?, ?, ?)
+                (name, description, image, status)
+                VALUES (?, ?, ?, ?)
                 RETURNING id
                 """;
 
@@ -42,7 +45,8 @@ public class BusinessDataAccessService implements BusinessDao {
                 Long.class,
                 business.getName(),
                 business.getDescription(),
-                business.getImage()
+                business.getImage(),
+                business.getStatus().name()
         );
         business.setId(businessId);
 
@@ -69,7 +73,7 @@ public class BusinessDataAccessService implements BusinessDao {
     public List<Business> getBusinesses() {
         String sql = """
                 SELECT id, name, description,
-                updated_at, created_at, image
+                updated_at, created_at, image, status
                 FROM businesses
                 """;
         List<Business> businesses = jdbcTemplate.query(sql, (rs, i) -> {
@@ -80,7 +84,8 @@ public class BusinessDataAccessService implements BusinessDao {
                     rs.getString("description"),
                     rs.getTimestamp("created_at").toInstant(),
                     updatedAt != null ? updatedAt.toInstant() : null,
-                    rs.getString("image")
+                    rs.getString("image"),
+                    Status.valueOf(rs.getString("status"))
             );
         });
 
@@ -97,7 +102,7 @@ public class BusinessDataAccessService implements BusinessDao {
     public Business getBusinessById(int id) {
         String sql = """
                 SELECT id, name, description,
-                updated_at, created_at, image
+                updated_at, created_at, image, status
                 FROM businesses
                 WHERE id = ?
                 """;
@@ -109,7 +114,8 @@ public class BusinessDataAccessService implements BusinessDao {
                             rs.getString("description"),
                             rs.getTimestamp("created_at").toInstant(),
                             updatedAt != null ? updatedAt.toInstant() : null,
-                            rs.getString("image")
+                            rs.getString("image"),
+                            Status.valueOf(rs.getString("status"))
                     );
                 }, id
         );
