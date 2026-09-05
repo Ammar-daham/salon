@@ -3,11 +3,13 @@ package com.example.salon.service;
 import com.example.salon.dao.UserDao;
 import com.example.salon.exception.BaseException;
 import com.example.salon.exception.ErrorCode;
+import com.example.salon.model.Role;
 import com.example.salon.model.User;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -16,19 +18,35 @@ import java.util.List;
 public class UserService {
 
     private final UserDao userDao;
+    private final PasswordEncoder passwordEncoder;
 
     @Autowired
-    public UserService(UserDao userDao) {
+    public UserService(UserDao userDao, PasswordEncoder passwordEncoder) {
         this.userDao = userDao;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Transactional
     public User addUser(User user) {
+        boolean canLogIn = user.getRole() != Role.CUSTOMER;
+        if (canLogIn && (user.getEmail() == null || user.getEmail().isBlank()
+                || user.getPassword() == null || user.getPassword().isBlank())) {
+            throw new BaseException("Email and password are required for role " + user.getRole(),
+                    "BAD_REQUEST", ErrorCode.BAD_REQUEST.getStatus());
+        }
+        if (user.getPassword() != null && !user.getPassword().isBlank()) {
+            user.setPasswordHash(passwordEncoder.encode(user.getPassword()));
+        }
+        user.setPassword(null);
+
         try {
             userDao.addUser(user);
         } catch (DuplicateKeyException ex) {
             if (ex.getMessage().contains("contacts_value_key"))
                 throw new BaseException("Contact already exists.", "CONFLICT", ErrorCode.DUPLICATE_RESOURCE.getStatus());
+            if (ex.getMessage().contains("users_email_unique_idx"))
+                throw new BaseException("Email already in use.", "CONFLICT", ErrorCode.DUPLICATE_RESOURCE.getStatus());
+            throw ex;
         }
         return user;
     }

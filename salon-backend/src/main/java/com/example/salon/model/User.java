@@ -11,6 +11,11 @@ public class User {
     public String firstName;
     public String lastName;
     public Role role;
+    public String email;
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    public String password;
+    @JsonIgnore
+    public String passwordHash;
     @JsonIgnore
     public Long businessId;
     public List<Address> addresses;
@@ -43,6 +48,18 @@ public class User {
 
     public Role getRole() {
         return role;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public String getPasswordHash() {
+        return passwordHash;
     }
 
     public Long getBusinessId() {
@@ -79,6 +96,18 @@ public class User {
 
     public void setRole(Role role) {
         this.role = role;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public void setPasswordHash(String passwordHash) {
+        this.passwordHash = passwordHash;
     }
 
     public void setBusinessId(Long businessId) {
