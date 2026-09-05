@@ -90,17 +90,19 @@ public class ContactDataAccessService implements ContactDao {
     public Contact getContactById(int id) {
         String sql = """
                 SELECT id, type, value,
-                created_at, updated_at,
+                created_at, updated_at
                 FROM contacts WHERE id = ?
                 """;
-        return jdbcTemplate.queryForObject(sql, (rs, i) ->
-                        new Contact(
-                                rs.getLong("id"),
-                                rs.getString("type"),
-                                rs.getString("value"),
-                                rs.getTimestamp("created_at").toInstant(),
-                                rs.getTimestamp("updated_at").toInstant()
-                        ),
+        return jdbcTemplate.queryForObject(sql, (rs, i) -> {
+                    Timestamp updatedAt = rs.getTimestamp("updated_at");
+                    return new Contact(
+                            rs.getLong("id"),
+                            rs.getString("type"),
+                            rs.getString("value"),
+                            rs.getTimestamp("created_at").toInstant(),
+                            updatedAt != null ? updatedAt.toInstant() : null
+                    );
+                },
                 id
         );
     }
