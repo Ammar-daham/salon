@@ -3,10 +3,13 @@ package com.example.salon.dao;
 import com.example.salon.model.Role;
 import com.example.salon.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public class UserDataAccessService implements UserDao {
@@ -21,11 +24,26 @@ public class UserDataAccessService implements UserDao {
         this.addressDao = addressDao;
     }
 
+    private RowMapper<User> userRowMapper() {
+        return (rs, i) -> {
+            User user = new User(
+                    rs.getLong("id"),
+                    rs.getString("first_name"),
+                    rs.getString("last_name"),
+                    Role.valueOf(rs.getString("role")),
+                    rs.getTimestamp("created_at").toInstant()
+            );
+            user.setEmail(rs.getString("email"));
+            user.setPasswordHash(rs.getString("password_hash"));
+            return user;
+        };
+    }
+
     @Override
     public Long addUser(User user) {
         String sql = """
-                INSERT INTO users (first_name, last_name, role)
-                VALUES (?, ?, ?)
+                INSERT INTO users (first_name, last_name, role, email, password_hash)
+                VALUES (?, ?, ?, ?, ?)
                 RETURNING id
                 """;
 
@@ -34,7 +52,9 @@ public class UserDataAccessService implements UserDao {
                 Long.class,
                 user.getFirstName(),
                 user.getLastName(),
-                user.getRole().name()
+                user.getRole().name(),
+                user.getEmail(),
+                user.getPasswordHash()
         );
         user.setId(userId);
 
@@ -61,15 +81,7 @@ public class UserDataAccessService implements UserDao {
     @Override
     public List<User> getAllUsers() {
         String sql = "SELECT * FROM users";
-        List<User> users = jdbcTemplate.query(sql, (rs, i) ->
-                new User(
-                        rs.getLong("id"),
-                        rs.getString("first_name"),
-                        rs.getString("last_name"),
-                        Role.valueOf(rs.getString("role")),
-                        rs.getTimestamp("created_at").toInstant()
-                )
-        );
+        List<User> users = jdbcTemplate.query(sql, userRowMapper());
         for (User user : users) {
             user.setAddresses(addressDao.getAddressesForUser(user.getId()));
             user.setContacts(contactDao.getContactsForUser(user.getId()));
@@ -79,20 +91,20 @@ public class UserDataAccessService implements UserDao {
 
     @Override
     public User getUserById(int id) {
-        String sql = "SELECT * FROM users WHERE id = ?";
-        User user = jdbcTemplate.queryForObject(sql, (rs, i) ->
-                        new User(
-                                rs.getLong("id"),
-                                rs.getString("first_name"),
-                                rs.getString("last_name"),
-                                Role.valueOf(rs.getString("role")),
-                                rs.getTimestamp("created_at").toInstant()
-                        ),
-                id
-        );
+        User user = jdbcTemplate.queryForObject("SELECT * FROM users WHERE id = ?", userRowMapper(), id);
         user.setAddresses(addressDao.getAddressesForUser(user.getId()));
         user.setContacts(contactDao.getContactsForUser(user.getId()));
         return user;
+    }
+
+    @Override
+    public Optional<User> findByEmail(String email) {
+        try {
+            User user = jdbcTemplate.queryForObject("SELECT * FROM users WHERE email = ?", userRowMapper(), email);
+            return Optional.ofNullable(user);
+        } catch (EmptyResultDataAccessException ex) {
+            return Optional.empty();
+        }
     }
 
     @Override
