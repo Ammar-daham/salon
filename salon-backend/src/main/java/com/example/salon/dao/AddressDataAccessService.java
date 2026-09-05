@@ -66,9 +66,9 @@ public class AddressDataAccessService implements AddressDao {
                 Timestamp updatedAt = rs.getTimestamp("updated_at");
                 return new Address(
                         rs.getLong("id"),
-                        rs.getString("street"),
-                        rs.getString("city"),
                         rs.getString("country"),
+                        rs.getString("city"),
+                        rs.getString("street"),
                         rs.getString("postal_code"),
                         rs.getString("latitude"),
                         rs.getString("longitude"),
@@ -93,9 +93,9 @@ public class AddressDataAccessService implements AddressDao {
             Timestamp updatedAt = rs.getTimestamp("updated_at");
             return new Address(
                     rs.getLong("id"),
-                    rs.getString("street"),
-                    rs.getString("city"),
                     rs.getString("country"),
+                    rs.getString("city"),
+                    rs.getString("street"),
                     rs.getString("postal_code"),
                     rs.getString("latitude"),
                     rs.getString("longitude"),
@@ -114,18 +114,20 @@ public class AddressDataAccessService implements AddressDao {
                 created_at, updated_at
                 FROM addresses WHERE id = ?
                 """;
-        return jdbcTemplate.queryForObject(sql, (rs, i) ->
-                        new Address(
-                                rs.getLong("id"),
-                                rs.getString("street"),
-                                rs.getString("city"),
-                                rs.getString("country"),
-                                rs.getString("postal_code"),
-                                rs.getString("latitude"),
-                                rs.getString("longitude"),
-                                rs.getTimestamp("created_at").toInstant(),
-                                rs.getTimestamp("updated_at").toInstant()
-                        ),
+        return jdbcTemplate.queryForObject(sql, (rs, i) -> {
+                    Timestamp updatedAt = rs.getTimestamp("updated_at");
+                    return new Address(
+                            rs.getLong("id"),
+                            rs.getString("country"),
+                            rs.getString("city"),
+                            rs.getString("street"),
+                            rs.getString("postal_code"),
+                            rs.getString("latitude"),
+                            rs.getString("longitude"),
+                            rs.getTimestamp("created_at").toInstant(),
+                            updatedAt != null ? updatedAt.toInstant() : null
+                    );
+                },
                 id
         );
     }
