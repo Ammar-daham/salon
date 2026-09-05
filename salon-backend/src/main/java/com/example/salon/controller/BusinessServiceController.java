@@ -47,7 +47,7 @@ public class BusinessServiceController {
     }
 
     @DeleteMapping("/{businessId}/services/{serviceId}")
-    public void deleteServiceForBusiness(@PathVariable int id) {
-        businessSalonServiceService.deleteServiceForBusiness(id);
+    public void deleteServiceForBusiness(@PathVariable int serviceId) {
+        businessSalonServiceService.deleteServiceForBusiness(serviceId);
     }
 }
