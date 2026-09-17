@@ -1,8 +1,10 @@
 package com.example.salon.controller;
 
 import com.example.salon.model.Contact;
+import com.example.salon.security.AuthenticatedUser;
 import com.example.salon.service.ContactService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -23,17 +25,17 @@ public class ContactController {
     }
 
     @GetMapping("/{id}")
-    public Contact getContactById(@PathVariable int id) {
-        return contactService.getContactById(id);
+    public Contact getContactById(@PathVariable int id, @AuthenticationPrincipal AuthenticatedUser principal) {
+        return contactService.getContactById(id, principal);
     }
 
     @PutMapping("/{id}")
-    public void updateContactById(@PathVariable int id, @RequestBody Contact contact) {
-        contactService.updateContactById(id, contact);
+    public void updateContactById(@PathVariable int id, @RequestBody Contact contact, @AuthenticationPrincipal AuthenticatedUser principal) {
+        contactService.updateContactById(id, contact, principal);
     }
 
     @DeleteMapping("/{id}")
-    public void deleteContactById(@PathVariable int id) {
-        contactService.delectContactById(id);
+    public void deleteContactById(@PathVariable int id, @AuthenticationPrincipal AuthenticatedUser principal) {
+        contactService.delectContactById(id, principal);
     }
 }

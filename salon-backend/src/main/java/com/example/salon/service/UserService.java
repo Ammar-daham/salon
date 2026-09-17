@@ -5,6 +5,8 @@ import com.example.salon.exception.BaseException;
 import com.example.salon.exception.ErrorCode;
 import com.example.salon.model.Role;
 import com.example.salon.model.User;
+import com.example.salon.security.AccessControl;
+import com.example.salon.security.AuthenticatedUser;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
@@ -55,7 +57,8 @@ public class UserService {
         return userDao.getAllUsers();
     }
 
-    public User getUserById(int id) {
+    public User getUserById(int id, AuthenticatedUser caller) {
+        AccessControl.requireSelfOrAdmin(caller, (long) id);
         User user;
         try {
             user = userDao.getUserById(id);
@@ -65,13 +68,20 @@ public class UserService {
         return user;
     }
 
-    public void updateUserById(long id, User user) {
+    public void updateUserById(long id, User user, AuthenticatedUser caller) {
+        AccessControl.requireSelfOrAdmin(caller, id);
+        if (!AccessControl.isAdmin(caller)) {
+            // Only an admin may change a user's role - a self-update must keep the caller's current one.
+            User existing = getUserById((int) id, caller);
+            user.setRole(existing.getRole());
+        }
         long row = userDao.updateUserById(id, user);
         if (row == 0)
             throw new BaseException("User with id " + id + " not found", "NOT_FOUND", ErrorCode.NOT_FOUND.getStatus());
     }
 
-    public void deleteUserById(long id, User user) {
+    public void deleteUserById(long id, User user, AuthenticatedUser caller) {
+        AccessControl.requireSelfOrAdmin(caller, id);
         long row = userDao.deleteUserById(id, user);
         if (row == 0)
             throw new BaseException("User with id " + id + " not found", "NOT_FOUND", ErrorCode.NOT_FOUND.getStatus());

@@ -65,6 +65,19 @@ public class SecurityConfig {
                         .requestMatchers("/error").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/auth/login").permitAll()
                         .requestMatchers("/api/v1/auth/**").authenticated()
+                        // Listing every user/address/contact leaks everyone's PII to any logged-in
+                        // customer - keep the bulk "list all" endpoints admin-only.
+                        .requestMatchers(HttpMethod.GET, "/api/v1/users", "/api/v1/addresses", "/api/v1/contacts")
+                                .hasAnyRole("ADMIN", "SUPER_ADMIN")
+                        // Single-record access below is "self or admin" - a URL matcher can't see who
+                        // owns a row, so these just require login and the controller/service enforces
+                        // ownership before returning or mutating the record.
+                        .requestMatchers(HttpMethod.GET, "/api/v1/users/**", "/api/v1/addresses/**", "/api/v1/contacts/**")
+                                .authenticated()
+                        .requestMatchers(HttpMethod.PUT, "/api/v1/users/**", "/api/v1/addresses/**", "/api/v1/contacts/**")
+                                .authenticated()
+                        .requestMatchers(HttpMethod.DELETE, "/api/v1/users/**", "/api/v1/addresses/**", "/api/v1/contacts/**")
+                                .authenticated()
                         .requestMatchers(HttpMethod.GET, "/api/v1/**").authenticated()
                         .requestMatchers(HttpMethod.POST, "/api/v1/**").hasAnyRole("ADMIN", "SUPER_ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/v1/**").hasAnyRole("ADMIN", "SUPER_ADMIN")

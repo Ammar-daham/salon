@@ -1,8 +1,10 @@
 package com.example.salon.controller;
 
 import com.example.salon.model.Address;
+import com.example.salon.security.AuthenticatedUser;
 import com.example.salon.service.AddressService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -23,18 +25,18 @@ public class AddressController {
     }
 
     @GetMapping("/{id}")
-    public Address getAddress(@PathVariable int id) {
-        return addressService.getAddressById(id);
+    public Address getAddress(@PathVariable int id, @AuthenticationPrincipal AuthenticatedUser principal) {
+        return addressService.getAddressById(id, principal);
     }
 
     @PutMapping("/{id}")
-    public void updateAddress(@PathVariable int id, @RequestBody Address address) {
-        addressService.updateAddressById(id, address);
+    public void updateAddress(@PathVariable int id, @RequestBody Address address, @AuthenticationPrincipal AuthenticatedUser principal) {
+        addressService.updateAddressById(id, address, principal);
     }
 
     @DeleteMapping("/{id}")
-    public void deleteAddress(@PathVariable int id) {
-        addressService.deleteAddressById(id);
+    public void deleteAddress(@PathVariable int id, @AuthenticationPrincipal AuthenticatedUser principal) {
+        addressService.deleteAddressById(id, principal);
     }
 
 
