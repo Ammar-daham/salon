@@ -1,7 +1,6 @@
 package com.example.salon.dao;
 
 import com.example.salon.model.Staff;
-import com.example.salon.model.User;
 
 import java.util.List;
 

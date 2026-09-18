@@ -9,152 +9,162 @@ import java.sql.Timestamp;
 import java.util.List;
 
 @Repository
-public class AddressDataAccessService implements AddressDao {
-    private final JdbcTemplate jdbcTemplate;
+public class AddressDataAccessService implements AddressDao
+{
+	private final JdbcTemplate jdbcTemplate;
 
-    @Autowired
-    public AddressDataAccessService(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
-    }
+	@Autowired
+	public AddressDataAccessService(JdbcTemplate jdbcTemplate)
+	{
+		this.jdbcTemplate = jdbcTemplate;
+	}
 
 
-    @Override
-    public Long addAddress(Address address) {
-        String sql = """
-                INSERT INTO addresses
-                (street, city, country, postal_code, latitude, longitude, business_id, user_id)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-                RETURNING id;
-                """;
+	@Override
+	public Long addAddress(Address address)
+	{
+		String sql = """
+				INSERT INTO addresses
+				(street, city, country, postal_code, latitude, longitude, business_id, user_id)
+				VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+				RETURNING id;
+				""";
 
-        Long addressId = jdbcTemplate.queryForObject(
-                sql,
-                Long.class,
-                address.getStreet(),
-                address.getCity(),
-                address.getCountry(),
-                address.getPostalCode(),
-                address.getLatitude(),
-                address.getLongitude(),
-                address.getBusinessId(),
-                address.getUserId()
-        );
-        address.setId(addressId);
-        return addressId;
-    }
+		Long addressId = jdbcTemplate.queryForObject(
+				sql,
+				Long.class,
+				address.getStreet(),
+				address.getCity(),
+				address.getCountry(),
+				address.getPostalCode(),
+				address.getLatitude(),
+				address.getLongitude(),
+				address.getBusinessId(),
+				address.getUserId()
+		);
+		address.setId(addressId);
+		return addressId;
+	}
 
-    @Override
-    public List<Address> getAddressesForBusiness(Long id) {
-        return getAddressesByColumn("business_id", id);
-    }
+	@Override
+	public List<Address> getAddressesForBusiness(Long id)
+	{
+		return getAddressesByColumn("business_id", id);
+	}
 
-    @Override
-    public List<Address> getAddressesForUser(Long id) {
-        return getAddressesByColumn("user_id", id);
-    }
+	@Override
+	public List<Address> getAddressesForUser(Long id)
+	{
+		return getAddressesByColumn("user_id", id);
+	}
 
-    public List<Address> getAddressesByColumn(String column, Long id) {
-        String sql = """
-                SELECT id, street, city,
-                country, postal_code,
-                latitude, longitude,
-                created_at, updated_at
-                FROM addresses WHERE %s = ?;
-                """.formatted(column);
+	public List<Address> getAddressesByColumn(String column, Long id)
+	{
+		String sql = """
+				SELECT id, street, city,
+				country, postal_code,
+				latitude, longitude,
+				created_at, updated_at
+				FROM addresses WHERE %s = ?;
+				""".formatted(column);
 
-        return jdbcTemplate.query(sql, (rs, i) -> {
-                Timestamp updatedAt = rs.getTimestamp("updated_at");
-                return new Address(
-                        rs.getLong("id"),
-                        rs.getString("country"),
-                        rs.getString("city"),
-                        rs.getString("street"),
-                        rs.getString("postal_code"),
-                        rs.getString("latitude"),
-                        rs.getString("longitude"),
-                        rs.getTimestamp("created_at").toInstant(),
-                        updatedAt != null ? updatedAt.toInstant() : null
-                );
-            }, id
-        );
-    }
+		return jdbcTemplate.query(sql, (rs, i) -> {
+				Timestamp updatedAt = rs.getTimestamp("updated_at");
+				return new Address(
+						rs.getLong("id"),
+						rs.getString("country"),
+						rs.getString("city"),
+						rs.getString("street"),
+						rs.getString("postal_code"),
+						rs.getString("latitude"),
+						rs.getString("longitude"),
+						rs.getTimestamp("created_at").toInstant(),
+						updatedAt != null ? updatedAt.toInstant() : null
+				);
+			}, id
+		);
+	}
 
-    @Override
-    public List<Address> getAllAddresses() {
-        String sql = """
-                SELECT id, street, city,
-                country, postal_code,
-                latitude, longitude,
-                created_at, updated_at
-                from addresses
-                """;
+	@Override
+	public List<Address> getAllAddresses()
+	{
+		String sql = """
+				SELECT id, street, city,
+				country, postal_code,
+				latitude, longitude,
+				created_at, updated_at
+				from addresses
+				""";
 
-        return jdbcTemplate.query(sql, (rs, i) -> {
-            Timestamp updatedAt = rs.getTimestamp("updated_at");
-            return new Address(
-                    rs.getLong("id"),
-                    rs.getString("country"),
-                    rs.getString("city"),
-                    rs.getString("street"),
-                    rs.getString("postal_code"),
-                    rs.getString("latitude"),
-                    rs.getString("longitude"),
-                    rs.getTimestamp("created_at").toInstant(),
-                    updatedAt != null ? updatedAt.toInstant() : null
-            );
-        });
-    }
+		return jdbcTemplate.query(sql, (rs, i) -> {
+			Timestamp updatedAt = rs.getTimestamp("updated_at");
+			return new Address(
+					rs.getLong("id"),
+					rs.getString("country"),
+					rs.getString("city"),
+					rs.getString("street"),
+					rs.getString("postal_code"),
+					rs.getString("latitude"),
+					rs.getString("longitude"),
+					rs.getTimestamp("created_at").toInstant(),
+					updatedAt != null ? updatedAt.toInstant() : null
+			);
+		});
+	}
 
-    @Override
-    public Address getAddressById(int id) {
-        String sql = """
-                SELECT id, street, city,
-                country, postal_code,
-                latitude, longitude,
-                created_at, updated_at
-                FROM addresses WHERE id = ?
-                """;
-        return jdbcTemplate.queryForObject(sql, (rs, i) -> {
-                    Timestamp updatedAt = rs.getTimestamp("updated_at");
-                    return new Address(
-                            rs.getLong("id"),
-                            rs.getString("country"),
-                            rs.getString("city"),
-                            rs.getString("street"),
-                            rs.getString("postal_code"),
-                            rs.getString("latitude"),
-                            rs.getString("longitude"),
-                            rs.getTimestamp("created_at").toInstant(),
-                            updatedAt != null ? updatedAt.toInstant() : null
-                    );
-                },
-                id
-        );
-    }
+	@Override
+	public Address getAddressById(int id)
+	{
+		String sql = """
+				SELECT id, street, city,
+				country, postal_code,
+				latitude, longitude,
+				created_at, updated_at
+				FROM addresses WHERE id = ?
+				""";
+		return jdbcTemplate.queryForObject(sql, (rs, i) -> {
+					Timestamp updatedAt = rs.getTimestamp("updated_at");
+					return new Address(
+							rs.getLong("id"),
+							rs.getString("country"),
+							rs.getString("city"),
+							rs.getString("street"),
+							rs.getString("postal_code"),
+							rs.getString("latitude"),
+							rs.getString("longitude"),
+							rs.getTimestamp("created_at").toInstant(),
+							updatedAt != null ? updatedAt.toInstant() : null
+					);
+				},
+				id
+		);
+	}
 
-    @Override
-    public int updateAddressById(long id, Address address) {
-        String sql = """
-                UPDATE addresses SET street = ?,
-                city = ?, country = ?, postal_code = ?,
-                latitude = ?, longitude = ?, updated_at = now()
-                WHERE id = ?
-                """;
+	@Override
+	public int updateAddressById(long id, Address address)
+	{
+		String sql = """
+				UPDATE addresses SET street = ?,
+				city = ?, country = ?, postal_code = ?,
+				latitude = ?, longitude = ?, updated_at = now()
+				WHERE id = ?
+				""";
 
-        return jdbcTemplate.update(
-                sql,
-                address.getStreet(),
-                address.getCity(),
-                address.getCountry(),
-                address.getPostalCode(),
-                address.getLatitude(),
-                address.getLongitude(),
-                id);
-    }
+		return jdbcTemplate.update(
+				sql,
+				address.getStreet(),
+				address.getCity(),
+				address.getCountry(),
+				address.getPostalCode(),
+				address.getLatitude(),
+				address.getLongitude(),
+				id);
+	}
 
-    @Override
-    public int deleteAddressById(long id) {
-        String sql = "DELETE FROM addresses WHERE id = ?";
-        return jdbcTemplate.update(sql, id);
-    }
+	@Override
+	public int deleteAddressById(long id)
+	{
+		String sql = "DELETE FROM addresses WHERE id = ?";
+		return jdbcTemplate.update(sql, id);
+	}
 }

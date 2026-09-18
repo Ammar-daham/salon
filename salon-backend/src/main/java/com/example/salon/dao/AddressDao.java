@@ -4,19 +4,19 @@ import com.example.salon.model.Address;
 
 import java.util.List;
 
-public interface AddressDao {
+public interface AddressDao
+{
+	Long addAddress(Address address);
 
-    Long addAddress(Address address);
+	List<Address> getAddressesForBusiness(Long id);
 
-    List<Address> getAddressesForBusiness(Long id);
+	List<Address> getAddressesForUser(Long id);
 
-    List<Address> getAddressesForUser(Long id);
+	List<Address> getAllAddresses();
 
-    List<Address> getAllAddresses();
+	Address getAddressById(int id);
 
-    Address getAddressById(int id);
+	int updateAddressById(long id, Address address);
 
-    int updateAddressById(long id, Address address);
-
-    int deleteAddressById(long id);
+	int deleteAddressById(long id);
 }

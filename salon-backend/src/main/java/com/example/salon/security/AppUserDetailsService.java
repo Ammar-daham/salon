@@ -9,21 +9,24 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 @Service
-public class AppUserDetailsService implements UserDetailsService {
-    private final UserDao userDao;
+public class AppUserDetailsService implements UserDetailsService
+{
+	private final UserDao userDao;
 
-    @Autowired
-    public AppUserDetailsService(UserDao userDao) {
-        this.userDao = userDao;
-    }
+	@Autowired
+	public AppUserDetailsService(UserDao userDao)
+	{
+		this.userDao = userDao;
+	}
 
-    @Override
-    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        User user = userDao.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("No account found for " + email));
-        if (user.getPasswordHash() == null) {
-            throw new UsernameNotFoundException("No account found for " + email);
-        }
-        return new AuthenticatedUser(user);
-    }
+	@Override
+	public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException
+	{
+		User user = userDao.findByEmail(email)
+				.orElseThrow(() -> new UsernameNotFoundException("No account found for " + email));
+		if (user.getPasswordHash() == null) {
+			throw new UsernameNotFoundException("No account found for " + email);
+		}
+		return new AuthenticatedUser(user);
+	}
 }

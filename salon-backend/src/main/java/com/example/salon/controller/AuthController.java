@@ -25,46 +25,51 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RequestMapping("api/v1/auth")
 @RestController
-public class AuthController {
-    private final AuthenticationManager authenticationManager;
-    private final SecurityContextRepository securityContextRepository;
+public class AuthController
+{
+	private final AuthenticationManager authenticationManager;
+	private final SecurityContextRepository securityContextRepository;
 
-    @Autowired
-    public AuthController(AuthenticationManager authenticationManager, SecurityContextRepository securityContextRepository) {
-        this.authenticationManager = authenticationManager;
-        this.securityContextRepository = securityContextRepository;
-    }
+	@Autowired
+	public AuthController(AuthenticationManager authenticationManager, SecurityContextRepository securityContextRepository)
+	{
+		this.authenticationManager = authenticationManager;
+		this.securityContextRepository = securityContextRepository;
+	}
 
-    @PostMapping("/login")
-    public AuthUserResponse login(@RequestBody LoginRequest request, HttpServletRequest servletRequest, HttpServletResponse servletResponse) {
-        Authentication authResult;
-        try {
-            authResult = authenticationManager.authenticate(
-                    UsernamePasswordAuthenticationToken.unauthenticated(request.email(), request.password())
-            );
-        } catch (AuthenticationException ex) {
-            throw new BaseException("Invalid email or password", "UNAUTHORIZED", ErrorCode.UNAUTHORIZED.getStatus());
-        }
+	@PostMapping("/login")
+	public AuthUserResponse login(@RequestBody LoginRequest request, HttpServletRequest servletRequest, HttpServletResponse servletResponse)
+	{
+		Authentication authResult;
+		try {
+			authResult = authenticationManager.authenticate(
+					UsernamePasswordAuthenticationToken.unauthenticated(request.email(), request.password())
+			);
+		} catch (AuthenticationException ex) {
+			throw new BaseException("Invalid email or password", "UNAUTHORIZED", ErrorCode.UNAUTHORIZED.getStatus());
+		}
 
-        SecurityContext context = SecurityContextHolder.createEmptyContext();
-        context.setAuthentication(authResult);
-        SecurityContextHolder.setContext(context);
-        securityContextRepository.saveContext(context, servletRequest, servletResponse);
+		SecurityContext context = SecurityContextHolder.createEmptyContext();
+		context.setAuthentication(authResult);
+		SecurityContextHolder.setContext(context);
+		securityContextRepository.saveContext(context, servletRequest, servletResponse);
 
-        return AuthUserResponse.from(((AuthenticatedUser) authResult.getPrincipal()).getUser());
-    }
+		return AuthUserResponse.from(((AuthenticatedUser) authResult.getPrincipal()).getUser());
+	}
 
-    @PostMapping("/logout")
-    public void logout(HttpServletRequest request) {
-        SecurityContextHolder.clearContext();
-        HttpSession session = request.getSession(false);
-        if (session != null) {
-            session.invalidate();
-        }
-    }
+	@PostMapping("/logout")
+	public void logout(HttpServletRequest request)
+	{
+		SecurityContextHolder.clearContext();
+		HttpSession session = request.getSession(false);
+		if (session != null) {
+			session.invalidate();
+		}
+	}
 
-    @GetMapping("/me")
-    public AuthUserResponse me(@AuthenticationPrincipal AuthenticatedUser principal) {
-        return AuthUserResponse.from(principal.getUser());
-    }
+	@GetMapping("/me")
+	public AuthUserResponse me(@AuthenticationPrincipal AuthenticatedUser principal)
+	{
+		return AuthUserResponse.from(principal.getUser());
+	}
 }

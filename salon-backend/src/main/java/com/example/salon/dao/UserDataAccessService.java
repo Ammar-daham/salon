@@ -12,147 +12,156 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public class UserDataAccessService implements UserDao {
-    private final JdbcTemplate jdbcTemplate;
-    private final ContactDao contactDao;
-    private final AddressDao addressDao;
+public class UserDataAccessService implements UserDao
+{
+	private final JdbcTemplate jdbcTemplate;
+	private final ContactDao contactDao;
+	private final AddressDao addressDao;
 
-    @Autowired
-    public UserDataAccessService(JdbcTemplate jdbcTemplate, ContactDao contactDao, AddressDao addressDao) {
-        this.jdbcTemplate = jdbcTemplate;
-        this.contactDao = contactDao;
-        this.addressDao = addressDao;
-    }
+	@Autowired
+	public UserDataAccessService(JdbcTemplate jdbcTemplate, ContactDao contactDao, AddressDao addressDao)
+	{
+		this.jdbcTemplate = jdbcTemplate;
+		this.contactDao = contactDao;
+		this.addressDao = addressDao;
+	}
 
-    private RowMapper<User> userRowMapper() {
-        return (rs, i) -> {
-            User user = new User(
-                    rs.getLong("id"),
-                    rs.getString("first_name"),
-                    rs.getString("last_name"),
-                    Role.valueOf(rs.getString("role")),
-                    rs.getTimestamp("created_at").toInstant()
-            );
-            user.setEmail(rs.getString("email"));
-            user.setPasswordHash(rs.getString("password_hash"));
-            return user;
-        };
-    }
+	private RowMapper<User> userRowMapper()
+	{
+		return (rs, i) -> {
+			User user = new User(
+					rs.getLong("id"),
+					rs.getString("first_name"),
+					rs.getString("last_name"),
+					Role.valueOf(rs.getString("role")),
+					rs.getTimestamp("created_at").toInstant()
+			);
+			user.setEmail(rs.getString("email"));
+			user.setPasswordHash(rs.getString("password_hash"));
+			return user;
+		};
+	}
 
-    @Override
-    public Long addUser(User user) {
-        String sql = """
-                INSERT INTO users (first_name, last_name, role, email, password_hash)
-                VALUES (?, ?, ?, ?, ?)
-                RETURNING id
-                """;
+	@Override
+	public Long addUser(User user)
+	{
+		String sql = """
+				INSERT INTO users (first_name, last_name, role, email, password_hash)
+				VALUES (?, ?, ?, ?, ?)
+				RETURNING id
+				""";
 
-        Long userId = jdbcTemplate.queryForObject(
-                sql,
-                Long.class,
-                user.getFirstName(),
-                user.getLastName(),
-                user.getRole().name(),
-                user.getEmail(),
-                user.getPasswordHash()
-        );
-        user.setId(userId);
+		Long userId = jdbcTemplate.queryForObject(
+				sql,
+				Long.class,
+				user.getFirstName(),
+				user.getLastName(),
+				user.getRole().name(),
+				user.getEmail(),
+				user.getPasswordHash()
+		);
+		user.setId(userId);
 
-        // Insert addresses
-        if (user.getAddresses() != null) {
-            user.getAddresses().forEach(address ->
-            {
-                address.setUserId(userId);
-                addressDao.addAddress(address);
-            });
-        }
+		// Insert addresses
+		if (user.getAddresses() != null) {
+			user.getAddresses().forEach(address ->
+			{
+				address.setUserId(userId);
+				addressDao.addAddress(address);
+			});
+		}
 
-        // Insert contacts
-        if (user.getContacts() != null) {
-            user.getContacts().forEach(contact ->
-            {
-                contact.setUserId(userId);
-                contactDao.addContact(contact);
-            });
-        }
-        return userId;
-    }
+		// Insert contacts
+		if (user.getContacts() != null) {
+			user.getContacts().forEach(contact ->
+			{
+				contact.setUserId(userId);
+				contactDao.addContact(contact);
+			});
+		}
+		return userId;
+	}
 
-    @Override
-    public List<User> getAllUsers() {
-        String sql = "SELECT * FROM users";
-        List<User> users = jdbcTemplate.query(sql, userRowMapper());
-        for (User user : users) {
-            user.setAddresses(addressDao.getAddressesForUser(user.getId()));
-            user.setContacts(contactDao.getContactsForUser(user.getId()));
-        }
-        return users;
-    }
+	@Override
+	public List<User> getAllUsers()
+	{
+		String sql = "SELECT * FROM users";
+		List<User> users = jdbcTemplate.query(sql, userRowMapper());
+		for (User user : users) {
+			user.setAddresses(addressDao.getAddressesForUser(user.getId()));
+			user.setContacts(contactDao.getContactsForUser(user.getId()));
+		}
+		return users;
+	}
 
-    @Override
-    public User getUserById(int id) {
-        User user = jdbcTemplate.queryForObject("SELECT * FROM users WHERE id = ?", userRowMapper(), id);
-        user.setAddresses(addressDao.getAddressesForUser(user.getId()));
-        user.setContacts(contactDao.getContactsForUser(user.getId()));
-        return user;
-    }
+	@Override
+	public User getUserById(int id)
+	{
+		User user = jdbcTemplate.queryForObject("SELECT * FROM users WHERE id = ?", userRowMapper(), id);
+		user.setAddresses(addressDao.getAddressesForUser(user.getId()));
+		user.setContacts(contactDao.getContactsForUser(user.getId()));
+		return user;
+	}
 
-    @Override
-    public Optional<User> findByEmail(String email) {
-        try {
-            User user = jdbcTemplate.queryForObject("SELECT * FROM users WHERE email = ?", userRowMapper(), email);
-            return Optional.ofNullable(user);
-        } catch (EmptyResultDataAccessException ex) {
-            return Optional.empty();
-        }
-    }
+	@Override
+	public Optional<User> findByEmail(String email)
+	{
+		try {
+			User user = jdbcTemplate.queryForObject("SELECT * FROM users WHERE email = ?", userRowMapper(), email);
+			return Optional.ofNullable(user);
+		} catch (EmptyResultDataAccessException ex) {
+			return Optional.empty();
+		}
+	}
 
-    @Override
-    public long updateUserById(long id, User user) {
-        String sql = "UPDATE users SET first_name = ?, last_name = ?, role = ? WHERE id = ?";
-        long userId = (long) jdbcTemplate.update(sql, user.getFirstName(), user.getLastName(), user.getRole().name(), id);
+	@Override
+	public long updateUserById(long id, User user)
+	{
+		String sql = "UPDATE users SET first_name = ?, last_name = ?, role = ? WHERE id = ?";
+		long userId = (long) jdbcTemplate.update(sql, user.getFirstName(), user.getLastName(), user.getRole().name(), id);
 
-        // Update contacts
-        if (user.getContacts() != null) {
-            user.getContacts().forEach(contact ->
-            {
-                contact.setUserId(id);
-                contactDao.updateContactById(contact.getId(), contact);
-            });
-        }
+		// Update contacts
+		if (user.getContacts() != null) {
+			user.getContacts().forEach(contact ->
+			{
+				contact.setUserId(id);
+				contactDao.updateContactById(contact.getId(), contact);
+			});
+		}
 
-        // Update addresses
-        if (user.getAddresses() != null) {
-            user.getAddresses().forEach(address ->
-            {
-                address.setUserId(id);
-                addressDao.updateAddressById(address.getId(), address);
-            });
-        }
-        return userId;
-    }
+		// Update addresses
+		if (user.getAddresses() != null) {
+			user.getAddresses().forEach(address ->
+			{
+				address.setUserId(id);
+				addressDao.updateAddressById(address.getId(), address);
+			});
+		}
+		return userId;
+	}
 
-    @Override
-    public long deleteUserById(long id, User user) {
-        String sql = "DELETE FROM users WHERE id = ?";
-        long userId = (long) jdbcTemplate.update(sql, id);
+	@Override
+	public long deleteUserById(long id, User user)
+	{
+		String sql = "DELETE FROM users WHERE id = ?";
+		long userId = (long) jdbcTemplate.update(sql, id);
 
-        // Delete contacts and addresses
-        if (user.getContacts() != null) {
-            user.getContacts().forEach(contact ->
-            {
-                contact.setUserId(id);
-                contactDao.deleteContactById(contact.getId());
-            });
-        } else if (user.getAddresses() != null) {
-            user.getAddresses().forEach(address ->
-            {
-                address.setUserId(id);
-                addressDao.deleteAddressById(address.getId());
-            });
-        } else {
-            return -1;
-        }
-        return userId;
-    }
+		// Delete contacts and addresses
+		if (user.getContacts() != null) {
+			user.getContacts().forEach(contact ->
+			{
+				contact.setUserId(id);
+				contactDao.deleteContactById(contact.getId());
+			});
+		} else if (user.getAddresses() != null) {
+			user.getAddresses().forEach(address ->
+			{
+				address.setUserId(id);
+				addressDao.deleteAddressById(address.getId());
+			});
+		} else {
+			return -1;
+		}
+		return userId;
+	}
 }

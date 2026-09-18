@@ -1,9 +1,7 @@
 package com.example.salon.controller;
 
-import com.example.salon.model.Business;
 import com.example.salon.model.User;
 import com.example.salon.security.AuthenticatedUser;
-import com.example.salon.service.BusinessService;
 import com.example.salon.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -16,43 +14,50 @@ import java.util.List;
 
 @RequestMapping("api/v1/users")
 @RestController
-public class UserController {
-    private final UserService userService;
+public class UserController
+{
+	private final UserService userService;
 
-    @Autowired
-    public UserController(UserService userService) {
-        this.userService = userService;
-    }
+	@Autowired
+	public UserController(UserService userService)
+	{
+		this.userService = userService;
+	}
 
-    @PostMapping
-    public User addUser(@RequestBody User user) {
-        User u = userService.addUser(user);
-        URI location = ServletUriComponentsBuilder
-                .fromCurrentRequest()
-                .path("/{id}")
-                .buildAndExpand(user.getId())
-                .toUri();
+	@PostMapping
+	public User addUser(@RequestBody User user)
+	{
+		User u = userService.addUser(user);
+		URI location = ServletUriComponentsBuilder
+				.fromCurrentRequest()
+				.path("/{id}")
+				.buildAndExpand(user.getId())
+				.toUri();
 
-        return ResponseEntity.created(location).body(u).getBody();
-    }
+		return ResponseEntity.created(location).body(u).getBody();
+	}
 
-    @GetMapping
-    public List<User> getUsers() {
-        return userService.getAllUsers();
-    }
+	@GetMapping
+	public List<User> getUsers()
+	{
+		return userService.getAllUsers();
+	}
 
-    @GetMapping("/{id}")
-    public User getUserById(@PathVariable int id, @AuthenticationPrincipal AuthenticatedUser principal) {
-        return userService.getUserById(id, principal);
-    }
+	@GetMapping("/{id}")
+	public User getUserById(@PathVariable int id, @AuthenticationPrincipal AuthenticatedUser principal)
+	{
+		return userService.getUserById(id, principal);
+	}
 
-    @PutMapping("/{id}")
-    public void updateUserById(@PathVariable long id, @RequestBody User user, @AuthenticationPrincipal AuthenticatedUser principal) {
-        userService.updateUserById(id, user, principal);
-    }
+	@PutMapping("/{id}")
+	public void updateUserById(@PathVariable long id, @RequestBody User user, @AuthenticationPrincipal AuthenticatedUser principal)
+	{
+		userService.updateUserById(id, user, principal);
+	}
 
-    @DeleteMapping("/{id}")
-    public void deleteUserById(@PathVariable int id, @RequestBody User user, @AuthenticationPrincipal AuthenticatedUser principal) {
-        userService.deleteUserById(id, user, principal);
-    }
+	@DeleteMapping("/{id}")
+	public void deleteUserById(@PathVariable int id, @RequestBody User user, @AuthenticationPrincipal AuthenticatedUser principal)
+	{
+		userService.deleteUserById(id, user, principal);
+	}
 }

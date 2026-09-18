@@ -23,84 +23,91 @@ import java.util.Arrays;
 import java.util.List;
 
 @Configuration
-public class SecurityConfig {
+public class SecurityConfig
+{
 
-    private final RestAuthenticationEntryPoint restAuthenticationEntryPoint;
-    private final RestAccessDeniedHandler restAccessDeniedHandler;
+	private final RestAuthenticationEntryPoint restAuthenticationEntryPoint;
+	private final RestAccessDeniedHandler restAccessDeniedHandler;
 
-    @Value("${app.cors.allowed-origins:http://localhost:3000}")
-    private String allowedOrigins;
+	@Value("${app.cors.allowed-origins:http://localhost:3000}")
+	private String allowedOrigins;
 
-    public SecurityConfig(RestAuthenticationEntryPoint restAuthenticationEntryPoint,
-                           RestAccessDeniedHandler restAccessDeniedHandler) {
-        this.restAuthenticationEntryPoint = restAuthenticationEntryPoint;
-        this.restAccessDeniedHandler = restAccessDeniedHandler;
-    }
+	public SecurityConfig(RestAuthenticationEntryPoint restAuthenticationEntryPoint,
+			RestAccessDeniedHandler restAccessDeniedHandler)
+	{
+		this.restAuthenticationEntryPoint = restAuthenticationEntryPoint;
+		this.restAccessDeniedHandler = restAccessDeniedHandler;
+	}
 
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
+	@Bean
+	public PasswordEncoder passwordEncoder()
+	{
+		return new BCryptPasswordEncoder();
+	}
 
-    @Bean
-    public SecurityContextRepository securityContextRepository() {
-        return new HttpSessionSecurityContextRepository();
-    }
+	@Bean
+	public SecurityContextRepository securityContextRepository()
+	{
+		return new HttpSessionSecurityContextRepository();
+	}
 
-    @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
-        return configuration.getAuthenticationManager();
-    }
+	@Bean
+	public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception
+	{
+		return configuration.getAuthenticationManager();
+	}
 
-    @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http, SecurityContextRepository securityContextRepository) throws Exception {
-        http
-                .securityContext(sc -> sc.securityContextRepository(securityContextRepository))
-                .cors(Customizer.withDefaults())
-                // CSRF is disabled: this is a JSON-only API (no form-encoded submissions), and
-                // credentialed cross-origin access is already restricted by the CORS policy below.
-                .csrf(AbstractHttpConfigurer::disable)
-                .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/error").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/v1/auth/login").permitAll()
-                        .requestMatchers("/api/v1/auth/**").authenticated()
-                        // Listing every user/address/contact leaks everyone's PII to any logged-in
-                        // customer - keep the bulk "list all" endpoints admin-only.
-                        .requestMatchers(HttpMethod.GET, "/api/v1/users", "/api/v1/addresses", "/api/v1/contacts")
-                                .hasAnyRole("ADMIN", "SUPER_ADMIN")
-                        // Single-record access below is "self or admin" - a URL matcher can't see who
-                        // owns a row, so these just require login and the controller/service enforces
-                        // ownership before returning or mutating the record.
-                        .requestMatchers(HttpMethod.GET, "/api/v1/users/**", "/api/v1/addresses/**", "/api/v1/contacts/**")
-                                .authenticated()
-                        .requestMatchers(HttpMethod.PUT, "/api/v1/users/**", "/api/v1/addresses/**", "/api/v1/contacts/**")
-                                .authenticated()
-                        .requestMatchers(HttpMethod.DELETE, "/api/v1/users/**", "/api/v1/addresses/**", "/api/v1/contacts/**")
-                                .authenticated()
-                        .requestMatchers(HttpMethod.GET, "/api/v1/**").authenticated()
-                        .requestMatchers(HttpMethod.POST, "/api/v1/**").hasAnyRole("ADMIN", "SUPER_ADMIN")
-                        .requestMatchers(HttpMethod.PUT, "/api/v1/**").hasAnyRole("ADMIN", "SUPER_ADMIN")
-                        .requestMatchers(HttpMethod.DELETE, "/api/v1/**").hasAnyRole("ADMIN", "SUPER_ADMIN")
-                        .anyRequest().denyAll()
-                )
-                .exceptionHandling(eh -> eh
-                        .authenticationEntryPoint(restAuthenticationEntryPoint)
-                        .accessDeniedHandler(restAccessDeniedHandler)
-                );
-        return http.build();
-    }
+	@Bean
+	public SecurityFilterChain securityFilterChain(HttpSecurity http, SecurityContextRepository securityContextRepository) throws Exception
+	{
+		http
+				.securityContext(sc -> sc.securityContextRepository(securityContextRepository))
+				.cors(Customizer.withDefaults())
+				// CSRF is disabled: this is a JSON-only API (no form-encoded submissions), and
+				// credentialed cross-origin access is already restricted by the CORS policy below.
+				.csrf(AbstractHttpConfigurer::disable)
+				.sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
+				.authorizeHttpRequests(auth -> auth
+						.requestMatchers("/error").permitAll()
+						.requestMatchers(HttpMethod.POST, "/api/v1/auth/login").permitAll()
+						.requestMatchers("/api/v1/auth/**").authenticated()
+						// Listing every user/address/contact leaks everyone's PII to any logged-in
+						// customer - keep the bulk "list all" endpoints admin-only.
+						.requestMatchers(HttpMethod.GET, "/api/v1/users", "/api/v1/addresses", "/api/v1/contacts")
+								.hasAnyRole("ADMIN", "SUPER_ADMIN")
+						// Single-record access below is "self or admin" - a URL matcher can't see who
+						// owns a row, so these just require login and the controller/service enforces
+						// ownership before returning or mutating the record.
+						.requestMatchers(HttpMethod.GET, "/api/v1/users/**", "/api/v1/addresses/**", "/api/v1/contacts/**")
+								.authenticated()
+						.requestMatchers(HttpMethod.PUT, "/api/v1/users/**", "/api/v1/addresses/**", "/api/v1/contacts/**")
+								.authenticated()
+						.requestMatchers(HttpMethod.DELETE, "/api/v1/users/**", "/api/v1/addresses/**", "/api/v1/contacts/**")
+								.authenticated()
+						.requestMatchers(HttpMethod.GET, "/api/v1/**").authenticated()
+						.requestMatchers(HttpMethod.POST, "/api/v1/**").hasAnyRole("ADMIN", "SUPER_ADMIN")
+						.requestMatchers(HttpMethod.PUT, "/api/v1/**").hasAnyRole("ADMIN", "SUPER_ADMIN")
+						.requestMatchers(HttpMethod.DELETE, "/api/v1/**").hasAnyRole("ADMIN", "SUPER_ADMIN")
+						.anyRequest().denyAll()
+				)
+				.exceptionHandling(eh -> eh
+						.authenticationEntryPoint(restAuthenticationEntryPoint)
+						.accessDeniedHandler(restAccessDeniedHandler)
+				);
+		return http.build();
+	}
 
-    @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.stream(allowedOrigins.split(",")).map(String::trim).toList());
-        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(List.of("*"));
-        configuration.setAllowCredentials(true);
+	@Bean
+	public CorsConfigurationSource corsConfigurationSource()
+	{
+		CorsConfiguration configuration = new CorsConfiguration();
+		configuration.setAllowedOrigins(Arrays.stream(allowedOrigins.split(",")).map(String::trim).toList());
+		configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+		configuration.setAllowedHeaders(List.of("*"));
+		configuration.setAllowCredentials(true);
 
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
-        return source;
-    }
+		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+		source.registerCorsConfiguration("/**", configuration);
+		return source;
+	}
 }

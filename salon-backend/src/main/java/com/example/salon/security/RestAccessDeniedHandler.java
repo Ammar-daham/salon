@@ -10,10 +10,12 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 
 @Component
-public class RestAccessDeniedHandler implements AccessDeniedHandler {
-    @Override
-    public void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException accessDeniedException) throws IOException {
-        SecurityResponseWriter.writeError(response, request,
-                HttpStatus.FORBIDDEN, "FORBIDDEN", "You do not have permission to perform this action");
-    }
+public class RestAccessDeniedHandler implements AccessDeniedHandler
+{
+	@Override
+	public void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException accessDeniedException) throws IOException
+	{
+		SecurityResponseWriter.writeError(response, request,
+				HttpStatus.FORBIDDEN, "FORBIDDEN", "You do not have permission to perform this action");
+	}
 }
