@@ -1,7 +1,7 @@
 import { AxiosError } from "axios";
 import { api } from "./axios";
 
-export type Role = "ADMIN" | "SUPER_ADMIN" | "USER";
+export type Role = "CUSTOMER" | "EMPLOYEE" | "ADMIN" | "SUPER_ADMIN";
 
 export interface AuthUser {
 	id: number;

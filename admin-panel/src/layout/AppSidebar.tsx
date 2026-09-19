@@ -28,7 +28,10 @@ const navItems: NavItem[] = [
   {
     name: 'Forms',
     icon: <ListIcon />,
-    subItems: [{ name: 'Add Business', path: '/add-business', pro: false }],
+    subItems: [
+      { name: 'Add Business', path: '/add-business', pro: false },
+      { name: 'Add Staff', path: '/signup', pro: false },
+    ],
   },
   {
     name: 'Tables',
