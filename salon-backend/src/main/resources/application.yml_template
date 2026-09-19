@@ -4,3 +4,5 @@ app:
     username: add_your_user_name
     password: add_your_password_here
     pool-size: 30
+  cors:
+    allowed-origins: http://localhost:3000
