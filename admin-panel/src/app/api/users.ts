@@ -7,6 +7,9 @@ export interface CreateUserInput {
 	email: string;
 	password: string;
 	role: Role;
+	// Required when the caller is a SUPER_ADMIN (they aren't tied to a single business).
+	// Ignored by the backend for any other caller, which is always scoped to their own business.
+	businessId?: number;
 }
 
 export interface CreatedUser {

@@ -7,6 +7,7 @@ import { useAuth } from "@/context/AuthContext";
 import { getAuthErrorMessage } from "@/app/api/auth";
 import { createUser } from "@/app/api/users";
 import { Role } from "@/app/api/auth";
+import { Business, getBusinesses } from "@/app/api/businesses";
 import { ChevronLeftIcon, EyeCloseIcon, EyeIcon } from "@/icons";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -39,6 +40,13 @@ export default function SignUpForm() {
 	const [isSubmitting, setIsSubmitting] = useState(false);
 
 	const isAuthorized = user?.role === "ADMIN" || user?.role === "SUPER_ADMIN";
+	// A super admin isn't tied to one business, so they must pick which business the new
+	// account belongs to. A regular admin's own business is used implicitly by the backend.
+	const mustPickBusiness = user?.role === "SUPER_ADMIN";
+
+	const [businesses, setBusinesses] = useState<Business[]>([]);
+	const [businessId, setBusinessId] = useState<number | "">("");
+	const [isLoadingBusinesses, setIsLoadingBusinesses] = useState(false);
 
 	useEffect(() => {
 		if (isLoading) return;
@@ -49,6 +57,15 @@ export default function SignUpForm() {
 		}
 	}, [isLoading, user, isAuthorized, router]);
 
+	useEffect(() => {
+		if (!mustPickBusiness) return;
+		setIsLoadingBusinesses(true);
+		getBusinesses()
+			.then(setBusinesses)
+			.catch((err) => setError(getAuthErrorMessage(err)))
+			.finally(() => setIsLoadingBusinesses(false));
+	}, [mustPickBusiness]);
+
 	async function handleSubmit(e: FormEvent<HTMLFormElement>) {
 		e.preventDefault();
 		setError(null);
@@ -58,10 +75,21 @@ export default function SignUpForm() {
 			setError("Passwords do not match.");
 			return;
 		}
+		if (mustPickBusiness && businessId === "") {
+			setError("Please select which business this account belongs to.");
+			return;
+		}
 
 		setIsSubmitting(true);
 		try {
-			const created = await createUser({ firstName, lastName, email, password, role });
+			const created = await createUser({
+				firstName,
+				lastName,
+				email,
+				password,
+				role,
+				...(mustPickBusiness ? { businessId: businessId as number } : {}),
+			});
 			setSuccessMessage(`Account created for ${created.email} (${ROLE_LABELS[created.role]}).`);
 			setFirstName("");
 			setLastName("");
@@ -69,6 +97,7 @@ export default function SignUpForm() {
 			setPassword("");
 			setConfirmPassword("");
 			setRole("EMPLOYEE");
+			setBusinessId("");
 		} catch (err) {
 			setError(getAuthErrorMessage(err));
 		} finally {
@@ -176,6 +205,30 @@ export default function SignUpForm() {
 									))}
 								</select>
 							</div>
+							{mustPickBusiness && (
+								<div>
+									<Label htmlFor="business">
+										Business<span className="text-error-500">*</span>
+									</Label>
+									<select
+										id="business"
+										name="business"
+										value={businessId}
+										onChange={(e) => setBusinessId(e.target.value ? Number(e.target.value) : "")}
+										disabled={isLoadingBusinesses}
+										className="h-11 w-full rounded-lg border appearance-none px-4 py-2.5 text-sm shadow-theme-xs bg-transparent text-gray-800 border-gray-300 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:focus:border-brand-800"
+									>
+										<option value="" disabled>
+											{isLoadingBusinesses ? "Loading businesses…" : "Select a business"}
+										</option>
+										{businesses.map((b) => (
+											<option key={b.id} value={b.id}>
+												{b.name}
+											</option>
+										))}
+									</select>
+								</div>
+							)}
 							<div>
 								<Label>
 									Password<span className="text-error-500">*</span>
