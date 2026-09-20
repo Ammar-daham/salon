@@ -38,6 +38,7 @@ public class UserDataAccessService implements UserDao
 			);
 			user.setEmail(rs.getString("email"));
 			user.setPasswordHash(rs.getString("password_hash"));
+			user.setBusinessId((Long) rs.getObject("business_id"));
 			return user;
 		};
 	}
@@ -46,8 +47,8 @@ public class UserDataAccessService implements UserDao
 	public Long addUser(User user)
 	{
 		String sql = """
-				INSERT INTO users (first_name, last_name, role, email, password_hash)
-				VALUES (?, ?, ?, ?, ?)
+				INSERT INTO users (first_name, last_name, role, email, password_hash, business_id)
+				VALUES (?, ?, ?, ?, ?, ?)
 				RETURNING id
 				""";
 
@@ -58,7 +59,8 @@ public class UserDataAccessService implements UserDao
 				user.getLastName(),
 				user.getRole().name(),
 				user.getEmail(),
-				user.getPasswordHash()
+				user.getPasswordHash(),
+				user.getBusinessId()
 		);
 		user.setId(userId);
 
