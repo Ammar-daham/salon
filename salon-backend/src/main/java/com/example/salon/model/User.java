@@ -17,7 +17,9 @@ public class User
 	public String password;
 	@JsonIgnore
 	public String passwordHash;
-	@JsonIgnore
+	// A super admin must be able to set this when creating a user for a specific business, but it
+	// should never be echoed back in a response - same treatment as the write-only password field.
+	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
 	public Long businessId;
 	public List<Address> addresses;
 	public List<Contact> contacts;
