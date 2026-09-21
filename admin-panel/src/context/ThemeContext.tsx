@@ -1,58 +1,73 @@
 "use client";
 
 import type React from "react";
-import { createContext, useState, useContext, useEffect } from "react";
+import { createContext, useCallback, useContext, useMemo, useSyncExternalStore } from "react";
 
 type Theme = "light" | "dark";
 
 type ThemeContextType = {
-  theme: Theme;
-  toggleTheme: () => void;
+	theme: Theme;
+	toggleTheme: () => void;
+	setTheme: (theme: Theme) => void;
 };
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
-export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({
-  children,
-}) => {
-  const [theme, setTheme] = useState<Theme>("light");
-  const [isInitialized, setIsInitialized] = useState(false);
+const STORAGE_KEY = "theme";
 
-  useEffect(() => {
-    // This code will only run on the client side
-    const savedTheme = localStorage.getItem("theme") as Theme | null;
-    const initialTheme = savedTheme || "light"; // Default to light theme
+/**
+ * The `dark` class on <html> is the single source of truth. An inline script in
+ * the root layout applies it before first paint, so there is no flash and no
+ * need to re-derive the theme in an effect — we just subscribe to the DOM.
+ */
+function subscribe(onChange: () => void) {
+	const observer = new MutationObserver(onChange);
+	observer.observe(document.documentElement, {
+		attributes: true,
+		attributeFilter: ["class"],
+	});
+	return () => observer.disconnect();
+}
 
-    setTheme(initialTheme);
-    setIsInitialized(true);
-  }, []);
+function getSnapshot(): Theme {
+	return document.documentElement.classList.contains("dark") ? "dark" : "light";
+}
 
-  useEffect(() => {
-    if (isInitialized) {
-      localStorage.setItem("theme", theme);
-      if (theme === "dark") {
-        document.documentElement.classList.add("dark");
-      } else {
-        document.documentElement.classList.remove("dark");
-      }
-    }
-  }, [theme, isInitialized]);
+function getServerSnapshot(): Theme {
+	return "light";
+}
 
-  const toggleTheme = () => {
-    setTheme((prevTheme) => (prevTheme === "light" ? "dark" : "light"));
-  };
+function applyTheme(theme: Theme) {
+	document.documentElement.classList.toggle("dark", theme === "dark");
+	try {
+		localStorage.setItem(STORAGE_KEY, theme);
+	} catch {
+		// Private mode or blocked site data — the class still applies for this
+		// session, it just won't be remembered.
+	}
+}
 
-  return (
-    <ThemeContext.Provider value={{ theme, toggleTheme }}>
-      {children}
-    </ThemeContext.Provider>
-  );
+export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+	const theme = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+
+	const setTheme = useCallback((next: Theme) => applyTheme(next), []);
+	const toggleTheme = useCallback(
+		() => applyTheme(document.documentElement.classList.contains("dark") ? "light" : "dark"),
+		[],
+	);
+
+	const value = useMemo(
+		() => ({ theme, toggleTheme, setTheme }),
+		[theme, toggleTheme, setTheme],
+	);
+
+	return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
 };
 
 export const useTheme = () => {
-  const context = useContext(ThemeContext);
-  if (context === undefined) {
-    throw new Error("useTheme must be used within a ThemeProvider");
-  }
-  return context;
+	const context = useContext(ThemeContext);
+	if (context === undefined) {
+		throw new Error("useTheme must be used within a ThemeProvider");
+	}
+	return context;
 };

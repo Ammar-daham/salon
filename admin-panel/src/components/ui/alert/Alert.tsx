@@ -37,8 +37,8 @@ const Alert: React.FC<AlertProps> = ({
     },
     info: {
       container:
-        "border-blue-light-500 bg-blue-light-50 dark:border-blue-light-500/30 dark:bg-blue-light-500/15",
-      icon: "text-blue-light-500",
+        "border-info-500 bg-info-50 dark:border-info-500/30 dark:bg-info-500/15",
+      icon: "text-info-500",
     },
   };
 
@@ -122,16 +122,16 @@ const Alert: React.FC<AlertProps> = ({
         </div>
 
         <div>
-          <h4 className="mb-1 text-sm font-semibold text-gray-800 dark:text-white/90">
+          <h4 className="mb-1 text-sm font-semibold text-neutral-800 dark:text-white/90">
             {title}
           </h4>
 
-          <p className="text-sm text-gray-500 dark:text-gray-400">{message}</p>
+          <p className="text-sm text-neutral-500 dark:text-neutral-400">{message}</p>
 
           {showLink && (
             <Link
               href={linkHref}
-              className="inline-block mt-3 text-sm font-medium text-gray-500 underline dark:text-gray-400"
+              className="inline-block mt-3 text-sm font-medium text-neutral-500 underline dark:text-neutral-400"
             >
               {linkText}
             </Link>

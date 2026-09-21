@@ -1,30 +1,13 @@
 import type { Metadata } from "next";
-import React from "react";
-
+import DashboardView from "@/features/dashboard/DashboardView";
 
 export const metadata: Metadata = {
-  title: "Home page | Admin Dashboard",
-  description: "This is Home for Admin Dashboard",
+	title: "Dashboard · Salon Admin",
+	description: "Overview of your salon and platform activity.",
 };
 
-export default function Home() {
-  return (
-    <div className="grid grid-cols-12 gap-4 md:gap-6">
-      <div className="col-span-12 space-y-6 xl:col-span-7">
-        
-      </div>
-
-      <div className="col-span-12 xl:col-span-5">
-      </div>
-
-      <div className="col-span-12">
-      </div>
-
-      <div className="col-span-12 xl:col-span-5">
-      </div>
-
-      <div className="col-span-12 xl:col-span-7">
-      </div>
-    </div>
-  );
+// A switch, not a redirect: one bookmarkable URL, no redirect flash, and the
+// sidebar's "Dashboard" item stays active for all three roles.
+export default function DashboardPage() {
+	return <DashboardView />;
 }

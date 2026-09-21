@@ -1,55 +1,94 @@
-import React, { ReactNode } from "react";
+import React from "react";
+import { cn } from "@/lib/utils/cn";
 
-interface ButtonProps {
-  children: ReactNode; // Button text or content
-  size?: "sm" | "md"; // Button size
-  variant?: "primary" | "outline"; // Button variant
-  startIcon?: ReactNode; // Icon before the text
-  endIcon?: ReactNode; // Icon after the text
-  onClick?: () => void; // Click handler
-  disabled?: boolean; // Disabled state
-  className?: string; // Disabled state
+export type ButtonVariant = "primary" | "outline" | "ghost" | "subtle" | "destructive";
+export type ButtonSize = "sm" | "md" | "lg";
+
+interface ButtonProps extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, "type"> {
+	children?: React.ReactNode;
+	size?: ButtonSize;
+	variant?: ButtonVariant;
+	startIcon?: React.ReactNode;
+	endIcon?: React.ReactNode;
+	loading?: boolean;
+	/**
+	 * Explicit and required-by-default in practice: the old Button had no `type`
+	 * prop at all, so every instance inside a <form> silently defaulted to
+	 * "submit".
+	 */
+	type?: "button" | "submit" | "reset";
+	className?: string;
 }
 
+const sizeClasses: Record<ButtonSize, string> = {
+	sm: "h-9 px-3.5 text-sm gap-1.5",
+	md: "h-11 px-5 text-sm gap-2",
+	lg: "h-12 px-6 text-base gap-2",
+};
+
+/**
+ * The solid fills are the 600 step, not 500. White on primary-500 measures 3.80
+ * which fails AA for body-sized text; primary-500 is reserved for identity and
+ * non-text UI where the 3:1 threshold applies.
+ *
+ * `destructive` uses error-600 rather than error-500 to hold distance from rose
+ * — and it never travels alone: destructive controls also carry an icon and a
+ * verb, and route through ConfirmDialog.
+ */
+const variantClasses: Record<ButtonVariant, string> = {
+	primary:
+		"bg-primary-solid text-white shadow-xs hover:bg-primary-700 focus-visible:ring-primary-500/40 disabled:bg-primary-300 dark:disabled:bg-primary-800",
+	destructive:
+		"bg-error-600 text-white shadow-xs hover:bg-error-700 focus-visible:ring-error-500/40 disabled:bg-error-300",
+	outline:
+		"border border-border-strong bg-surface-raised text-ink shadow-xs hover:bg-neutral-50 focus-visible:ring-primary-500/30 dark:hover:bg-white/5",
+	subtle:
+		"bg-neutral-100 text-ink hover:bg-neutral-200 focus-visible:ring-primary-500/30 dark:bg-white/5 dark:hover:bg-white/10",
+	ghost:
+		"text-ink-muted hover:bg-neutral-100 hover:text-ink focus-visible:ring-primary-500/30 dark:hover:bg-white/5",
+};
+
 const Button: React.FC<ButtonProps> = ({
-  children,
-  size = "md",
-  variant = "primary",
-  startIcon,
-  endIcon,
-  onClick,
-  className = "",
-  disabled = false,
+	children,
+	size = "md",
+	variant = "primary",
+	startIcon,
+	endIcon,
+	loading = false,
+	type = "button",
+	className,
+	disabled,
+	...rest
 }) => {
-  // Size Classes
-  const sizeClasses = {
-    sm: "px-4 py-3 text-sm",
-    md: "px-5 py-3.5 text-sm",
-  };
+	const isDisabled = disabled || loading;
 
-  // Variant Classes
-  const variantClasses = {
-    primary:
-      "bg-brand-500 text-white shadow-theme-xs hover:bg-brand-600 disabled:bg-brand-300",
-    outline:
-      "bg-white text-gray-700 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-400 dark:ring-gray-700 dark:hover:bg-white/[0.03] dark:hover:text-gray-300",
-  };
-
-  return (
-    <button
-      className={`inline-flex items-center justify-center font-medium gap-2 rounded-lg transition ${className} ${
-        sizeClasses[size]
-      } ${variantClasses[variant]} ${
-        disabled ? "cursor-not-allowed opacity-50" : ""
-      }`}
-      onClick={onClick}
-      disabled={disabled}
-    >
-      {startIcon && <span className="flex items-center">{startIcon}</span>}
-      {children}
-      {endIcon && <span className="flex items-center">{endIcon}</span>}
-    </button>
-  );
+	return (
+		<button
+			type={type}
+			disabled={isDisabled}
+			aria-busy={loading || undefined}
+			className={cn(
+				"inline-flex items-center justify-center rounded-lg font-medium transition-colors",
+				"focus-visible:outline-none focus-visible:ring-4",
+				sizeClasses[size],
+				variantClasses[variant],
+				isDisabled && "cursor-not-allowed opacity-60",
+				className,
+			)}
+			{...rest}
+		>
+			{loading ? (
+				<span
+					className="size-4 animate-spin rounded-full border-2 border-current/30 border-t-current"
+					aria-hidden="true"
+				/>
+			) : (
+				startIcon && <span className="flex items-center">{startIcon}</span>
+			)}
+			{children}
+			{!loading && endIcon && <span className="flex items-center">{endIcon}</span>}
+		</button>
+	);
 };
 
 export default Button;

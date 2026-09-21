@@ -4,25 +4,16 @@ import Label from "@/components/form/Label";
 import Alert from "@/components/ui/alert/Alert";
 import Button from "@/components/ui/button/Button";
 import { useAuth } from "@/context/AuthContext";
-import { getAuthErrorMessage } from "@/app/api/auth";
-import { createUser } from "@/app/api/users";
-import { Role } from "@/app/api/auth";
-import { Business, getBusinesses } from "@/app/api/businesses";
+import { getErrorMessage } from "@/lib/api/errors";
+import { createUser } from "@/lib/resources/users/users.api";
+import { ROLE_LABELS, type Role } from "@/lib/resources/auth/auth.types";
+import { grantableRoles } from "@/lib/auth/permissions";
+import type { Business } from "@/lib/resources/businesses/businesses.types";
+import { businessesRepository } from "@/lib/resources/businesses/businesses.api";
 import { ChevronLeftIcon, EyeCloseIcon, EyeIcon } from "@/icons";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FormEvent, useEffect, useState } from "react";
-
-const ROLE_LABELS: Record<Role, string> = {
-	CUSTOMER: "Customer",
-	EMPLOYEE: "Employee",
-	ADMIN: "Admin",
-	SUPER_ADMIN: "Super Admin",
-};
-
-function grantableRoles(callerRole: Role | undefined): Role[] {
-	return callerRole === "SUPER_ADMIN" ? ["EMPLOYEE", "ADMIN", "SUPER_ADMIN"] : ["EMPLOYEE", "ADMIN"];
-}
 
 export default function SignUpForm() {
 	const { user, isLoading } = useAuth();
@@ -60,9 +51,9 @@ export default function SignUpForm() {
 	useEffect(() => {
 		if (!mustPickBusiness) return;
 		setIsLoadingBusinesses(true);
-		getBusinesses()
+		businessesRepository.list()
 			.then(setBusinesses)
-			.catch((err) => setError(getAuthErrorMessage(err)))
+			.catch((err) => setError(getErrorMessage(err)))
 			.finally(() => setIsLoadingBusinesses(false));
 	}, [mustPickBusiness]);
 
@@ -99,7 +90,7 @@ export default function SignUpForm() {
 			setRole("EMPLOYEE");
 			setBusinessId("");
 		} catch (err) {
-			setError(getAuthErrorMessage(err));
+			setError(getErrorMessage(err));
 		} finally {
 			setIsSubmitting(false);
 		}
@@ -108,7 +99,7 @@ export default function SignUpForm() {
 	if (isLoading || !user || !isAuthorized) {
 		return (
 			<div className="flex items-center justify-center min-h-screen">
-				<p className="text-gray-500 dark:text-gray-400">Loading…</p>
+				<p className="text-neutral-500 dark:text-neutral-400">Loading…</p>
 			</div>
 		);
 	}
@@ -118,7 +109,7 @@ export default function SignUpForm() {
 			<div className="w-full max-w-md sm:pt-10 mx-auto mb-5">
 				<Link
 					href="/"
-					className="inline-flex items-center text-sm text-gray-500 transition-colors hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
+					className="inline-flex items-center text-sm text-neutral-500 transition-colors hover:text-neutral-700 dark:text-neutral-400 dark:hover:text-neutral-300"
 				>
 					<ChevronLeftIcon />
 					Back to dashboard
@@ -127,10 +118,10 @@ export default function SignUpForm() {
 			<div className="flex flex-col justify-center flex-1 w-full max-w-md mx-auto">
 				<div>
 					<div className="mb-5 sm:mb-8">
-						<h1 className="mb-2 font-semibold text-gray-800 text-title-sm dark:text-white/90 sm:text-title-md">
+						<h1 className="mb-2 font-semibold text-neutral-800 text-h1 dark:text-white/90 sm:text-display">
 							Add Staff Account
 						</h1>
-						<p className="text-sm text-gray-500 dark:text-gray-400">
+						<p className="text-sm text-neutral-500 dark:text-neutral-400">
 							Create a login for a new employee or admin at your business.
 						</p>
 					</div>
@@ -196,9 +187,9 @@ export default function SignUpForm() {
 									name="role"
 									value={role}
 									onChange={(e) => setRole(e.target.value as Role)}
-									className="h-11 w-full rounded-lg border appearance-none px-4 py-2.5 text-sm shadow-theme-xs bg-transparent text-gray-800 border-gray-300 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:focus:border-brand-800"
+									className="h-11 w-full rounded-lg border appearance-none px-4 py-2.5 text-sm shadow-xs bg-transparent text-neutral-800 border-neutral-300 focus:border-primary-300 focus:outline-hidden focus:ring-3 focus:ring-primary-500/10 dark:border-neutral-700 dark:bg-neutral-900 dark:text-white/90 dark:focus:border-primary-800"
 								>
-									{grantableRoles(user.role).map((r) => (
+									{grantableRoles(user).map((r) => (
 										<option key={r} value={r}>
 											{ROLE_LABELS[r]}
 										</option>
@@ -216,7 +207,7 @@ export default function SignUpForm() {
 										value={businessId}
 										onChange={(e) => setBusinessId(e.target.value ? Number(e.target.value) : "")}
 										disabled={isLoadingBusinesses}
-										className="h-11 w-full rounded-lg border appearance-none px-4 py-2.5 text-sm shadow-theme-xs bg-transparent text-gray-800 border-gray-300 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:focus:border-brand-800"
+										className="h-11 w-full rounded-lg border appearance-none px-4 py-2.5 text-sm shadow-xs bg-transparent text-neutral-800 border-neutral-300 focus:border-primary-300 focus:outline-hidden focus:ring-3 focus:ring-primary-500/10 dark:border-neutral-700 dark:bg-neutral-900 dark:text-white/90 dark:focus:border-primary-800"
 									>
 										<option value="" disabled>
 											{isLoadingBusinesses ? "Loading businesses…" : "Select a business"}
@@ -245,9 +236,9 @@ export default function SignUpForm() {
 										className="absolute z-30 -translate-y-1/2 cursor-pointer right-4 top-1/2"
 									>
 										{showPassword ? (
-											<EyeIcon className="fill-gray-500 dark:fill-gray-400" />
+											<EyeIcon className="fill-neutral-500 dark:fill-neutral-400" />
 										) : (
-											<EyeCloseIcon className="fill-gray-500 dark:fill-gray-400" />
+											<EyeCloseIcon className="fill-neutral-500 dark:fill-neutral-400" />
 										)}
 									</span>
 								</div>
