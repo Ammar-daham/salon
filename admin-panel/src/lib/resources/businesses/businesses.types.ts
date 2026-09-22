@@ -68,6 +68,14 @@ export interface Business {
 	services: SalonService[];
 }
 
+export interface SalonServiceInput {
+	name: string;
+	description: string | null;
+	durationMinutes: number;
+	price: number;
+	isActive: boolean;
+}
+
 export interface BusinessInput {
 	name: string;
 	description: string | null;

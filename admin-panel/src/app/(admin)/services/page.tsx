@@ -1,17 +1,11 @@
 import type { Metadata } from "next";
-import PagePlaceholder from "@/components/ui/PagePlaceholder";
+import ServicesView from "@/features/services/ServicesView";
 
 export const metadata: Metadata = {
 	title: "Services · Salon Admin",
+	description: "Treatments, duration and pricing.",
 };
 
 export default function ServicesPage() {
-	return (
-		<PagePlaceholder
-			title="Services"
-			description="The treatments a salon offers, with duration and pricing."
-			phase="Phase 2"
-			detail="Service management is wired to live data and ships with the users work."
-		/>
-	);
+	return <ServicesView />;
 }
