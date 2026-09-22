@@ -1,17 +1,11 @@
 import type { Metadata } from "next";
-import PagePlaceholder from "@/components/ui/PagePlaceholder";
+import CustomerListView from "@/features/customers/CustomerListView";
 
 export const metadata: Metadata = {
 	title: "Customers · Salon Admin",
+	description: "Clients, their visit history and their notes.",
 };
 
 export default function CustomersPage() {
-	return (
-		<PagePlaceholder
-			title="Customers"
-			description="Clients, their visit history and their notes."
-			phase="Phase 3"
-			detail="Customer records arrive with the mock data layer, alongside employees."
-		/>
-	);
+	return <CustomerListView />;
 }
