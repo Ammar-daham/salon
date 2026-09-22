@@ -2,52 +2,35 @@ import { apiClient } from "@/lib/api/client";
 import { endpoints } from "@/lib/api/endpoints";
 import type { Id, ListParams, Repository } from "@/lib/api/types";
 import type { Business, BusinessInput } from "./businesses.types";
-
-/**
- * Wire shape. Jackson serialises FIELD names (camelCase) regardless of the
- * @JsonProperty annotations on constructor parameters — those only affect
- * deserialisation. So responses are camelCase even where request bodies are
- * snake_case. Any such asymmetry is confined to this file.
- */
-type BusinessResponseDto = Business;
-
-function toBusiness(dto: BusinessResponseDto): Business {
-	return {
-		...dto,
-		description: dto.description ?? null,
-		addresses: dto.addresses ?? [],
-		contacts: dto.contacts ?? [],
-		services: dto.services ?? [],
-	};
-}
+import { toBusiness, toBusinessRequest, type BusinessDto } from "./businesses.mappers";
 
 export const businessesRepository: Repository<Business, BusinessInput, BusinessInput> = {
 	source: "live",
 
 	async list(params?: ListParams) {
-		const { data } = await apiClient.get<BusinessResponseDto[]>(endpoints.businesses.root, {
+		const { data } = await apiClient.get<BusinessDto[]>(endpoints.businesses.root, {
 			signal: params?.signal,
 		});
 		return (data ?? []).map(toBusiness);
 	},
 
 	async get(id: Id, params?: ListParams) {
-		const { data } = await apiClient.get<BusinessResponseDto>(endpoints.businesses.byId(id), {
+		const { data } = await apiClient.get<BusinessDto>(endpoints.businesses.byId(id), {
 			signal: params?.signal,
 		});
 		return toBusiness(data);
 	},
 
 	async create(input: BusinessInput) {
-		const { data } = await apiClient.post<BusinessResponseDto>(
+		const { data } = await apiClient.post<BusinessDto>(
 			endpoints.businesses.root,
-			input,
+			toBusinessRequest(input),
 		);
 		return toBusiness(data);
 	},
 
 	async update(id: Id, input: BusinessInput) {
-		await apiClient.put(endpoints.businesses.byId(id), input);
+		await apiClient.put(endpoints.businesses.byId(id), toBusinessRequest(input));
 	},
 
 	/**
@@ -61,7 +44,7 @@ export const businessesRepository: Repository<Business, BusinessInput, BusinessI
 	 * to know.
 	 */
 	async remove(id: Id) {
-		const { data } = await apiClient.get<BusinessResponseDto>(endpoints.businesses.byId(id));
+		const { data } = await apiClient.get<BusinessDto>(endpoints.businesses.byId(id));
 		await apiClient.delete(endpoints.businesses.byId(id), { data });
 	},
 };

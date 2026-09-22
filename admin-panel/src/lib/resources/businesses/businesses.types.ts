@@ -9,6 +9,24 @@ export const BUSINESS_STATUS_LABELS: Record<BusinessStatus, string> = {
 	SUSPENDED: "Suspended",
 };
 
+/** Status colour is a second channel only — the label always travels with it. */
+export const BUSINESS_STATUS_TONE: Record<
+	BusinessStatus,
+	"success" | "warning" | "error" | "neutral"
+> = {
+	APPROVED: "success",
+	PENDING: "warning",
+	REJECTED: "error",
+	SUSPENDED: "neutral",
+};
+
+export const BUSINESS_STATUSES: BusinessStatus[] = [
+	"PENDING",
+	"APPROVED",
+	"REJECTED",
+	"SUSPENDED",
+];
+
 export interface Address {
 	id: Id;
 	street: string;

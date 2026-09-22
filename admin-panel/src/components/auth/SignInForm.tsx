@@ -1,5 +1,4 @@
 "use client";
-import Checkbox from "@/components/form/input/Checkbox";
 import Input from "@/components/form/input/InputField";
 import Label from "@/components/form/Label";
 import Alert from "@/components/ui/alert/Alert";
@@ -13,7 +12,6 @@ import { FormEvent, useState } from "react";
 
 export default function SignInForm() {
 	const [showPassword, setShowPassword] = useState(false);
-	const [isChecked, setIsChecked] = useState(false);
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
 	const [error, setError] = useState<string | null>(null);
@@ -101,22 +99,8 @@ export default function SignInForm() {
 									</span>
 								</div>
 							</div>
-							<div className="flex items-center justify-between">
-								<div className="flex items-center gap-3">
-									<Checkbox checked={isChecked} onChange={setIsChecked} />
-									<span className="block font-normal text-neutral-700 text-sm dark:text-neutral-400">
-										Keep me logged in
-									</span>
-								</div>
-								<Link
-									href="/reset-password"
-									className="text-sm text-primary-500 hover:text-primary-600 dark:text-primary-400"
-								>
-									Forgot password?
-								</Link>
-							</div>
 							<div>
-								<Button className="w-full" size="sm" disabled={isSubmitting}>
+								<Button type="submit" className="w-full" size="sm" loading={isSubmitting}>
 									{isSubmitting ? "Signing in..." : "Sign in"}
 								</Button>
 							</div>

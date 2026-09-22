@@ -255,7 +255,7 @@ export default function SignUpForm() {
 								/>
 							</div>
 							<div>
-								<Button className="w-full" size="sm" disabled={isSubmitting}>
+								<Button type="submit" className="w-full" size="sm" loading={isSubmitting}>
 									{isSubmitting ? "Creating account..." : "Create account"}
 								</Button>
 							</div>
