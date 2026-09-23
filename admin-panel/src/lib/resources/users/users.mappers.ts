@@ -1,12 +1,5 @@
 import type { CreateUserInput, UpdateUserInput, User } from "./users.types";
 
-/**
- * Wire shape, verified against a running backend. Users are snake_case on the
- * wire in both directions, same as every other resource — `business_id` is
- * WRITE_ONLY, so it is accepted on create but never comes back in a response.
- *
- * Everything past this file speaks one camelCase domain model.
- */
 export interface UserDto {
 	id: number;
 	first_name: string;

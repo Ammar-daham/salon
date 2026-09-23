@@ -1,11 +1,5 @@
 import type { AuthUser } from "./auth.types";
 
-/**
- * Wire shape, verified against a running backend. AuthUserResponse is
- * snake_case, same as every other resource.
- *
- * Everything past this file speaks one camelCase domain model.
- */
 export interface AuthUserDto {
 	id: number;
 	first_name: string;

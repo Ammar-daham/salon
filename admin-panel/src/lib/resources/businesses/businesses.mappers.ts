@@ -7,17 +7,6 @@ import type {
 	SalonService,
 } from "./businesses.types";
 
-/**
- * Wire shapes, verified against a running backend rather than inferred from the
- * Java. Every multi-word field is snake_case now, in both directions:
- *
- *   Business  -> created_at, updated_at
- *   Address   -> postal_code, created_at, updated_at, user_id
- *   Contact   -> created_at, updated_at
- *   Service   -> duration_minutes, is_active, created_at, updated_at
- *
- * Everything past this file speaks one camelCase domain model.
- */
 interface AddressDto {
 	id: number;
 	street: string;
