@@ -2,8 +2,15 @@ package com.example.salon.security;
 
 import com.example.salon.model.Role;
 import com.example.salon.model.User;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
-public record AuthUserResponse(Long id, String firstName, String lastName, String email, Role role, Long businessId)
+public record AuthUserResponse(
+		Long id,
+		@JsonProperty("first_name") String firstName,
+		@JsonProperty("last_name") String lastName,
+		String email,
+		Role role,
+		@JsonProperty("business_id") Long businessId)
 {
 	public static AuthUserResponse from(User user)
 	{

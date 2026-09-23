@@ -9,12 +9,12 @@ import type {
 
 /**
  * Wire shapes, verified against a running backend rather than inferred from the
- * Java. The naming is genuinely inconsistent and there is no rule to generalise:
+ * Java. Every multi-word field is snake_case now, in both directions:
  *
- *   Business  -> createdAt, updatedAt                              (camelCase)
- *   Address   -> postal_code, created_at, updated_at, but userId    (mixed)
- *   Contact   -> created_at, updated_at                             (snake_case)
- *   Service   -> duration_minutes, is_active, created_at, updated_at (snake_case)
+ *   Business  -> created_at, updated_at
+ *   Address   -> postal_code, created_at, updated_at, user_id
+ *   Contact   -> created_at, updated_at
+ *   Service   -> duration_minutes, is_active, created_at, updated_at
  *
  * Everything past this file speaks one camelCase domain model.
  */
@@ -28,7 +28,7 @@ interface AddressDto {
 	longitude: string | null;
 	created_at?: string;
 	updated_at?: string | null;
-	userId?: number | null;
+	user_id?: number | null;
 }
 
 interface ContactDto {
@@ -56,8 +56,8 @@ export interface BusinessDto {
 	description: string | null;
 	image: string;
 	status: BusinessStatus;
-	createdAt: string;
-	updatedAt: string | null;
+	created_at: string;
+	updated_at: string | null;
 	addresses: AddressDto[] | null;
 	contacts: ContactDto[] | null;
 	services: ServiceDto[] | null;
@@ -95,8 +95,8 @@ export function toBusiness(dto: BusinessDto): Business {
 		description: dto.description ?? null,
 		image: dto.image,
 		status: dto.status,
-		createdAt: dto.createdAt,
-		updatedAt: dto.updatedAt ?? null,
+		createdAt: dto.created_at,
+		updatedAt: dto.updated_at ?? null,
 		addresses: (dto.addresses ?? []).map(toAddress),
 		contacts: (dto.contacts ?? []).map(toContact),
 		services: (dto.services ?? []).map(toSalonService),

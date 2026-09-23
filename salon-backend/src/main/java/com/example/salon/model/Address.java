@@ -18,6 +18,7 @@ public class Address {
     public Instant updatedAt;
     @JsonIgnore
     public Long businessId;
+    @JsonProperty("user_id")
     public Long userId;
 
     public Address(@JsonProperty("id") Long id,
