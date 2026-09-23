@@ -1,7 +1,13 @@
 "use client";
 
-import { AuthUser, getCurrentUser, login as loginRequest, logout as logoutRequest } from "@/app/api/auth";
 import React, { createContext, useCallback, useContext, useEffect, useState } from "react";
+import { setUnauthorizedHandler } from "@/lib/api/client";
+import {
+	getCurrentUser,
+	login as loginRequest,
+	logout as logoutRequest,
+} from "@/lib/resources/auth/auth.api";
+import type { AuthUser } from "@/lib/resources/auth/auth.types";
 
 interface AuthContextType {
 	user: AuthUser | null;
@@ -12,14 +18,37 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+/**
+ * Session identity stays a context rather than a query-cache entry: the 401
+ * interceptor has to be able to clear it synchronously, before any dependent
+ * render happens.
+ */
 export function AuthProvider({ children }: { children: React.ReactNode }) {
 	const [user, setUser] = useState<AuthUser | null>(null);
 	const [isLoading, setIsLoading] = useState(true);
 
 	useEffect(() => {
+		let cancelled = false;
 		getCurrentUser()
-			.then(setUser)
-			.finally(() => setIsLoading(false));
+			.then((u) => {
+				if (!cancelled) setUser(u);
+			})
+			.catch(() => {
+				if (!cancelled) setUser(null);
+			})
+			.finally(() => {
+				if (!cancelled) setIsLoading(false);
+			});
+		return () => {
+			cancelled = true;
+		};
+	}, []);
+
+	// Any 401 from a request that isn't the boot probe or the login form means
+	// the session lapsed mid-use. Drop the user; the admin layout redirects.
+	useEffect(() => {
+		setUnauthorizedHandler(() => setUser(null));
+		return () => setUnauthorizedHandler(null);
 	}, []);
 
 	const login = useCallback(async (email: string, password: string) => {

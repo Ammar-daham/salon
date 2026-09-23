@@ -2,6 +2,7 @@
 
 import { useAuth } from "@/context/AuthContext";
 import { useSidebar } from "@/context/SidebarContext";
+import RouteGuard from "@/components/auth/RouteGuard";
 import AppHeader from "@/layout/AppHeader";
 import AppSidebar from "@/layout/AppSidebar";
 import Backdrop from "@/layout/Backdrop";
@@ -23,7 +24,7 @@ export default function AdminLayout({
 		}
 	}, [isLoading, user, router]);
 
-	// Dynamic class for main content margin based on sidebar state
+	// Mirrors the sidebar's own widths. Both pivot at `lg`.
 	const mainContentMargin = isMobileOpen
 		? "ml-0"
 		: isExpanded || isHovered
@@ -32,25 +33,27 @@ export default function AdminLayout({
 
 	if (isLoading || !user) {
 		return (
-			<div className="flex items-center justify-center min-h-screen">
-				<p className="text-gray-500 dark:text-gray-400">Loading…</p>
+			<div className="flex min-h-screen items-center justify-center bg-surface">
+				<div className="flex flex-col items-center gap-3">
+					<span
+						className="size-6 animate-spin rounded-full border-2 border-border-strong border-t-primary-500"
+						aria-hidden="true"
+					/>
+					<p className="text-sm text-ink-muted">Loading your workspace…</p>
+				</div>
 			</div>
 		);
 	}
 
 	return (
-		<div className="min-h-screen xl:flex">
-			{/* Sidebar and Backdrop */}
+		<div className="min-h-screen bg-surface xl:flex">
 			<AppSidebar />
 			<Backdrop />
-			{/* Main Content Area */}
-			<div
-				className={`flex-1 transition-all  duration-300 ease-in-out ${mainContentMargin}`}
-			>
-				{/* Header */}
+			<div className={`flex-1 transition-all duration-300 ease-in-out ${mainContentMargin}`}>
 				<AppHeader />
-				{/* Page Content */}
-				<div className="p-4 mx-auto max-w-(--breakpoint-2xl) md:p-6">{children}</div>
+				<div className="mx-auto max-w-(--breakpoint-2xl) p-4 md:p-6">
+					<RouteGuard>{children}</RouteGuard>
+				</div>
 			</div>
 		</div>
 	);

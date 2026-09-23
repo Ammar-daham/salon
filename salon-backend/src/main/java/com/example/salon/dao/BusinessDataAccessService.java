@@ -128,12 +128,24 @@ public class BusinessDataAccessService implements BusinessDao {
 
     @Override
     public int updateBusinessById(int id, Business business) {
+        // status and image use COALESCE so that a PUT which omits them preserves the
+        // stored value. Without it, omitting status made approve/reject/suspend a silent
+        // no-op that still returned 200, and omitting image violated image NOT NULL.
         String sql = """
                 UPDATE businesses SET name = ?,
-                description = ?, image = ?,
+                description = ?,
+                image = COALESCE(?, image),
+                status = COALESCE(?, status),
                  updated_at = now() WHERE id = ?
                 """;
-        int row = jdbcTemplate.update(sql, business.getName(), business.getDescription(), business.getImage(), id);
+        int row = jdbcTemplate.update(
+                sql,
+                business.getName(),
+                business.getDescription(),
+                business.getImage(),
+                business.getStatus() == null ? null : business.getStatus().name(),
+                id
+        );
 
         // Update addresses
         if (business.getAddresses() != null) {
@@ -171,7 +183,6 @@ public class BusinessDataAccessService implements BusinessDao {
 
         // Delete addresses
         if (business.getAddresses() != null) {
-            System.out.println("address " + business.getAddresses().toString());
             business.getAddresses().forEach(address -> {
                 addressDao.deleteAddressById(address.getId());
             });

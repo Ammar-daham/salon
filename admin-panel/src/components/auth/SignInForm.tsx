@@ -1,11 +1,10 @@
 "use client";
-import Checkbox from "@/components/form/input/Checkbox";
 import Input from "@/components/form/input/InputField";
 import Label from "@/components/form/Label";
 import Alert from "@/components/ui/alert/Alert";
 import Button from "@/components/ui/button/Button";
 import { useAuth } from "@/context/AuthContext";
-import { getAuthErrorMessage } from "@/app/api/auth";
+import { getErrorMessage } from "@/lib/api/errors";
 import { ChevronLeftIcon, EyeCloseIcon, EyeIcon } from "@/icons";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -13,7 +12,6 @@ import { FormEvent, useState } from "react";
 
 export default function SignInForm() {
 	const [showPassword, setShowPassword] = useState(false);
-	const [isChecked, setIsChecked] = useState(false);
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
 	const [error, setError] = useState<string | null>(null);
@@ -29,7 +27,7 @@ export default function SignInForm() {
 			await login(email, password);
 			router.push("/");
 		} catch (err) {
-			setError(getAuthErrorMessage(err));
+			setError(getErrorMessage(err));
 		} finally {
 			setIsSubmitting(false);
 		}
@@ -40,7 +38,7 @@ export default function SignInForm() {
 			<div className="w-full max-w-md sm:pt-10 mx-auto mb-5">
 				<Link
 					href="/"
-					className="inline-flex items-center text-sm text-gray-500 transition-colors hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
+					className="inline-flex items-center text-sm text-neutral-500 transition-colors hover:text-neutral-700 dark:text-neutral-400 dark:hover:text-neutral-300"
 				>
 					<ChevronLeftIcon />
 					Back to dashboard
@@ -49,10 +47,10 @@ export default function SignInForm() {
 			<div className="flex flex-col justify-center flex-1 w-full max-w-md mx-auto">
 				<div>
 					<div className="mb-5 sm:mb-8">
-						<h1 className="mb-2 font-semibold text-gray-800 text-title-sm dark:text-white/90 sm:text-title-md">
+						<h1 className="mb-2 font-semibold text-neutral-800 text-h1 dark:text-white/90 sm:text-display">
 							Sign In
 						</h1>
-						<p className="text-sm text-gray-500 dark:text-gray-400">
+						<p className="text-sm text-neutral-500 dark:text-neutral-400">
 							Enter your email and password to sign in!
 						</p>
 					</div>
@@ -94,29 +92,15 @@ export default function SignInForm() {
 										className="absolute z-30 -translate-y-1/2 cursor-pointer right-4 top-1/2"
 									>
 										{showPassword ? (
-											<EyeIcon className="fill-gray-500 dark:fill-gray-400" />
+											<EyeIcon className="fill-neutral-500 dark:fill-neutral-400" />
 										) : (
-											<EyeCloseIcon className="fill-gray-500 dark:fill-gray-400" />
+											<EyeCloseIcon className="fill-neutral-500 dark:fill-neutral-400" />
 										)}
 									</span>
 								</div>
 							</div>
-							<div className="flex items-center justify-between">
-								<div className="flex items-center gap-3">
-									<Checkbox checked={isChecked} onChange={setIsChecked} />
-									<span className="block font-normal text-gray-700 text-theme-sm dark:text-gray-400">
-										Keep me logged in
-									</span>
-								</div>
-								<Link
-									href="/reset-password"
-									className="text-sm text-brand-500 hover:text-brand-600 dark:text-brand-400"
-								>
-									Forgot password?
-								</Link>
-							</div>
 							<div>
-								<Button className="w-full" size="sm" disabled={isSubmitting}>
+								<Button type="submit" className="w-full" size="sm" loading={isSubmitting}>
 									{isSubmitting ? "Signing in..." : "Sign in"}
 								</Button>
 							</div>
