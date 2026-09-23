@@ -27,7 +27,8 @@ public abstract class IntegrationTest
 {
 	private static final PostgreSQLContainer POSTGRES = new PostgreSQLContainer("postgres:16");
 
-	static {
+	static 
+	{
 		POSTGRES.start();
 	}
 
