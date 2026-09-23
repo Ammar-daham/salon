@@ -1,0 +1,133 @@
+package com.example.salon.controller;
+
+import com.example.salon.support.IntegrationTest;
+import org.junit.jupiter.api.Test;
+import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockHttpSession;
+
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+/**
+ * One test per bug that has already shipped once, so none of them can ship again.
+ * The commit that fixed each bug is named in the test.
+ */
+class RegressionTest extends IntegrationTest
+{
+	/** 0ef369c: every address read swapped street and country. */
+	@Test
+	void addressReadsKeepStreetAndCountryInTheRightFields() throws Exception
+	{
+		MockHttpSession admin = loginAs(Fixture.GLOW_ADMIN);
+
+		mvc.perform(get("/api/v1/addresses/" + Fixture.GLOW_ADDRESS).session(admin))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.street").value("12 Rosenthaler Str."))
+				.andExpect(jsonPath("$.country").value("Germany"))
+				.andExpect(jsonPath("$.postal_code").value("10119"));
+
+		mvc.perform(get("/api/v1/addresses").session(admin))
+				.andExpect(jsonPath("$[?(@.id == 1)].street").value("12 Rosenthaler Str."))
+				.andExpect(jsonPath("$[?(@.id == 1)].country").value("Germany"));
+
+		mvc.perform(get("/api/v1/businesses/" + Fixture.GLOW).session(admin))
+				.andExpect(jsonPath("$.addresses[0].street").value("12 Rosenthaler Str."))
+				.andExpect(jsonPath("$.addresses[0].country").value("Germany"));
+	}
+
+	/** 0ef369c: reading a never-updated address (updated_at NULL) crashed with an NPE. */
+	@Test
+	void neverUpdatedAddressCanBeReadAndUpdateSetsUpdatedAt() throws Exception
+	{
+		MockHttpSession admin = loginAs(Fixture.GLOW_ADMIN);
+
+		mvc.perform(get("/api/v1/addresses/" + Fixture.GLOW_ADDRESS).session(admin))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.updated_at").value(nullValue()));
+
+		mvc.perform(put("/api/v1/addresses/" + Fixture.GLOW_ADDRESS).session(admin)
+						.contentType(MediaType.APPLICATION_JSON)
+						.content("""
+								{"street": "99 New Street", "city": "Berlin", "country": "Germany", "postal_code": "10119"}
+								"""))
+				.andExpect(status().isOk());
+
+		mvc.perform(get("/api/v1/addresses/" + Fixture.GLOW_ADDRESS).session(admin))
+				.andExpect(jsonPath("$.street").value("99 New Street"))
+				.andExpect(jsonPath("$.country").value("Germany"))
+				.andExpect(jsonPath("$.updated_at").value(notNullValue()));
+	}
+
+	/** b1403ef: a trailing comma in the SQL made every GET /contacts/{id} a BadSqlGrammarException. */
+	@Test
+	void contactCanBeReadById() throws Exception
+	{
+		mvc.perform(get("/api/v1/contacts/" + Fixture.GLOW_CONTACT).session(loginAs(Fixture.GLOW_ADMIN)))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.type").value("phone"))
+				.andExpect(jsonPath("$.value").value("+49 30 1234501"))
+				.andExpect(jsonPath("$.updated_at").value(nullValue()));
+	}
+
+	/** 83a3062: the DELETE route bound a path variable that didn't exist, so every delete failed. */
+	@Test
+	void deletingAServiceRemovesItFromTheBusiness() throws Exception
+	{
+		MockHttpSession admin = loginAs(Fixture.GLOW_ADMIN);
+
+		mvc.perform(delete("/api/v1/businesses/" + Fixture.GLOW + "/services/" + Fixture.GLOW_MANICURE).session(admin))
+				.andExpect(status().isOk());
+
+		mvc.perform(get("/api/v1/businesses/" + Fixture.GLOW).session(admin))
+				.andExpect(jsonPath("$.services", hasSize(1)))
+				.andExpect(jsonPath("$.services[0].id").value(Fixture.GLOW_HAIRCUT));
+	}
+
+	/** updateBusinessById COALESCE: omitting status/image used to reset status and violate image NOT NULL. */
+	@Test
+	void updatingABusinessWithoutImageOrStatusKeepsBoth() throws Exception
+	{
+		MockHttpSession admin = loginAs(Fixture.GLOW_ADMIN);
+
+		mvc.perform(put("/api/v1/businesses/" + Fixture.GLOW).session(admin)
+						.contentType(MediaType.APPLICATION_JSON)
+						.content("""
+								{"name": "Glow Beauty Studio", "description": "Now with brows."}
+								"""))
+				.andExpect(status().isOk());
+
+		mvc.perform(get("/api/v1/businesses/" + Fixture.GLOW).session(admin))
+				.andExpect(jsonPath("$.description").value("Now with brows."))
+				.andExpect(jsonPath("$.status").value("APPROVED"))
+				.andExpect(jsonPath("$.image").value("https://example.com/glow.png"))
+				.andExpect(jsonPath("$.updated_at").value(notNullValue()));
+	}
+
+	/** Pins the snake_case wire contract the admin panel's mappers depend on. */
+	@Test
+	void serviceRoundTripsInSnakeCase() throws Exception
+	{
+		MockHttpSession admin = loginAs(Fixture.GLOW_ADMIN);
+
+		mvc.perform(post("/api/v1/businesses/" + Fixture.GLOW + "/services").session(admin)
+						.contentType(MediaType.APPLICATION_JSON)
+						.content("""
+								{"name": "Blow Dry", "description": "Wash and blow dry.", "duration_minutes": 25, "price": 20.00, "is_active": false}
+								"""))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.id").value(notNullValue()));
+
+		mvc.perform(get("/api/v1/businesses/" + Fixture.GLOW).session(admin))
+				.andExpect(jsonPath("$.created_at").value(notNullValue()))
+				.andExpect(jsonPath("$.services", hasSize(3)))
+				.andExpect(jsonPath("$.services[?(@.name == 'Blow Dry')].duration_minutes").value(25))
+				.andExpect(jsonPath("$.services[?(@.name == 'Blow Dry')].is_active").value(false));
+	}
+}
