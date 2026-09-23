@@ -10,7 +10,9 @@ public class Business {
     public Long id;
     public String name;
     public String description;
+    @JsonProperty("created_at")
     public Instant createdAt;
+    @JsonProperty("updated_at")
     public Instant updatedAt;
     public String image;
     public Status status;

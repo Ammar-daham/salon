@@ -1,9 +1,7 @@
 /**
  * Every backend URL lives here. No path string literals anywhere else.
  *
- * Note the singular `business` segment — that is the backend's actual path, not
- * a typo. PATCH is NOT in the server's CORS allowed methods, so nothing here
- * may use it.
+ * PATCH is NOT in the server's CORS allowed methods, so nothing here may use it.
  */
 export const endpoints = {
 	auth: {
@@ -16,12 +14,12 @@ export const endpoints = {
 		byId: (id: number) => `/api/v1/users/${id}`,
 	},
 	businesses: {
-		root: "/api/v1/business",
-		byId: (id: number) => `/api/v1/business/${id}`,
+		root: "/api/v1/businesses",
+		byId: (id: number) => `/api/v1/businesses/${id}`,
 		// There is no list endpoint for services: read business.services instead.
-		services: (businessId: number) => `/api/v1/business/${businessId}/services`,
+		services: (businessId: number) => `/api/v1/businesses/${businessId}/services`,
 		serviceById: (businessId: number, serviceId: number) =>
-			`/api/v1/business/${businessId}/services/${serviceId}`,
+			`/api/v1/businesses/${businessId}/services/${serviceId}`,
 	},
 	addresses: {
 		root: "/api/v1/addresses",

@@ -10,7 +10,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import java.net.URI;
 
 @RestController
-@RequestMapping("api/v1/business")
+@RequestMapping("api/v1/businesses")
 public class BusinessServiceController
 {
 
