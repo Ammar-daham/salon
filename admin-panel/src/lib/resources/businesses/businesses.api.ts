@@ -33,13 +33,6 @@ export const businessesRepository: Repository<Business, BusinessInput, BusinessI
 		await apiClient.put(endpoints.businesses.byId(id), toBusinessRequest(input));
 	},
 
-	/**
-	 * FE-09: the backend now deletes a business's children (addresses, contacts,
-	 * services) from the canonical record (BE-10), so a plain body-less DELETE is
-	 * correct. This used to re-read the record and echo it back as the body — which
-	 * meant an empty body would orphan every child and permanently burn each
-	 * contact's globally-unique value.
-	 */
 	async remove(id: Id) {
 		await apiClient.delete(endpoints.businesses.byId(id));
 	},
