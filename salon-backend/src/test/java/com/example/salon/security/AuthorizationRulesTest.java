@@ -95,6 +95,22 @@ class AuthorizationRulesTest extends IntegrationTest
 	}
 
 	@Test
+	void adminCannotPromoteThemselvesToSuperAdmin() throws Exception
+	{
+		MockHttpSession admin = loginAs(Fixture.GLOW_ADMIN);
+
+		mvc.perform(put("/api/v1/users/" + Fixture.GLOW_ADMIN_ID).session(admin)
+						.contentType(MediaType.APPLICATION_JSON)
+						.content("""
+								{"first_name": "Anna", "last_name": "Admin", "role": "SUPER_ADMIN"}
+								"""))
+				.andExpect(status().isForbidden());
+
+		mvc.perform(get("/api/v1/users/" + Fixture.GLOW_ADMIN_ID).session(admin))
+				.andExpect(jsonPath("$.role").value("ADMIN"));
+	}
+
+	@Test
 	void superAdminMustSayWhichBusinessANewUserBelongsTo() throws Exception
 	{
 		mvc.perform(post("/api/v1/users").session(loginAs(Fixture.SUPER_ADMIN))

@@ -106,6 +106,9 @@ public class UserService
 			// Only an admin may change a user's role - a self-update must keep the caller's current one.
 			User existing = getUserById((int) id, caller);
 			user.setRole(existing.getRole());
+		} else if (user.getRole() == Role.SUPER_ADMIN && caller.getUser().getRole() != Role.SUPER_ADMIN) {
+			// a caller can never grant a role higher than their own.
+			throw new AccessDeniedException("Only a super admin can grant the super admin role");
 		}
 		long row = userDao.updateUserById(id, user);
 		if (row == 0)

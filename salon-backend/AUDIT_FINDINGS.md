@@ -44,6 +44,9 @@ Root causes:
   PUT and DELETE ignore the `businessId` path variable and act on the bare service id.
 - **BE-04** — [`UserService.updateUserById`](src/main/java/com/example/salon/service/UserService.java) only locks
   the role for non-admins. `addUser` blocks minting a SUPER_ADMIN; `updateUserById` does not.
+  *(fixed: `updateUserById` now rejects an update that sets `role` to `SUPER_ADMIN` unless the caller is
+  a SUPER_ADMIN, mirroring `addUser`'s guard. Guarded by `AuthorizationRulesTest.adminCannotPromoteThemselvesToSuperAdmin`.
+  BE-05 — the missing business scoping on the same method — is still open and tracked separately.)*
 - <a id="be-05"></a>**BE-05 — User update/delete aren't business-scoped either.** An ADMIN can edit or
   delete users (including super admins) of every salon via `PUT/DELETE /users/{id}`.
   **→ [`fix/salon-backend-user-scoping`](../VERSION_CONTROL_GUIDE.md#br-0-6)**
@@ -180,8 +183,8 @@ new users to the caller's business; `application.yml` is not tracked in git.
   done by hand.)*
 - <a id="be-32"></a>**BE-32 — Testing: effectively zero.** Start with MockMvc + Testcontainers tests for
   the four exploits in §1. **→ [`test/salon-backend-integration-test-setup`](../VERSION_CONTROL_GUIDE.md#br-0-1)**
-  *(in progress: integration test base, 21 passing tests, and 7 `@Disabled` tests in `KnownIssuesTest`
-  for BE-01–BE-05 and BE-41; run them with `./gradlew test -PrunKnownIssues`)*
+  *(in progress: integration test base, passing tests, and 6 `@Disabled` tests in `KnownIssuesTest`
+  for BE-01–BE-03, BE-05 and BE-41; run them with `./gradlew test -PrunKnownIssues`)*
 - <a id="be-33"></a>**BE-33 — Missing `@Transactional`** on `UserService.updateUserById/deleteUserById`
   (multi-step writes). **→ [`fix/salon-backend-user-scoping`](../VERSION_CONTROL_GUIDE.md#br-0-6)**
   (it rewrites these methods)
