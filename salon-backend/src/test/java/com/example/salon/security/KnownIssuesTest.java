@@ -89,23 +89,6 @@ class KnownIssuesTest extends IntegrationTest
 	}
 
 	@Test
-	@Disabled("BE-04: fixed by fix/salon-backend-role-escalation (VERSION_CONTROL_GUIDE.md §9, row 0.3)")
-	void adminCannotPromoteThemselvesToSuperAdmin() throws Exception
-	{
-		MockHttpSession admin = loginAs(Fixture.GLOW_ADMIN);
-
-		mvc.perform(put("/api/v1/users/" + Fixture.GLOW_ADMIN_ID).session(admin)
-						.contentType(MediaType.APPLICATION_JSON)
-						.content("""
-								{"first_name": "Anna", "last_name": "Admin", "role": "SUPER_ADMIN"}
-								"""))
-				.andExpect(status().isForbidden());
-
-		mvc.perform(get("/api/v1/users/" + Fixture.GLOW_ADMIN_ID).session(admin))
-				.andExpect(jsonPath("$.role").value("ADMIN"));
-	}
-
-	@Test
 	@Disabled("BE-05: fixed by fix/salon-backend-user-scoping (VERSION_CONTROL_GUIDE.md §9, row 0.6)")
 	void adminCannotEditUsersOfAnotherSalon() throws Exception
 	{
