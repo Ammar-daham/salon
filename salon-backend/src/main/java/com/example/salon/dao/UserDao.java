@@ -11,6 +11,8 @@ public interface UserDao
 
 	List<User> getAllUsers();
 
+	List<User> getUsersByBusinessId(long businessId);
+
 	User getUserById(int id);
 
 	Optional<User> findByEmail(String email);

@@ -5,6 +5,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpSession;
 
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.not;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -272,6 +274,69 @@ class AuthorizationRulesTest extends IntegrationTest
 
 		mvc.perform(get("/api/v1/businesses/" + Fixture.GLOW + "/services/" + Fixture.GLOW_HAIRCUT).session(admin))
 				.andExpect(jsonPath("$.name").value("Precision Cut"));
+	}
+
+	@Test
+	void adminOnlySeesUsersOfTheirOwnBusiness() throws Exception
+	{
+		mvc.perform(get("/api/v1/users").session(loginAs(Fixture.GLOW_ADMIN)))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$[*].email", hasItem(Fixture.GLOW_EMPLOYEE)))
+				.andExpect(jsonPath("$[*].email", not(hasItem(Fixture.URBAN_ADMIN))))
+				.andExpect(jsonPath("$[*].email", not(hasItem(Fixture.SUPER_ADMIN))));
+	}
+
+	@Test
+	void superAdminSeesUsersAcrossAllBusinesses() throws Exception
+	{
+		mvc.perform(get("/api/v1/users").session(loginAs(Fixture.SUPER_ADMIN)))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$[*].email", hasItem(Fixture.GLOW_EMPLOYEE)))
+				.andExpect(jsonPath("$[*].email", hasItem(Fixture.URBAN_ADMIN)));
+	}
+
+	@Test
+	void adminCannotEditUsersOfAnotherSalon() throws Exception
+	{
+		mvc.perform(put("/api/v1/users/" + Fixture.URBAN_ADMIN_ID).session(loginAs(Fixture.GLOW_ADMIN))
+						.contentType(MediaType.APPLICATION_JSON)
+						.content("""
+								{"first_name": "Pwned", "last_name": "Admin", "role": "EMPLOYEE"}
+								"""))
+				.andExpect(status().isForbidden());
+
+		mvc.perform(get("/api/v1/users/" + Fixture.URBAN_ADMIN_ID).session(loginAs(Fixture.URBAN_ADMIN)))
+				.andExpect(jsonPath("$.first_name").value("Ben"))
+				.andExpect(jsonPath("$.role").value("ADMIN"));
+	}
+
+	@Test
+	void adminCannotDeleteUsersOfAnotherSalon() throws Exception
+	{
+		mvc.perform(delete("/api/v1/users/" + Fixture.URBAN_ADMIN_ID).session(loginAs(Fixture.GLOW_ADMIN))
+						.contentType(MediaType.APPLICATION_JSON)
+						.content("{}"))
+				.andExpect(status().isForbidden());
+
+		mvc.perform(get("/api/v1/users/" + Fixture.URBAN_ADMIN_ID).session(loginAs(Fixture.URBAN_ADMIN)))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.first_name").value("Ben"));
+	}
+
+	@Test
+	void adminCanEditUsersOfTheirOwnSalon() throws Exception
+	{
+		MockHttpSession admin = loginAs(Fixture.GLOW_ADMIN);
+
+		mvc.perform(put("/api/v1/users/" + Fixture.GLOW_EMPLOYEE_ID).session(admin)
+						.contentType(MediaType.APPLICATION_JSON)
+						.content("""
+								{"first_name": "Mia", "last_name": "Renamed", "role": "EMPLOYEE"}
+								"""))
+				.andExpect(status().isOk());
+
+		mvc.perform(get("/api/v1/users/" + Fixture.GLOW_EMPLOYEE_ID).session(admin))
+				.andExpect(jsonPath("$.last_name").value("Renamed"));
 	}
 
 	static String serviceBody(String name)
