@@ -37,17 +37,12 @@ export const usersRepository: Repository<User, CreateUserInput, UpdateUserInput>
 	},
 
 	/**
-	 * DELETE requires a body here too, and its shape matters: deleteUserById
-	 * runs the DELETE first, then branches on `contacts` / `addresses` to decide
-	 * what to return. Echo the real (wire-shaped) record so child rows are
-	 * handled, and never trust the response — deleting a nonexistent user still
-	 * returns 200.
+	 * FE-09: the backend now deletes the user's own children from the canonical
+	 * record (BE-10), so a plain body-less DELETE is correct. This used to re-read
+	 * the record and echo it back to drive the server's child cleanup.
 	 */
 	async remove(id: Id) {
-		const { data } = await apiClient.get<UserDto>(endpoints.users.byId(id));
-		await apiClient.delete(endpoints.users.byId(id), {
-			data: { ...data, contacts: [], addresses: [] },
-		});
+		await apiClient.delete(endpoints.users.byId(id));
 	},
 };
 
