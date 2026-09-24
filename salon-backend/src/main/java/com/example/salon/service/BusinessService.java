@@ -57,7 +57,7 @@ public class BusinessService {
         Business existing = getBusinessById(id); // 404 if it doesn't exist
 
         if (!AccessControl.isSuperAdmin(caller)) {
-            // BE-02: an ADMIN may only edit their own salon, and may never change its status.
+            // ADMIN may only edit their own salon, and may never change its status.
             // Approving/rejecting/suspending a salon is platform moderation, reserved for SUPER_ADMIN.
             requireOwnBusiness(caller, id);
             if (business.getStatus() != null && business.getStatus() != existing.getStatus()) {
