@@ -14,7 +14,7 @@ likely hit in normal use), **Medium** (real bug, narrower trigger), **Low** (hyg
 Each row there links back here. Frontend findings (`FE-xx`) use the same scheme.
 A ✅ next to a finding's ID means its fix has landed; the parenthetical *(fixed: …)* / *(done: …)* note
 on that finding describes what changed and which test guards it.
-So far: ✅ BE-01, ✅ BE-02, ✅ BE-03, ✅ BE-04, ✅ BE-05, ✅ BE-31, ✅ BE-33.
+So far: ✅ BE-01, ✅ BE-02, ✅ BE-03, ✅ BE-04, ✅ BE-05, ✅ BE-10, ✅ BE-11, ✅ BE-31, ✅ BE-33.
 
 ## 0. Honest summary
 
@@ -103,15 +103,25 @@ Root causes:
   has an empty `catch (DuplicateKeyException)` and returns the service with no id as if it succeeded.
   `BusinessService.addBusiness` only rethrows for two message substrings and silently succeeds on any other.
   **→ [`fix/salon-backend-error-handling`](../VERSION_CONTROL_GUIDE.md#br-0-10)**
-- <a id="be-10"></a>**BE-10 — DELETE trusts the request body.** `deleteBusiness` / `deleteUserById` delete
+- <a id="be-10"></a>✅ **BE-10 — DELETE trusts the request body.** `deleteBusiness` / `deleteUserById` delete
   children from the client-sent object instead of the canonical record. An empty body orphans every
   child, and because `contacts.value` is globally UNIQUE an orphaned phone number becomes unusable
   platform-wide. **→ [`fix/salon-backend-server-side-deletes`](../VERSION_CONTROL_GUIDE.md#br-0-7)**,
   then [`refactor/admin-panel-drop-delete-bodies`](../VERSION_CONTROL_GUIDE.md#br-0-8)
-- <a id="be-11"></a>**BE-11 — User delete cleanup is `if / else if`.** [`UserDataAccessService.deleteUserById`](src/main/java/com/example/salon/dao/UserDataAccessService.java):
+  *(fixed: the DELETE endpoints no longer accept a request body. `deleteBusiness`/`deleteUserById` read
+  the real children from the canonical record (`getContactsForBusiness`/`getAddressesForBusiness`/
+  `getServicesForBusiness` and the user equivalents) and delete them first, then the parent — the FKs are
+  `ON DELETE SET NULL`, so children must go first or they survive orphaned with the unique value burned.
+  Guarded by `deletingABusinessWithoutABodyDeletesItsChildren`, `deletingABusinessFreesItsContactValueForReuse`
+  and `deletingAUserWithoutABodyDeletesTheirChildren` in `RegressionTest`. The paired frontend cleanup
+  [`refactor/admin-panel-drop-delete-bodies`](../VERSION_CONTROL_GUIDE.md#br-0-8) is still pending; the
+  backend now ignores any body the panel still sends.)*
+- <a id="be-11"></a>✅ **BE-11 — User delete cleanup is `if / else if`.** [`UserDataAccessService.deleteUserById`](src/main/java/com/example/salon/dao/UserDataAccessService.java):
   a user with both contacts and addresses only has contacts removed; with neither it returns `-1`
   even though the user row was already deleted.
   **→ [`fix/salon-backend-server-side-deletes`](../VERSION_CONTROL_GUIDE.md#br-0-7)**
+  *(fixed: the same rewrite deletes both contacts and addresses unconditionally and returns the real
+  row count, so the `if / else if` and the bogus `-1` are gone.)*
 - <a id="be-12"></a>**BE-12 — `users.updated_at` is never set.** The UPDATE omits `updated_at = now()`,
   unlike every other DAO. **→ [`fix/salon-backend-schema-integrity`](../VERSION_CONTROL_GUIDE.md#br-1-2)**
   (the `updated_at` trigger, [DB-11](#db-11))

@@ -19,5 +19,5 @@ public interface UserDao
 
 	long updateUserById(long id, User user);
 
-	long deleteUserById(long id, User user);
+	long deleteUserById(long id);
 }

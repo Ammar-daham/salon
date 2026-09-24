@@ -125,11 +125,11 @@ public class UserService
 	}
 
 	@Transactional
-	public void deleteUserById(long id, User user, AuthenticatedUser caller)
+	public void deleteUserById(long id, AuthenticatedUser caller)
 	{
 		// getUserById enforces self / own-business / super-admin access (BE-05) and 404s if missing.
 		getUserById((int) id, caller);
-		long row = userDao.deleteUserById(id, user);
+		long row = userDao.deleteUserById(id);
 		if (row == 0)
 			throw new BaseException("User with id " + id + " not found", "NOT_FOUND", ErrorCode.NOT_FOUND.getStatus());
 	}

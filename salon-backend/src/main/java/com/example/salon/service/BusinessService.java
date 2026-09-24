@@ -76,14 +76,14 @@ public class BusinessService
     }
 
     @Transactional
-    public void deleteBusiness(int id, Business business, AuthenticatedUser caller) 
+    public void deleteBusiness(int id, AuthenticatedUser caller)
     {
         getBusinessById(id);
 
         // ADMIN can only delete their own salon, never another tenant's.
         AccessControl.requireBusinessAccess(caller, id);
 
-        int row = businessDao.deleteBusiness(id, business);
+        int row = businessDao.deleteBusiness(id);
         if (row == 0)
             throw new BaseException("Business with id " + id + " not found.", "NOT_FOUND", ErrorCode.NOT_FOUND.getStatus());
     }

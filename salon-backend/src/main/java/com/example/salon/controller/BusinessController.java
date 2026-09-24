@@ -50,7 +50,8 @@ public class BusinessController {
     }
 
     @DeleteMapping("/{id}")
-    public void deleteBusiness(@PathVariable int id, @RequestBody Business business, @AuthenticationPrincipal AuthenticatedUser principal) {
-        businessService.deleteBusiness(id, business, principal);
+    public void deleteBusiness(@PathVariable int id, @AuthenticationPrincipal AuthenticatedUser principal) {
+        // BE-10: no request body - the server deletes the business's real children, not a client-sent object.
+        businessService.deleteBusiness(id, principal);
     }
 }

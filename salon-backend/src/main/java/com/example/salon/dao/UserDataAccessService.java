@@ -155,27 +155,14 @@ public class UserDataAccessService implements UserDao
 	}
 
 	@Override
-	public long deleteUserById(long id, User user)
+	public long deleteUserById(long id)
 	{
-		String sql = "DELETE FROM users WHERE id = ?";
-		long userId = (long) jdbcTemplate.update(sql, id);
+		// BE-10: delete the user's own children from the canonical record, not from a client body.
+		// Children first: the FKs are ON DELETE SET NULL, so deleting the user first would orphan
+		// them (and a contact's globally-unique value would stay burned).
+		contactDao.getContactsForUser(id).forEach(contact -> contactDao.deleteContactById(contact.getId()));
+		addressDao.getAddressesForUser(id).forEach(address -> addressDao.deleteAddressById(address.getId()));
 
-		// Delete contacts and addresses
-		if (user.getContacts() != null) {
-			user.getContacts().forEach(contact ->
-			{
-				contact.setUserId(id);
-				contactDao.deleteContactById(contact.getId());
-			});
-		} else if (user.getAddresses() != null) {
-			user.getAddresses().forEach(address ->
-			{
-				address.setUserId(id);
-				addressDao.deleteAddressById(address.getId());
-			});
-		} else {
-			return -1;
-		}
-		return userId;
+		return jdbcTemplate.update("DELETE FROM users WHERE id = ?", id);
 	}
 }
