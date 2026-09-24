@@ -58,8 +58,7 @@ public final class AccessControl
 
 	/**
 	 * Read/modify access to a single user record: a SUPER_ADMIN may touch anyone, a user may touch
-	 * themselves, and an ADMIN may touch other users only within their own business. The role check
-	 * alone (BE-01/BE-05) let any admin reach every salon's users.
+	 * themselves, and an ADMIN may touch other users only within their own business. 
 	 */
 	public static void requireUserAccess(AuthenticatedUser caller, User target)
 	{
