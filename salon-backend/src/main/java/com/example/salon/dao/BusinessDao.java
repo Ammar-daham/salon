@@ -4,7 +4,8 @@ import com.example.salon.model.Business;
 
 import java.util.List;
 
-public interface BusinessDao {
+public interface BusinessDao 
+{
     Long addBusiness(Business business);
 
     List<Business> getBusinesses();
