@@ -1,9 +1,11 @@
 package com.example.salon.controller;
 
 import com.example.salon.model.Business;
+import com.example.salon.security.AuthenticatedUser;
 import com.example.salon.service.BusinessService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -43,12 +45,12 @@ public class BusinessController {
     }
 
     @PutMapping("/{id}")
-    public void updateBusiness(@PathVariable int id,  @RequestBody Business business) {
-        businessService.updateBusinessById(id, business);
+    public void updateBusiness(@PathVariable int id, @RequestBody Business business, @AuthenticationPrincipal AuthenticatedUser principal) {
+        businessService.updateBusinessById(id, business, principal);
     }
 
     @DeleteMapping("/{id}")
-    public void deleteBusiness(@PathVariable int id, @RequestBody Business business) {
-        businessService.deleteBusiness(id, business);
+    public void deleteBusiness(@PathVariable int id, @RequestBody Business business, @AuthenticationPrincipal AuthenticatedUser principal) {
+        businessService.deleteBusiness(id, business, principal);
     }
 }

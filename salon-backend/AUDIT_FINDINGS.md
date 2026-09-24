@@ -40,6 +40,13 @@ Root causes:
 - **BE-02** — [`SecurityConfig.java:88-90`](src/main/java/com/example/salon/security/SecurityConfig.java) gates
   POST/PUT/DELETE on `/api/v1/**` only by role. `BusinessController` lets any ADMIN create, update
   (including `status`) and delete **any** business. Approving/suspending a salon should be SUPER_ADMIN-only.
+  *(fixed: `BusinessService.updateBusinessById`/`deleteBusiness` now take the caller. A non-SUPER_ADMIN
+  may only touch their own business (`business_id` must match the path id) and may never change `status` —
+  approving/rejecting/suspending is reserved for SUPER_ADMIN; re-sending the unchanged status is still
+  allowed so the panel's full-object PUT keeps working. Guarded by `adminCannotApproveAnotherSalon`,
+  `adminCannotChangeEvenTheirOwnBusinessStatus`, `adminCannotDeleteAnotherSalon`, `superAdminCanApproveASalon`
+  in `AuthorizationRulesTest`. Still open, deliberately out of scope here: `POST /businesses` creation
+  (BE-40/registration flow) and hiding non-APPROVED salons from non-admins on `GET /businesses` (FE-11).)*
 - **BE-03** — [`BusinessServiceController`](src/main/java/com/example/salon/controller/BusinessServiceController.java)
   PUT and DELETE ignore the `businessId` path variable and act on the bare service id.
 - **BE-04** — [`UserService.updateUserById`](src/main/java/com/example/salon/service/UserService.java) only locks
@@ -183,8 +190,8 @@ new users to the caller's business; `application.yml` is not tracked in git.
   done by hand.)*
 - <a id="be-32"></a>**BE-32 — Testing: effectively zero.** Start with MockMvc + Testcontainers tests for
   the four exploits in §1. **→ [`test/salon-backend-integration-test-setup`](../VERSION_CONTROL_GUIDE.md#br-0-1)**
-  *(in progress: integration test base, passing tests, and 6 `@Disabled` tests in `KnownIssuesTest`
-  for BE-01–BE-03, BE-05 and BE-41; run them with `./gradlew test -PrunKnownIssues`)*
+  *(in progress: integration test base, passing tests, and 5 `@Disabled` tests in `KnownIssuesTest`
+  for BE-01, BE-03, BE-05 and BE-41; run them with `./gradlew test -PrunKnownIssues`)*
 - <a id="be-33"></a>**BE-33 — Missing `@Transactional`** on `UserService.updateUserById/deleteUserById`
   (multi-step writes). **→ [`fix/salon-backend-user-scoping`](../VERSION_CONTROL_GUIDE.md#br-0-6)**
   (it rewrites these methods)
