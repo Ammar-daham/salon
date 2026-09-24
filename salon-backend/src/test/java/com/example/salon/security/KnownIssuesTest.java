@@ -56,22 +56,6 @@ class KnownIssuesTest extends IntegrationTest
 	}
 
 	@Test
-	@Disabled("BE-02: fixed by fix/salon-backend-business-tenant-scoping (VERSION_CONTROL_GUIDE.md §9, row 0.4)")
-	void adminCannotApproveAnotherSalon() throws Exception
-	{
-		mvc.perform(put("/api/v1/businesses/" + Fixture.SERENITY_PENDING).session(loginAs(Fixture.GLOW_ADMIN))
-						.contentType(MediaType.APPLICATION_JSON)
-						.content("""
-								{"name": "Serenity Day Spa", "description": "pwned", "status": "APPROVED"}
-								"""))
-				.andExpect(status().isForbidden());
-
-		mvc.perform(get("/api/v1/businesses/" + Fixture.SERENITY_PENDING).session(loginAs(Fixture.SUPER_ADMIN)))
-				.andExpect(jsonPath("$.status").value("PENDING"))
-				.andExpect(jsonPath("$.description").value("Massage and facials."));
-	}
-
-	@Test
 	@Disabled("BE-03: fixed by fix/salon-backend-service-ownership (VERSION_CONTROL_GUIDE.md §9, row 0.5)")
 	void adminCannotEditAnotherSalonsServiceThroughTheirOwnBusinessPath() throws Exception
 	{

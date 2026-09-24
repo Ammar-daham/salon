@@ -15,6 +15,11 @@ public final class AccessControl
 		return role == Role.ADMIN || role == Role.SUPER_ADMIN;
 	}
 
+	public static boolean isSuperAdmin(AuthenticatedUser caller)
+	{
+		return caller.getUser().getRole() == Role.SUPER_ADMIN;
+	}
+
 	public static boolean isSelf(AuthenticatedUser caller, Long ownerId)
 	{
 		return ownerId != null && ownerId.equals(caller.getUser().getId());

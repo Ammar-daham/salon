@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpSession;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -138,6 +139,85 @@ class AuthorizationRulesTest extends IntegrationTest
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(newUserBody(Fixture.GLOW_EMPLOYEE, "EMPLOYEE", null)))
 				.andExpect(status().isConflict());
+	}
+
+	@Test
+	void adminCannotApproveAnotherSalon() throws Exception
+	{
+		mvc.perform(put("/api/v1/businesses/" + Fixture.SERENITY_PENDING).session(loginAs(Fixture.GLOW_ADMIN))
+						.contentType(MediaType.APPLICATION_JSON)
+						.content("""
+								{"name": "Serenity Day Spa", "description": "pwned", "status": "APPROVED"}
+								"""))
+				.andExpect(status().isForbidden());
+
+		mvc.perform(get("/api/v1/businesses/" + Fixture.SERENITY_PENDING).session(loginAs(Fixture.SUPER_ADMIN)))
+				.andExpect(jsonPath("$.status").value("PENDING"))
+				.andExpect(jsonPath("$.description").value("Massage and facials."));
+	}
+
+	@Test
+	void adminCannotChangeEvenTheirOwnBusinessStatus() throws Exception
+	{
+		MockHttpSession admin = loginAs(Fixture.GLOW_ADMIN);
+
+		mvc.perform(put("/api/v1/businesses/" + Fixture.GLOW).session(admin)
+						.contentType(MediaType.APPLICATION_JSON)
+						.content("""
+								{"name": "Glow Beauty Studio", "status": "SUSPENDED"}
+								"""))
+				.andExpect(status().isForbidden());
+
+		mvc.perform(get("/api/v1/businesses/" + Fixture.GLOW).session(admin))
+				.andExpect(jsonPath("$.status").value("APPROVED"));
+	}
+
+	@Test
+	void adminCanEditTheirOwnBusinessWhenResendingItsCurrentStatus() throws Exception
+	{
+		MockHttpSession admin = loginAs(Fixture.GLOW_ADMIN);
+
+		// The admin panel echoes the whole record back, including the unchanged status. That must
+		// still succeed - only an actual status transition is reserved for SUPER_ADMIN.
+		mvc.perform(put("/api/v1/businesses/" + Fixture.GLOW).session(admin)
+						.contentType(MediaType.APPLICATION_JSON)
+						.content("""
+								{"name": "Glow Beauty Studio", "description": "Now with a lash bar.", "status": "APPROVED"}
+								"""))
+				.andExpect(status().isOk());
+
+		mvc.perform(get("/api/v1/businesses/" + Fixture.GLOW).session(admin))
+				.andExpect(jsonPath("$.description").value("Now with a lash bar."));
+	}
+
+	@Test
+	void adminCannotDeleteAnotherSalon() throws Exception
+	{
+		mvc.perform(delete("/api/v1/businesses/" + Fixture.URBAN).session(loginAs(Fixture.GLOW_ADMIN))
+						.contentType(MediaType.APPLICATION_JSON)
+						.content("""
+								{"name": "Urban Cuts Barbershop", "description": "Fades and beard work."}
+								"""))
+				.andExpect(status().isForbidden());
+
+		mvc.perform(get("/api/v1/businesses/" + Fixture.URBAN).session(loginAs(Fixture.URBAN_ADMIN)))
+				.andExpect(status().isOk());
+	}
+
+	@Test
+	void superAdminCanApproveASalon() throws Exception
+	{
+		MockHttpSession superAdmin = loginAs(Fixture.SUPER_ADMIN);
+
+		mvc.perform(put("/api/v1/businesses/" + Fixture.SERENITY_PENDING).session(superAdmin)
+						.contentType(MediaType.APPLICATION_JSON)
+						.content("""
+								{"name": "Serenity Day Spa", "description": "Massage and facials.", "status": "APPROVED"}
+								"""))
+				.andExpect(status().isOk());
+
+		mvc.perform(get("/api/v1/businesses/" + Fixture.SERENITY_PENDING).session(superAdmin))
+				.andExpect(jsonPath("$.status").value("APPROVED"));
 	}
 
 	static String serviceBody(String name)
