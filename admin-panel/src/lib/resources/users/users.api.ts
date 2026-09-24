@@ -36,11 +36,6 @@ export const usersRepository: Repository<User, CreateUserInput, UpdateUserInput>
 		await apiClient.put(endpoints.users.byId(id), toUpdateUserRequest(input));
 	},
 
-	/**
-	 * FE-09: the backend now deletes the user's own children from the canonical
-	 * record (BE-10), so a plain body-less DELETE is correct. This used to re-read
-	 * the record and echo it back to drive the server's child cleanup.
-	 */
 	async remove(id: Id) {
 		await apiClient.delete(endpoints.users.byId(id));
 	},
