@@ -13,7 +13,8 @@ likely hit in normal use), **Medium** (real bug, narrower trigger), **Low** (hyg
 [`VERSION_CONTROL_GUIDE.md` §9](../VERSION_CONTROL_GUIDE.md#9-branch-plan-for-the-mvp-roadmap).
 Each row there links back here. Frontend findings (`FE-xx`) use the same scheme.
 A ✅ next to a finding's ID means its fix has landed; the parenthetical *(fixed: …)* / *(done: …)* note
-on that finding describes what changed and which test guards it. So far: ✅ BE-02, ✅ BE-03, ✅ BE-04, ✅ BE-31.
+on that finding describes what changed and which test guards it.
+So far: ✅ BE-01, ✅ BE-02, ✅ BE-03, ✅ BE-04, ✅ BE-05, ✅ BE-31, ✅ BE-33.
 
 ## 0. Honest summary
 
@@ -32,13 +33,16 @@ Reproduced on 2026-09-23 against a running backend loaded with `db/seed_data.sql
 
 | ID | Request | Result | Fixed by |
 |---|---|---|---|
-| <a id="be-01"></a>BE-01 | `GET /api/v1/users` | **200** — all 16 users platform-wide, including other salons' staff emails | [`fix/salon-backend-user-scoping`](../VERSION_CONTROL_GUIDE.md#br-0-6) |
+| <a id="be-01"></a>✅ BE-01 | `GET /api/v1/users` | **200** — all 16 users platform-wide, including other salons' staff emails | [`fix/salon-backend-user-scoping`](../VERSION_CONTROL_GUIDE.md#br-0-6) |
 | <a id="be-02"></a>✅ BE-02 | `PUT /api/v1/businesses/3` `{"status":"APPROVED", ...}` on another salon | **200** — foreign salon approved and its description overwritten | [`fix/salon-backend-business-tenant-scoping`](../VERSION_CONTROL_GUIDE.md#br-0-4) |
 | <a id="be-03"></a>✅ BE-03 | `PUT /api/v1/businesses/1/services/4` (service 4 belongs to business 2) | **200** — foreign service renamed, price set to 0.01 | [`fix/salon-backend-service-ownership`](../VERSION_CONTROL_GUIDE.md#br-0-5) |
 | <a id="be-04"></a>✅ BE-04 | `PUT /api/v1/users/{self}` `{"role":"SUPER_ADMIN", ...}` | **200** — **Anna is now a platform super admin** | [`fix/salon-backend-role-escalation`](../VERSION_CONTROL_GUIDE.md#br-0-3) |
 
 Root causes:
-- **BE-01** — `UserService.getAllUsers` has no business filter; admin-only is enforced, but *which* admin isn't.
+- ✅ **BE-01** — `UserService.getAllUsers` has no business filter; admin-only is enforced, but *which* admin isn't.
+  *(fixed: `getAllUsers` now takes the caller — a SUPER_ADMIN still sees the whole platform, any other admin
+  gets only their own business's users (new `UserDao.getUsersByBusinessId`). Guarded by
+  `adminOnlySeesUsersOfTheirOwnBusiness` and `superAdminSeesUsersAcrossAllBusinesses` in `AuthorizationRulesTest`.)*
 - ✅ **BE-02** — [`SecurityConfig.java:88-90`](src/main/java/com/example/salon/security/SecurityConfig.java) gates
   POST/PUT/DELETE on `/api/v1/**` only by role. `BusinessController` lets any ADMIN create, update
   (including `status`) and delete **any** business. Approving/suspending a salon should be SUPER_ADMIN-only.
@@ -62,9 +66,13 @@ Root causes:
   *(fixed: `updateUserById` now rejects an update that sets `role` to `SUPER_ADMIN` unless the caller is
   a SUPER_ADMIN, mirroring `addUser`'s guard. Guarded by `AuthorizationRulesTest.adminCannotPromoteThemselvesToSuperAdmin`.
   BE-05 — the missing business scoping on the same method — is still open and tracked separately.)*
-- <a id="be-05"></a>**BE-05 — User update/delete aren't business-scoped either.** An ADMIN can edit or
+- <a id="be-05"></a>✅ **BE-05 — User update/delete aren't business-scoped either.** An ADMIN can edit or
   delete users (including super admins) of every salon via `PUT/DELETE /users/{id}`.
   **→ [`fix/salon-backend-user-scoping`](../VERSION_CONTROL_GUIDE.md#br-0-6)**
+  *(fixed: `getUserById`/`updateUserById`/`deleteUserById` now enforce `AccessControl.requireUserAccess`
+  against the loaded record — self, or an admin acting within their own business, or a super admin —
+  so cross-salon reads/edits/deletes return 403. Guarded by `adminCannotEditUsersOfAnotherSalon`,
+  `adminCannotDeleteUsersOfAnotherSalon` and `adminCanEditUsersOfTheirOwnSalon` in `AuthorizationRulesTest`.)*
 
 ## 2. Correctness bugs
 
@@ -198,11 +206,12 @@ new users to the caller's business; `application.yml` is not tracked in git.
   done by hand.)*
 - <a id="be-32"></a>**BE-32 — Testing: effectively zero.** Start with MockMvc + Testcontainers tests for
   the four exploits in §1. **→ [`test/salon-backend-integration-test-setup`](../VERSION_CONTROL_GUIDE.md#br-0-1)**
-  *(in progress: integration test base, passing tests, and 4 `@Disabled` tests in `KnownIssuesTest`
-  for BE-01, BE-05 and BE-41; run them with `./gradlew test -PrunKnownIssues`)*
-- <a id="be-33"></a>**BE-33 — Missing `@Transactional`** on `UserService.updateUserById/deleteUserById`
+  *(in progress: integration test base, passing tests, and 2 `@Disabled` tests in `KnownIssuesTest`
+  for BE-41; run them with `./gradlew test -PrunKnownIssues`)*
+- <a id="be-33"></a>✅ **BE-33 — Missing `@Transactional`** on `UserService.updateUserById/deleteUserById`
   (multi-step writes). **→ [`fix/salon-backend-user-scoping`](../VERSION_CONTROL_GUIDE.md#br-0-6)**
   (it rewrites these methods)
+  *(fixed: both methods are now `@Transactional`, so their access check + multi-row write commit atomically.)*
 - <a id="be-34"></a>**BE-34 — No logging.** `System.out.println` in `BusinessService` and nowhere else;
   no SLF4J usage; errors are hidden in production (`include-message: never`) with nothing logged
   server-side. **→ [`fix/salon-backend-error-handling`](../VERSION_CONTROL_GUIDE.md#br-0-10)**

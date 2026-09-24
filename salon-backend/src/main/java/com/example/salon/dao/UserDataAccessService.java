@@ -97,6 +97,18 @@ public class UserDataAccessService implements UserDao
 	}
 
 	@Override
+	public List<User> getUsersByBusinessId(long businessId)
+	{
+		String sql = "SELECT * FROM users WHERE business_id = ?";
+		List<User> users = jdbcTemplate.query(sql, userRowMapper(), businessId);
+		for (User user : users) {
+			user.setAddresses(addressDao.getAddressesForUser(user.getId()));
+			user.setContacts(contactDao.getContactsForUser(user.getId()));
+		}
+		return users;
+	}
+
+	@Override
 	public User getUserById(int id)
 	{
 		User user = jdbcTemplate.queryForObject("SELECT * FROM users WHERE id = ?", userRowMapper(), id);

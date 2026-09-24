@@ -1,6 +1,7 @@
 package com.example.salon.security;
 
 import com.example.salon.model.Role;
+import com.example.salon.model.User;
 import org.springframework.security.access.AccessDeniedException;
 
 public final class AccessControl
@@ -53,5 +54,21 @@ public final class AccessControl
 		if (callerBusinessId == null || callerBusinessId != businessId) {
 			throw new AccessDeniedException("You can only modify your own business");
 		}
+	}
+
+	/**
+	 * Read/modify access to a single user record: a SUPER_ADMIN may touch anyone, a user may touch
+	 * themselves, and an ADMIN may touch other users only within their own business. 
+	 */
+	public static void requireUserAccess(AuthenticatedUser caller, User target)
+	{
+		if (isSuperAdmin(caller) || isSelf(caller, target.getId())) {
+			return;
+		}
+		Long callerBusinessId = caller.getUser().getBusinessId();
+		if (isAdmin(caller) && callerBusinessId != null && callerBusinessId.equals(target.getBusinessId())) {
+			return;
+		}
+		throw new AccessDeniedException("You do not have permission to access this resource");
 	}
 }

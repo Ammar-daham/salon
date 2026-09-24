@@ -38,9 +38,9 @@ public class UserController
 	}
 
 	@GetMapping
-	public List<User> getUsers()
+	public List<User> getUsers(@AuthenticationPrincipal AuthenticatedUser principal)
 	{
-		return userService.getAllUsers();
+		return userService.getAllUsers(principal);
 	}
 
 	@GetMapping("/{id}")

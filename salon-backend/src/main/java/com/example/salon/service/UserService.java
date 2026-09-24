@@ -82,29 +82,38 @@ public class UserService
 		return user;
 	}
 
-	public List<User> getAllUsers()
+	public List<User> getAllUsers(AuthenticatedUser caller)
 	{
-		return userDao.getAllUsers();
+		if (AccessControl.isSuperAdmin(caller)) {
+			return userDao.getAllUsers();
+		}
+		Long businessId = caller.getUser().getBusinessId();
+		if (businessId == null) {
+			return List.of();
+		}
+		return userDao.getUsersByBusinessId(businessId);
 	}
 
 	public User getUserById(int id, AuthenticatedUser caller)
 	{
-		AccessControl.requireSelfOrAdmin(caller, (long) id);
 		User user;
 		try {
 			user = userDao.getUserById(id);
 		} catch (EmptyResultDataAccessException ex) {
 			throw new BaseException("User with id " + id + " not found", "NOT_FOUND", ErrorCode.NOT_FOUND.getStatus());
 		}
+		// enforce ownership against the record we actually loaded, not just the caller's role.
+		AccessControl.requireUserAccess(caller, user);
 		return user;
 	}
 
+	@Transactional
 	public void updateUserById(long id, User user, AuthenticatedUser caller)
 	{
-		AccessControl.requireSelfOrAdmin(caller, id);
+		// getUserById enforces self / own-business / super-admin access (BE-05) and 404s if missing.
+		User existing = getUserById((int) id, caller);
 		if (!AccessControl.isAdmin(caller)) {
 			// Only an admin may change a user's role - a self-update must keep the caller's current one.
-			User existing = getUserById((int) id, caller);
 			user.setRole(existing.getRole());
 		} else if (user.getRole() == Role.SUPER_ADMIN && caller.getUser().getRole() != Role.SUPER_ADMIN) {
 			// a caller can never grant a role higher than their own.
@@ -115,9 +124,11 @@ public class UserService
 			throw new BaseException("User with id " + id + " not found", "NOT_FOUND", ErrorCode.NOT_FOUND.getStatus());
 	}
 
+	@Transactional
 	public void deleteUserById(long id, User user, AuthenticatedUser caller)
 	{
-		AccessControl.requireSelfOrAdmin(caller, id);
+		// getUserById enforces self / own-business / super-admin access (BE-05) and 404s if missing.
+		getUserById((int) id, caller);
 		long row = userDao.deleteUserById(id, user);
 		if (row == 0)
 			throw new BaseException("User with id " + id + " not found", "NOT_FOUND", ErrorCode.NOT_FOUND.getStatus());
