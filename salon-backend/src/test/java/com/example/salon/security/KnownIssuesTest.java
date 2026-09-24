@@ -56,23 +56,6 @@ class KnownIssuesTest extends IntegrationTest
 	}
 
 	@Test
-	@Disabled("BE-03: fixed by fix/salon-backend-service-ownership (VERSION_CONTROL_GUIDE.md §9, row 0.5)")
-	void adminCannotEditAnotherSalonsServiceThroughTheirOwnBusinessPath() throws Exception
-	{
-		mvc.perform(put("/api/v1/businesses/" + Fixture.GLOW + "/services/" + Fixture.URBAN_FADE)
-						.session(loginAs(Fixture.GLOW_ADMIN))
-						.contentType(MediaType.APPLICATION_JSON)
-						.content("""
-								{"name": "Hijacked", "description": "x", "duration_minutes": 1, "price": 0.01, "is_active": true}
-								"""))
-				.andExpect(status().is4xxClientError());
-
-		mvc.perform(get("/api/v1/businesses/" + Fixture.URBAN).session(loginAs(Fixture.URBAN_ADMIN)))
-				.andExpect(jsonPath("$.services[0].name").value("Classic Fade"))
-				.andExpect(jsonPath("$.services[0].price").value(28.0));
-	}
-
-	@Test
 	@Disabled("BE-05: fixed by fix/salon-backend-user-scoping (VERSION_CONTROL_GUIDE.md §9, row 0.6)")
 	void adminCannotEditUsersOfAnotherSalon() throws Exception
 	{

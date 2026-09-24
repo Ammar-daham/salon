@@ -62,13 +62,12 @@ public class BusinessService
     {
         Business existing = getBusinessById(id); // 404 if it doesn't exist
 
-        if (!AccessControl.isSuperAdmin(caller)) {
-            // ADMIN may only edit their own salon, and may never change its status.
-            // Approving/rejecting/suspending a salon is platform moderation, reserved for SUPER_ADMIN.
-            requireOwnBusiness(caller, id);
-            if (business.getStatus() != null && business.getStatus() != existing.getStatus()) {
-                throw new AccessDeniedException("Only a super admin can change a business's status");
-            }
+        // ADMIN may only edit their own salon; SUPER_ADMIN may edit any.
+        AccessControl.requireBusinessAccess(caller, id);
+        // Approving/rejecting/suspending a salon is platform moderation, reserved for SUPER_ADMIN.
+        if (!AccessControl.isSuperAdmin(caller)
+                && business.getStatus() != null && business.getStatus() != existing.getStatus()) {
+            throw new AccessDeniedException("Only a super admin can change a business's status");
         }
 
         int row = businessDao.updateBusinessById(id, business);
@@ -79,23 +78,13 @@ public class BusinessService
     @Transactional
     public void deleteBusiness(int id, Business business, AuthenticatedUser caller) 
     {
-        getBusinessById(id); // 404 if it doesn't exist
+        getBusinessById(id);
 
-        if (!AccessControl.isSuperAdmin(caller)) {
-            // BE-02: an ADMIN can only delete their own salon, never another tenant's.
-            requireOwnBusiness(caller, id);
-        }
+        // ADMIN can only delete their own salon, never another tenant's.
+        AccessControl.requireBusinessAccess(caller, id);
 
         int row = businessDao.deleteBusiness(id, business);
         if (row == 0)
             throw new BaseException("Business with id " + id + " not found.", "NOT_FOUND", ErrorCode.NOT_FOUND.getStatus());
-    }
-
-    private void requireOwnBusiness(AuthenticatedUser caller, int businessId) 
-    {
-        Long callerBusinessId = caller.getUser().getBusinessId();
-        if (callerBusinessId == null || callerBusinessId != businessId) {
-            throw new AccessDeniedException("You can only modify your own business");
-        }
     }
 }

@@ -39,4 +39,19 @@ public final class AccessControl
 			throw new AccessDeniedException("You do not have permission to access this resource");
 		}
 	}
+
+	/**
+	 * A SUPER_ADMIN may act on any business; anyone else only on the one they belong to.
+	 * Shared by the business and service endpoints so tenant ownership is enforced identically.
+	 */
+	public static void requireBusinessAccess(AuthenticatedUser caller, long businessId)
+	{
+		if (isSuperAdmin(caller)) {
+			return;
+		}
+		Long callerBusinessId = caller.getUser().getBusinessId();
+		if (callerBusinessId == null || callerBusinessId != businessId) {
+			throw new AccessDeniedException("You can only modify your own business");
+		}
+	}
 }
