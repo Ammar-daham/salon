@@ -78,9 +78,9 @@ public class BusinessService
     @Transactional
     public void deleteBusiness(int id, Business business, AuthenticatedUser caller) 
     {
-        getBusinessById(id); // 404 if it doesn't exist
+        getBusinessById(id);
 
-        // BE-02: an ADMIN can only delete their own salon, never another tenant's.
+        // ADMIN can only delete their own salon, never another tenant's.
         AccessControl.requireBusinessAccess(caller, id);
 
         int row = businessDao.deleteBusiness(id, business);
