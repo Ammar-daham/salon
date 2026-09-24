@@ -172,6 +172,12 @@ new users to the caller's business; `application.yml` is not tracked in git.
 
 - <a id="be-31"></a>**BE-31 — No CI.** Nothing runs tests or builds on a PR.
   **→ [`chore/repo-ci-pipeline`](../VERSION_CONTROL_GUIDE.md#br-0-2)**
+  *(done: [`.github/workflows/ci.yml`](../.github/workflows/ci.yml) runs on every PR and on pushes to
+  `main` — `salon-backend` validates the Gradle wrapper and runs `./gradlew build` (compile, the
+  Testcontainers suite, war), `admin-panel` runs `npm ci`, lint, typecheck and `next build`. Both
+  jobs run on every PR; neither is path-filtered, so they work as required status checks. Making
+  them required in the branch-protection rules for `main` is a repo-settings step and still has to be
+  done by hand.)*
 - <a id="be-32"></a>**BE-32 — Testing: effectively zero.** Start with MockMvc + Testcontainers tests for
   the four exploits in §1. **→ [`test/salon-backend-integration-test-setup`](../VERSION_CONTROL_GUIDE.md#br-0-1)**
   *(in progress: integration test base, 21 passing tests, and 7 `@Disabled` tests in `KnownIssuesTest`
