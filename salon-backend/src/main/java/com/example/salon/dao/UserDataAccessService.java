@@ -157,7 +157,7 @@ public class UserDataAccessService implements UserDao
 	@Override
 	public long deleteUserById(long id)
 	{
-		// BE-10: delete the user's own children from the canonical record, not from a client body.
+		// delete the user's own children from the canonical record, not from a client body.
 		// Children first: the FKs are ON DELETE SET NULL, so deleting the user first would orphan
 		// them (and a contact's globally-unique value would stay burned).
 		contactDao.getContactsForUser(id).forEach(contact -> contactDao.deleteContactById(contact.getId()));
