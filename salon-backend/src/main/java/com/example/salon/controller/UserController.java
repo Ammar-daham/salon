@@ -58,7 +58,6 @@ public class UserController
 	@DeleteMapping("/{id}")
 	public void deleteUserById(@PathVariable int id, @AuthenticationPrincipal AuthenticatedUser principal)
 	{
-		// BE-10: no request body - the server deletes the user's real children, not a client-sent object.
 		userService.deleteUserById(id, principal);
 	}
 }
