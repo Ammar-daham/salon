@@ -1,0 +1,86 @@
+name: CI
+
+# BE-31: every pull request must build both apps and run the backend test suite
+# before it can be merged. Pushes to main re-run the same checks so a merge that
+# only passed against a stale base is caught immediately.
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+# A new push to a branch cancels the run still in flight for the previous one.
+# Runs on main are left alone so every merged commit keeps its own result.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
+
+jobs:
+  salon-backend:
+    name: salon-backend (Java 21)
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    defaults:
+      run:
+        working-directory: salon-backend
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      # Fails the build if gradle-wrapper.jar does not match a published Gradle release.
+      - uses: gradle/actions/wrapper-validation@v4
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      # `build` compiles main + test, runs the Testcontainers suite (Docker is
+      # preinstalled on ubuntu-latest) and assembles the war. The @Disabled
+      # KnownIssuesTest cases stay disabled here: they assert bugs that are still
+      # open (BE-01–BE-05, BE-41), so running them would make CI permanently red.
+      - name: Build and test
+        run: ./gradlew build
+
+      - name: Upload test report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: salon-backend-test-report
+          path: salon-backend/build/reports/tests/test
+          if-no-files-found: ignore
+
+  admin-panel:
+    name: admin-panel (Node 20)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: admin-panel
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: admin-panel/package-lock.json
+
+      # `npm ci` (not `npm install`) so a package.json/package-lock.json mismatch
+      # fails the build instead of being silently papered over.
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Type check
+        run: npm run typecheck
+
+      - name: Build
+        run: npm run build
