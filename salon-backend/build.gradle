@@ -41,9 +41,16 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-validation-test'
     testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
     testImplementation 'org.springframework.boot:spring-boot-starter-security-test'
+    testImplementation 'org.springframework.boot:spring-boot-testcontainers'
+    testImplementation 'org.testcontainers:testcontainers-junit-jupiter'
+    testImplementation 'org.testcontainers:testcontainers-postgresql'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
 tasks.named('test') {
     useJUnitPlatform()
+    // ./gradlew test -PrunKnownIssues also runs the @Disabled KnownIssuesTest cases, to check they still fail.
+    if (project.hasProperty('runKnownIssues')) {
+        systemProperty 'junit.jupiter.conditions.deactivate', 'org.junit.*DisabledCondition'
+    }
 }
