@@ -84,8 +84,6 @@ public class UserService
 
 	public List<User> getAllUsers(AuthenticatedUser caller)
 	{
-		// BE-01: the endpoint is admin-only, but "which admin" was never checked. A SUPER_ADMIN sees
-		// the whole platform; any other admin sees only the users of their own business.
 		if (AccessControl.isSuperAdmin(caller)) {
 			return userDao.getAllUsers();
 		}
@@ -104,7 +102,7 @@ public class UserService
 		} catch (EmptyResultDataAccessException ex) {
 			throw new BaseException("User with id " + id + " not found", "NOT_FOUND", ErrorCode.NOT_FOUND.getStatus());
 		}
-		// BE-05: enforce ownership against the record we actually loaded, not just the caller's role.
+		// enforce ownership against the record we actually loaded, not just the caller's role.
 		AccessControl.requireUserAccess(caller, user);
 		return user;
 	}
@@ -118,7 +116,7 @@ public class UserService
 			// Only an admin may change a user's role - a self-update must keep the caller's current one.
 			user.setRole(existing.getRole());
 		} else if (user.getRole() == Role.SUPER_ADMIN && caller.getUser().getRole() != Role.SUPER_ADMIN) {
-			// BE-04: a caller can never grant a role higher than their own.
+			// a caller can never grant a role higher than their own.
 			throw new AccessDeniedException("Only a super admin can grant the super admin role");
 		}
 		long row = userDao.updateUserById(id, user);
