@@ -220,6 +220,60 @@ class AuthorizationRulesTest extends IntegrationTest
 				.andExpect(jsonPath("$.status").value("APPROVED"));
 	}
 
+	@Test
+	void adminCannotEditAnotherSalonsServiceThroughTheirOwnBusinessPath() throws Exception
+	{
+		mvc.perform(put("/api/v1/businesses/" + Fixture.GLOW + "/services/" + Fixture.URBAN_FADE)
+						.session(loginAs(Fixture.GLOW_ADMIN))
+						.contentType(MediaType.APPLICATION_JSON)
+						.content("""
+								{"name": "Hijacked", "description": "x", "duration_minutes": 1, "price": 0.01, "is_active": true}
+								"""))
+				.andExpect(status().is4xxClientError());
+
+		mvc.perform(get("/api/v1/businesses/" + Fixture.URBAN).session(loginAs(Fixture.URBAN_ADMIN)))
+				.andExpect(jsonPath("$.services[0].name").value("Classic Fade"))
+				.andExpect(jsonPath("$.services[0].price").value(28.0));
+	}
+
+	@Test
+	void adminCannotDeleteAnotherSalonsService() throws Exception
+	{
+		mvc.perform(delete("/api/v1/businesses/" + Fixture.GLOW + "/services/" + Fixture.URBAN_FADE)
+						.session(loginAs(Fixture.GLOW_ADMIN)))
+				.andExpect(status().is4xxClientError());
+
+		mvc.perform(get("/api/v1/businesses/" + Fixture.URBAN + "/services/" + Fixture.URBAN_FADE)
+						.session(loginAs(Fixture.URBAN_ADMIN)))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.name").value("Classic Fade"));
+	}
+
+	@Test
+	void adminCannotCreateAServiceUnderAnotherSalon() throws Exception
+	{
+		mvc.perform(post("/api/v1/businesses/" + Fixture.URBAN + "/services")
+						.session(loginAs(Fixture.GLOW_ADMIN))
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(serviceBody("Smuggled Service")))
+				.andExpect(status().isForbidden());
+	}
+
+	@Test
+	void adminCanEditTheirOwnSalonsService() throws Exception
+	{
+		MockHttpSession admin = loginAs(Fixture.GLOW_ADMIN);
+
+		mvc.perform(put("/api/v1/businesses/" + Fixture.GLOW + "/services/" + Fixture.GLOW_HAIRCUT)
+						.session(admin)
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(serviceBody("Precision Cut")))
+				.andExpect(status().isOk());
+
+		mvc.perform(get("/api/v1/businesses/" + Fixture.GLOW + "/services/" + Fixture.GLOW_HAIRCUT).session(admin))
+				.andExpect(jsonPath("$.name").value("Precision Cut"));
+	}
+
 	static String serviceBody(String name)
 	{
 		return """

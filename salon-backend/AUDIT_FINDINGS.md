@@ -12,6 +12,8 @@ likely hit in normal use), **Medium** (real bug, narrower trigger), **Low** (hyg
 **→ the branch that fixes it**, linked to that branch's row in
 [`VERSION_CONTROL_GUIDE.md` §9](../VERSION_CONTROL_GUIDE.md#9-branch-plan-for-the-mvp-roadmap).
 Each row there links back here. Frontend findings (`FE-xx`) use the same scheme.
+A ✅ next to a finding's ID means its fix has landed; the parenthetical *(fixed: …)* / *(done: …)* note
+on that finding describes what changed and which test guards it. So far: ✅ BE-02, ✅ BE-03, ✅ BE-04, ✅ BE-31.
 
 ## 0. Honest summary
 
@@ -31,13 +33,13 @@ Reproduced on 2026-09-23 against a running backend loaded with `db/seed_data.sql
 | ID | Request | Result | Fixed by |
 |---|---|---|---|
 | <a id="be-01"></a>BE-01 | `GET /api/v1/users` | **200** — all 16 users platform-wide, including other salons' staff emails | [`fix/salon-backend-user-scoping`](../VERSION_CONTROL_GUIDE.md#br-0-6) |
-| <a id="be-02"></a>BE-02 | `PUT /api/v1/businesses/3` `{"status":"APPROVED", ...}` on another salon | **200** — foreign salon approved and its description overwritten | [`fix/salon-backend-business-tenant-scoping`](../VERSION_CONTROL_GUIDE.md#br-0-4) |
-| <a id="be-03"></a>BE-03 | `PUT /api/v1/businesses/1/services/4` (service 4 belongs to business 2) | **200** — foreign service renamed, price set to 0.01 | [`fix/salon-backend-service-ownership`](../VERSION_CONTROL_GUIDE.md#br-0-5) |
-| <a id="be-04"></a>BE-04 | `PUT /api/v1/users/{self}` `{"role":"SUPER_ADMIN", ...}` | **200** — **Anna is now a platform super admin** | [`fix/salon-backend-role-escalation`](../VERSION_CONTROL_GUIDE.md#br-0-3) |
+| <a id="be-02"></a>✅ BE-02 | `PUT /api/v1/businesses/3` `{"status":"APPROVED", ...}` on another salon | **200** — foreign salon approved and its description overwritten | [`fix/salon-backend-business-tenant-scoping`](../VERSION_CONTROL_GUIDE.md#br-0-4) |
+| <a id="be-03"></a>✅ BE-03 | `PUT /api/v1/businesses/1/services/4` (service 4 belongs to business 2) | **200** — foreign service renamed, price set to 0.01 | [`fix/salon-backend-service-ownership`](../VERSION_CONTROL_GUIDE.md#br-0-5) |
+| <a id="be-04"></a>✅ BE-04 | `PUT /api/v1/users/{self}` `{"role":"SUPER_ADMIN", ...}` | **200** — **Anna is now a platform super admin** | [`fix/salon-backend-role-escalation`](../VERSION_CONTROL_GUIDE.md#br-0-3) |
 
 Root causes:
 - **BE-01** — `UserService.getAllUsers` has no business filter; admin-only is enforced, but *which* admin isn't.
-- **BE-02** — [`SecurityConfig.java:88-90`](src/main/java/com/example/salon/security/SecurityConfig.java) gates
+- ✅ **BE-02** — [`SecurityConfig.java:88-90`](src/main/java/com/example/salon/security/SecurityConfig.java) gates
   POST/PUT/DELETE on `/api/v1/**` only by role. `BusinessController` lets any ADMIN create, update
   (including `status`) and delete **any** business. Approving/suspending a salon should be SUPER_ADMIN-only.
   *(fixed: `BusinessService.updateBusinessById`/`deleteBusiness` now take the caller. A non-SUPER_ADMIN
@@ -47,9 +49,15 @@ Root causes:
   `adminCannotChangeEvenTheirOwnBusinessStatus`, `adminCannotDeleteAnotherSalon`, `superAdminCanApproveASalon`
   in `AuthorizationRulesTest`. Still open, deliberately out of scope here: `POST /businesses` creation
   (BE-40/registration flow) and hiding non-APPROVED salons from non-admins on `GET /businesses` (FE-11).)*
-- **BE-03** — [`BusinessServiceController`](src/main/java/com/example/salon/controller/BusinessServiceController.java)
+- ✅ **BE-03** — [`BusinessServiceController`](src/main/java/com/example/salon/controller/BusinessServiceController.java)
   PUT and DELETE ignore the `businessId` path variable and act on the bare service id.
-- **BE-04** — [`UserService.updateUserById`](src/main/java/com/example/salon/service/UserService.java) only locks
+  *(fixed: PUT/DELETE now bind `businessId` and pass the caller. `BusinessSalonServiceService` requires the
+  caller to own the path business (`AccessControl.requireBusinessAccess`, shared with BE-02) and verifies the
+  service actually belongs to that business (via `getServiceById`, which 404s otherwise) before mutating it.
+  `POST /{businessId}/services` is scoped the same way so an admin can't inject a service into another salon.
+  Guarded by `adminCannotEditAnotherSalonsServiceThroughTheirOwnBusinessPath`, `adminCannotDeleteAnotherSalonsService`,
+  `adminCannotCreateAServiceUnderAnotherSalon` and `adminCanEditTheirOwnSalonsService` in `AuthorizationRulesTest`.)*
+- ✅ **BE-04** — [`UserService.updateUserById`](src/main/java/com/example/salon/service/UserService.java) only locks
   the role for non-admins. `addUser` blocks minting a SUPER_ADMIN; `updateUserById` does not.
   *(fixed: `updateUserById` now rejects an update that sets `role` to `SUPER_ADMIN` unless the caller is
   a SUPER_ADMIN, mirroring `addUser`'s guard. Guarded by `AuthorizationRulesTest.adminCannotPromoteThemselvesToSuperAdmin`.
@@ -180,7 +188,7 @@ new users to the caller's business; `application.yml` is not tracked in git.
 
 ## 4. Architecture, testing, ops
 
-- <a id="be-31"></a>**BE-31 — No CI.** Nothing runs tests or builds on a PR.
+- <a id="be-31"></a>✅ **BE-31 — No CI.** Nothing runs tests or builds on a PR.
   **→ [`chore/repo-ci-pipeline`](../VERSION_CONTROL_GUIDE.md#br-0-2)**
   *(done: [`.github/workflows/ci.yml`](../.github/workflows/ci.yml) runs on every PR and on pushes to
   `main` — `salon-backend` validates the Gradle wrapper and runs `./gradlew build` (compile, the
@@ -190,8 +198,8 @@ new users to the caller's business; `application.yml` is not tracked in git.
   done by hand.)*
 - <a id="be-32"></a>**BE-32 — Testing: effectively zero.** Start with MockMvc + Testcontainers tests for
   the four exploits in §1. **→ [`test/salon-backend-integration-test-setup`](../VERSION_CONTROL_GUIDE.md#br-0-1)**
-  *(in progress: integration test base, passing tests, and 5 `@Disabled` tests in `KnownIssuesTest`
-  for BE-01, BE-03, BE-05 and BE-41; run them with `./gradlew test -PrunKnownIssues`)*
+  *(in progress: integration test base, passing tests, and 4 `@Disabled` tests in `KnownIssuesTest`
+  for BE-01, BE-05 and BE-41; run them with `./gradlew test -PrunKnownIssues`)*
 - <a id="be-33"></a>**BE-33 — Missing `@Transactional`** on `UserService.updateUserById/deleteUserById`
   (multi-step writes). **→ [`fix/salon-backend-user-scoping`](../VERSION_CONTROL_GUIDE.md#br-0-6)**
   (it rewrites these methods)
