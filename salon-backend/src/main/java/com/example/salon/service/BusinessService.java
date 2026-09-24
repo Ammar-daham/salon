@@ -16,16 +16,19 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
-public class BusinessService {
+public class BusinessService 
+{
     private final BusinessDao businessDao;
 
     @Autowired
-    public BusinessService(BusinessDao businessDao) {
+    public BusinessService(BusinessDao businessDao) 
+    {
         this.businessDao = businessDao;
     }
 
     @Transactional
-    public Business addBusiness(Business business) {
+    public Business addBusiness(Business business) 
+    {
         try {
             businessDao.addBusiness(business);
         } catch (DuplicateKeyException ex) {
@@ -38,11 +41,13 @@ public class BusinessService {
         return business;
     }
 
-    public List<Business> getAllBusiness() {
+    public List<Business> getAllBusiness() 
+    {
         return businessDao.getBusinesses();
     }
 
-    public Business getBusinessById(int id) {
+    public Business getBusinessById(int id) 
+    {
         Business business;
         try {
             business = businessDao.getBusinessById(id);
@@ -53,7 +58,8 @@ public class BusinessService {
     }
 
     @Transactional
-    public void updateBusinessById(int id, Business business, AuthenticatedUser caller) {
+    public void updateBusinessById(int id, Business business, AuthenticatedUser caller) 
+    {
         Business existing = getBusinessById(id); // 404 if it doesn't exist
 
         if (!AccessControl.isSuperAdmin(caller)) {
@@ -71,7 +77,8 @@ public class BusinessService {
     }
 
     @Transactional
-    public void deleteBusiness(int id, Business business, AuthenticatedUser caller) {
+    public void deleteBusiness(int id, Business business, AuthenticatedUser caller) 
+    {
         getBusinessById(id); // 404 if it doesn't exist
 
         if (!AccessControl.isSuperAdmin(caller)) {
@@ -84,7 +91,8 @@ public class BusinessService {
             throw new BaseException("Business with id " + id + " not found.", "NOT_FOUND", ErrorCode.NOT_FOUND.getStatus());
     }
 
-    private void requireOwnBusiness(AuthenticatedUser caller, int businessId) {
+    private void requireOwnBusiness(AuthenticatedUser caller, int businessId) 
+    {
         Long callerBusinessId = caller.getUser().getBusinessId();
         if (callerBusinessId == null || callerBusinessId != businessId) {
             throw new AccessDeniedException("You can only modify your own business");
