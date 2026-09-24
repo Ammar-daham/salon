@@ -14,16 +14,19 @@ import java.util.List;
 
 @RequestMapping("api/v1/businesses")
 @RestController
-public class BusinessController {
+public class BusinessController 
+{
     private final BusinessService businessService;
 
     @Autowired
-    public BusinessController(BusinessService businessService) {
+    public BusinessController(BusinessService businessService) 
+    {
         this.businessService = businessService;
     }
 
     @PostMapping
-    public Business addBusiness(@RequestBody Business business) {
+    public Business addBusiness(@RequestBody Business business) 
+    {
         Business b = businessService.addBusiness(business);
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest()
@@ -35,23 +38,26 @@ public class BusinessController {
     }
 
     @GetMapping
-    public List<Business> getAllBusiness() {
+    public List<Business> getAllBusiness() 
+    {
         return businessService.getAllBusiness();
     }
 
     @GetMapping("/{id}")
-    public Business getBusinessById(@PathVariable int id) {
+    public Business getBusinessById(@PathVariable int id) 
+    {
         return businessService.getBusinessById(id);
     }
 
     @PutMapping("/{id}")
-    public void updateBusiness(@PathVariable int id, @RequestBody Business business, @AuthenticationPrincipal AuthenticatedUser principal) {
+    public void updateBusiness(@PathVariable int id, @RequestBody Business business, @AuthenticationPrincipal AuthenticatedUser principal) 
+    {
         businessService.updateBusinessById(id, business, principal);
     }
 
     @DeleteMapping("/{id}")
-    public void deleteBusiness(@PathVariable int id, @AuthenticationPrincipal AuthenticatedUser principal) {
-        // BE-10: no request body - the server deletes the business's real children, not a client-sent object.
+    public void deleteBusiness(@PathVariable int id, @AuthenticationPrincipal AuthenticatedUser principal)
+    {
         businessService.deleteBusiness(id, principal);
     }
 }
