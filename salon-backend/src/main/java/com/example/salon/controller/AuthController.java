@@ -46,7 +46,7 @@ public class AuthController
 					UsernamePasswordAuthenticationToken.unauthenticated(request.email(), request.password())
 			);
 		} catch (AuthenticationException ex) {
-			throw new BaseException("Invalid email or password", "UNAUTHORIZED", ErrorCode.UNAUTHORIZED.getStatus());
+			throw new BaseException("Invalid email or password", ErrorCode.UNAUTHORIZED);
 		}
 
 		SecurityContext context = SecurityContextHolder.createEmptyContext();

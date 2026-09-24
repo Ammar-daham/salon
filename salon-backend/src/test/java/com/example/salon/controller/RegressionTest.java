@@ -176,4 +176,37 @@ class RegressionTest extends IntegrationTest
 		mvc.perform(get("/api/v1/contacts/" + Fixture.GLOW_EMPLOYEE_PERSONAL_CONTACT).session(superAdmin))
 				.andExpect(status().isNotFound());
 	}
+
+	/** BE-09: a duplicate-key insert must surface as a conflict, not a swallowed false success. */
+	@Test
+	void creatingABusinessWithADuplicateNameIsAConflict() throws Exception
+	{
+		mvc.perform(post("/api/v1/businesses").session(loginAs(Fixture.SUPER_ADMIN))
+						.contentType(MediaType.APPLICATION_JSON)
+						.content("""
+								{"name": "Glow Beauty Studio", "description": "dup", "image": "https://example.com/x.png"}
+								"""))
+				.andExpect(status().isConflict());
+	}
+
+	/** BE-18: errors carry the stable ErrorCode.code on the wire, not an ad-hoc string. */
+	@Test
+	void notFoundErrorsCarryTheStableNotFoundCode() throws Exception
+	{
+		mvc.perform(get("/api/v1/businesses/999999").session(loginAs(Fixture.SUPER_ADMIN)))
+				.andExpect(status().isNotFound())
+				.andExpect(jsonPath("$.errorCode").value("NOT_FOUND"));
+	}
+
+	/** BE-27: a server-side NPE (here, an update body with no role) is a logged 500, no longer a masked 400. */
+	@Test
+	void aServerSideNullPointerBecomesA500NotAMasked400() throws Exception
+	{
+		mvc.perform(put("/api/v1/users/" + Fixture.GLOW_EMPLOYEE_ID).session(loginAs(Fixture.GLOW_ADMIN))
+						.contentType(MediaType.APPLICATION_JSON)
+						.content("""
+								{"first_name": "Mia", "last_name": "Stylist"}
+								"""))
+				.andExpect(status().isInternalServerError());
+	}
 }

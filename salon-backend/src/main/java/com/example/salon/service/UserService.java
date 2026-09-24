@@ -49,7 +49,7 @@ public class UserService
 			// which business the new user belongs to - and that business has to actually exist.
 			if (user.getBusinessId() == null) {
 				throw new BaseException("businessId is required when a super admin creates a user",
-						"BAD_REQUEST", ErrorCode.BAD_REQUEST.getStatus());
+						ErrorCode.BAD_REQUEST);
 			}
 			businessService.getBusinessById(user.getBusinessId().intValue());
 		} else {
@@ -63,7 +63,7 @@ public class UserService
 		if (canLogIn && (user.getEmail() == null || user.getEmail().isBlank()
 				|| user.getPassword() == null || user.getPassword().isBlank())) {
 			throw new BaseException("Email and password are required for role " + user.getRole(),
-					"BAD_REQUEST", ErrorCode.BAD_REQUEST.getStatus());
+					ErrorCode.BAD_REQUEST);
 		}
 		if (user.getPassword() != null && !user.getPassword().isBlank()) {
 			user.setPasswordHash(passwordEncoder.encode(user.getPassword()));
@@ -74,9 +74,9 @@ public class UserService
 			userDao.addUser(user);
 		} catch (DuplicateKeyException ex) {
 			if (ex.getMessage().contains("contacts_value_key"))
-				throw new BaseException("Contact already exists.", "CONFLICT", ErrorCode.DUPLICATE_RESOURCE.getStatus());
+				throw new BaseException("Contact already exists.", ErrorCode.DUPLICATE_RESOURCE);
 			if (ex.getMessage().contains("users_email_unique_idx"))
-				throw new BaseException("Email already in use.", "CONFLICT", ErrorCode.DUPLICATE_RESOURCE.getStatus());
+				throw new BaseException("Email already in use.", ErrorCode.DUPLICATE_RESOURCE);
 			throw ex;
 		}
 		return user;
@@ -100,7 +100,7 @@ public class UserService
 		try {
 			user = userDao.getUserById(id);
 		} catch (EmptyResultDataAccessException ex) {
-			throw new BaseException("User with id " + id + " not found", "NOT_FOUND", ErrorCode.NOT_FOUND.getStatus());
+			throw new BaseException("User with id " + id + " not found", ErrorCode.NOT_FOUND);
 		}
 		// enforce ownership against the record we actually loaded, not just the caller's role.
 		AccessControl.requireUserAccess(caller, user);
@@ -121,7 +121,7 @@ public class UserService
 		}
 		long row = userDao.updateUserById(id, user);
 		if (row == 0)
-			throw new BaseException("User with id " + id + " not found", "NOT_FOUND", ErrorCode.NOT_FOUND.getStatus());
+			throw new BaseException("User with id " + id + " not found", ErrorCode.NOT_FOUND);
 	}
 
 	@Transactional
@@ -131,7 +131,7 @@ public class UserService
 		getUserById((int) id, caller);
 		long row = userDao.deleteUserById(id);
 		if (row == 0)
-			throw new BaseException("User with id " + id + " not found", "NOT_FOUND", ErrorCode.NOT_FOUND.getStatus());
+			throw new BaseException("User with id " + id + " not found", ErrorCode.NOT_FOUND);
 	}
 
 

@@ -5,18 +5,24 @@ import org.springframework.http.HttpStatus;
 
 public enum ErrorCode
 {
-	NOT_FOUND(HttpStatus.NOT_FOUND, "NOT-FOUNT_404", "NOT_FOUND"),
-	UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "UNAUTHORIZED_401", "UNAUTHORIZED"),
-	DUPLICATE_RESOURCE(HttpStatus.CONFLICT, "DUPLICATE_RESOURCES_409", "CONFLICT"),
-	DATABASE_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "DB_500", "DATABASE_ERROR"),
-	BAD_REQUEST(HttpStatus.BAD_REQUEST, "BAD_REQUEST_400", "BAD_REQUEST"),
-	NULL_VALUE(HttpStatus.BAD_REQUEST, "NULL_VALUE_400", "REQUIRED_FIELD_MISSING");
+	NOT_FOUND(HttpStatus.NOT_FOUND, "NOT_FOUND"),
+	UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "UNAUTHORIZED"),
+	FORBIDDEN(HttpStatus.FORBIDDEN, "FORBIDDEN"),
+	DUPLICATE_RESOURCE(HttpStatus.CONFLICT, "CONFLICT"),
+	DATABASE_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "DATABASE_ERROR"),
+	BAD_REQUEST(HttpStatus.BAD_REQUEST, "BAD_REQUEST"),
+	NULL_VALUE(HttpStatus.BAD_REQUEST, "REQUIRED_FIELD_MISSING"),
+	INTERNAL_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "INTERNAL_ERROR");
 
 	private final HttpStatus status;
+	private final String code;
 
-	ErrorCode(HttpStatus status, String message, String code)
+	// BE-18: the old constructor discarded its code argument (and the NOT_FOUND label was a typo,
+	// "NOT-FOUNT_404"), so the wire never carried a stable code. Both are now stored and exposed.
+	ErrorCode(HttpStatus status, String code)
 	{
 		this.status = status;
+		this.code = code;
 	}
 
 	public HttpStatus getStatus()
@@ -24,4 +30,8 @@ public enum ErrorCode
 		return status;
 	}
 
+	public String getCode()
+	{
+		return code;
+	}
 }
