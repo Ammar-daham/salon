@@ -56,8 +56,8 @@ public class UserController
 	}
 
 	@DeleteMapping("/{id}")
-	public void deleteUserById(@PathVariable int id, @RequestBody User user, @AuthenticationPrincipal AuthenticatedUser principal)
+	public void deleteUserById(@PathVariable int id, @AuthenticationPrincipal AuthenticatedUser principal)
 	{
-		userService.deleteUserById(id, user, principal);
+		userService.deleteUserById(id, principal);
 	}
 }

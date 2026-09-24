@@ -10,7 +10,8 @@ import java.sql.Timestamp;
 import java.util.List;
 
 @Repository
-public class BusinessDataAccessService implements BusinessDao {
+public class BusinessDataAccessService implements BusinessDao 
+{
     private final JdbcTemplate jdbcTemplate;
     private final AddressDao addressDao;
     private final ContactDao contactDao;
@@ -20,7 +21,8 @@ public class BusinessDataAccessService implements BusinessDao {
     public BusinessDataAccessService(JdbcTemplate jdbcTemplate,
                                      AddressDao addressDao,
                                      ContactDao contactDao,
-                                     SalonServiceDao salonServiceDao) {
+                                     SalonServiceDao salonServiceDao) 
+    {
         this.jdbcTemplate = jdbcTemplate;
         this.addressDao = addressDao;
         this.contactDao = contactDao;
@@ -28,7 +30,8 @@ public class BusinessDataAccessService implements BusinessDao {
     }
 
     @Override
-    public Long addBusiness(Business business) {
+    public Long addBusiness(Business business) 
+    {
 
         if (business.getStatus() == null) business.setStatus(Status.PENDING);
 
@@ -69,7 +72,8 @@ public class BusinessDataAccessService implements BusinessDao {
         return businessId;
     }
 
-    public List<Business> getBusinesses() {
+    public List<Business> getBusinesses() 
+    {
         String sql = """
                 SELECT id, name, description,
                 updated_at, created_at, image, status
@@ -98,7 +102,8 @@ public class BusinessDataAccessService implements BusinessDao {
     }
 
     @Override
-    public Business getBusinessById(int id) {
+    public Business getBusinessById(int id) 
+    {
         String sql = """
                 SELECT id, name, description,
                 updated_at, created_at, image, status
@@ -127,7 +132,8 @@ public class BusinessDataAccessService implements BusinessDao {
     }
 
     @Override
-    public int updateBusinessById(int id, Business business) {
+    public int updateBusinessById(int id, Business business) 
+    {
         // status and image use COALESCE so that a PUT which omits them preserves the
         // stored value. Without it, omitting status made approve/reject/suspend a silent
         // no-op that still returned 200, and omitting image violated image NOT NULL.
@@ -177,31 +183,16 @@ public class BusinessDataAccessService implements BusinessDao {
     }
 
     @Override
-    public int deleteBusiness(int id, Business business) {
-        String sql = "DELETE FROM businesses WHERE id = ?";
-        int row = jdbcTemplate.update(sql, id);
+    public int deleteBusiness(int id) 
+    {
+        // delete the children that actually belong to this business, read from the canonical
+        // record - never from a client-supplied body, which could be empty and orphan them. Children
+        // must go first: the addresses/contacts FKs are ON DELETE SET NULL, so deleting the business
+        // first would leave those rows behind (and a contact's globally-unique value burned forever).
+        contactDao.getContactsForBusiness((long) id).forEach(contact -> contactDao.deleteContactById(contact.getId()));
+        addressDao.getAddressesForBusiness((long) id).forEach(address -> addressDao.deleteAddressById(address.getId()));
+        salonServiceDao.getServicesForBusiness((long) id).forEach(service -> salonServiceDao.deleteServiceById(service.getId()));
 
-        // Delete addresses
-        if (business.getAddresses() != null) {
-            business.getAddresses().forEach(address -> {
-                addressDao.deleteAddressById(address.getId());
-            });
-        }
-
-        // Delete contacts
-        if (business.getContacts() != null) {
-            business.getContacts().forEach(contact -> {
-                contactDao.deleteContactById(contact.getId());
-            });
-        }
-
-        // Delete services
-        if (business.getServices() != null) {
-            business.getServices().forEach(service -> {
-                salonServiceDao.deleteServiceById(service.getId());
-            });
-        }
-
-        return row;
+        return jdbcTemplate.update("DELETE FROM businesses WHERE id = ?", id);
     }
 }

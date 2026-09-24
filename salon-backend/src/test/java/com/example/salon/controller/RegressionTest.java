@@ -130,4 +130,50 @@ class RegressionTest extends IntegrationTest
 				.andExpect(jsonPath("$.services[?(@.name == 'Blow Dry')].duration_minutes").value(25))
 				.andExpect(jsonPath("$.services[?(@.name == 'Blow Dry')].is_active").value(false));
 	}
+
+	/** BE-10: deleting a business takes no body and removes its real children - no orphaned rows. */
+	@Test
+	void deletingABusinessWithoutABodyDeletesItsChildren() throws Exception
+	{
+		MockHttpSession superAdmin = loginAs(Fixture.SUPER_ADMIN);
+
+		mvc.perform(delete("/api/v1/businesses/" + Fixture.GLOW).session(superAdmin))
+				.andExpect(status().isOk());
+
+		mvc.perform(get("/api/v1/contacts/" + Fixture.GLOW_CONTACT).session(superAdmin))
+				.andExpect(status().isNotFound());
+		mvc.perform(get("/api/v1/addresses/" + Fixture.GLOW_ADDRESS).session(superAdmin))
+				.andExpect(status().isNotFound());
+	}
+
+	/** BE-10: the deleted business's contact value is freed, not burned forever by the global UNIQUE. */
+	@Test
+	void deletingABusinessFreesItsContactValueForReuse() throws Exception
+	{
+		MockHttpSession superAdmin = loginAs(Fixture.SUPER_ADMIN);
+
+		mvc.perform(delete("/api/v1/businesses/" + Fixture.GLOW).session(superAdmin))
+				.andExpect(status().isOk());
+
+		// The phone number that belonged to the deleted business can be registered again.
+		mvc.perform(post("/api/v1/users").session(superAdmin)
+						.contentType(MediaType.APPLICATION_JSON)
+						.content("""
+								{"first_name":"New","last_name":"Hire","email":"newhire@urban.test","password":"Password123!","role":"EMPLOYEE","business_id":%d,"contacts":[{"type":"phone","value":"+49 30 1234501"}]}
+								""".formatted(Fixture.URBAN)))
+				.andExpect(status().isOk());
+	}
+
+	/** BE-10: deleting a user takes no body and removes the user's own children. */
+	@Test
+	void deletingAUserWithoutABodyDeletesTheirChildren() throws Exception
+	{
+		MockHttpSession superAdmin = loginAs(Fixture.SUPER_ADMIN);
+
+		mvc.perform(delete("/api/v1/users/" + Fixture.GLOW_EMPLOYEE_ID).session(superAdmin))
+				.andExpect(status().isOk());
+
+		mvc.perform(get("/api/v1/contacts/" + Fixture.GLOW_EMPLOYEE_PERSONAL_CONTACT).session(superAdmin))
+				.andExpect(status().isNotFound());
+	}
 }
