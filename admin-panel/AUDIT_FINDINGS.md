@@ -8,6 +8,9 @@ behaviour it depends on.
 [`../salon-backend/AUDIT_FINDINGS.md`](../salon-backend/AUDIT_FINDINGS.md) §5–§7.** This file covers
 frontend-specific findings only.
 
+A ✅ next to a finding's ID means its fix has landed; the parenthetical *(fixed: …)* note on that
+finding says what changed. So far: ✅ FE-09.
+
 ## 0. Honest summary
 
 The admin panel is **ahead of the backend**, and it's the healthier of the two codebases:
@@ -79,10 +82,13 @@ findings it depends on are linked by their `BE-xx` / `DB-xx` IDs.
   the mappers, and no e2e (Playwright) for sign-in and CRUD flows. The permission matrix and wire
   mappers are exactly where regressions will hide.
   **→ [`test/admin-panel-permission-matrix`](../VERSION_CONTROL_GUIDE.md#br-0-12), [`test/admin-panel-e2e-smoke`](../VERSION_CONTROL_GUIDE.md#br-3-8)**
-- <a id="fe-09"></a>**FE-09 — Deletes echo the whole record in the DELETE body.** `businesses.api.ts` and
+- <a id="fe-09"></a>✅ **FE-09 — Deletes echo the whole record in the DELETE body.** `businesses.api.ts` and
   `users.api.ts` re-fetch the record and send it back so the backend can cascade children
   ([BE-10](../salon-backend/AUDIT_FINDINGS.md#be-10)). **→ [`refactor/admin-panel-drop-delete-bodies`](../VERSION_CONTROL_GUIDE.md#br-0-8)** (after
   [`fix/salon-backend-server-side-deletes`](../VERSION_CONTROL_GUIDE.md#br-0-7))
+  *(fixed: both repositories' `remove(id)` now send a plain body-less `DELETE` — no re-fetch, no echoed
+  record. Relies on the backend's [BE-10](../salon-backend/AUDIT_FINDINGS.md#be-10) fix, which deletes
+  children from the canonical record, so this must ship after `fix/salon-backend-server-side-deletes`.)*
 - <a id="fe-10"></a>**FE-10 — CSRF is CORS-only** (backend, [BE-28](../salon-backend/AUDIT_FINDINGS.md#be-28)) — fine while
   `allowed-origins` stays pinned to the panel's origin. **→ [`chore/salon-backend-production-config`](../VERSION_CONTROL_GUIDE.md#br-3-4)**
 - <a id="fe-11"></a>**FE-11 — `GET /businesses` open to every authenticated role** — intended for a future

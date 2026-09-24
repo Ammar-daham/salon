@@ -36,18 +36,8 @@ export const usersRepository: Repository<User, CreateUserInput, UpdateUserInput>
 		await apiClient.put(endpoints.users.byId(id), toUpdateUserRequest(input));
 	},
 
-	/**
-	 * DELETE requires a body here too, and its shape matters: deleteUserById
-	 * runs the DELETE first, then branches on `contacts` / `addresses` to decide
-	 * what to return. Echo the real (wire-shaped) record so child rows are
-	 * handled, and never trust the response — deleting a nonexistent user still
-	 * returns 200.
-	 */
 	async remove(id: Id) {
-		const { data } = await apiClient.get<UserDto>(endpoints.users.byId(id));
-		await apiClient.delete(endpoints.users.byId(id), {
-			data: { ...data, contacts: [], addresses: [] },
-		});
+		await apiClient.delete(endpoints.users.byId(id));
 	},
 };
 

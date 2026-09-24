@@ -33,18 +33,7 @@ export const businessesRepository: Repository<Business, BusinessInput, BusinessI
 		await apiClient.put(endpoints.businesses.byId(id), toBusinessRequest(input));
 	},
 
-	/**
-	 * The backend uses the DELETE *body* to cascade child deletes —
-	 * BusinessDataAccessService.deleteBusiness iterates the addresses, contacts
-	 * and services it finds there. Sending `{}` orphans every child row, and
-	 * because contacts.value is globally UNIQUE, an orphaned contact makes that
-	 * phone number permanently unusable platform-wide.
-	 *
-	 * So: re-read the record and echo it back. Hidden here so no call site has
-	 * to know.
-	 */
 	async remove(id: Id) {
-		const { data } = await apiClient.get<BusinessDto>(endpoints.businesses.byId(id));
-		await apiClient.delete(endpoints.businesses.byId(id), { data });
+		await apiClient.delete(endpoints.businesses.byId(id));
 	},
 };
