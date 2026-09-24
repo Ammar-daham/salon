@@ -14,19 +14,21 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 
 @Service
-public class BusinessSalonServiceService {
-
+public class BusinessSalonServiceService 
+{
     private final SalonServiceDao salonServiceDao;
     private final BusinessServiceDao businessServiceDao;
 
     @Autowired
-    public BusinessSalonServiceService(SalonServiceDao salonServiceDao, BusinessServiceDao businessServiceDao) {
+    public BusinessSalonServiceService(SalonServiceDao salonServiceDao, BusinessServiceDao businessServiceDao) 
+    {
         this.salonServiceDao = salonServiceDao;
         this.businessServiceDao = businessServiceDao;
     }
 
     @Transactional
-    public SalonService createServiceForBusiness(Long businessId, SalonService salonService, AuthenticatedUser caller) {
+    public SalonService createServiceForBusiness(Long businessId, SalonService salonService, AuthenticatedUser caller) 
+    {
         AccessControl.requireBusinessAccess(caller, businessId);
         try {
             Long serviceId = salonServiceDao.addService(salonService);
@@ -38,7 +40,8 @@ public class BusinessSalonServiceService {
         return salonService;
     }
 
-    public SalonService getServiceById(int businessId, int serviceId) {
+    public SalonService getServiceById(int businessId, int serviceId) 
+    {
         SalonService ss;
         try {
             ss = salonServiceDao.getServiceById(businessId, serviceId);
@@ -49,10 +52,10 @@ public class BusinessSalonServiceService {
     }
 
     @Transactional
-    public void updateServiceForBusiness(int businessId, int serviceId, SalonService salonService, AuthenticatedUser caller) {
+    public void updateServiceForBusiness(int businessId, int serviceId, SalonService salonService, AuthenticatedUser caller) 
+    {
         AccessControl.requireBusinessAccess(caller, businessId);
-        // BE-03: the update/delete SQL keys on the bare service id, so the businessId path
-        // variable used to be ignored. Confirm the service really belongs to this business
+        //  Confirm the service really belongs to this business
         // (getServiceById joins business_service and 404s otherwise) before mutating it.
         getServiceById(businessId, serviceId);
         int row = salonServiceDao.updateServiceById(serviceId, salonService);
@@ -61,9 +64,10 @@ public class BusinessSalonServiceService {
     }
 
     @Transactional
-    public void deleteServiceForBusiness(int businessId, int serviceId, AuthenticatedUser caller) {
+    public void deleteServiceForBusiness(int businessId, int serviceId, AuthenticatedUser caller) 
+    {
         AccessControl.requireBusinessAccess(caller, businessId);
-        getServiceById(businessId, serviceId); // BE-03: 404 unless the service belongs to this business
+        getServiceById(businessId, serviceId);
         int row = salonServiceDao.deleteServiceById(serviceId);
         if (row == 0)
             throw new BaseException("Service with id " + serviceId + " not found.", "NOT_FOUND", ErrorCode.NOT_FOUND.getStatus());
