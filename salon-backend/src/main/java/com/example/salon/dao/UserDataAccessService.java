@@ -131,27 +131,12 @@ public class UserDataAccessService implements UserDao
 	@Override
 	public long updateUserById(long id, User user)
 	{
+		// BE-06/BE-07/BE-21: update only the user's own columns. Walking client-supplied
+		// contacts/addresses let a caller edit any child row by id (IDOR), crashed on a new child
+		// whose id is null, and duplicated the same loop in BusinessDataAccessService. Children are
+		// edited through their own ownership-checked endpoints (/contacts, /addresses).
 		String sql = "UPDATE users SET first_name = ?, last_name = ?, role = ? WHERE id = ?";
-		long userId = (long) jdbcTemplate.update(sql, user.getFirstName(), user.getLastName(), user.getRole().name(), id);
-
-		// Update contacts
-		if (user.getContacts() != null) {
-			user.getContacts().forEach(contact ->
-			{
-				contact.setUserId(id);
-				contactDao.updateContactById(contact.getId(), contact);
-			});
-		}
-
-		// Update addresses
-		if (user.getAddresses() != null) {
-			user.getAddresses().forEach(address ->
-			{
-				address.setUserId(id);
-				addressDao.updateAddressById(address.getId(), address);
-			});
-		}
-		return userId;
+		return (long) jdbcTemplate.update(sql, user.getFirstName(), user.getLastName(), user.getRole().name(), id);
 	}
 
 	@Override

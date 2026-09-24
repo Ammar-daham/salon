@@ -144,7 +144,12 @@ public class BusinessDataAccessService implements BusinessDao
                 status = COALESCE(?, status),
                  updated_at = now() WHERE id = ?
                 """;
-        int row = jdbcTemplate.update(
+        // BE-06/BE-07/BE-21: this update touches only the business's own columns. It no longer walks
+        // client-supplied addresses/contacts/services: doing so let a caller edit any child row by id
+        // regardless of owner (IDOR), crashed on a new child whose id is null, and duplicated the same
+        // loop in UserDataAccessService. Children are edited through their own ownership-checked
+        // endpoints (/addresses, /contacts, /businesses/{id}/services).
+        return jdbcTemplate.update(
                 sql,
                 business.getName(),
                 business.getDescription(),
@@ -152,34 +157,6 @@ public class BusinessDataAccessService implements BusinessDao
                 business.getStatus() == null ? null : business.getStatus().name(),
                 id
         );
-
-        // Update addresses
-        if (business.getAddresses() != null) {
-            business.getAddresses().forEach(address ->
-            {
-                address.setBusinessId(business.getId());
-                addressDao.updateAddressById(address.getId(), address);
-            });
-        }
-
-        // Update contacts
-        if (business.getContacts() != null) {
-            business.getContacts().forEach(contact ->
-            {
-                contact.setBusinessId(business.getId());
-                contactDao.updateContactById(contact.getId(), contact);
-            });
-        }
-
-        // Update services
-        if (business.getServices() != null) {
-            business.getServices().forEach(service ->
-            {
-                salonServiceDao.updateServiceById(service.getId(), service);
-            });
-        }
-
-        return row;
     }
 
     @Override
