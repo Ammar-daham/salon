@@ -194,7 +194,7 @@ Root causes:
   but there are zero `@Valid`/`@NotBlank`/`@Email`/`@Size` annotations. Password strength and email
   format are unchecked server-side; request bodies bind straight onto domain models (mass assignment
   of `role`, `status`, ids). **→ [`feature/salon-backend-request-validation`](../VERSION_CONTROL_GUIDE.md#br-1-4)**
-- <a id="be-24"></a>**BE-24 — Session fixation.** `AuthController.login` saves the security context
+- <a id="be-24"></a>✅ **BE-24 — Session fixation.** `AuthController.login` saves the security context
   manually and never rotates the session id. Call `request.changeSessionId()` before `saveContext`.
   **→ [`fix/salon-backend-session-hardening`](../VERSION_CONTROL_GUIDE.md#br-0-11)**
 - <a id="be-25"></a>**BE-25 — Secure cookie not enforced.** No `server.servlet.session.cookie.secure: true`,

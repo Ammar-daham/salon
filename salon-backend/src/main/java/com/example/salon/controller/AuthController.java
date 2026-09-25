@@ -49,6 +49,12 @@ public class AuthController
 			throw new BaseException("Invalid email or password", ErrorCode.UNAUTHORIZED);
 		}
 
+		// Rotate the id of any session that existed before login, so an id planted or observed
+		// while anonymous can't be reused as this user's authenticated session (session fixation).
+		if (servletRequest.getSession(false) != null) {
+			servletRequest.changeSessionId();
+		}
+
 		SecurityContext context = SecurityContextHolder.createEmptyContext();
 		context.setAuthentication(authResult);
 		SecurityContextHolder.setContext(context);

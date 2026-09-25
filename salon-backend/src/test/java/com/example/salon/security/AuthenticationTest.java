@@ -4,7 +4,9 @@ import com.example.salon.support.IntegrationTest;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpSession;
+import org.springframework.test.web.servlet.MvcResult;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.nullValue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -71,5 +73,20 @@ class AuthenticationTest extends IntegrationTest
 		mvc.perform(post("/api/v1/auth/logout").session(session)).andExpect(status().isOk());
 
 		mvc.perform(get("/api/v1/auth/me").session(session)).andExpect(status().isUnauthorized());
+	}
+
+	@Test
+	void loginRotatesThePreExistingSessionId() throws Exception
+	{
+		MockHttpSession session = new MockHttpSession();
+		String anonymousId = session.getId();
+
+		MvcResult result = mvc.perform(post("/api/v1/auth/login").session(session)
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(loginBody(Fixture.GLOW_EMPLOYEE, Fixture.PASSWORD)))
+				.andExpect(status().isOk())
+				.andReturn();
+
+		assertThat(result.getRequest().getSession(false).getId()).isNotEqualTo(anonymousId);
 	}
 }
