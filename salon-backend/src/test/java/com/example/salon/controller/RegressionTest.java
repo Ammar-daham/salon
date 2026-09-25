@@ -201,6 +201,15 @@ class RegressionTest extends IntegrationTest
 	/** BE-27: a server-side NPE (here, an update body with no role) is a logged 500, no longer a masked 400. */
 	@Test
 	void aServerSideNullPointerBecomesA500NotAMasked400() throws Exception
+	{
+		mvc.perform(put("/api/v1/users/" + Fixture.GLOW_EMPLOYEE_ID).session(loginAs(Fixture.GLOW_ADMIN))
+						.contentType(MediaType.APPLICATION_JSON)
+						.content("""
+								{"first_name": "Mia", "last_name": "Stylist"}
+								"""))
+				.andExpect(status().isInternalServerError());
+	}
+	
 	/** BE-07: a nested new child (id null) on a business update used to auto-unbox to an NPE / 400. */
 	@Test
 	void updatingABusinessWithANewNestedChildNoLongerCrashes() throws Exception
