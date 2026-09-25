@@ -131,10 +131,6 @@ public class UserDataAccessService implements UserDao
 	@Override
 	public long updateUserById(long id, User user)
 	{
-		// BE-06/BE-07/BE-21: update only the user's own columns. Walking client-supplied
-		// contacts/addresses let a caller edit any child row by id (IDOR), crashed on a new child
-		// whose id is null, and duplicated the same loop in BusinessDataAccessService. Children are
-		// edited through their own ownership-checked endpoints (/contacts, /addresses).
 		String sql = "UPDATE users SET first_name = ?, last_name = ?, role = ? WHERE id = ?";
 		return (long) jdbcTemplate.update(sql, user.getFirstName(), user.getLastName(), user.getRole().name(), id);
 	}
@@ -142,9 +138,6 @@ public class UserDataAccessService implements UserDao
 	@Override
 	public long deleteUserById(long id)
 	{
-		// delete the user's own children from the canonical record, not from a client body.
-		// Children first: the FKs are ON DELETE SET NULL, so deleting the user first would orphan
-		// them (and a contact's globally-unique value would stay burned).
 		contactDao.getContactsForUser(id).forEach(contact -> contactDao.deleteContactById(contact.getId()));
 		addressDao.getAddressesForUser(id).forEach(address -> addressDao.deleteAddressById(address.getId()));
 
