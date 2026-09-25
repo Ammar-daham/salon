@@ -17,8 +17,6 @@ public enum ErrorCode
 	private final HttpStatus status;
 	private final String code;
 
-	// BE-18: the old constructor discarded its code argument (and the NOT_FOUND label was a typo,
-	// "NOT-FOUNT_404"), so the wire never carried a stable code. Both are now stored and exposed.
 	ErrorCode(HttpStatus status, String code)
 	{
 		this.status = status;
