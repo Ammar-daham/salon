@@ -142,7 +142,7 @@ Root causes:
 - <a id="be-13"></a>**BE-13 — `201 Created` / `Location` never sent.** Controllers build
   `ResponseEntity.created(...)` then call `.getBody()`, discarding status and header; every create returns 200.
   **→ [`fix/salon-backend-created-responses`](../VERSION_CONTROL_GUIDE.md#br-1-5)**
-- <a id="be-14"></a>**BE-14 — Stale sessions.** The session stores a snapshot of the `User`
+- <a id="be-14"></a>✅ **BE-14 — Stale sessions.** The session stores a snapshot of the `User`
   (`AuthenticatedUser`). A demoted, re-scoped or deleted user keeps their old role and access until the
   session expires. **→ [`fix/salon-backend-session-hardening`](../VERSION_CONTROL_GUIDE.md#br-0-11)**
 

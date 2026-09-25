@@ -1,5 +1,6 @@
 package com.example.salon.security;
 
+import com.example.salon.dao.UserDao;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -46,9 +47,9 @@ public class SecurityConfig
 	}
 
 	@Bean
-	public SecurityContextRepository securityContextRepository()
+	public SecurityContextRepository securityContextRepository(UserDao userDao)
 	{
-		return new HttpSessionSecurityContextRepository();
+		return new RefreshingSecurityContextRepository(new HttpSessionSecurityContextRepository(), userDao);
 	}
 
 	@Bean
