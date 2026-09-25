@@ -14,8 +14,10 @@ likely hit in normal use), **Medium** (real bug, narrower trigger), **Low** (hyg
 Each row there links back here. Frontend findings (`FE-xx`) use the same scheme.
 A ✅ next to a finding's ID means its fix has landed; the parenthetical *(fixed: …)* / *(done: …)* note
 on that finding describes what changed and which test guards it.
+fix/salon-backend-error-handling
 So far: ✅ BE-01, ✅ BE-02, ✅ BE-03, ✅ BE-04, ✅ BE-05, ✅ BE-09, ✅ BE-10, ✅ BE-11, ✅ BE-18,
 ✅ BE-27, ✅ BE-31, ✅ BE-33, ✅ BE-34.
+
 
 ## 0. Honest summary
 
@@ -78,16 +80,24 @@ Root causes:
 ## 2. Correctness bugs
 
 ### Critical
-- <a id="be-06"></a>**BE-06 — IDOR via nested payloads.** `BusinessDataAccessService.updateBusinessById/deleteBusiness`
+- <a id="be-06"></a>✅ **BE-06 — IDOR via nested payloads.** `BusinessDataAccessService.updateBusinessById/deleteBusiness`
   and `UserDataAccessService.updateUserById/deleteUserById` act on client-supplied child ids (addresses,
   contacts, services) with no check that the child belongs to the parent in the path.
   `PUT /businesses/1` with `{"contacts":[{"id":999,...}]}` edits contact 999 whoever owns it.
   **→ [`fix/salon-backend-nested-child-writes`](../VERSION_CONTROL_GUIDE.md#br-0-9)**
-- <a id="be-07"></a>**BE-07 — Adding a new child to an existing business/user crashes.** Nested
+  *(fixed: `updateBusinessById`/`updateUserById` update only the parent's own columns and no longer walk
+  client-supplied child collections, so a nested foreign child id can't edit a row the caller doesn't own;
+  the delete side already stopped trusting the body in [BE-10](#be-10). Children are edited through their own
+  ownership-checked endpoints. Guarded by `businessUpdateCannotEditAnotherSalonsContactViaNestedId` in `AuthorizationRulesTest`.)*
+- <a id="be-07"></a>✅ **BE-07 — Adding a new child to an existing business/user crashes.** Nested
   `address.getId()` / `contact.getId()` / `service.getId()` (a `null` `Long` for new rows) is auto-unboxed
   into `updateXById(long id, ...)` → NPE → masked as `400 Null argument`. There is no working way to add
   an address/contact to an existing business or user.
   **→ [`fix/salon-backend-nested-child-writes`](../VERSION_CONTROL_GUIDE.md#br-0-9)**
+  *(fixed: with nested writes removed, a new child in the payload is ignored instead of auto-unboxing to an
+  NPE/400. Guarded by `updatingABusinessWithANewNestedChildNoLongerCrashes` and
+  `updatingAUserWithANewNestedChildNoLongerCrashes` in `RegressionTest`. A dedicated endpoint to add a
+  child to an existing parent is a separate feature, out of scope here.)*
 - <a id="be-41"></a>**BE-41 — Non-admins can't read *any* address or contact, not even their own.**
   Found by the first test run on 2026-09-23. `AddressDataAccessService.getAddressById` and
   `ContactDataAccessService.getContactById` never select `business_id`/`user_id`, so the ownership check
@@ -162,9 +172,10 @@ Root causes:
   `BusinessServiceDataAccessService`; stray `;` in `SalonServiceDataAccessService`; `SELECT *` only in
   `UserDataAccessService`; row-count variables named `userId`.
   **→ No dedicated branch** — fix whenever a branch touches that file.
-- <a id="be-21"></a>**BE-21 — Copy-pasted nested-collection sync** between `BusinessDataAccessService` and
+- <a id="be-21"></a>✅ **BE-21 — Copy-pasted nested-collection sync** between `BusinessDataAccessService` and
   `UserDataAccessService`. **→ [`fix/salon-backend-nested-child-writes`](../VERSION_CONTROL_GUIDE.md#br-0-9)**
   (removing nested writes removes the duplication)
+  *(fixed: the duplicated nested-collection sync loops are gone from both DAOs.)*
 
 ### Fixed since the previous audit
 - `users.business_id` is now read and written (`userRowMapper`, `addUser`) and exposed via `AuthUserResponse`.

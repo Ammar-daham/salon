@@ -339,6 +339,21 @@ class AuthorizationRulesTest extends IntegrationTest
 				.andExpect(jsonPath("$.last_name").value("Renamed"));
 	}
 
+	@Test
+	void businessUpdateCannotEditAnotherSalonsContactViaNestedId() throws Exception
+	{
+		// BE-06: nesting a foreign child id in the parent update must not touch that child.
+		mvc.perform(put("/api/v1/businesses/" + Fixture.GLOW).session(loginAs(Fixture.GLOW_ADMIN))
+						.contentType(MediaType.APPLICATION_JSON)
+						.content("""
+								{"name": "Glow Beauty Studio", "contacts": [{"id": %d, "type": "email", "value": "hijacked@evil.test"}]}
+								""".formatted(Fixture.URBAN_CONTACT)))
+				.andExpect(status().isOk());
+
+		mvc.perform(get("/api/v1/contacts/" + Fixture.URBAN_CONTACT).session(loginAs(Fixture.SUPER_ADMIN)))
+				.andExpect(jsonPath("$.value").value("hello@urban.test"));
+	}
+
 	static String serviceBody(String name)
 	{
 		return """
