@@ -144,11 +144,7 @@ public class BusinessDataAccessService implements BusinessDao
                 status = COALESCE(?, status),
                  updated_at = now() WHERE id = ?
                 """;
-        // BE-06/BE-07/BE-21: this update touches only the business's own columns. It no longer walks
-        // client-supplied addresses/contacts/services: doing so let a caller edit any child row by id
-        // regardless of owner (IDOR), crashed on a new child whose id is null, and duplicated the same
-        // loop in UserDataAccessService. Children are edited through their own ownership-checked
-        // endpoints (/addresses, /contacts, /businesses/{id}/services).
+        
         return jdbcTemplate.update(
                 sql,
                 business.getName(),
@@ -162,10 +158,6 @@ public class BusinessDataAccessService implements BusinessDao
     @Override
     public int deleteBusiness(int id) 
     {
-        // delete the children that actually belong to this business, read from the canonical
-        // record - never from a client-supplied body, which could be empty and orphan them. Children
-        // must go first: the addresses/contacts FKs are ON DELETE SET NULL, so deleting the business
-        // first would leave those rows behind (and a contact's globally-unique value burned forever).
         contactDao.getContactsForBusiness((long) id).forEach(contact -> contactDao.deleteContactById(contact.getId()));
         addressDao.getAddressesForBusiness((long) id).forEach(address -> addressDao.deleteAddressById(address.getId()));
         salonServiceDao.getServicesForBusiness((long) id).forEach(service -> salonServiceDao.deleteServiceById(service.getId()));
