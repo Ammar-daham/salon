@@ -118,6 +118,12 @@ public class UserDataAccessService implements UserDao
 	}
 
 	@Override
+	public Optional<User> findById(long id)
+	{
+		return jdbcTemplate.query("SELECT * FROM users WHERE id = ?", userRowMapper(), id).stream().findFirst();
+	}
+
+	@Override
 	public Optional<User> findByEmail(String email)
 	{
 		try {

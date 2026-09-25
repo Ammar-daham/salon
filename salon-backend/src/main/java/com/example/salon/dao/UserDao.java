@@ -15,6 +15,8 @@ public interface UserDao
 
 	User getUserById(int id);
 
+	Optional<User> findById(long id);
+
 	Optional<User> findByEmail(String email);
 
 	long updateUserById(long id, User user);

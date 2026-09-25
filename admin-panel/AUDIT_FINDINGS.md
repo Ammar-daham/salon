@@ -76,6 +76,10 @@ findings it depends on are linked by their `BE-xx` / `DB-xx` IDs.
   [BE-25](../salon-backend/AUDIT_FINDINGS.md#be-25)) — session id not rotated on login; `secure` flag not forced; timeout is the
   implicit 30-minute default. **→ [`fix/salon-backend-session-hardening`](../VERSION_CONTROL_GUIDE.md#br-0-11),
   [`chore/salon-backend-production-config`](../VERSION_CONTROL_GUIDE.md#br-3-4)**
+  *(session fixation fixed by [BE-24](../salon-backend/AUDIT_FINDINGS.md#be-24): the backend now rotates the
+  session id on login, and the browser picks up the new `JSESSIONID` from `Set-Cookie`, so no admin-panel
+  change was needed. The `secure` flag and timeout remain open under
+  [BE-25](../salon-backend/AUDIT_FINDINGS.md#be-25).)*
 
 ### Medium
 - <a id="fe-08"></a>**FE-08 — No frontend tests.** No unit tests for `permissions.ts` / `routeAccess.ts` /
