@@ -35,8 +35,6 @@ public class BusinessSalonServiceService
             businessServiceDao.linkServiceToBusiness(businessId, serviceId);
             salonService.setId(serviceId);
         } catch (DuplicateKeyException ex) {
-            // BE-09: an empty catch returned a service with no id as if it had been created. Surface
-            // the failure as a conflict instead.
             throw new BaseException("Service could not be created due to a conflict.", ErrorCode.DUPLICATE_RESOURCE);
         }
         return salonService;
@@ -57,8 +55,6 @@ public class BusinessSalonServiceService
     public void updateServiceForBusiness(int businessId, int serviceId, SalonService salonService, AuthenticatedUser caller) 
     {
         AccessControl.requireBusinessAccess(caller, businessId);
-        //  Confirm the service really belongs to this business
-        // (getServiceById joins business_service and 404s otherwise) before mutating it.
         getServiceById(businessId, serviceId);
         int row = salonServiceDao.updateServiceById(serviceId, salonService);
         if (row == 0)
