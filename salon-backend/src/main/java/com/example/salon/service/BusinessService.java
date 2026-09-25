@@ -36,9 +36,6 @@ public class BusinessService
         try {
             businessDao.addBusiness(business);
         } catch (DuplicateKeyException ex) {
-            // BE-09/BE-34: a duplicate key must surface as a conflict, never fall through as a success.
-            // Map the known constraints to a clear message and rethrow anything else instead of
-            // returning a half-created business.
             String reason = ex.getMessage();
             if (reason != null && reason.contains("businesses_name_unique"))
                 throw new BaseException("Business with name " + business.getName() + " already exists.", ErrorCode.DUPLICATE_RESOURCE);
@@ -69,7 +66,7 @@ public class BusinessService
     @Transactional
     public void updateBusinessById(int id, Business business, AuthenticatedUser caller) 
     {
-        Business existing = getBusinessById(id); // 404 if it doesn't exist
+        Business existing = getBusinessById(id);
 
         // ADMIN may only edit their own salon; SUPER_ADMIN may edit any.
         AccessControl.requireBusinessAccess(caller, id);
