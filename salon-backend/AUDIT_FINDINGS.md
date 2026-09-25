@@ -14,8 +14,10 @@ likely hit in normal use), **Medium** (real bug, narrower trigger), **Low** (hyg
 Each row there links back here. Frontend findings (`FE-xx`) use the same scheme.
 A ✅ next to a finding's ID means its fix has landed; the parenthetical *(fixed: …)* / *(done: …)* note
 on that finding describes what changed and which test guards it.
-So far: ✅ BE-01, ✅ BE-02, ✅ BE-03, ✅ BE-04, ✅ BE-05, ✅ BE-06, ✅ BE-07, ✅ BE-10, ✅ BE-11,
-✅ BE-21, ✅ BE-31, ✅ BE-33.
+fix/salon-backend-error-handling
+So far: ✅ BE-01, ✅ BE-02, ✅ BE-03, ✅ BE-04, ✅ BE-05, ✅ BE-09, ✅ BE-10, ✅ BE-11, ✅ BE-18,
+✅ BE-27, ✅ BE-31, ✅ BE-33, ✅ BE-34.
+
 
 ## 0. Honest summary
 
@@ -108,10 +110,13 @@ Root causes:
   **→ [`feature/salon-backend-staff-api`](../VERSION_CONTROL_GUIDE.md#br-1-6)**
 
 ### High
-- <a id="be-09"></a>**BE-09 — Duplicate-key swallowed → false success.** `BusinessSalonServiceService.createServiceForBusiness`
+- <a id="be-09"></a>✅ **BE-09 — Duplicate-key swallowed → false success.** `BusinessSalonServiceService.createServiceForBusiness`
   has an empty `catch (DuplicateKeyException)` and returns the service with no id as if it succeeded.
   `BusinessService.addBusiness` only rethrows for two message substrings and silently succeeds on any other.
   **→ [`fix/salon-backend-error-handling`](../VERSION_CONTROL_GUIDE.md#br-0-10)**
+  *(fixed: `createServiceForBusiness` now rethrows a `CONFLICT` instead of swallowing, and `addBusiness`
+  rethrows a `CONFLICT` for any `DuplicateKeyException` it doesn't specifically recognise rather than
+  returning a half-created row. Guarded by `creatingABusinessWithADuplicateNameIsAConflict` in `RegressionTest`.)*
 - <a id="be-10"></a>✅ **BE-10 — DELETE trusts the request body.** `deleteBusiness` / `deleteUserById` delete
   children from the client-sent object instead of the canonical record. An empty body orphans every
   child, and because `contacts.value` is globally UNIQUE an orphaned phone number becomes unusable
@@ -150,10 +155,15 @@ Root causes:
   ([DB-02](#db-02))
 - <a id="be-17"></a>**BE-17 — Deleting a business leaves its staff dangling**, because `users.business_id`
   has no FK. **→ [`fix/salon-backend-schema-integrity`](../VERSION_CONTROL_GUIDE.md#br-1-2)** ([DB-01](#db-01))
-- <a id="be-18"></a>**BE-18 — Typo'd and discarded error codes.** `ContactService` returns `"NOT_FOUNT"`;
+- <a id="be-18"></a>✅ **BE-18 — Typo'd and discarded error codes.** `ContactService` returns `"NOT_FOUNT"`;
   `ErrorCode.NOT_FOUND`'s message is `"NOT-FOUNT_404"`; `ErrorCode`'s constructor discards its
   message/code args, so the frontend gets ad-hoc codes like `"400"`.
   **→ [`fix/salon-backend-error-handling`](../VERSION_CONTROL_GUIDE.md#br-0-10)**
+  *(fixed: `ErrorCode` now stores and exposes a stable `code` (typo removed); `BaseException` takes an
+  `ErrorCode` instead of a hand-typed string, so the `"NOT_FOUNT"` class of typo is gone and all 22 call
+  sites route through the enum. The exception handler emits `ErrorCode.getCode()` everywhere instead of
+  ad-hoc `"400"`/`"INVALID_JSON"`. Guarded by `notFoundErrorsCarryTheStableNotFoundCode` in `RegressionTest`
+  (and the existing `AuthenticationTest` already asserts `errorCode == "UNAUTHORIZED"`).)*
 
 ### Low
 - <a id="be-19"></a>**BE-19 — Naming inconsistencies.** Mixed `int`/`long` id parameters across DAO
@@ -196,8 +206,12 @@ Root causes:
   `getContactsByColumn` are public and only fed literals today; one careless caller away from SQL
   injection. **→ [`feature/repo-pagination`](../VERSION_CONTROL_GUIDE.md#br-3-5)** (fixing the N+1
   rewrites exactly these methods)
-- <a id="be-27"></a>**BE-27 — NPEs silently converted to 400** with no logging — hides real server bugs
+- <a id="be-27"></a>✅ **BE-27 — NPEs silently converted to 400** with no logging — hides real server bugs
   as client errors. **→ [`fix/salon-backend-error-handling`](../VERSION_CONTROL_GUIDE.md#br-0-10)**
+  *(fixed: the `NullPointerException`→400 handler is gone. Any unhandled exception is now a logged 500
+  (`ErrorCode.INTERNAL_ERROR`) via a catch-all; a dedicated `AccessDeniedException` handler keeps
+  authorization failures at 403 so the catch-all can't turn them into 500. Guarded by
+  `aServerSideNullPointerBecomesA500NotAMasked400` in `RegressionTest`.)*
 - <a id="be-28"></a>**BE-28 — CSRF is CORS-only** (disabled, relying on a pinned origin). Defensible, but
   any loosening of `app.cors.allowed-origins` reopens CSRF on every write. Document it or add a
   double-submit token. **→ [`chore/salon-backend-production-config`](../VERSION_CONTROL_GUIDE.md#br-3-4)**
@@ -232,9 +246,12 @@ new users to the caller's business; `application.yml` is not tracked in git.
   (multi-step writes). **→ [`fix/salon-backend-user-scoping`](../VERSION_CONTROL_GUIDE.md#br-0-6)**
   (it rewrites these methods)
   *(fixed: both methods are now `@Transactional`, so their access check + multi-row write commit atomically.)*
-- <a id="be-34"></a>**BE-34 — No logging.** `System.out.println` in `BusinessService` and nowhere else;
+- <a id="be-34"></a>✅ **BE-34 — No logging.** `System.out.println` in `BusinessService` and nowhere else;
   no SLF4J usage; errors are hidden in production (`include-message: never`) with nothing logged
   server-side. **→ [`fix/salon-backend-error-handling`](../VERSION_CONTROL_GUIDE.md#br-0-10)**
+  *(fixed: the `System.out.println` is replaced by an SLF4J logger, and the global exception handler now
+  logs 5xx/database/unexpected failures server-side with their stack traces — so a real bug leaves a trace
+  even though the client response stays generic.)*
 - <a id="be-35"></a>**BE-35 — Stub feature.** `StaffDataAccessService` returns `0`/`List.of()`/`null`,
   isn't a Spring bean, has no controller. **→ [`feature/salon-backend-staff-api`](../VERSION_CONTROL_GUIDE.md#br-1-6)**
 - <a id="be-36"></a>**BE-36 — Unused dependency** `spring-boot-starter-data-jpa` (no entities;

@@ -7,6 +7,8 @@ import com.example.salon.model.Business;
 import com.example.salon.security.AccessControl;
 import com.example.salon.security.AuthenticatedUser;
 import jakarta.transaction.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -16,8 +18,10 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
-public class BusinessService 
+public class BusinessService
 {
+    private static final Logger log = LoggerFactory.getLogger(BusinessService.class);
+
     private final BusinessDao businessDao;
 
     @Autowired
@@ -32,11 +36,13 @@ public class BusinessService
         try {
             businessDao.addBusiness(business);
         } catch (DuplicateKeyException ex) {
-            System.out.println("ex.getMessage() " + ex.getMessage());
-            if (ex.getMessage().contains("businesses_name_unique"))
-                throw new BaseException("Business with name " + business.getName() + " already exists.", "CONFLICT", ErrorCode.DUPLICATE_RESOURCE.getStatus());
-            else if (ex.getMessage().contains("contacts_value_key"))
-                throw new BaseException("Contact already exists.", "CONFLICT", ErrorCode.DUPLICATE_RESOURCE.getStatus());
+            String reason = ex.getMessage();
+            if (reason != null && reason.contains("businesses_name_unique"))
+                throw new BaseException("Business with name " + business.getName() + " already exists.", ErrorCode.DUPLICATE_RESOURCE);
+            if (reason != null && reason.contains("contacts_value_key"))
+                throw new BaseException("Contact already exists.", ErrorCode.DUPLICATE_RESOURCE);
+            log.warn("Unmapped duplicate-key creating business '{}'", business.getName(), ex);
+            throw new BaseException("Business could not be created due to a conflict.", ErrorCode.DUPLICATE_RESOURCE);
         }
         return business;
     }
@@ -52,7 +58,7 @@ public class BusinessService
         try {
             business = businessDao.getBusinessById(id);
         } catch (EmptyResultDataAccessException ex) {
-            throw new BaseException("Business with id " + id + " not found", "NOT_FOUND", ErrorCode.NOT_FOUND.getStatus());
+            throw new BaseException("Business with id " + id + " not found", ErrorCode.NOT_FOUND);
         }
         return business;
     }
@@ -60,7 +66,7 @@ public class BusinessService
     @Transactional
     public void updateBusinessById(int id, Business business, AuthenticatedUser caller) 
     {
-        Business existing = getBusinessById(id); // 404 if it doesn't exist
+        Business existing = getBusinessById(id);
 
         // ADMIN may only edit their own salon; SUPER_ADMIN may edit any.
         AccessControl.requireBusinessAccess(caller, id);
@@ -72,7 +78,7 @@ public class BusinessService
 
         int row = businessDao.updateBusinessById(id, business);
         if (row == 0)
-            throw new BaseException("Business with id " + id + " not found.", "NOT_FOUND", ErrorCode.NOT_FOUND.getStatus());
+            throw new BaseException("Business with id " + id + " not found.", ErrorCode.NOT_FOUND);
     }
 
     @Transactional
@@ -85,6 +91,6 @@ public class BusinessService
 
         int row = businessDao.deleteBusiness(id);
         if (row == 0)
-            throw new BaseException("Business with id " + id + " not found.", "NOT_FOUND", ErrorCode.NOT_FOUND.getStatus());
+            throw new BaseException("Business with id " + id + " not found.", ErrorCode.NOT_FOUND);
     }
 }

@@ -45,7 +45,7 @@ public class AddressService
 		requireWritePermission(id, caller);
 		int row = addressDao.updateAddressById(id, address);
 		if (row == 0)
-			throw new BaseException("Address with id " + id + " not found", "NOT_FOUND", ErrorCode.NOT_FOUND.getStatus());
+			throw new BaseException("Address with id " + id + " not found", ErrorCode.NOT_FOUND);
 	}
 
 	public void deleteAddressById(int id, AuthenticatedUser caller)
@@ -53,7 +53,7 @@ public class AddressService
 		requireWritePermission(id, caller);
 		int row = addressDao.deleteAddressById(id);
 		if (row == 0)
-			throw new BaseException("Address with id " + id + " not found", "NOT_FOUND", ErrorCode.NOT_FOUND.getStatus());
+			throw new BaseException("Address with id " + id + " not found", ErrorCode.NOT_FOUND);
 	}
 
 	private void requireWritePermission(int id, AuthenticatedUser caller)
@@ -72,7 +72,7 @@ public class AddressService
 		try {
 			return addressDao.getAddressById(id);
 		} catch (EmptyResultDataAccessException e) {
-			throw new BaseException("Address with id " + id + " not found", "NOT_FOUND", ErrorCode.NOT_FOUND.getStatus());
+			throw new BaseException("Address with id " + id + " not found", ErrorCode.NOT_FOUND);
 		}
 	}
 }

@@ -1,20 +1,20 @@
 package com.example.salon.exception;
 
-import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import lombok.Getter;
 import org.springframework.http.HttpStatus;
 
+@Getter
 @EqualsAndHashCode(callSuper = true)
-@NoArgsConstructor(force = true)
-@Data
-public class BaseException extends RuntimeException {
+public class BaseException extends RuntimeException 
+{
     private final String errorCode;
     private final HttpStatus status;
 
-    public BaseException(String message, String errorCode, HttpStatus status) {
+    public BaseException(String message, ErrorCode errorCode) 
+    {
         super(message);
-        this.errorCode = errorCode;
-        this.status = status;
+        this.errorCode = errorCode.getCode();
+        this.status = errorCode.getStatus();
     }
 }

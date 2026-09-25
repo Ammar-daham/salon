@@ -45,7 +45,7 @@ public class ContactService
 		requireWritePermission(id, caller);
 		int row = contactDao.updateContactById(id, contact);
 		if (row == 0)
-			throw new BaseException("Contact with id " + id + " not found", "NOT_FOUND", ErrorCode.NOT_FOUND.getStatus());
+			throw new BaseException("Contact with id " + id + " not found", ErrorCode.NOT_FOUND);
 	}
 
 	public void delectContactById(int id, AuthenticatedUser caller)
@@ -53,7 +53,7 @@ public class ContactService
 		requireWritePermission(id, caller);
 		int row = contactDao.deleteContactById(id);
 		if (row == 0)
-			throw new BaseException("Contact with id " + id + " not found", "NOT_FOUNT", ErrorCode.NOT_FOUND.getStatus());
+			throw new BaseException("Contact with id " + id + " not found", ErrorCode.NOT_FOUND);
 	}
 
 	private void requireWritePermission(int id, AuthenticatedUser caller)
@@ -72,7 +72,7 @@ public class ContactService
 		try {
 			return contactDao.getContactById(id);
 		} catch (EmptyResultDataAccessException e) {
-			throw new BaseException("Contact with id " + id + " not found", "NOT_FOUND", ErrorCode.NOT_FOUND.getStatus());
+			throw new BaseException("Contact with id " + id + " not found", ErrorCode.NOT_FOUND);
 		}
 	}
 }

@@ -35,7 +35,7 @@ public class BusinessSalonServiceService
             businessServiceDao.linkServiceToBusiness(businessId, serviceId);
             salonService.setId(serviceId);
         } catch (DuplicateKeyException ex) {
-
+            throw new BaseException("Service could not be created due to a conflict.", ErrorCode.DUPLICATE_RESOURCE);
         }
         return salonService;
     }
@@ -46,7 +46,7 @@ public class BusinessSalonServiceService
         try {
             ss = salonServiceDao.getServiceById(businessId, serviceId);
         } catch (EmptyResultDataAccessException ex) {
-            throw new BaseException("Service with id " + serviceId + " not found.", "NOT_FOUND", ErrorCode.NOT_FOUND.getStatus());
+            throw new BaseException("Service with id " + serviceId + " not found.", ErrorCode.NOT_FOUND);
         }
         return ss;
     }
@@ -55,12 +55,10 @@ public class BusinessSalonServiceService
     public void updateServiceForBusiness(int businessId, int serviceId, SalonService salonService, AuthenticatedUser caller) 
     {
         AccessControl.requireBusinessAccess(caller, businessId);
-        //  Confirm the service really belongs to this business
-        // (getServiceById joins business_service and 404s otherwise) before mutating it.
         getServiceById(businessId, serviceId);
         int row = salonServiceDao.updateServiceById(serviceId, salonService);
         if (row == 0)
-            throw new BaseException("Service with id " + serviceId + " not found.", "NOT_FOUND", ErrorCode.NOT_FOUND.getStatus());
+            throw new BaseException("Service with id " + serviceId + " not found.", ErrorCode.NOT_FOUND);
     }
 
     @Transactional
@@ -70,6 +68,6 @@ public class BusinessSalonServiceService
         getServiceById(businessId, serviceId);
         int row = salonServiceDao.deleteServiceById(serviceId);
         if (row == 0)
-            throw new BaseException("Service with id " + serviceId + " not found.", "NOT_FOUND", ErrorCode.NOT_FOUND.getStatus());
+            throw new BaseException("Service with id " + serviceId + " not found.", ErrorCode.NOT_FOUND);
     }
 }
