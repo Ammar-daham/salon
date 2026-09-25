@@ -176,4 +176,28 @@ class RegressionTest extends IntegrationTest
 		mvc.perform(get("/api/v1/contacts/" + Fixture.GLOW_EMPLOYEE_PERSONAL_CONTACT).session(superAdmin))
 				.andExpect(status().isNotFound());
 	}
+
+	/** BE-07: a nested new child (id null) on a business update used to auto-unbox to an NPE / 400. */
+	@Test
+	void updatingABusinessWithANewNestedChildNoLongerCrashes() throws Exception
+	{
+		mvc.perform(put("/api/v1/businesses/" + Fixture.GLOW).session(loginAs(Fixture.GLOW_ADMIN))
+						.contentType(MediaType.APPLICATION_JSON)
+						.content("""
+								{"name": "Glow Beauty Studio", "contacts": [{"type": "email", "value": "brand-new@glow.test"}]}
+								"""))
+				.andExpect(status().isOk());
+	}
+
+	/** BE-07: same for a user update with a nested new child. */
+	@Test
+	void updatingAUserWithANewNestedChildNoLongerCrashes() throws Exception
+	{
+		mvc.perform(put("/api/v1/users/" + Fixture.GLOW_EMPLOYEE_ID).session(loginAs(Fixture.GLOW_ADMIN))
+						.contentType(MediaType.APPLICATION_JSON)
+						.content("""
+								{"first_name": "Mia", "last_name": "Stylist", "role": "EMPLOYEE", "contacts": [{"type": "phone", "value": "+49 30 0000000"}]}
+								"""))
+				.andExpect(status().isOk());
+	}
 }

@@ -66,6 +66,7 @@ public abstract class IntegrationTest
 		public static final long GLOW_ADDRESS = 1;
 		public static final long GLOW_EMPLOYEE_PERSONAL_ADDRESS = 2;
 		public static final long GLOW_CONTACT = 1;
+		public static final long URBAN_CONTACT = 2;
 		public static final long GLOW_EMPLOYEE_PERSONAL_CONTACT = 3;
 
 		public static final long GLOW_HAIRCUT = 1;

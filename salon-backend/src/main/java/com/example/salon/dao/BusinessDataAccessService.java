@@ -144,7 +144,8 @@ public class BusinessDataAccessService implements BusinessDao
                 status = COALESCE(?, status),
                  updated_at = now() WHERE id = ?
                 """;
-        int row = jdbcTemplate.update(
+        
+        return jdbcTemplate.update(
                 sql,
                 business.getName(),
                 business.getDescription(),
@@ -152,43 +153,11 @@ public class BusinessDataAccessService implements BusinessDao
                 business.getStatus() == null ? null : business.getStatus().name(),
                 id
         );
-
-        // Update addresses
-        if (business.getAddresses() != null) {
-            business.getAddresses().forEach(address ->
-            {
-                address.setBusinessId(business.getId());
-                addressDao.updateAddressById(address.getId(), address);
-            });
-        }
-
-        // Update contacts
-        if (business.getContacts() != null) {
-            business.getContacts().forEach(contact ->
-            {
-                contact.setBusinessId(business.getId());
-                contactDao.updateContactById(contact.getId(), contact);
-            });
-        }
-
-        // Update services
-        if (business.getServices() != null) {
-            business.getServices().forEach(service ->
-            {
-                salonServiceDao.updateServiceById(service.getId(), service);
-            });
-        }
-
-        return row;
     }
 
     @Override
     public int deleteBusiness(int id) 
     {
-        // delete the children that actually belong to this business, read from the canonical
-        // record - never from a client-supplied body, which could be empty and orphan them. Children
-        // must go first: the addresses/contacts FKs are ON DELETE SET NULL, so deleting the business
-        // first would leave those rows behind (and a contact's globally-unique value burned forever).
         contactDao.getContactsForBusiness((long) id).forEach(contact -> contactDao.deleteContactById(contact.getId()));
         addressDao.getAddressesForBusiness((long) id).forEach(address -> addressDao.deleteAddressById(address.getId()));
         salonServiceDao.getServicesForBusiness((long) id).forEach(service -> salonServiceDao.deleteServiceById(service.getId()));
