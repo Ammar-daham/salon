@@ -15,8 +15,8 @@ Each row there links back here. Frontend findings (`FE-xx`) use the same scheme.
 A ✅ next to a finding's ID means its fix has landed; the parenthetical *(fixed: …)* / *(done: …)* note
 on that finding describes what changed and which test guards it.
 fix/salon-backend-error-handling
-So far: ✅ BE-01, ✅ BE-02, ✅ BE-03, ✅ BE-04, ✅ BE-05, ✅ BE-09, ✅ BE-10, ✅ BE-11, ✅ BE-18,
-✅ BE-27, ✅ BE-31, ✅ BE-33, ✅ BE-34.
+So far: ✅ BE-01, ✅ BE-02, ✅ BE-03, ✅ BE-04, ✅ BE-05, ✅ BE-09, ✅ BE-10, ✅ BE-11, ✅ BE-14,
+✅ BE-18, ✅ BE-24, ✅ BE-27, ✅ BE-31, ✅ BE-33, ✅ BE-34.
 
 
 ## 0. Honest summary
@@ -145,6 +145,9 @@ Root causes:
 - <a id="be-14"></a>✅ **BE-14 — Stale sessions.** The session stores a snapshot of the `User`
   (`AuthenticatedUser`). A demoted, re-scoped or deleted user keeps their old role and access until the
   session expires. **→ [`fix/salon-backend-session-hardening`](../VERSION_CONTROL_GUIDE.md#br-0-11)**
+  *(fixed: `RefreshingSecurityContextRepository` wraps the session repository and re-reads the user by id
+  on every request, so a role or business change applies on the next request. A deleted user, or one
+  without a password hash, has their session invalidated and gets a 401. Guarded by `SessionRefreshTest`.)*
 
 ### Medium
 - <a id="be-15"></a>**BE-15 — N+1 queries, no pagination.** `getBusinesses()` runs 1 + 3N queries;
@@ -197,6 +200,8 @@ Root causes:
 - <a id="be-24"></a>✅ **BE-24 — Session fixation.** `AuthController.login` saves the security context
   manually and never rotates the session id. Call `request.changeSessionId()` before `saveContext`.
   **→ [`fix/salon-backend-session-hardening`](../VERSION_CONTROL_GUIDE.md#br-0-11)**
+  *(fixed: `login` now calls `changeSessionId()` on any pre-existing session before saving the context.
+  Guarded by `AuthenticationTest.loginRotatesThePreExistingSessionId`.)*
 - <a id="be-25"></a>**BE-25 — Secure cookie not enforced.** No `server.servlet.session.cookie.secure: true`,
   no HTTPS requirement for production; session timeout is the implicit 30-minute default.
   **→ [`chore/salon-backend-production-config`](../VERSION_CONTROL_GUIDE.md#br-3-4)**
