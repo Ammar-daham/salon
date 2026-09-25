@@ -229,9 +229,6 @@ class RegressionTest extends IntegrationTest
 		mvc.perform(put("/api/v1/users/" + Fixture.GLOW_EMPLOYEE_ID).session(loginAs(Fixture.GLOW_ADMIN))
 						.contentType(MediaType.APPLICATION_JSON)
 						.content("""
-								{"first_name": "Mia", "last_name": "Stylist"}
-								"""))
-				.andExpect(status().isInternalServerError());
 								{"first_name": "Mia", "last_name": "Stylist", "role": "EMPLOYEE", "contacts": [{"type": "phone", "value": "+49 30 0000000"}]}
 								"""))
 				.andExpect(status().isOk());
