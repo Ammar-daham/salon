@@ -9,7 +9,7 @@ behaviour it depends on.
 frontend-specific findings only.
 
 A ✅ next to a finding's ID means its fix has landed; the parenthetical *(fixed: …)* note on that
-finding says what changed. So far: ✅ FE-09.
+finding says what changed. So far: ✅ FE-01, ✅ FE-09.
 
 ## 0. Honest summary
 
@@ -46,13 +46,17 @@ branch's row in [`VERSION_CONTROL_GUIDE.md` §9](../VERSION_CONTROL_GUIDE.md#9-b
 findings it depends on are linked by their `BE-xx` / `DB-xx` IDs.
 
 ### Critical — backend holes the UI is currently papering over
-- <a id="fe-01"></a>**FE-01 — Hiding a button is the only thing stopping an ADMIN from editing/deleting
+- <a id="fe-01"></a>✅ **FE-01 — Hiding a button is the only thing stopping an ADMIN from editing/deleting
   other salons.** `src/lib/auth/permissions.ts` withholds `business:delete` and `user:*` from ADMIN
   *because* the backend doesn't enforce ownership. Verified live: an ADMIN can approve another salon,
   edit another salon's services, list every user, and promote themselves to SUPER_ADMIN with plain API
   calls ([BE-01](../salon-backend/AUDIT_FINDINGS.md#be-01)–[BE-05](../salon-backend/AUDIT_FINDINGS.md#be-05)). Fix is backend-side; once fixed, revisit which grants
   ADMIN should get. **→ [`test/admin-panel-permission-matrix`](../VERSION_CONTROL_GUIDE.md#br-0-12)** (after
   [0.3](../VERSION_CONTROL_GUIDE.md#br-0-3)–[0.6](../VERSION_CONTROL_GUIDE.md#br-0-6) merge)
+  *(fixed: with BE-01–BE-05 enforced server-side, ADMIN now gets `user:list/create/edit/delete` — the
+  Users page shows only their own salon's accounts. `business:delete` stays SUPER_ADMIN-only: deleting a
+  salon is a platform decision and still leaves its staff dangling ([BE-17](../salon-backend/AUDIT_FINDINGS.md#be-17)).
+  The full role × permission matrix is locked in by `permissions.test.ts` and `routeAccess.test.ts`.)*
 - <a id="fe-02"></a>**FE-02 — Client-side route guarding only.** `RouteGuard` / `routeAccess.ts` are UX,
   not security (and documented as such). Acceptable *only* once the backend enforces the same rules.
   **→ [`fix/salon-backend-business-tenant-scoping`](../VERSION_CONTROL_GUIDE.md#br-0-4),
@@ -82,6 +86,9 @@ findings it depends on are linked by their `BE-xx` / `DB-xx` IDs.
   the mappers, and no e2e (Playwright) for sign-in and CRUD flows. The permission matrix and wire
   mappers are exactly where regressions will hide.
   **→ [`test/admin-panel-permission-matrix`](../VERSION_CONTROL_GUIDE.md#br-0-12), [`test/admin-panel-e2e-smoke`](../VERSION_CONTROL_GUIDE.md#br-3-8)**
+  *(unit tests done: Vitest (`npm test`) now covers `permissions.ts`, `routeAccess.ts` and the auth, user and
+  business mappers. The Playwright e2e half stays open under
+  [`test/admin-panel-e2e-smoke`](../VERSION_CONTROL_GUIDE.md#br-3-8).)*
 - <a id="fe-09"></a>✅ **FE-09 — Deletes echo the whole record in the DELETE body.** `businesses.api.ts` and
   `users.api.ts` re-fetch the record and send it back so the backend can cascade children
   ([BE-10](../salon-backend/AUDIT_FINDINGS.md#be-10)). **→ [`refactor/admin-panel-drop-delete-bodies`](../VERSION_CONTROL_GUIDE.md#br-0-8)** (after
