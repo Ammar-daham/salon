@@ -15,7 +15,6 @@ public interface UserDao
 
 	User getUserById(int id);
 
-	/** The user row alone, without addresses or contacts. */
 	Optional<User> findById(long id);
 
 	Optional<User> findByEmail(String email);
