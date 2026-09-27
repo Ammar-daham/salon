@@ -64,14 +64,7 @@ const SUPER_ADMIN_GRANTS: Permission[] = [
 
 const ADMIN_GRANTS: Permission[] = [
 	"dashboard:view",
-	// No business:list — that page is the platform-wide directory.
-	// No business:delete — the backend would let an admin delete their own salon,
-	// but removing a salon is a platform decision, and today it also leaves the
-	// salon's staff rows dangling (BE-17).
 	"business:view", "business:edit",
-	// The backend scopes GET /users to the caller's business and checks
-	// ownership on PUT/DELETE (BE-01, BE-05), and refuses SUPER_ADMIN
-	// promotion (BE-04), so the Users page is safe for an admin.
 	"user:list", "user:create", "user:edit", "user:delete",
 	"employee:list", "employee:create", "employee:edit", "employee:delete",
 	"customer:list", "customer:create", "customer:edit", "customer:delete",
