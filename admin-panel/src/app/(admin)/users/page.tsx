@@ -3,7 +3,7 @@ import UserListView from "@/features/users/UserListView";
 
 export const metadata: Metadata = {
 	title: "Users · Salon Admin",
-	description: "Every account on the platform.",
+	description: "User accounts and their roles.",
 };
 
 export default function UsersPage() {

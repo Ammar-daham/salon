@@ -172,7 +172,11 @@ export default function UserListView() {
 		<>
 			<PageHeader
 				title="Users"
-				description="Every account on the platform, across all salons."
+				description={
+					currentUser?.role === "SUPER_ADMIN"
+						? "Every account on the platform, across all salons."
+						: "Every account in your salon."
+				}
 				actions={
 					canCreate && (
 						<Button
