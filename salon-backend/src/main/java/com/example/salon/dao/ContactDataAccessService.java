@@ -98,18 +98,23 @@ public class ContactDataAccessService implements ContactDao
 	{
 		String sql = """
 				SELECT id, type, value,
-				created_at, updated_at
+				created_at, updated_at,
+				business_id, user_id
 				FROM contacts WHERE id = ?
 				""";
 		return jdbcTemplate.queryForObject(sql, (rs, i) -> {
 					Timestamp updatedAt = rs.getTimestamp("updated_at");
-					return new Contact(
+					Contact contact = new Contact(
 							rs.getLong("id"),
 							rs.getString("type"),
 							rs.getString("value"),
 							rs.getTimestamp("created_at").toInstant(),
 							updatedAt != null ? updatedAt.toInstant() : null
 					);
+					// ContactService's owner-or-admin check needs the owner, so read it here.
+					contact.setBusinessId(rs.getObject("business_id", Long.class));
+					contact.setUserId(rs.getObject("user_id", Long.class));
+					return contact;
 				},
 				id
 		);

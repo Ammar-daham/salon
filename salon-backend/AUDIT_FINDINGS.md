@@ -98,13 +98,17 @@ Root causes:
   NPE/400. Guarded by `updatingABusinessWithANewNestedChildNoLongerCrashes` and
   `updatingAUserWithANewNestedChildNoLongerCrashes` in `RegressionTest`. A dedicated endpoint to add a
   child to an existing parent is a separate feature, out of scope here.)*
-- <a id="be-41"></a>**BE-41 — Non-admins can't read *any* address or contact, not even their own.**
+- <a id="be-41"></a>✅ **BE-41 — Non-admins can't read *any* address or contact, not even their own.**
   Found by the first test run on 2026-09-23. `AddressDataAccessService.getAddressById` and
   `ContactDataAccessService.getContactById` never select `business_id`/`user_id`, so the ownership check
   in `AddressService`/`ContactService` always sees `null` owners: a salon's public address and a user's
   own personal contact both return 403 to everyone but admins. The "owner or admin" rule from commit
   79b3e2e has never worked. Covered by two `@Disabled` tests in `KnownIssuesTest`.
   **→ [`fix/salon-backend-address-contact-ownership`](../VERSION_CONTROL_GUIDE.md#br-0-13)**
+  *(fixed: `getAddressById`/`getContactById` now select `business_id` and `user_id`, so owners can read
+  their own personal records, anyone signed in can read a salon's, and business-owned records take the
+  admin-only write path. The two tests moved from `KnownIssuesTest` to `AuthorizationRulesTest`, plus
+  `employeesCannotEditTheirSalonsAddressOrContact` and `ownersCanEditTheirOwnPersonalContact`.)*
 - <a id="be-08"></a>**BE-08 — `Staff` constructor drops fields.** [`Staff.java:14-16`](src/main/java/com/example/salon/model/Staff.java)
   only assigns `id`. Unreachable today (no staff API), but a live defect the moment it's wired up.
   **→ [`feature/salon-backend-staff-api`](../VERSION_CONTROL_GUIDE.md#br-1-6)**
@@ -184,8 +188,8 @@ Root causes:
 - `users.business_id` is now read and written (`userRowMapper`, `addUser`) and exposed via `AuthUserResponse`.
 - Wire format is consistently snake_case; business endpoints are plural (`/api/v1/businesses`).
 - Bulk `GET /users|/addresses|/contacts` restricted to admins. Single-record user access is
-  self-or-admin (still not *business*-scoped — see §1). Single-record address/contact access was
-  *meant* to be owner-or-admin but is broken — see [BE-41](#be-41).
+  self-or-admin (still not *business*-scoped — see §1). Single-record address/contact access is
+  owner-or-admin (fixed in [BE-41](#be-41)).
 
 ## 3. Security
 
@@ -245,8 +249,8 @@ new users to the caller's business; `application.yml` is not tracked in git.
   done by hand.)*
 - <a id="be-32"></a>**BE-32 — Testing: effectively zero.** Start with MockMvc + Testcontainers tests for
   the four exploits in §1. **→ [`test/salon-backend-integration-test-setup`](../VERSION_CONTROL_GUIDE.md#br-0-1)**
-  *(in progress: integration test base, passing tests, and 2 `@Disabled` tests in `KnownIssuesTest`
-  for BE-41; run them with `./gradlew test -PrunKnownIssues`)*
+  *(in progress: integration test base, passing tests, and a `KnownIssuesTest` for `@Disabled`
+  open findings, empty since BE-41 was fixed; run them with `./gradlew test -PrunKnownIssues`)*
 - <a id="be-33"></a>✅ **BE-33 — Missing `@Transactional`** on `UserService.updateUserById/deleteUserById`
   (multi-step writes). **→ [`fix/salon-backend-user-scoping`](../VERSION_CONTROL_GUIDE.md#br-0-6)**
   (it rewrites these methods)
