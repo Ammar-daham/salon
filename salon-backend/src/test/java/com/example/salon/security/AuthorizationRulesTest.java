@@ -14,7 +14,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-/** Rules that hold today. Open findings (tenant isolation, BE-41) are in {@link KnownIssuesTest}. */
+/** Rules that hold today. Open findings are in {@link KnownIssuesTest}. */
 class AuthorizationRulesTest extends IntegrationTest
 {
 	@Test
@@ -70,6 +70,64 @@ class AuthorizationRulesTest extends IntegrationTest
 				.andExpect(status().isForbidden());
 		mvc.perform(get("/api/v1/contacts/" + Fixture.GLOW_EMPLOYEE_PERSONAL_CONTACT).session(stranger))
 				.andExpect(status().isForbidden());
+	}
+
+	@Test
+	void ownersCanReadTheirOwnAddressAndContact() throws Exception
+	{
+		// BE-41: the owner check used to see a null owner, so this was 403 for everyone but admins.
+		MockHttpSession owner = loginAs(Fixture.GLOW_EMPLOYEE);
+
+		mvc.perform(get("/api/v1/addresses/" + Fixture.GLOW_EMPLOYEE_PERSONAL_ADDRESS).session(owner))
+				.andExpect(status().isOk());
+		mvc.perform(get("/api/v1/contacts/" + Fixture.GLOW_EMPLOYEE_PERSONAL_CONTACT).session(owner))
+				.andExpect(status().isOk());
+	}
+
+	@Test
+	void anySignedInUserCanReadASalonsPublicAddressAndContact() throws Exception
+	{
+		MockHttpSession otherSalonEmployee = loginAs(Fixture.URBAN_EMPLOYEE);
+
+		mvc.perform(get("/api/v1/addresses/" + Fixture.GLOW_ADDRESS).session(otherSalonEmployee))
+				.andExpect(status().isOk());
+		mvc.perform(get("/api/v1/contacts/" + Fixture.GLOW_CONTACT).session(otherSalonEmployee))
+				.andExpect(status().isOk());
+	}
+
+	@Test
+	void employeesCannotEditTheirSalonsAddressOrContact() throws Exception
+	{
+		// Now that the owner is read, a business-owned record takes the admin-only write path.
+		MockHttpSession employee = loginAs(Fixture.GLOW_EMPLOYEE);
+
+		mvc.perform(put("/api/v1/addresses/" + Fixture.GLOW_ADDRESS).session(employee)
+						.contentType(MediaType.APPLICATION_JSON)
+						.content("""
+								{"street": "1 Hijack Rd", "city": "Berlin", "country": "Germany", "postal_code": "10119"}
+								"""))
+				.andExpect(status().isForbidden());
+		mvc.perform(put("/api/v1/contacts/" + Fixture.GLOW_CONTACT).session(employee)
+						.contentType(MediaType.APPLICATION_JSON)
+						.content("""
+								{"type": "phone", "value": "+49 30 0000000"}
+								"""))
+				.andExpect(status().isForbidden());
+	}
+
+	@Test
+	void ownersCanEditTheirOwnPersonalContact() throws Exception
+	{
+		MockHttpSession owner = loginAs(Fixture.GLOW_EMPLOYEE);
+
+		mvc.perform(put("/api/v1/contacts/" + Fixture.GLOW_EMPLOYEE_PERSONAL_CONTACT).session(owner)
+						.contentType(MediaType.APPLICATION_JSON)
+						.content("""
+								{"type": "phone", "value": "+49 30 9990099"}
+								"""))
+				.andExpect(status().is2xxSuccessful());
+		mvc.perform(get("/api/v1/contacts/" + Fixture.GLOW_EMPLOYEE_PERSONAL_CONTACT).session(owner))
+				.andExpect(jsonPath("$.value").value("+49 30 9990099"));
 	}
 
 	@Test

@@ -42,7 +42,7 @@ jobs:
       # `build` compiles main + test, runs the Testcontainers suite (Docker is
       # preinstalled on ubuntu-latest) and assembles the war. The @Disabled
       # KnownIssuesTest cases stay disabled here: they assert bugs that are still
-      # open (BE-01–BE-05, BE-41), so running them would make CI permanently red.
+      # open, so running them would make CI permanently red.
       - name: Build and test
         run: ./gradlew build
 

@@ -119,12 +119,13 @@ public class AddressDataAccessService implements AddressDao
 				SELECT id, street, city,
 				country, postal_code,
 				latitude, longitude,
-				created_at, updated_at
+				created_at, updated_at,
+				business_id, user_id
 				FROM addresses WHERE id = ?
 				""";
 		return jdbcTemplate.queryForObject(sql, (rs, i) -> {
 					Timestamp updatedAt = rs.getTimestamp("updated_at");
-					return new Address(
+					Address address = new Address(
 							rs.getLong("id"),
 							rs.getString("country"),
 							rs.getString("city"),
@@ -135,6 +136,10 @@ public class AddressDataAccessService implements AddressDao
 							rs.getTimestamp("created_at").toInstant(),
 							updatedAt != null ? updatedAt.toInstant() : null
 					);
+					// AddressService's owner-or-admin check needs the owner, so read it here.
+					address.setBusinessId(rs.getObject("business_id", Long.class));
+					address.setUserId(rs.getObject("user_id", Long.class));
+					return address;
 				},
 				id
 		);
