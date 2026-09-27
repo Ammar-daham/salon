@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { toCreateUserRequest, toUpdateUserRequest, toUser, type UserDto } from "./users.mappers";
+import { toCreateUserRequest, toUpdateUserRequest, toUser, type UserDto } from "@/lib/resources/users/users.mappers";
 
 const dto: UserDto = {
 	id: 4,

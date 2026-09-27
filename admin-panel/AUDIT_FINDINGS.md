@@ -56,7 +56,7 @@ findings it depends on are linked by their `BE-xx` / `DB-xx` IDs.
   *(fixed: with BE-01–BE-05 enforced server-side, ADMIN now gets `user:list/create/edit/delete` — the
   Users page shows only their own salon's accounts. `business:delete` stays SUPER_ADMIN-only: deleting a
   salon is a platform decision and still leaves its staff dangling ([BE-17](../salon-backend/AUDIT_FINDINGS.md#be-17)).
-  The full role × permission matrix is locked in by `permissions.test.ts` and `routeAccess.test.ts`.)*
+  The full role × permission matrix is locked in by `src/test/lib/auth/permissions.test.ts` and `routeAccess.test.ts`.)*
 - <a id="fe-02"></a>**FE-02 — Client-side route guarding only.** `RouteGuard` / `routeAccess.ts` are UX,
   not security (and documented as such). Acceptable *only* once the backend enforces the same rules.
   **→ [`fix/salon-backend-business-tenant-scoping`](../VERSION_CONTROL_GUIDE.md#br-0-4),

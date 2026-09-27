@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { Role } from "@/lib/resources/auth/auth.types";
 import { userWithRole } from "@/test/fixtures";
-import { can, canAny, grantableRoles, type Permission } from "./permissions";
+import { can, canAny, grantableRoles, type Permission } from "@/lib/auth/permissions";
 
 const S: Role = "SUPER_ADMIN";
 const A: Role = "ADMIN";

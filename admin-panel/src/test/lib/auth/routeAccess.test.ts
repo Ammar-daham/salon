@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { Role } from "@/lib/resources/auth/auth.types";
 import { userWithRole } from "@/test/fixtures";
-import { canAccessRoute } from "./routeAccess";
+import { canAccessRoute } from "@/lib/auth/routeAccess";
 
 type Access = Record<Exclude<Role, "CUSTOMER">, boolean>;
 

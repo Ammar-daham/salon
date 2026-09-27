@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { toAuthUser } from "./auth.mappers";
+import { toAuthUser } from "@/lib/resources/auth/auth.mappers";
 
 describe("toAuthUser", () => {
 	it("maps the snake_case /auth/me response, including the business", () => {

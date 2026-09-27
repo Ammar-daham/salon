@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { toBusiness, toBusinessRequest, toSalonService, type BusinessDto } from "./businesses.mappers";
+import { toBusiness, toBusinessRequest, toSalonService, type BusinessDto } from "@/lib/resources/businesses/businesses.mappers";
 
 const dto: BusinessDto = {
 	id: 1,
