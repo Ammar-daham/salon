@@ -64,7 +64,6 @@ public class BusinessService
         return business;
     }
 
-    /** Existence lookup with no visibility check, for internal callers. Controllers use the overload above. */
     public Business getBusinessById(int id) 
     {
         Business business;
@@ -76,8 +75,6 @@ public class BusinessService
         return business;
     }
 
-    // Admins see every salon so they can moderate them. Everyone else sees APPROVED salons, plus
-    // the one they work at, so staff of a salon still awaiting approval can load their own.
     private static boolean isVisibleTo(Business business, AuthenticatedUser caller)
     {
         if (AccessControl.isAdmin(caller) || business.getStatus() == Status.APPROVED)
