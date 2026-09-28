@@ -54,8 +54,9 @@ Root causes:
   approving/rejecting/suspending is reserved for SUPER_ADMIN; re-sending the unchanged status is still
   allowed so the panel's full-object PUT keeps working. Guarded by `adminCannotApproveAnotherSalon`,
   `adminCannotChangeEvenTheirOwnBusinessStatus`, `adminCannotDeleteAnotherSalon`, `superAdminCanApproveASalon`
-  in `AuthorizationRulesTest`. Still open, deliberately out of scope here: `POST /businesses` creation
-  (BE-40/registration flow) and hiding non-APPROVED salons from non-admins on `GET /businesses` (FE-11).)*
+  in `AuthorizationRulesTest`. Follow-up: `POST /businesses` is now SUPER_ADMIN-only (guarded by
+  `onlySuperAdminCanCreateABusiness`), and non-admins only see APPROVED salons plus their own on
+  `GET /businesses` ([FE-11](../admin-panel/AUDIT_FINDINGS.md#fe-11)). Self-service salon sign-up, if wanted, needs its own endpoint.)*
 - ✅ **BE-03** — [`BusinessServiceController`](src/main/java/com/example/salon/controller/BusinessServiceController.java)
   PUT and DELETE ignore the `businessId` path variable and act on the bare service id.
   *(fixed: PUT/DELETE now bind `businessId` and pass the caller. `BusinessSalonServiceService` requires the

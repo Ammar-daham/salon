@@ -38,15 +38,15 @@ public class BusinessController
     }
 
     @GetMapping
-    public List<Business> getAllBusiness() 
+    public List<Business> getAllBusiness(@AuthenticationPrincipal AuthenticatedUser principal) 
     {
-        return businessService.getAllBusiness();
+        return businessService.getAllBusiness(principal);
     }
 
     @GetMapping("/{id}")
-    public Business getBusinessById(@PathVariable int id) 
+    public Business getBusinessById(@PathVariable int id, @AuthenticationPrincipal AuthenticatedUser principal) 
     {
-        return businessService.getBusinessById(id);
+        return businessService.getBusinessById(id, principal);
     }
 
     @PutMapping("/{id}")

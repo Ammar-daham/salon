@@ -4,6 +4,7 @@ import com.example.salon.dao.BusinessDao;
 import com.example.salon.exception.BaseException;
 import com.example.salon.exception.ErrorCode;
 import com.example.salon.model.Business;
+import com.example.salon.model.Status;
 import com.example.salon.security.AccessControl;
 import com.example.salon.security.AuthenticatedUser;
 import jakarta.transaction.Transactional;
@@ -47,11 +48,23 @@ public class BusinessService
         return business;
     }
 
-    public List<Business> getAllBusiness() 
+    public List<Business> getAllBusiness(AuthenticatedUser caller) 
     {
-        return businessDao.getBusinesses();
+        return businessDao.getBusinesses().stream()
+                .filter(business -> isVisibleTo(business, caller))
+                .toList();
     }
 
+    public Business getBusinessById(int id, AuthenticatedUser caller) 
+    {
+        Business business = getBusinessById(id);
+        // 404 rather than 403, so a non-admin can't probe which unapproved salons exist.
+        if (!isVisibleTo(business, caller))
+            throw new BaseException("Business with id " + id + " not found", ErrorCode.NOT_FOUND);
+        return business;
+    }
+
+    /** Existence lookup with no visibility check, for internal callers. Controllers use the overload above. */
     public Business getBusinessById(int id) 
     {
         Business business;
@@ -61,6 +74,16 @@ public class BusinessService
             throw new BaseException("Business with id " + id + " not found", ErrorCode.NOT_FOUND);
         }
         return business;
+    }
+
+    // Admins see every salon so they can moderate them. Everyone else sees APPROVED salons, plus
+    // the one they work at, so staff of a salon still awaiting approval can load their own.
+    private static boolean isVisibleTo(Business business, AuthenticatedUser caller)
+    {
+        if (AccessControl.isAdmin(caller) || business.getStatus() == Status.APPROVED)
+            return true;
+        Long callerBusinessId = caller.getUser().getBusinessId();
+        return callerBusinessId != null && callerBusinessId.equals(business.getId());
     }
 
     @Transactional
