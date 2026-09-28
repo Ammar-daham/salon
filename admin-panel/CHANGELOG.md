@@ -15,13 +15,13 @@ Requires salon-backend ≥ 0.1.0.
 
 ### Changed
 - DELETE requests are sent without a body; the panel no longer re-fetches a record to echo it
-  back (FE-09, #17).
+  back.
 - ADMIN is granted `user:list`, `user:create`, `user:edit` and `user:delete` now that the backend
   scopes users to the caller's business (FE-01, #21).
 
 ### Added
 - Vitest unit tests for the permission matrix, route access and the auth, user and business wire
-  mappers (FE-08, #21).
+  mappers.
 - CI runs lint, type check, unit tests and `next build` on every pull request (#11).
 
 [Unreleased]: https://github.com/Ammar-daham/salon/compare/admin-panel/v0.1.0...HEAD
