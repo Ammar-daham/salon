@@ -9,7 +9,7 @@ behaviour it depends on.
 frontend-specific findings only.
 
 A ✅ next to a finding's ID means its fix has landed; the parenthetical *(fixed: …)* note on that
-finding says what changed. So far: ✅ FE-01, ✅ FE-09.
+finding says what changed. So far: ✅ FE-01, ✅ FE-02, ✅ FE-09, ✅ FE-11.
 
 ## 0. Honest summary
 
@@ -57,10 +57,13 @@ findings it depends on are linked by their `BE-xx` / `DB-xx` IDs.
   Users page shows only their own salon's accounts. `business:delete` stays SUPER_ADMIN-only: deleting a
   salon is a platform decision and still leaves its staff dangling ([BE-17](../salon-backend/AUDIT_FINDINGS.md#be-17)).
   The full role × permission matrix is locked in by `src/test/lib/auth/permissions.test.ts` and `routeAccess.test.ts`.)*
-- <a id="fe-02"></a>**FE-02 — Client-side route guarding only.** `RouteGuard` / `routeAccess.ts` are UX,
+- <a id="fe-02"></a>✅ **FE-02 — Client-side route guarding only.** `RouteGuard` / `routeAccess.ts` are UX,
   not security (and documented as such). Acceptable *only* once the backend enforces the same rules.
   **→ [`fix/salon-backend-business-tenant-scoping`](../VERSION_CONTROL_GUIDE.md#br-0-4),
   [`fix/salon-backend-service-ownership`](../VERSION_CONTROL_GUIDE.md#br-0-5), [`fix/salon-backend-user-scoping`](../VERSION_CONTROL_GUIDE.md#br-0-6)**
+  *(fixed: the backend now enforces every rule the guards encode — business, service and user access are
+  tenant-scoped ([BE-01](../salon-backend/AUDIT_FINDINGS.md#be-01)–[BE-05](../salon-backend/AUDIT_FINDINGS.md#be-05)), and only SUPER_ADMIN can create a business or change its
+  `status`. `RouteGuard` / `routeAccess.ts` stay as UX only.)*
 
 ### High
 - <a id="fe-03"></a>**FE-03 — Employees and Customers run on generated mock data.** The rosters are
@@ -102,9 +105,14 @@ findings it depends on are linked by their `BE-xx` / `DB-xx` IDs.
   children from the canonical record, so this must ship after `fix/salon-backend-server-side-deletes`.)*
 - <a id="fe-10"></a>**FE-10 — CSRF is CORS-only** (backend, [BE-28](../salon-backend/AUDIT_FINDINGS.md#be-28)) — fine while
   `allowed-origins` stays pinned to the panel's origin. **→ [`chore/salon-backend-production-config`](../VERSION_CONTROL_GUIDE.md#br-3-4)**
-- <a id="fe-11"></a>**FE-11 — `GET /businesses` open to every authenticated role** — intended for a future
+- <a id="fe-11"></a>✅ **FE-11 — `GET /businesses` open to every authenticated role** — intended for a future
   customer app; confirm, and hide non-APPROVED salons from non-admins.
   **→ [`fix/salon-backend-business-tenant-scoping`](../VERSION_CONTROL_GUIDE.md#br-0-4)**
+  *(fixed: confirmed open to every signed-in role, but `GET /businesses` and `GET /businesses/{id}` now show
+  non-admins only APPROVED salons plus the one they work at; any other salon is a 404. ADMIN and
+  SUPER_ADMIN still see every salon. Guarded by `nonAdminsOnlySeeApprovedSalons`,
+  `staffStillSeeTheirOwnSalonWhenItIsNotApproved` and `adminsSeeEverySalonIncludingUnapprovedOnes` in
+  `AuthorizationRulesTest`.)*
 - <a id="fe-12"></a>**FE-12 — Stale identity.** The backend session keeps a snapshot of the user, so a role
   change made in the Users page doesn't take effect for that user until they sign in again
   ([BE-14](../salon-backend/AUDIT_FINDINGS.md#be-14)). **→ [`fix/salon-backend-session-hardening`](../VERSION_CONTROL_GUIDE.md#br-0-11)**

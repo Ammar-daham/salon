@@ -86,6 +86,7 @@ public class SecurityConfig
 						.requestMatchers(HttpMethod.DELETE, "/api/v1/users/**", "/api/v1/addresses/**", "/api/v1/contacts/**")
 								.authenticated()
 						.requestMatchers(HttpMethod.GET, "/api/v1/**").authenticated()
+						.requestMatchers(HttpMethod.POST, "/api/v1/businesses").hasRole("SUPER_ADMIN")
 						.requestMatchers(HttpMethod.POST, "/api/v1/**").hasAnyRole("ADMIN", "SUPER_ADMIN")
 						.requestMatchers(HttpMethod.PUT, "/api/v1/**").hasAnyRole("ADMIN", "SUPER_ADMIN")
 						.requestMatchers(HttpMethod.DELETE, "/api/v1/**").hasAnyRole("ADMIN", "SUPER_ADMIN")

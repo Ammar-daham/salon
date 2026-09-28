@@ -412,6 +412,66 @@ class AuthorizationRulesTest extends IntegrationTest
 				.andExpect(jsonPath("$.value").value("hello@urban.test"));
 	}
 
+	@Test
+	void onlySuperAdminCanCreateABusiness() throws Exception
+	{
+		mvc.perform(post("/api/v1/businesses").session(loginAs(Fixture.GLOW_ADMIN))
+						.contentType(MediaType.APPLICATION_JSON)
+						.content("""
+								{"name": "Glow Beauty Studio II", "description": "x", "image": "x"}
+								"""))
+				.andExpect(status().isForbidden());
+
+		mvc.perform(post("/api/v1/businesses").session(loginAs(Fixture.SUPER_ADMIN))
+						.contentType(MediaType.APPLICATION_JSON)
+						.content("""
+								{"name": "Lumen Nail Bar", "description": "x", "image": "x"}
+								"""))
+				.andExpect(status().isOk());
+	}
+
+	@Test
+	void nonAdminsOnlySeeApprovedSalons() throws Exception
+	{
+		MockHttpSession employee = loginAs(Fixture.GLOW_EMPLOYEE);
+
+		mvc.perform(get("/api/v1/businesses").session(employee))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$[*].id", hasItem((int) Fixture.URBAN)))
+				.andExpect(jsonPath("$[*].id", not(hasItem((int) Fixture.SERENITY_PENDING))));
+
+		// 404, not 403: an unapproved salon is invisible, not forbidden.
+		mvc.perform(get("/api/v1/businesses/" + Fixture.SERENITY_PENDING).session(employee))
+				.andExpect(status().isNotFound());
+	}
+
+	@Test
+	void staffStillSeeTheirOwnSalonWhenItIsNotApproved() throws Exception
+	{
+		mvc.perform(put("/api/v1/businesses/" + Fixture.GLOW).session(loginAs(Fixture.SUPER_ADMIN))
+						.contentType(MediaType.APPLICATION_JSON)
+						.content("""
+								{"name": "Glow Beauty Studio", "status": "SUSPENDED"}
+								"""))
+				.andExpect(status().isOk());
+
+		MockHttpSession glowEmployee = loginAs(Fixture.GLOW_EMPLOYEE);
+		mvc.perform(get("/api/v1/businesses").session(glowEmployee))
+				.andExpect(jsonPath("$[*].id", hasItem((int) Fixture.GLOW)));
+		mvc.perform(get("/api/v1/businesses/" + Fixture.GLOW).session(glowEmployee))
+				.andExpect(status().isOk());
+
+		mvc.perform(get("/api/v1/businesses/" + Fixture.GLOW).session(loginAs(Fixture.URBAN_EMPLOYEE)))
+				.andExpect(status().isNotFound());
+	}
+
+	@Test
+	void adminsSeeEverySalonIncludingUnapprovedOnes() throws Exception
+	{
+		mvc.perform(get("/api/v1/businesses").session(loginAs(Fixture.GLOW_ADMIN)))
+				.andExpect(jsonPath("$[*].id", hasItem((int) Fixture.SERENITY_PENDING)));
+	}
+
 	static String serviceBody(String name)
 	{
 		return """
