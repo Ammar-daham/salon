@@ -130,7 +130,7 @@ public class UserDataAccessService implements UserDao
 	public Optional<User> findByEmail(String email)
 	{
 		try {
-			User user = jdbcTemplate.queryForObject("SELECT * FROM users WHERE email = ?", userRowMapper(), email);
+			User user = jdbcTemplate.queryForObject("SELECT * FROM users WHERE lower(email) = lower(?)", userRowMapper(), email);
 			return Optional.ofNullable(user);
 		} catch (EmptyResultDataAccessException ex) {
 			return Optional.empty();

@@ -297,15 +297,25 @@ new users to the caller's business; `application.yml` is not tracked in git.
 | <a id="db-02"></a>DB-02 | `services` ↔ `businesses` is many-to-many, but a service belongs to one salon | Add `services.business_id NOT NULL` FK and drop `business_service`. Fixes shared-service deletion and simplifies ownership checks. | [`refactor/repo-services-owned-by-business`](../VERSION_CONTROL_GUIDE.md#br-1-3) |
 | <a id="db-03"></a>DB-03 | `business_customers` has no PK, no FKs, no code | Replace with a `customers` table (business_id, name, phone, email, notes, marketing consent). Customers needn't be `users` rows until they can log in. | [`feature/salon-backend-customers-api`](../VERSION_CONTROL_GUIDE.md#br-1-8) |
 | <a id="db-04"></a>DB-04 | `staff` duplicates `users.role/business_id`, stubbed in code | Keep as the employment record (title, active, hired_at, calendar colour) with real FKs, or fold into `users`. | [`feature/salon-backend-staff-api`](../VERSION_CONTROL_GUIDE.md#br-1-6) |
-| <a id="db-05"></a>DB-05 | `contacts.value` **globally UNIQUE** | Two customers can't share a family phone; a salon can't share its owner's email. Make it unique per owner or drop it. | [`fix/salon-backend-schema-integrity`](../VERSION_CONTROL_GUIDE.md#br-1-2) |
-| <a id="db-06"></a>DB-06 | Polymorphic `business_id OR user_id` on `addresses`/`contacts`, unchecked | Add `CHECK (num_nonnulls(business_id, user_id) = 1)` — or put phone/email columns directly on businesses and customers and keep one address per business. | [`fix/salon-backend-schema-integrity`](../VERSION_CONTROL_GUIDE.md#br-1-2) |
+| <a id="db-05"></a>✅ DB-05 | `contacts.value` **globally UNIQUE** | Two customers can't share a family phone; a salon can't share its owner's email. Make it unique per owner or drop it. | [`fix/salon-backend-schema-integrity`](../VERSION_CONTROL_GUIDE.md#br-1-2) |
+| <a id="db-06"></a>✅ DB-06 | Polymorphic `business_id OR user_id` on `addresses`/`contacts`, unchecked | Add `CHECK (num_nonnulls(business_id, user_id) = 1)` — or put phone/email columns directly on businesses and customers and keep one address per business. | [`fix/salon-backend-schema-integrity`](../VERSION_CONTROL_GUIDE.md#br-1-2) |
 | <a id="db-07"></a>DB-07 | `latitude`/`longitude` are `VARCHAR` | `NUMERIC(9,6)` (PostGIS later for "salons near me"). | [`refactor/salon-backend-column-types`](../VERSION_CONTROL_GUIDE.md#br-1-10) |
 | <a id="db-08"></a>DB-08 | Java `double` for money | `BigDecimal` / `NUMERIC(10,2)` + a `currency` column (or integer cents). | [`refactor/salon-backend-column-types`](../VERSION_CONTROL_GUIDE.md#br-1-10) |
 | <a id="db-09"></a>DB-09 | `timestamp` without time zone | `timestamptz` everywhere, plus `businesses.timezone` — mandatory before appointments. | [`refactor/salon-backend-column-types`](../VERSION_CONTROL_GUIDE.md#br-1-10) (column type), [`feature/salon-backend-business-hours`](../VERSION_CONTROL_GUIDE.md#br-2-1) (`timezone`) |
-| <a id="db-10"></a>DB-10 | Case-sensitive email index — `Anna@x.com` and `anna@x.com` are two accounts | `UNIQUE INDEX ON users (lower(email))`. | [`fix/salon-backend-schema-integrity`](../VERSION_CONTROL_GUIDE.md#br-1-2) |
+| <a id="db-10"></a>✅ DB-10 | Case-sensitive email index — `Anna@x.com` and `anna@x.com` are two accounts | `UNIQUE INDEX ON users (lower(email))`. | [`fix/salon-backend-schema-integrity`](../VERSION_CONTROL_GUIDE.md#br-1-2) |
 | <a id="db-11"></a>✅ DB-11 | `updated_at` maintained by hand (and forgotten, [BE-12](#be-12)) | A single `set_updated_at()` trigger on every table. | [`fix/salon-backend-schema-integrity`](../VERSION_CONTROL_GUIDE.md#br-1-2) |
-| <a id="db-12"></a>DB-12 | No indexes on FK columns | Index every `business_id`, `user_id`, `service_id`. | [`fix/salon-backend-schema-integrity`](../VERSION_CONTROL_GUIDE.md#br-1-2) |
+| <a id="db-12"></a>✅ DB-12 | No indexes on FK columns | Index every `business_id`, `user_id`, `service_id`. | [`fix/salon-backend-schema-integrity`](../VERSION_CONTROL_GUIDE.md#br-1-2) |
 | <a id="db-13"></a>DB-13 | Hard deletes everywhere | Soft delete (`deleted_at`) for businesses, services, staff, customers — past appointments must keep pointing at them. | [`feature/salon-backend-appointments`](../VERSION_CONTROL_GUIDE.md#br-2-3) |
+
+*(DB-01, DB-05, DB-06, DB-10, DB-11 and DB-12 fixed by migrations V4 and V5 on
+[`fix/salon-backend-schema-integrity`](../VERSION_CONTROL_GUIDE.md#br-1-2):
+DB-05 — `contacts.value` is unique per owner (`contacts_business_value_unique_idx`,
+`contacts_user_value_unique_idx`) instead of platform-wide.
+DB-06 — `addresses`/`contacts` have `CHECK (num_nonnulls(business_id, user_id) = 1)`, and their owner FKs
+are `ON DELETE CASCADE` (SET NULL would break the CHECK); ownerless rows left by old deletes are removed.
+DB-10 — the email index is on `lower(email)` and login matches case-insensitively.
+DB-12 — every FK column has an index. Guarded by `SchemaConstraintsTest`, `emailsDifferingOnlyByCaseAreTheSameAccount`,
+`differentOwnersCanShareAContactValue`, `oneOwnerCannotHaveTheSameContactValueTwice` and `loginEmailIsCaseInsensitive`.)*
 
 <a id="db-14"></a>**DB-14 — Booking tables don't exist.** Phase 2 needs `business_hours`,
 `staff_schedules`, `staff_time_off`, `staff_services`, `appointments` (customer, staff, service,

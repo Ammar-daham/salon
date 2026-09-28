@@ -202,6 +202,45 @@ class AuthorizationRulesTest extends IntegrationTest
 	}
 
 	@Test
+	void emailsDifferingOnlyByCaseAreTheSameAccount() throws Exception
+	{
+		// DB-10: the unique index is on lower(email).
+		mvc.perform(post("/api/v1/users").session(loginAs(Fixture.GLOW_ADMIN))
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(newUserBody(Fixture.GLOW_EMPLOYEE.toUpperCase(), "EMPLOYEE", null)))
+				.andExpect(status().isConflict());
+	}
+
+	@Test
+	void differentOwnersCanShareAContactValue() throws Exception
+	{
+		// DB-05: Glow's business phone can also be a staff member's personal phone.
+		mvc.perform(post("/api/v1/users").session(loginAs(Fixture.GLOW_ADMIN))
+						.contentType(MediaType.APPLICATION_JSON)
+						.content("""
+								{"first_name":"New","last_name":"Hire","email":"newhire@glow.test","password":"Password123!","role":"EMPLOYEE","contacts":[{"type":"phone","value":"+49 30 1234501"}]}
+								"""))
+				.andExpect(status().isOk());
+	}
+
+	@Test
+	void oneOwnerCannotHaveTheSameContactValueTwice() throws Exception
+	{
+		mvc.perform(post("/api/v1/users").session(loginAs(Fixture.GLOW_ADMIN))
+						.contentType(MediaType.APPLICATION_JSON)
+						.content("""
+								{"first_name":"New","last_name":"Hire","email":"newhire@glow.test","password":"Password123!","role":"EMPLOYEE","contacts":[{"type":"phone","value":"+49 30 5550000"},{"type":"phone","value":"+49 30 5550000"}]}
+								"""))
+				.andExpect(status().isConflict());
+
+		// The rejected create rolled back: the email is still free.
+		mvc.perform(post("/api/v1/users").session(loginAs(Fixture.GLOW_ADMIN))
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(newUserBody("newhire@glow.test", "EMPLOYEE", null)))
+				.andExpect(status().isOk());
+	}
+
+	@Test
 	void adminCannotApproveAnotherSalon() throws Exception
 	{
 		mvc.perform(put("/api/v1/businesses/" + Fixture.SERENITY_PENDING).session(loginAs(Fixture.GLOW_ADMIN))

@@ -41,7 +41,7 @@ public class BusinessService
             String reason = ex.getMessage();
             if (reason != null && reason.contains("businesses_name_unique"))
                 throw new BaseException("Business with name " + business.getName() + " already exists.", ErrorCode.DUPLICATE_RESOURCE);
-            if (reason != null && reason.contains("contacts_value_key"))
+            if (reason != null && reason.contains("contacts_business_value_unique_idx"))
                 throw new BaseException("Contact already exists.", ErrorCode.DUPLICATE_RESOURCE);
             log.warn("Unmapped duplicate-key creating business '{}'", business.getName(), ex);
             throw new BaseException("Business could not be created due to a conflict.", ErrorCode.DUPLICATE_RESOURCE);

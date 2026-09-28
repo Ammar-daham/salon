@@ -73,9 +73,9 @@ public class UserService
 		try {
 			userDao.addUser(user);
 		} catch (DuplicateKeyException ex) {
-			if (ex.getMessage().contains("contacts_value_key"))
+			if (ex.getMessage().contains("contacts_user_value_unique_idx"))
 				throw new BaseException("Contact already exists.", ErrorCode.DUPLICATE_RESOURCE);
-			if (ex.getMessage().contains("users_email_unique_idx"))
+			if (ex.getMessage().contains("users_email_lower_unique_idx"))
 				throw new BaseException("Email already in use.", ErrorCode.DUPLICATE_RESOURCE);
 			throw ex;
 		}
