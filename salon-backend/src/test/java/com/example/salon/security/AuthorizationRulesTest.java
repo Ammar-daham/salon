@@ -472,6 +472,32 @@ class AuthorizationRulesTest extends IntegrationTest
 				.andExpect(jsonPath("$[*].id", hasItem((int) Fixture.SERENITY_PENDING)));
 	}
 
+	@Test
+	void aSalonWithStaffCannotBeDeleted() throws Exception
+	{
+		MockHttpSession superAdmin = loginAs(Fixture.SUPER_ADMIN);
+
+		// BE-17: users.business_id is an FK, so deleting a salon would strand its staff. It's a 409.
+		mvc.perform(delete("/api/v1/businesses/" + Fixture.GLOW).session(superAdmin))
+				.andExpect(status().isConflict())
+				.andExpect(jsonPath("$.errorCode").value("CONFLICT"));
+
+		// The rejected delete rolled back fully: the salon and its children are all still there.
+		mvc.perform(get("/api/v1/businesses/" + Fixture.GLOW).session(superAdmin))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.contacts[*].id", hasItem((int) Fixture.GLOW_CONTACT)))
+				.andExpect(jsonPath("$.services[*].id", hasItem((int) Fixture.GLOW_HAIRCUT)));
+		mvc.perform(get("/api/v1/users/" + Fixture.GLOW_EMPLOYEE_ID).session(superAdmin))
+				.andExpect(status().isOk());
+	}
+
+	@Test
+	void aSalonWithoutStaffCanBeDeleted() throws Exception
+	{
+		mvc.perform(delete("/api/v1/businesses/" + Fixture.SERENITY_PENDING).session(loginAs(Fixture.SUPER_ADMIN)))
+				.andExpect(status().isOk());
+	}
+
 	static String serviceBody(String name)
 	{
 		return """

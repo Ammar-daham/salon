@@ -8,6 +8,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
+import java.sql.Timestamp;
 import java.util.List;
 import java.util.Optional;
 
@@ -39,6 +40,8 @@ public class UserDataAccessService implements UserDao
 			user.setEmail(rs.getString("email"));
 			user.setPasswordHash(rs.getString("password_hash"));
 			user.setBusinessId((Long) rs.getObject("business_id"));
+			Timestamp updatedAt = rs.getTimestamp("updated_at");
+			user.setUpdatedAt(updatedAt != null ? updatedAt.toInstant() : null);
 			return user;
 		};
 	}

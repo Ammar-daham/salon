@@ -136,6 +136,7 @@ class RegressionTest extends IntegrationTest
 	void deletingABusinessWithoutABodyDeletesItsChildren() throws Exception
 	{
 		MockHttpSession superAdmin = loginAs(Fixture.SUPER_ADMIN);
+		deleteGlowStaff(superAdmin);
 
 		mvc.perform(delete("/api/v1/businesses/" + Fixture.GLOW).session(superAdmin))
 				.andExpect(status().isOk());
@@ -151,6 +152,7 @@ class RegressionTest extends IntegrationTest
 	void deletingABusinessFreesItsContactValueForReuse() throws Exception
 	{
 		MockHttpSession superAdmin = loginAs(Fixture.SUPER_ADMIN);
+		deleteGlowStaff(superAdmin);
 
 		mvc.perform(delete("/api/v1/businesses/" + Fixture.GLOW).session(superAdmin))
 				.andExpect(status().isOk());
@@ -232,5 +234,35 @@ class RegressionTest extends IntegrationTest
 								{"first_name": "Mia", "last_name": "Stylist", "role": "EMPLOYEE", "contacts": [{"type": "phone", "value": "+49 30 0000000"}]}
 								"""))
 				.andExpect(status().isOk());
+	}
+
+	/** BE-12: a user update never set users.updated_at. */
+	@Test
+	void updatingAUserSetsUpdatedAt() throws Exception
+	{
+		MockHttpSession admin = loginAs(Fixture.GLOW_ADMIN);
+
+		mvc.perform(get("/api/v1/users/" + Fixture.GLOW_EMPLOYEE_ID).session(admin))
+				.andExpect(jsonPath("$.updated_at").value(nullValue()));
+
+		mvc.perform(put("/api/v1/users/" + Fixture.GLOW_EMPLOYEE_ID).session(admin)
+						.contentType(MediaType.APPLICATION_JSON)
+						.content("""
+								{"first_name": "Mia", "last_name": "Senior-Stylist", "role": "EMPLOYEE"}
+								"""))
+				.andExpect(status().isOk());
+
+		mvc.perform(get("/api/v1/users/" + Fixture.GLOW_EMPLOYEE_ID).session(admin))
+				.andExpect(jsonPath("$.last_name").value("Senior-Stylist"))
+				.andExpect(jsonPath("$.updated_at").value(notNullValue()));
+	}
+
+	/** A salon can only be deleted once it has no staff (BE-17). */
+	private void deleteGlowStaff(MockHttpSession superAdmin) throws Exception
+	{
+		for (long userId : new long[] {Fixture.GLOW_ADMIN_ID, Fixture.GLOW_EMPLOYEE_ID}) {
+			mvc.perform(delete("/api/v1/users/" + userId).session(superAdmin))
+					.andExpect(status().isOk());
+		}
 	}
 }
