@@ -7,7 +7,6 @@ import com.example.salon.model.Business;
 import com.example.salon.model.Status;
 import com.example.salon.security.AccessControl;
 import com.example.salon.security.AuthenticatedUser;
-import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +14,7 @@ import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 

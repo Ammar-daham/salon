@@ -7,13 +7,13 @@ import com.example.salon.model.Role;
 import com.example.salon.model.User;
 import com.example.salon.security.AccessControl;
 import com.example.salon.security.AuthenticatedUser;
-import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
