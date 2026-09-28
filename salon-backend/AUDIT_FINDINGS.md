@@ -264,11 +264,16 @@ new users to the caller's business; `application.yml` is not tracked in git.
   even though the client response stays generic.)*
 - <a id="be-35"></a>**BE-35 — Stub feature.** `StaffDataAccessService` returns `0`/`List.of()`/`null`,
   isn't a Spring bean, has no controller. **→ [`feature/salon-backend-staff-api`](../VERSION_CONTROL_GUIDE.md#br-1-6)**
-- <a id="be-36"></a>**BE-36 — Unused dependency** `spring-boot-starter-data-jpa` (no entities;
+- <a id="be-36"></a>✅ **BE-36 — Unused dependency** `spring-boot-starter-data-jpa` (no entities;
   everything is JdbcTemplate). **→ [`chore/salon-backend-dependency-cleanup`](../VERSION_CONTROL_GUIDE.md#br-1-1)**
-- <a id="be-37"></a>**BE-37 — Flyway version mismatch.** `flyway-core:10.0.0` vs
+  *(fixed: replaced by `spring-boot-starter-jdbc`, so Hibernate and the JPA EntityManager no longer
+  start. The services' `@Transactional` now comes from Spring instead of `jakarta.transaction`, and
+  `TransactionTest` checks that a failed transaction still rolls back JdbcTemplate writes.)*
+- <a id="be-37"></a>✅ **BE-37 — Flyway version mismatch.** `flyway-core:10.0.0` vs
   `flyway-database-postgresql:11.0.0`; let the BOM manage both.
   **→ [`chore/salon-backend-dependency-cleanup`](../VERSION_CONTROL_GUIDE.md#br-1-1)**
+  *(fixed: both artifacts are unversioned in `build.gradle`, so the Spring Boot BOM resolves them to
+  the same release (11.14.1 with Boot 4.0.1).)*
 - <a id="be-38"></a>**BE-38 — Flyway `baselineOnMigrate(true)`** can mask missing migrations on an
   existing database. **→ [`chore/salon-backend-production-config`](../VERSION_CONTROL_GUIDE.md#br-3-4)**
 - <a id="be-39"></a>**BE-39 — No actuator/health endpoint.**

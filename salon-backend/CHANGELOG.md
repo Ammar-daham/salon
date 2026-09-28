@@ -11,6 +11,12 @@ version. The version lives in [`gradle.properties`](gradle.properties); each rel
 
 ## [Unreleased]
 
+### Changed
+- Dropped the unused `spring-boot-starter-data-jpa` for `spring-boot-starter-jdbc`; Hibernate no
+  longer starts. `@Transactional` is Spring's (BE-36).
+- Flyway is managed by the Spring Boot BOM: `flyway-core` goes from 10.0.0 to 11.14.1, matching
+  `flyway-database-postgresql` (BE-37).
+
 ## [0.1.0] - 2026-09-28
 
 The first release that is safe to run with more than one salon. Every finding the integration
