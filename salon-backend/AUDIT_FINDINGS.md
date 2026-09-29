@@ -141,9 +141,13 @@ Root causes:
   **→ [`fix/salon-backend-server-side-deletes`](../VERSION_CONTROL_GUIDE.md#br-0-7)**
   *(fixed: the same rewrite deletes both contacts and addresses unconditionally and returns the real
   row count, so the `if / else if` and the bogus `-1` are gone.)*
-- <a id="be-12"></a>**BE-12 — `users.updated_at` is never set.** The UPDATE omits `updated_at = now()`,
+- <a id="be-12"></a>✅ **BE-12 — `users.updated_at` is never set.** The UPDATE omits `updated_at = now()`,
   unlike every other DAO. **→ [`fix/salon-backend-schema-integrity`](../VERSION_CONTROL_GUIDE.md#br-1-2)**
   (the `updated_at` trigger, [DB-11](#db-11))
+  *(fixed: migration V4 adds a `set_updated_at()` trigger on every table with an `updated_at` column,
+  so the database sets it on every UPDATE whatever the DAO does. The user row mapper now reads
+  `updated_at`, which the API never returned before. Guarded by `updatingAUserSetsUpdatedAt` in
+  `RegressionTest`.)*
 - <a id="be-13"></a>**BE-13 — `201 Created` / `Location` never sent.** Controllers build
   `ResponseEntity.created(...)` then call `.getBody()`, discarding status and header; every create returns 200.
   **→ [`fix/salon-backend-created-responses`](../VERSION_CONTROL_GUIDE.md#br-1-5)**
@@ -161,8 +165,12 @@ Root causes:
 - <a id="be-16"></a>**BE-16 — Deleting a business hard-deletes rows in the shared `services` table**
   instead of unlinking them. **→ [`refactor/repo-services-owned-by-business`](../VERSION_CONTROL_GUIDE.md#br-1-3)**
   ([DB-02](#db-02))
-- <a id="be-17"></a>**BE-17 — Deleting a business leaves its staff dangling**, because `users.business_id`
+- <a id="be-17"></a>✅ **BE-17 — Deleting a business leaves its staff dangling**, because `users.business_id`
   has no FK. **→ [`fix/salon-backend-schema-integrity`](../VERSION_CONTROL_GUIDE.md#br-1-2)** ([DB-01](#db-01))
+  *(fixed: migration V4 adds `fk_users_business` with `ON DELETE RESTRICT`, after unlinking any users
+  already pointing at a deleted business. Deleting a salon that still has staff is a 409 `CONFLICT`
+  and the whole delete rolls back; remove or move the staff first. Guarded by
+  `aSalonWithStaffCannotBeDeleted` and `aSalonWithoutStaffCanBeDeleted` in `AuthorizationRulesTest`.)*
 - <a id="be-18"></a>✅ **BE-18 — Typo'd and discarded error codes.** `ContactService` returns `"NOT_FOUNT"`;
   `ErrorCode.NOT_FOUND`'s message is `"NOT-FOUNT_404"`; `ErrorCode`'s constructor discards its
   message/code args, so the frontend gets ad-hoc codes like `"400"`.
@@ -285,19 +293,29 @@ new users to the caller's business; `application.yml` is not tracked in git.
 
 | ID | Problem | Recommendation | Fixed by |
 |---|---|---|---|
-| <a id="db-01"></a>DB-01 | `users.business_id` has **no FK** | Add FK to `businesses(id)`; deleting a salon currently strands its staff. | [`fix/salon-backend-schema-integrity`](../VERSION_CONTROL_GUIDE.md#br-1-2) |
+| <a id="db-01"></a>✅ DB-01 | `users.business_id` has **no FK** | Add FK to `businesses(id)`; deleting a salon currently strands its staff. | [`fix/salon-backend-schema-integrity`](../VERSION_CONTROL_GUIDE.md#br-1-2) |
 | <a id="db-02"></a>DB-02 | `services` ↔ `businesses` is many-to-many, but a service belongs to one salon | Add `services.business_id NOT NULL` FK and drop `business_service`. Fixes shared-service deletion and simplifies ownership checks. | [`refactor/repo-services-owned-by-business`](../VERSION_CONTROL_GUIDE.md#br-1-3) |
 | <a id="db-03"></a>DB-03 | `business_customers` has no PK, no FKs, no code | Replace with a `customers` table (business_id, name, phone, email, notes, marketing consent). Customers needn't be `users` rows until they can log in. | [`feature/salon-backend-customers-api`](../VERSION_CONTROL_GUIDE.md#br-1-8) |
 | <a id="db-04"></a>DB-04 | `staff` duplicates `users.role/business_id`, stubbed in code | Keep as the employment record (title, active, hired_at, calendar colour) with real FKs, or fold into `users`. | [`feature/salon-backend-staff-api`](../VERSION_CONTROL_GUIDE.md#br-1-6) |
-| <a id="db-05"></a>DB-05 | `contacts.value` **globally UNIQUE** | Two customers can't share a family phone; a salon can't share its owner's email. Make it unique per owner or drop it. | [`fix/salon-backend-schema-integrity`](../VERSION_CONTROL_GUIDE.md#br-1-2) |
-| <a id="db-06"></a>DB-06 | Polymorphic `business_id OR user_id` on `addresses`/`contacts`, unchecked | Add `CHECK (num_nonnulls(business_id, user_id) = 1)` — or put phone/email columns directly on businesses and customers and keep one address per business. | [`fix/salon-backend-schema-integrity`](../VERSION_CONTROL_GUIDE.md#br-1-2) |
+| <a id="db-05"></a>✅ DB-05 | `contacts.value` **globally UNIQUE** | Two customers can't share a family phone; a salon can't share its owner's email. Make it unique per owner or drop it. | [`fix/salon-backend-schema-integrity`](../VERSION_CONTROL_GUIDE.md#br-1-2) |
+| <a id="db-06"></a>✅ DB-06 | Polymorphic `business_id OR user_id` on `addresses`/`contacts`, unchecked | Add `CHECK (num_nonnulls(business_id, user_id) = 1)` — or put phone/email columns directly on businesses and customers and keep one address per business. | [`fix/salon-backend-schema-integrity`](../VERSION_CONTROL_GUIDE.md#br-1-2) |
 | <a id="db-07"></a>DB-07 | `latitude`/`longitude` are `VARCHAR` | `NUMERIC(9,6)` (PostGIS later for "salons near me"). | [`refactor/salon-backend-column-types`](../VERSION_CONTROL_GUIDE.md#br-1-10) |
 | <a id="db-08"></a>DB-08 | Java `double` for money | `BigDecimal` / `NUMERIC(10,2)` + a `currency` column (or integer cents). | [`refactor/salon-backend-column-types`](../VERSION_CONTROL_GUIDE.md#br-1-10) |
 | <a id="db-09"></a>DB-09 | `timestamp` without time zone | `timestamptz` everywhere, plus `businesses.timezone` — mandatory before appointments. | [`refactor/salon-backend-column-types`](../VERSION_CONTROL_GUIDE.md#br-1-10) (column type), [`feature/salon-backend-business-hours`](../VERSION_CONTROL_GUIDE.md#br-2-1) (`timezone`) |
-| <a id="db-10"></a>DB-10 | Case-sensitive email index — `Anna@x.com` and `anna@x.com` are two accounts | `UNIQUE INDEX ON users (lower(email))`. | [`fix/salon-backend-schema-integrity`](../VERSION_CONTROL_GUIDE.md#br-1-2) |
-| <a id="db-11"></a>DB-11 | `updated_at` maintained by hand (and forgotten, [BE-12](#be-12)) | A single `set_updated_at()` trigger on every table. | [`fix/salon-backend-schema-integrity`](../VERSION_CONTROL_GUIDE.md#br-1-2) |
-| <a id="db-12"></a>DB-12 | No indexes on FK columns | Index every `business_id`, `user_id`, `service_id`. | [`fix/salon-backend-schema-integrity`](../VERSION_CONTROL_GUIDE.md#br-1-2) |
+| <a id="db-10"></a>✅ DB-10 | Case-sensitive email index — `Anna@x.com` and `anna@x.com` are two accounts | `UNIQUE INDEX ON users (lower(email))`. | [`fix/salon-backend-schema-integrity`](../VERSION_CONTROL_GUIDE.md#br-1-2) |
+| <a id="db-11"></a>✅ DB-11 | `updated_at` maintained by hand (and forgotten, [BE-12](#be-12)) | A single `set_updated_at()` trigger on every table. | [`fix/salon-backend-schema-integrity`](../VERSION_CONTROL_GUIDE.md#br-1-2) |
+| <a id="db-12"></a>✅ DB-12 | No indexes on FK columns | Index every `business_id`, `user_id`, `service_id`. | [`fix/salon-backend-schema-integrity`](../VERSION_CONTROL_GUIDE.md#br-1-2) |
 | <a id="db-13"></a>DB-13 | Hard deletes everywhere | Soft delete (`deleted_at`) for businesses, services, staff, customers — past appointments must keep pointing at them. | [`feature/salon-backend-appointments`](../VERSION_CONTROL_GUIDE.md#br-2-3) |
+
+*(DB-01, DB-05, DB-06, DB-10, DB-11 and DB-12 fixed by migrations V4 and V5 on
+[`fix/salon-backend-schema-integrity`](../VERSION_CONTROL_GUIDE.md#br-1-2):
+DB-05 — `contacts.value` is unique per owner (`contacts_business_value_unique_idx`,
+`contacts_user_value_unique_idx`) instead of platform-wide.
+DB-06 — `addresses`/`contacts` have `CHECK (num_nonnulls(business_id, user_id) = 1)`, and their owner FKs
+are `ON DELETE CASCADE` (SET NULL would break the CHECK); ownerless rows left by old deletes are removed.
+DB-10 — the email index is on `lower(email)` and login matches case-insensitively.
+DB-12 — every FK column has an index. Guarded by `SchemaConstraintsTest`, `emailsDifferingOnlyByCaseAreTheSameAccount`,
+`differentOwnersCanShareAContactValue`, `oneOwnerCannotHaveTheSameContactValueTwice` and `loginEmailIsCaseInsensitive`.)*
 
 <a id="db-14"></a>**DB-14 — Booking tables don't exist.** Phase 2 needs `business_hours`,
 `staff_schedules`, `staff_time_off`, `staff_services`, `appointments` (customer, staff, service,

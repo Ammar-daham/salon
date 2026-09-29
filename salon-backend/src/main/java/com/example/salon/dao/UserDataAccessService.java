@@ -8,6 +8,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
+import java.sql.Timestamp;
 import java.util.List;
 import java.util.Optional;
 
@@ -39,6 +40,8 @@ public class UserDataAccessService implements UserDao
 			user.setEmail(rs.getString("email"));
 			user.setPasswordHash(rs.getString("password_hash"));
 			user.setBusinessId((Long) rs.getObject("business_id"));
+			Timestamp updatedAt = rs.getTimestamp("updated_at");
+			user.setUpdatedAt(updatedAt != null ? updatedAt.toInstant() : null);
 			return user;
 		};
 	}
@@ -127,7 +130,7 @@ public class UserDataAccessService implements UserDao
 	public Optional<User> findByEmail(String email)
 	{
 		try {
-			User user = jdbcTemplate.queryForObject("SELECT * FROM users WHERE email = ?", userRowMapper(), email);
+			User user = jdbcTemplate.queryForObject("SELECT * FROM users WHERE lower(email) = lower(?)", userRowMapper(), email);
 			return Optional.ofNullable(user);
 		} catch (EmptyResultDataAccessException ex) {
 			return Optional.empty();

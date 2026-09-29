@@ -202,6 +202,45 @@ class AuthorizationRulesTest extends IntegrationTest
 	}
 
 	@Test
+	void emailsDifferingOnlyByCaseAreTheSameAccount() throws Exception
+	{
+		// DB-10: the unique index is on lower(email).
+		mvc.perform(post("/api/v1/users").session(loginAs(Fixture.GLOW_ADMIN))
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(newUserBody(Fixture.GLOW_EMPLOYEE.toUpperCase(), "EMPLOYEE", null)))
+				.andExpect(status().isConflict());
+	}
+
+	@Test
+	void differentOwnersCanShareAContactValue() throws Exception
+	{
+		// DB-05: Glow's business phone can also be a staff member's personal phone.
+		mvc.perform(post("/api/v1/users").session(loginAs(Fixture.GLOW_ADMIN))
+						.contentType(MediaType.APPLICATION_JSON)
+						.content("""
+								{"first_name":"New","last_name":"Hire","email":"newhire@glow.test","password":"Password123!","role":"EMPLOYEE","contacts":[{"type":"phone","value":"+49 30 1234501"}]}
+								"""))
+				.andExpect(status().isOk());
+	}
+
+	@Test
+	void oneOwnerCannotHaveTheSameContactValueTwice() throws Exception
+	{
+		mvc.perform(post("/api/v1/users").session(loginAs(Fixture.GLOW_ADMIN))
+						.contentType(MediaType.APPLICATION_JSON)
+						.content("""
+								{"first_name":"New","last_name":"Hire","email":"newhire@glow.test","password":"Password123!","role":"EMPLOYEE","contacts":[{"type":"phone","value":"+49 30 5550000"},{"type":"phone","value":"+49 30 5550000"}]}
+								"""))
+				.andExpect(status().isConflict());
+
+		// The rejected create rolled back: the email is still free.
+		mvc.perform(post("/api/v1/users").session(loginAs(Fixture.GLOW_ADMIN))
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(newUserBody("newhire@glow.test", "EMPLOYEE", null)))
+				.andExpect(status().isOk());
+	}
+
+	@Test
 	void adminCannotApproveAnotherSalon() throws Exception
 	{
 		mvc.perform(put("/api/v1/businesses/" + Fixture.SERENITY_PENDING).session(loginAs(Fixture.GLOW_ADMIN))
@@ -470,6 +509,32 @@ class AuthorizationRulesTest extends IntegrationTest
 	{
 		mvc.perform(get("/api/v1/businesses").session(loginAs(Fixture.GLOW_ADMIN)))
 				.andExpect(jsonPath("$[*].id", hasItem((int) Fixture.SERENITY_PENDING)));
+	}
+
+	@Test
+	void aSalonWithStaffCannotBeDeleted() throws Exception
+	{
+		MockHttpSession superAdmin = loginAs(Fixture.SUPER_ADMIN);
+
+		// BE-17: users.business_id is an FK, so deleting a salon would strand its staff. It's a 409.
+		mvc.perform(delete("/api/v1/businesses/" + Fixture.GLOW).session(superAdmin))
+				.andExpect(status().isConflict())
+				.andExpect(jsonPath("$.errorCode").value("CONFLICT"));
+
+		// The rejected delete rolled back fully: the salon and its children are all still there.
+		mvc.perform(get("/api/v1/businesses/" + Fixture.GLOW).session(superAdmin))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.contacts[*].id", hasItem((int) Fixture.GLOW_CONTACT)))
+				.andExpect(jsonPath("$.services[*].id", hasItem((int) Fixture.GLOW_HAIRCUT)));
+		mvc.perform(get("/api/v1/users/" + Fixture.GLOW_EMPLOYEE_ID).session(superAdmin))
+				.andExpect(status().isOk());
+	}
+
+	@Test
+	void aSalonWithoutStaffCanBeDeleted() throws Exception
+	{
+		mvc.perform(delete("/api/v1/businesses/" + Fixture.SERENITY_PENDING).session(loginAs(Fixture.SUPER_ADMIN)))
+				.andExpect(status().isOk());
 	}
 
 	static String serviceBody(String name)

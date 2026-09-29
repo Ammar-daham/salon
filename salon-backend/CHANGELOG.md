@@ -11,7 +11,23 @@ version. The version lives in [`gradle.properties`](gradle.properties); each rel
 
 ## [Unreleased]
 
+### Breaking API changes
+- `DELETE /api/v1/businesses/{id}` returns 409 `CONFLICT` while the salon still has staff; remove or
+  move them first (BE-17).
+
+### Fixed
+- `users.updated_at` is set on every update, and user responses now include it (BE-12).
+- Emails are unique regardless of case, and sign-in accepts any casing of the email (DB-10).
+- Two owners can share a contact value, e.g. a salon's phone that is also its owner's; one owner
+  still can't list the same value twice (DB-05).
+
 ### Changed
+- Migration V4: `users.business_id` is a foreign key to `businesses`, and a `set_updated_at()`
+  trigger maintains `updated_at` on every table (DB-01, DB-11).
+- Migration V5: every address and contact must have exactly one owner and is deleted with it; contact
+  values are unique per owner; the email index is on `lower(email)`; every foreign-key column is
+  indexed (DB-05, DB-06, DB-10, DB-12). V5 removes ownerless addresses/contacts, and stops with an
+  error if two users' emails differ only by case or a row has two owners.
 - Dropped the unused `spring-boot-starter-data-jpa` for `spring-boot-starter-jdbc`; Hibernate no
   longer starts. `@Transactional` is Spring's (BE-36).
 - Flyway is managed by the Spring Boot BOM: `flyway-core` goes from 10.0.0 to 11.14.1, matching
