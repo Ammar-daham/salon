@@ -156,11 +156,12 @@ public class BusinessDataAccessService implements BusinessDao
     }
 
     @Override
-    public int deleteBusiness(int id) 
+    public int deleteBusiness(int id)
     {
         contactDao.getContactsForBusiness((long) id).forEach(contact -> contactDao.deleteContactById(contact.getId()));
         addressDao.getAddressesForBusiness((long) id).forEach(address -> addressDao.deleteAddressById(address.getId()));
-        salonServiceDao.getServicesForBusiness((long) id).forEach(service -> salonServiceDao.deleteServiceById(service.getId()));
+        // fk_services_business is ON DELETE CASCADE: a service belongs to exactly one business,
+        // so it goes with it instead of being hard-deleted out of what used to be a shared table.
 
         return jdbcTemplate.update("DELETE FROM businesses WHERE id = ?", id);
     }

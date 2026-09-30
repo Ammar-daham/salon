@@ -1,6 +1,5 @@
 package com.example.salon.service;
 
-import com.example.salon.dao.BusinessServiceDao;
 import com.example.salon.dao.SalonServiceDao;
 import com.example.salon.exception.BaseException;
 import com.example.salon.exception.ErrorCode;
@@ -17,22 +16,19 @@ import org.springframework.transaction.annotation.Transactional;
 public class BusinessSalonServiceService 
 {
     private final SalonServiceDao salonServiceDao;
-    private final BusinessServiceDao businessServiceDao;
 
     @Autowired
-    public BusinessSalonServiceService(SalonServiceDao salonServiceDao, BusinessServiceDao businessServiceDao) 
+    public BusinessSalonServiceService(SalonServiceDao salonServiceDao)
     {
         this.salonServiceDao = salonServiceDao;
-        this.businessServiceDao = businessServiceDao;
     }
 
     @Transactional
-    public SalonService createServiceForBusiness(Long businessId, SalonService salonService, AuthenticatedUser caller) 
+    public SalonService createServiceForBusiness(Long businessId, SalonService salonService, AuthenticatedUser caller)
     {
         AccessControl.requireBusinessAccess(caller, businessId);
         try {
-            Long serviceId = salonServiceDao.addService(salonService);
-            businessServiceDao.linkServiceToBusiness(businessId, serviceId);
+            Long serviceId = salonServiceDao.addService(businessId, salonService);
             salonService.setId(serviceId);
         } catch (DuplicateKeyException ex) {
             throw new BaseException("Service could not be created due to a conflict.", ErrorCode.DUPLICATE_RESOURCE);

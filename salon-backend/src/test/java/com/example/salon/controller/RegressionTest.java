@@ -147,6 +147,21 @@ class RegressionTest extends IntegrationTest
 				.andExpect(status().isNotFound());
 	}
 
+	/** BE-16: services belong to one business now, so deleting it cascades to its services
+	 *  instead of leaving them behind in what used to be modeled as a shared table. */
+	@Test
+	void deletingABusinessRemovesItsServices() throws Exception
+	{
+		MockHttpSession superAdmin = loginAs(Fixture.SUPER_ADMIN);
+		deleteGlowStaff(superAdmin);
+
+		mvc.perform(delete("/api/v1/businesses/" + Fixture.GLOW).session(superAdmin))
+				.andExpect(status().isOk());
+
+		mvc.perform(get("/api/v1/businesses/" + Fixture.GLOW + "/services/" + Fixture.GLOW_HAIRCUT).session(superAdmin))
+				.andExpect(status().isNotFound());
+	}
+
 	/** BE-10: the deleted business's contact value is freed, not burned forever by the global UNIQUE. */
 	@Test
 	void deletingABusinessFreesItsContactValueForReuse() throws Exception

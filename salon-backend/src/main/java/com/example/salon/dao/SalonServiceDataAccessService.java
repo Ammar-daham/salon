@@ -19,18 +19,19 @@ public class SalonServiceDataAccessService implements SalonServiceDao {
 
 
     @Override
-    public Long addService(SalonService service) {
+    public Long addService(Long businessId, SalonService service) {
         String sql = """
                 INSERT INTO services
-                (name, description,
+                (business_id, name, description,
                 duration_minutes, price, is_active)
-                VALUES (?, ?, ?, ?, ?)
+                VALUES (?, ?, ?, ?, ?, ?)
                 RETURNING id;
                 """;
 
         return jdbcTemplate.queryForObject(
                 sql,
                 Long.class,
+                businessId,
                 service.getName(),
                 service.getDescription(),
                 service.getDuration(),
@@ -42,14 +43,11 @@ public class SalonServiceDataAccessService implements SalonServiceDao {
     @Override
     public List<SalonService> getServicesForBusiness(Long businessId) {
         String sql = """
-                SELECT s.id,
-                s.name, s.description,
-                s.duration_minutes,
-                s.price, s.is_active,
-                s.created_at, s.updated_at
-                FROM services s
-                JOIN business_service bs ON bs.service_id = s.id
-                WHERE bs.business_id = ?;
+                SELECT id, name, description,
+                duration_minutes, price, is_active,
+                created_at, updated_at
+                FROM services
+                WHERE business_id = ?;
                 """;
 
         return jdbcTemplate.query(sql, (rs, i) -> {
@@ -67,20 +65,15 @@ public class SalonServiceDataAccessService implements SalonServiceDao {
         }, businessId);
     }
 
-    ;
-
     @Override
     public SalonService getServiceById(int businessId, int serviceId) {
         String sql = """
-                SELECT s.id,
-                s.name, s.description,
-                s.duration_minutes,
-                s.price, s.is_active,
-                s.created_at, s.updated_at
-                FROM services s
-                JOIN business_service bs ON bs.service_id = s.id
-                WHERE bs.business_id = ?
-                and s.id = ?;
+                SELECT id, name, description,
+                duration_minutes, price, is_active,
+                created_at, updated_at
+                FROM services
+                WHERE business_id = ?
+                AND id = ?;
                 """;
 
         return jdbcTemplate.queryForObject(sql, (rs, i) -> {

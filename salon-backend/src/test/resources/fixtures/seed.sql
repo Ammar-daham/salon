@@ -24,12 +24,10 @@ INSERT INTO contacts (id, type, value, business_id, user_id) VALUES
     (2, 'email', 'hello@urban.test', 2, NULL),
     (3, 'phone', '+49 30 9990004', NULL, 4);
 
-INSERT INTO services (id, name, description, duration_minutes, price, is_active) VALUES
-    (1, 'Signature Haircut', 'Wash, cut and style.', 45, 45.00, true),
-    (2, 'Classic Manicure', 'Shape and polish.', 30, 25.00, true),
-    (3, 'Classic Fade', 'Skin fade.', 30, 28.00, true);
-
-INSERT INTO business_service (business_id, service_id) VALUES (1, 1), (1, 2), (2, 3);
+INSERT INTO services (id, business_id, name, description, duration_minutes, price, is_active) VALUES
+    (1, 1, 'Signature Haircut', 'Wash, cut and style.', 45, 45.00, true),
+    (2, 1, 'Classic Manicure', 'Shape and polish.', 30, 25.00, true),
+    (3, 2, 'Classic Fade', 'Skin fade.', 30, 28.00, true);
 
 SELECT setval(pg_get_serial_sequence('businesses', 'id'), (SELECT max(id) FROM businesses));
 SELECT setval(pg_get_serial_sequence('users', 'id'), (SELECT max(id) FROM users));
