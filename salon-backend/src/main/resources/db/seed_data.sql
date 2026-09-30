@@ -27,7 +27,7 @@
 -- real behaviour - customers don't log in, per V3's migration comment.
 -- =============================================================================
 
--- TRUNCATE business_customers, business_service, staff, services, contacts,
+-- TRUNCATE business_customers, staff, services, contacts,
 --     addresses, users, businesses RESTART IDENTITY CASCADE;
 
 BEGIN;
@@ -51,8 +51,6 @@ DECLARE
     serenity_admin_id BIGINT;
     serenity_emp1_id  BIGINT;
     serenity_emp2_id  BIGINT;
-
-    svc_id           BIGINT;
 
     cust1_id BIGINT; cust2_id BIGINT; cust3_id BIGINT;
     cust4_id BIGINT; cust5_id BIGINT; cust6_id BIGINT;
@@ -81,17 +79,14 @@ BEGIN
     VALUES ('phone', '+49 30 1234501', glow_id),
            ('email', 'hello@glowbeauty.example.com', glow_id);
 
-    INSERT INTO services (name, description, duration_minutes, price, is_active)
-    VALUES ('Signature Haircut', 'Wash, cut and style.', 45, 45.00, true) RETURNING id INTO svc_id;
-    INSERT INTO business_service (business_id, service_id) VALUES (glow_id, svc_id);
+    INSERT INTO services (business_id, name, description, duration_minutes, price, is_active)
+    VALUES (glow_id, 'Signature Haircut', 'Wash, cut and style.', 45, 45.00, true);
 
-    INSERT INTO services (name, description, duration_minutes, price, is_active)
-    VALUES ('Balayage Colour', 'Hand-painted colour with gloss finish.', 120, 150.00, true) RETURNING id INTO svc_id;
-    INSERT INTO business_service (business_id, service_id) VALUES (glow_id, svc_id);
+    INSERT INTO services (business_id, name, description, duration_minutes, price, is_active)
+    VALUES (glow_id, 'Balayage Colour', 'Hand-painted colour with gloss finish.', 120, 150.00, true);
 
-    INSERT INTO services (name, description, duration_minutes, price, is_active)
-    VALUES ('Classic Manicure', 'Shape, cuticle care and polish.', 30, 25.00, true) RETURNING id INTO svc_id;
-    INSERT INTO business_service (business_id, service_id) VALUES (glow_id, svc_id);
+    INSERT INTO services (business_id, name, description, duration_minutes, price, is_active)
+    VALUES (glow_id, 'Classic Manicure', 'Shape, cuticle care and polish.', 30, 25.00, true);
 
     INSERT INTO users (first_name, last_name, role, business_id, email, password_hash)
     VALUES ('Anna', 'Admin', 'ADMIN', glow_id, 'anna.admin@glowbeauty.example.com', pw_hash)
@@ -124,17 +119,14 @@ BEGIN
     VALUES ('phone', '+49 30 1234502', urban_id),
            ('email', 'hello@urbancuts.example.com', urban_id);
 
-    INSERT INTO services (name, description, duration_minutes, price, is_active)
-    VALUES ('Classic Fade', 'Skin fade with a straight-razor finish.', 30, 28.00, true) RETURNING id INTO svc_id;
-    INSERT INTO business_service (business_id, service_id) VALUES (urban_id, svc_id);
+    INSERT INTO services (business_id, name, description, duration_minutes, price, is_active)
+    VALUES (urban_id, 'Classic Fade', 'Skin fade with a straight-razor finish.', 30, 28.00, true);
 
-    INSERT INTO services (name, description, duration_minutes, price, is_active)
-    VALUES ('Beard Trim', 'Shape and line-up.', 20, 15.00, true) RETURNING id INTO svc_id;
-    INSERT INTO business_service (business_id, service_id) VALUES (urban_id, svc_id);
+    INSERT INTO services (business_id, name, description, duration_minutes, price, is_active)
+    VALUES (urban_id, 'Beard Trim', 'Shape and line-up.', 20, 15.00, true);
 
-    INSERT INTO services (name, description, duration_minutes, price, is_active)
-    VALUES ('Hot Towel Shave', 'Traditional straight-razor shave.', 40, 35.00, true) RETURNING id INTO svc_id;
-    INSERT INTO business_service (business_id, service_id) VALUES (urban_id, svc_id);
+    INSERT INTO services (business_id, name, description, duration_minutes, price, is_active)
+    VALUES (urban_id, 'Hot Towel Shave', 'Traditional straight-razor shave.', 40, 35.00, true);
 
     INSERT INTO users (first_name, last_name, role, business_id, email, password_hash)
     VALUES ('Ben', 'Admin', 'ADMIN', urban_id, 'ben.admin@urbancuts.example.com', pw_hash)
@@ -167,17 +159,14 @@ BEGIN
     VALUES ('phone', '+49 89 1234503', serenity_id),
            ('email', 'hello@serenityspa.example.com', serenity_id);
 
-    INSERT INTO services (name, description, duration_minutes, price, is_active)
-    VALUES ('Deep Tissue Massage', 'Firm pressure for muscle tension.', 60, 80.00, true) RETURNING id INTO svc_id;
-    INSERT INTO business_service (business_id, service_id) VALUES (serenity_id, svc_id);
+    INSERT INTO services (business_id, name, description, duration_minutes, price, is_active)
+    VALUES (serenity_id, 'Deep Tissue Massage', 'Firm pressure for muscle tension.', 60, 80.00, true);
 
-    INSERT INTO services (name, description, duration_minutes, price, is_active)
-    VALUES ('Hot Stone Therapy', 'Heated basalt stones with massage.', 90, 110.00, true) RETURNING id INTO svc_id;
-    INSERT INTO business_service (business_id, service_id) VALUES (serenity_id, svc_id);
+    INSERT INTO services (business_id, name, description, duration_minutes, price, is_active)
+    VALUES (serenity_id, 'Hot Stone Therapy', 'Heated basalt stones with massage.', 90, 110.00, true);
 
-    INSERT INTO services (name, description, duration_minutes, price, is_active)
-    VALUES ('Facial Renewal', 'Deep cleanse, exfoliation and mask. Currently paused.', 50, 65.00, false) RETURNING id INTO svc_id;
-    INSERT INTO business_service (business_id, service_id) VALUES (serenity_id, svc_id);
+    INSERT INTO services (business_id, name, description, duration_minutes, price, is_active)
+    VALUES (serenity_id, 'Facial Renewal', 'Deep cleanse, exfoliation and mask. Currently paused.', 50, 65.00, false);
 
     INSERT INTO users (first_name, last_name, role, business_id, email, password_hash)
     VALUES ('Clara', 'Admin', 'ADMIN', serenity_id, 'clara.admin@serenityspa.example.com', pw_hash)

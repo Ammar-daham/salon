@@ -4,7 +4,7 @@ import com.example.salon.model.SalonService;
 import java.util.List;
 
 public interface SalonServiceDao {
-    Long addService(SalonService service);
+    Long addService(Long businessId, SalonService service);
 
     List<SalonService> getServicesForBusiness(Long businessId);
 

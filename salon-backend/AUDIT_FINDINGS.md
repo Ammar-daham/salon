@@ -162,9 +162,15 @@ Root causes:
 - <a id="be-15"></a>**BE-15 — N+1 queries, no pagination.** `getBusinesses()` runs 1 + 3N queries;
   `getAllUsers()` 1 + 2N. No list endpoint pages or filters.
   **→ [`feature/repo-pagination`](../VERSION_CONTROL_GUIDE.md#br-3-5)**
-- <a id="be-16"></a>**BE-16 — Deleting a business hard-deletes rows in the shared `services` table**
+- <a id="be-16"></a>✅ **BE-16 — Deleting a business hard-deletes rows in the shared `services` table**
   instead of unlinking them. **→ [`refactor/repo-services-owned-by-business`](../VERSION_CONTROL_GUIDE.md#br-1-3)**
   ([DB-02](#db-02))
+  *(fixed: migration V6 adds `services.business_id NOT NULL` with `fk_services_business ON DELETE
+  CASCADE` and drops `business_service` - a service belongs to exactly one business now, not many, so
+  deleting the business deletes the service with it instead of the app hard-deleting rows out of what
+  was modeled as a shared table. `SalonServiceDao` queries `services` directly instead of joining
+  through the dropped link table, and `BusinessDataAccessService.deleteBusiness` no longer deletes
+  services by hand. Guarded by `deletingABusinessRemovesItsServices` in `RegressionTest`.)*
 - <a id="be-17"></a>✅ **BE-17 — Deleting a business leaves its staff dangling**, because `users.business_id`
   has no FK. **→ [`fix/salon-backend-schema-integrity`](../VERSION_CONTROL_GUIDE.md#br-1-2)** ([DB-01](#db-01))
   *(fixed: migration V4 adds `fk_users_business` with `ON DELETE RESTRICT`, after unlinking any users
@@ -294,7 +300,7 @@ new users to the caller's business; `application.yml` is not tracked in git.
 | ID | Problem | Recommendation | Fixed by |
 |---|---|---|---|
 | <a id="db-01"></a>✅ DB-01 | `users.business_id` has **no FK** | Add FK to `businesses(id)`; deleting a salon currently strands its staff. | [`fix/salon-backend-schema-integrity`](../VERSION_CONTROL_GUIDE.md#br-1-2) |
-| <a id="db-02"></a>DB-02 | `services` ↔ `businesses` is many-to-many, but a service belongs to one salon | Add `services.business_id NOT NULL` FK and drop `business_service`. Fixes shared-service deletion and simplifies ownership checks. | [`refactor/repo-services-owned-by-business`](../VERSION_CONTROL_GUIDE.md#br-1-3) |
+| <a id="db-02"></a>✅ DB-02 | `services` ↔ `businesses` is many-to-many, but a service belongs to one salon | Add `services.business_id NOT NULL` FK and drop `business_service`. Fixes shared-service deletion and simplifies ownership checks. | [`refactor/repo-services-owned-by-business`](../VERSION_CONTROL_GUIDE.md#br-1-3) |
 | <a id="db-03"></a>DB-03 | `business_customers` has no PK, no FKs, no code | Replace with a `customers` table (business_id, name, phone, email, notes, marketing consent). Customers needn't be `users` rows until they can log in. | [`feature/salon-backend-customers-api`](../VERSION_CONTROL_GUIDE.md#br-1-8) |
 | <a id="db-04"></a>DB-04 | `staff` duplicates `users.role/business_id`, stubbed in code | Keep as the employment record (title, active, hired_at, calendar colour) with real FKs, or fold into `users`. | [`feature/salon-backend-staff-api`](../VERSION_CONTROL_GUIDE.md#br-1-6) |
 | <a id="db-05"></a>✅ DB-05 | `contacts.value` **globally UNIQUE** | Two customers can't share a family phone; a salon can't share its owner's email. Make it unique per owner or drop it. | [`fix/salon-backend-schema-integrity`](../VERSION_CONTROL_GUIDE.md#br-1-2) |

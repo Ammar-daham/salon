@@ -78,8 +78,7 @@ export async function updateService(
 }
 
 /**
- * Unlike businesses and users, this DELETE takes no body — business_service is
- * ON DELETE CASCADE, so removing the service cleans up the join row itself.
+ * Unlike businesses and users, this DELETE takes no body.
  */
 export async function removeService(businessId: Id, serviceId: Id): Promise<void> {
 	await apiClient.delete(endpoints.businesses.serviceById(businessId, serviceId));

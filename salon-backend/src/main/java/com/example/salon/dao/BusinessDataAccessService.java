@@ -156,11 +156,10 @@ public class BusinessDataAccessService implements BusinessDao
     }
 
     @Override
-    public int deleteBusiness(int id) 
+    public int deleteBusiness(int id)
     {
         contactDao.getContactsForBusiness((long) id).forEach(contact -> contactDao.deleteContactById(contact.getId()));
         addressDao.getAddressesForBusiness((long) id).forEach(address -> addressDao.deleteAddressById(address.getId()));
-        salonServiceDao.getServicesForBusiness((long) id).forEach(service -> salonServiceDao.deleteServiceById(service.getId()));
 
         return jdbcTemplate.update("DELETE FROM businesses WHERE id = ?", id);
     }
