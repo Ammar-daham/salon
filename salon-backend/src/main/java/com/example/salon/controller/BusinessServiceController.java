@@ -1,8 +1,10 @@
 package com.example.salon.controller;
 
+import com.example.salon.dto.SalonServiceRequest;
 import com.example.salon.model.SalonService;
 import com.example.salon.security.AuthenticatedUser;
 import com.example.salon.service.BusinessSalonServiceService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -27,10 +29,11 @@ public class BusinessServiceController
 	@PostMapping("/{businessId}/services")
 	public SalonService createServiceForBusiness(
 			@PathVariable Long businessId,
-			@RequestBody SalonService salonService,
+			@Valid @RequestBody SalonServiceRequest request,
 			@AuthenticationPrincipal AuthenticatedUser principal
 	)
 	{
+		SalonService salonService = request.toSalonService();
 		SalonService s = businessSalonServiceService
 				.createServiceForBusiness(businessId, salonService, principal);
 		URI location = ServletUriComponentsBuilder
@@ -50,9 +53,9 @@ public class BusinessServiceController
 
 	@PutMapping("/{businessId}/services/{serviceId}")
 	public void updateServiceForBusiness(@PathVariable int businessId, @PathVariable int serviceId,
-			@RequestBody SalonService salonService, @AuthenticationPrincipal AuthenticatedUser principal)
+			@Valid @RequestBody SalonServiceRequest request, @AuthenticationPrincipal AuthenticatedUser principal)
 	{
-		businessSalonServiceService.updateServiceForBusiness(businessId, serviceId, salonService, principal);
+		businessSalonServiceService.updateServiceForBusiness(businessId, serviceId, request.toSalonService(), principal);
 	}
 
 	@DeleteMapping("/{businessId}/services/{serviceId}")
