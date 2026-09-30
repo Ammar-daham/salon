@@ -160,8 +160,6 @@ public class BusinessDataAccessService implements BusinessDao
     {
         contactDao.getContactsForBusiness((long) id).forEach(contact -> contactDao.deleteContactById(contact.getId()));
         addressDao.getAddressesForBusiness((long) id).forEach(address -> addressDao.deleteAddressById(address.getId()));
-        // fk_services_business is ON DELETE CASCADE: a service belongs to exactly one business,
-        // so it goes with it instead of being hard-deleted out of what used to be a shared table.
 
         return jdbcTemplate.update("DELETE FROM businesses WHERE id = ?", id);
     }
