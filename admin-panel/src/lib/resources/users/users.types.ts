@@ -34,6 +34,6 @@ export interface CreateUserInput {
 export interface UpdateUserInput {
 	firstName: string;
 	lastName: string;
-	/** Always send it: UserDataAccessService NPEs into a 400 when role is null. */
+	/** Always send it: UpdateUserRequest rejects a missing role with a 400 (BE-23). */
 	role: Role;
 }
