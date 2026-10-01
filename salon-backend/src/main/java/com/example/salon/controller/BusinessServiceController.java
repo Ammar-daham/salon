@@ -27,7 +27,7 @@ public class BusinessServiceController
 	}
 
 	@PostMapping("/{businessId}/services")
-	public SalonService createServiceForBusiness(
+	public ResponseEntity<SalonService> createServiceForBusiness(
 			@PathVariable Long businessId,
 			@Valid @RequestBody SalonServiceRequest request,
 			@AuthenticationPrincipal AuthenticatedUser principal
@@ -42,7 +42,7 @@ public class BusinessServiceController
 				.buildAndExpand(salonService.getId())
 				.toUri();
 
-		return ResponseEntity.created(location).body(s).getBody();
+		return ResponseEntity.created(location).body(s);
 	}
 
 	@GetMapping("/{businessId}/services/{serviceId}")

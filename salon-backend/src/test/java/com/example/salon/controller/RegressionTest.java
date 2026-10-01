@@ -121,7 +121,7 @@ class RegressionTest extends IntegrationTest
 						.content("""
 								{"name": "Blow Dry", "description": "Wash and blow dry.", "duration_minutes": 25, "price": 20.00, "is_active": false}
 								"""))
-				.andExpect(status().isOk())
+				.andExpect(status().isCreated())
 				.andExpect(jsonPath("$.id").value(notNullValue()));
 
 		mvc.perform(get("/api/v1/businesses/" + Fixture.GLOW).session(admin))
@@ -129,6 +129,52 @@ class RegressionTest extends IntegrationTest
 				.andExpect(jsonPath("$.services", hasSize(3)))
 				.andExpect(jsonPath("$.services[?(@.name == 'Blow Dry')].duration_minutes").value(25))
 				.andExpect(jsonPath("$.services[?(@.name == 'Blow Dry')].is_active").value(false));
+	}
+
+	/**
+	 * BE-13: every create controller built a ResponseEntity.created(location) and then called
+	 * .getBody() on it, discarding the status and the Location header - so every create silently
+	 * returned 200 with no way to locate the new resource except parsing the response body.
+	 */
+	@Test
+	void creatingAResourceReturns201WithALocationHeaderThatResolves() throws Exception
+	{
+		MockHttpSession superAdmin = loginAs(Fixture.SUPER_ADMIN);
+
+		String businessLocation = mvc.perform(post("/api/v1/businesses").session(superAdmin)
+						.contentType(MediaType.APPLICATION_JSON)
+						.content("""
+								{"name": "BE-13 Spa", "description": "x", "image": "x"}
+								"""))
+				.andExpect(status().isCreated())
+				.andReturn().getResponse().getHeader("Location");
+		mvc.perform(get(businessLocation).session(superAdmin))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.name").value("BE-13 Spa"));
+
+		MockHttpSession admin = loginAs(Fixture.GLOW_ADMIN);
+
+		String userLocation = mvc.perform(post("/api/v1/users").session(admin)
+						.contentType(MediaType.APPLICATION_JSON)
+						.content("""
+								{"first_name":"Be13","last_name":"Check","email":"be13check@glow.test","password":"Password123!","role":"EMPLOYEE"}
+								"""))
+				.andExpect(status().isCreated())
+				.andReturn().getResponse().getHeader("Location");
+		mvc.perform(get(userLocation).session(admin))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.first_name").value("Be13"));
+
+		String serviceLocation = mvc.perform(post("/api/v1/businesses/" + Fixture.GLOW + "/services").session(admin)
+						.contentType(MediaType.APPLICATION_JSON)
+						.content("""
+								{"name": "BE-13 Trim", "description": "x", "duration_minutes": 15, "price": 10.00, "is_active": true}
+								"""))
+				.andExpect(status().isCreated())
+				.andReturn().getResponse().getHeader("Location");
+		mvc.perform(get(serviceLocation).session(admin))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.name").value("BE-13 Trim"));
 	}
 
 	/** BE-10: deleting a business takes no body and removes its real children - no orphaned rows. */
@@ -178,7 +224,7 @@ class RegressionTest extends IntegrationTest
 						.content("""
 								{"first_name":"New","last_name":"Hire","email":"newhire@urban.test","password":"Password123!","role":"EMPLOYEE","business_id":%d,"contacts":[{"type":"phone","value":"+49 30 1234501"}]}
 								""".formatted(Fixture.URBAN)))
-				.andExpect(status().isOk());
+				.andExpect(status().isCreated());
 	}
 
 	/** BE-10: deleting a user takes no body and removes the user's own children. */

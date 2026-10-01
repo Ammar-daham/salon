@@ -186,7 +186,7 @@ class AuthorizationRulesTest extends IntegrationTest
 		mvc.perform(post("/api/v1/users").session(loginAs(Fixture.GLOW_ADMIN))
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(newUserBody("new.stylist@glow.test", "EMPLOYEE", Fixture.URBAN)))
-				.andExpect(status().isOk());
+				.andExpect(status().isCreated());
 
 		mvc.perform(get("/api/v1/auth/me").session(loginAs("new.stylist@glow.test")))
 				.andExpect(jsonPath("$.business_id").value(Fixture.GLOW));
@@ -220,7 +220,7 @@ class AuthorizationRulesTest extends IntegrationTest
 						.content("""
 								{"first_name":"New","last_name":"Hire","email":"newhire@glow.test","password":"Password123!","role":"EMPLOYEE","contacts":[{"type":"phone","value":"+49 30 1234501"}]}
 								"""))
-				.andExpect(status().isOk());
+				.andExpect(status().isCreated());
 	}
 
 	@Test
@@ -237,7 +237,7 @@ class AuthorizationRulesTest extends IntegrationTest
 		mvc.perform(post("/api/v1/users").session(loginAs(Fixture.GLOW_ADMIN))
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(newUserBody("newhire@glow.test", "EMPLOYEE", null)))
-				.andExpect(status().isOk());
+				.andExpect(status().isCreated());
 	}
 
 	@Test
@@ -466,7 +466,7 @@ class AuthorizationRulesTest extends IntegrationTest
 						.content("""
 								{"name": "Lumen Nail Bar", "description": "x", "image": "x"}
 								"""))
-				.andExpect(status().isOk());
+				.andExpect(status().isCreated());
 	}
 
 	@Test

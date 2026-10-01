@@ -28,7 +28,7 @@ public class UserController
 	}
 
 	@PostMapping
-	public User addUser(@Valid @RequestBody CreateUserRequest request, @AuthenticationPrincipal AuthenticatedUser principal)
+	public ResponseEntity<User> addUser(@Valid @RequestBody CreateUserRequest request, @AuthenticationPrincipal AuthenticatedUser principal)
 	{
 		User user = request.toUser();
 		User u = userService.addUser(user, principal);
@@ -38,7 +38,7 @@ public class UserController
 				.buildAndExpand(user.getId())
 				.toUri();
 
-		return ResponseEntity.created(location).body(u).getBody();
+		return ResponseEntity.created(location).body(u);
 	}
 
 	@GetMapping

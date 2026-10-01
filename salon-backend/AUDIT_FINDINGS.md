@@ -148,9 +148,15 @@ Root causes:
   so the database sets it on every UPDATE whatever the DAO does. The user row mapper now reads
   `updated_at`, which the API never returned before. Guarded by `updatingAUserSetsUpdatedAt` in
   `RegressionTest`.)*
-- <a id="be-13"></a>**BE-13 — `201 Created` / `Location` never sent.** Controllers build
+- <a id="be-13"></a>✅ **BE-13 — `201 Created` / `Location` never sent.** Controllers build
   `ResponseEntity.created(...)` then call `.getBody()`, discarding status and header; every create returns 200.
   **→ [`fix/salon-backend-created-responses`](../VERSION_CONTROL_GUIDE.md#br-1-5)**
+  *(fixed: `BusinessController.addBusiness`, `UserController.addUser` and
+  `BusinessServiceController.createServiceForBusiness` now return `ResponseEntity<T>` directly instead
+  of unwrapping it with `.getBody()`, so the 201 status and `Location` header actually reach the
+  client. Guarded by `creatingAResourceReturns201WithALocationHeaderThatResolves` in `RegressionTest`,
+  which follows each `Location` header back with a GET to confirm it resolves to the resource just
+  created.)*
 - <a id="be-14"></a>✅ **BE-14 — Stale sessions.** The session stores a snapshot of the `User`
   (`AuthenticatedUser`). A demoted, re-scoped or deleted user keeps their old role and access until the
   session expires. **→ [`fix/salon-backend-session-hardening`](../VERSION_CONTROL_GUIDE.md#br-0-11)**

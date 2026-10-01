@@ -28,7 +28,7 @@ public class BusinessController
     }
 
     @PostMapping
-    public Business addBusiness(@Valid @RequestBody CreateBusinessRequest request)
+    public ResponseEntity<Business> addBusiness(@Valid @RequestBody CreateBusinessRequest request)
     {
         Business business = request.toBusiness();
         Business b = businessService.addBusiness(business);
@@ -38,7 +38,7 @@ public class BusinessController
                 .buildAndExpand(business.getId())
                 .toUri();
 
-        return ResponseEntity.created(location).body(b).getBody();
+        return ResponseEntity.created(location).body(b);
     }
 
     @GetMapping
