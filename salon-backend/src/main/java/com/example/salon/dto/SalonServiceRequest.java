@@ -8,7 +8,6 @@ import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
 
-/** Same shape for creating and updating a service - both write every column. */
 public record SalonServiceRequest(
 		@NotBlank @Size(max = 100) String name,
 		String description,
