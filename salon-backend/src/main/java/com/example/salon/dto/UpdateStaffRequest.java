@@ -9,7 +9,6 @@ import jakarta.validation.constraints.Size;
 
 import java.time.LocalDate;
 
-/** Which user this employment record belongs to isn't editable - delete and recreate instead. */
 public record UpdateStaffRequest(
 		@NotBlank @Size(max = 50) String title,
 		@JsonProperty("is_active") boolean active,
