@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
-/** Shape for both a nested address on user/business creation and a standalone address update. */
 public record AddressRequest(
 		@NotBlank @Size(max = 255) String street,
 		@NotBlank @Size(max = 100) String city,
