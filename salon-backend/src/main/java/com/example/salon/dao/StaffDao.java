@@ -5,13 +5,13 @@ import com.example.salon.model.Staff;
 import java.util.List;
 
 public interface StaffDao {
-    long addUser(Staff staff);
+    Long addStaff(Staff staff);
 
-    List<Staff> getAllStaff();
+    List<Staff> getStaffForBusiness(Long businessId);
 
-    Staff getStaffById(int id);
+    Staff getStaffById(long businessId, long staffId);
 
-    long updateStaffById(long id, Staff staff);
+    int updateStaffById(long id, Staff staff);
 
-    long deleteStaffById(long id, Staff staff);
+    int deleteStaffById(long id);
 }

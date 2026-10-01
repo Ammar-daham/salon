@@ -29,8 +29,13 @@ INSERT INTO services (id, business_id, name, description, duration_minutes, pric
     (2, 1, 'Classic Manicure', 'Shape and polish.', 30, 25.00, true),
     (3, 2, 'Classic Fade', 'Skin fade.', 30, 28.00, true);
 
+INSERT INTO staff (id, user_id, business_id, title, is_active, hired_at) VALUES
+    (1, 4, 1, 'Senior Stylist', true, '2021-03-15'),
+    (2, 6, 2, 'Barber', true, '2020-11-02');
+
 SELECT setval(pg_get_serial_sequence('businesses', 'id'), (SELECT max(id) FROM businesses));
 SELECT setval(pg_get_serial_sequence('users', 'id'), (SELECT max(id) FROM users));
 SELECT setval(pg_get_serial_sequence('addresses', 'id'), (SELECT max(id) FROM addresses));
 SELECT setval(pg_get_serial_sequence('contacts', 'id'), (SELECT max(id) FROM contacts));
 SELECT setval(pg_get_serial_sequence('services', 'id'), (SELECT max(id) FROM services));
+SELECT setval(pg_get_serial_sequence('staff', 'id'), (SELECT max(id) FROM staff));

@@ -95,12 +95,12 @@ BEGIN
     INSERT INTO users (first_name, last_name, role, business_id, email, password_hash)
     VALUES ('Mia', 'Stylist', 'EMPLOYEE', glow_id, 'mia.stylist@glowbeauty.example.com', pw_hash)
     RETURNING id INTO glow_emp1_id;
-    INSERT INTO staff (user_id, business_id, title, is_active) VALUES (glow_emp1_id, glow_id, 'Senior Stylist', true);
+    INSERT INTO staff (user_id, business_id, title, is_active, hired_at) VALUES (glow_emp1_id, glow_id, 'Senior Stylist', true, '2021-03-15');
 
     INSERT INTO users (first_name, last_name, role, business_id, email, password_hash)
     VALUES ('Noah', 'Colorist', 'EMPLOYEE', glow_id, 'noah.colorist@glowbeauty.example.com', pw_hash)
     RETURNING id INTO glow_emp2_id;
-    INSERT INTO staff (user_id, business_id, title, is_active) VALUES (glow_emp2_id, glow_id, 'Colorist', true);
+    INSERT INTO staff (user_id, business_id, title, is_active, hired_at) VALUES (glow_emp2_id, glow_id, 'Colorist', true, '2022-07-01');
 
     -- =========================================================================
     -- Business 2: Urban Cuts Barbershop (APPROVED)
@@ -135,12 +135,12 @@ BEGIN
     INSERT INTO users (first_name, last_name, role, business_id, email, password_hash)
     VALUES ('Leo', 'Barber', 'EMPLOYEE', urban_id, 'leo.barber@urbancuts.example.com', pw_hash)
     RETURNING id INTO urban_emp1_id;
-    INSERT INTO staff (user_id, business_id, title, is_active) VALUES (urban_emp1_id, urban_id, 'Barber', true);
+    INSERT INTO staff (user_id, business_id, title, is_active, hired_at) VALUES (urban_emp1_id, urban_id, 'Barber', true, '2020-11-02');
 
     INSERT INTO users (first_name, last_name, role, business_id, email, password_hash)
     VALUES ('Sam', 'Barber', 'EMPLOYEE', urban_id, 'sam.barber@urbancuts.example.com', pw_hash)
     RETURNING id INTO urban_emp2_id;
-    INSERT INTO staff (user_id, business_id, title, is_active) VALUES (urban_emp2_id, urban_id, 'Barber', true);
+    INSERT INTO staff (user_id, business_id, title, is_active, hired_at) VALUES (urban_emp2_id, urban_id, 'Barber', true, '2023-02-20');
 
     -- =========================================================================
     -- Business 3: Serenity Day Spa (PENDING)
@@ -175,12 +175,12 @@ BEGIN
     INSERT INTO users (first_name, last_name, role, business_id, email, password_hash)
     VALUES ('Ida', 'Therapist', 'EMPLOYEE', serenity_id, 'ida.therapist@serenityspa.example.com', pw_hash)
     RETURNING id INTO serenity_emp1_id;
-    INSERT INTO staff (user_id, business_id, title, is_active) VALUES (serenity_emp1_id, serenity_id, 'Massage Therapist', true);
+    INSERT INTO staff (user_id, business_id, title, is_active, hired_at) VALUES (serenity_emp1_id, serenity_id, 'Massage Therapist', true, '2022-04-18');
 
     INSERT INTO users (first_name, last_name, role, business_id, email, password_hash)
     VALUES ('Tom', 'Therapist', 'EMPLOYEE', serenity_id, 'tom.therapist@serenityspa.example.com', pw_hash)
     RETURNING id INTO serenity_emp2_id;
-    INSERT INTO staff (user_id, business_id, title, is_active) VALUES (serenity_emp2_id, serenity_id, 'Esthetician', false);
+    INSERT INTO staff (user_id, business_id, title, is_active, hired_at) VALUES (serenity_emp2_id, serenity_id, 'Esthetician', false, '2019-09-09');
 
     -- =========================================================================
     -- Customers - no login, no business_id column, linked to businesses only

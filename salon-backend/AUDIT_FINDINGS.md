@@ -110,9 +110,12 @@ Root causes:
   their own personal records, anyone signed in can read a salon's, and business-owned records take the
   admin-only write path. The two tests moved from `KnownIssuesTest` to `AuthorizationRulesTest`, plus
   `employeesCannotEditTheirSalonsAddressOrContact` and `ownersCanEditTheirOwnPersonalContact`.)*
-- <a id="be-08"></a>**BE-08 — `Staff` constructor drops fields.** [`Staff.java:14-16`](src/main/java/com/example/salon/model/Staff.java)
+- <a id="be-08"></a>✅ **BE-08 — `Staff` constructor drops fields.** [`Staff.java:14-16`](src/main/java/com/example/salon/model/Staff.java)
   only assigns `id`. Unreachable today (no staff API), but a live defect the moment it's wired up.
   **→ [`feature/salon-backend-staff-api`](../VERSION_CONTROL_GUIDE.md#br-1-6)**
+  *(fixed alongside [BE-35](#be-35)/[DB-04](#db-04): the constructor now assigns every field.
+  Guarded by `StaffControllerTest`, which is only possible because the staff API is real now - see
+  BE-35.)*
 
 ### High
 - <a id="be-09"></a>✅ **BE-09 — Duplicate-key swallowed → false success.** `BusinessSalonServiceService.createServiceForBusiness`
@@ -309,8 +312,18 @@ new users to the caller's business; `application.yml` is not tracked in git.
   *(fixed: the `System.out.println` is replaced by an SLF4J logger, and the global exception handler now
   logs 5xx/database/unexpected failures server-side with their stack traces — so a real bug leaves a trace
   even though the client response stays generic.)*
-- <a id="be-35"></a>**BE-35 — Stub feature.** `StaffDataAccessService` returns `0`/`List.of()`/`null`,
+- <a id="be-35"></a>✅ **BE-35 — Stub feature.** `StaffDataAccessService` returns `0`/`List.of()`/`null`,
   isn't a Spring bean, has no controller. **→ [`feature/salon-backend-staff-api`](../VERSION_CONTROL_GUIDE.md#br-1-6)**
+  *(fixed: `StaffDataAccessService` is a real `@Repository` now, scoped by business the same way
+  `SalonServiceDataAccessService` is post-[BE-16](#be-16); `StaffService` enforces that the user being
+  hired actually exists, belongs to the target business, and holds an employable role
+  (`EMPLOYEE`/`ADMIN`), plus the same `requireBusinessAccess` tenant check every other write endpoint
+  uses; `StaffController` exposes `POST`/`GET`/`PUT`/`DELETE` under
+  `/api/v1/businesses/{businessId}/staff(/{staffId})`, following [BE-13](#be-13) (`ResponseEntity<Staff>`,
+  not `.getBody()`) and [BE-23](#be-23) (`CreateStaffRequest`/`UpdateStaffRequest` validated with
+  `@Valid`) from the start. Deleting a staff record removes only the employment record, never the
+  underlying `users` row - firing someone isn't the same as deleting their account. Guarded by
+  `StaffControllerTest`.)*
 - <a id="be-36"></a>✅ **BE-36 — Unused dependency** `spring-boot-starter-data-jpa` (no entities;
   everything is JdbcTemplate). **→ [`chore/salon-backend-dependency-cleanup`](../VERSION_CONTROL_GUIDE.md#br-1-1)**
   *(fixed: replaced by `spring-boot-starter-jdbc`, so Hibernate and the JPA EntityManager no longer
@@ -335,7 +348,7 @@ new users to the caller's business; `application.yml` is not tracked in git.
 | <a id="db-01"></a>✅ DB-01 | `users.business_id` has **no FK** | Add FK to `businesses(id)`; deleting a salon currently strands its staff. | [`fix/salon-backend-schema-integrity`](../VERSION_CONTROL_GUIDE.md#br-1-2) |
 | <a id="db-02"></a>✅ DB-02 | `services` ↔ `businesses` is many-to-many, but a service belongs to one salon | Add `services.business_id NOT NULL` FK and drop `business_service`. Fixes shared-service deletion and simplifies ownership checks. | [`refactor/repo-services-owned-by-business`](../VERSION_CONTROL_GUIDE.md#br-1-3) |
 | <a id="db-03"></a>DB-03 | `business_customers` has no PK, no FKs, no code | Replace with a `customers` table (business_id, name, phone, email, notes, marketing consent). Customers needn't be `users` rows until they can log in. | [`feature/salon-backend-customers-api`](../VERSION_CONTROL_GUIDE.md#br-1-8) |
-| <a id="db-04"></a>DB-04 | `staff` duplicates `users.role/business_id`, stubbed in code | Keep as the employment record (title, active, hired_at, calendar colour) with real FKs, or fold into `users`. | [`feature/salon-backend-staff-api`](../VERSION_CONTROL_GUIDE.md#br-1-6) |
+| <a id="db-04"></a>✅ DB-04 | `staff` duplicates `users.role/business_id`, stubbed in code | Keep as the employment record (title, active, hired_at, calendar colour) with real FKs, or fold into `users`. | [`feature/salon-backend-staff-api`](../VERSION_CONTROL_GUIDE.md#br-1-6) |
 | <a id="db-05"></a>✅ DB-05 | `contacts.value` **globally UNIQUE** | Two customers can't share a family phone; a salon can't share its owner's email. Make it unique per owner or drop it. | [`fix/salon-backend-schema-integrity`](../VERSION_CONTROL_GUIDE.md#br-1-2) |
 | <a id="db-06"></a>✅ DB-06 | Polymorphic `business_id OR user_id` on `addresses`/`contacts`, unchecked | Add `CHECK (num_nonnulls(business_id, user_id) = 1)` — or put phone/email columns directly on businesses and customers and keep one address per business. | [`fix/salon-backend-schema-integrity`](../VERSION_CONTROL_GUIDE.md#br-1-2) |
 | <a id="db-07"></a>DB-07 | `latitude`/`longitude` are `VARCHAR` | `NUMERIC(9,6)` (PostGIS later for "salons near me"). | [`refactor/salon-backend-column-types`](../VERSION_CONTROL_GUIDE.md#br-1-10) |
