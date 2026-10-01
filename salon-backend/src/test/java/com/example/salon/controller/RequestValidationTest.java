@@ -25,7 +25,7 @@ class RequestValidationTest extends IntegrationTest
 						.content("""
 								{"name": "Self-Approved Salon", "description": "x", "image": "x", "status": "APPROVED"}
 								"""))
-				.andExpect(status().isOk())
+				.andExpect(status().isCreated())
 				.andExpect(jsonPath("$.status").value("PENDING"));
 	}
 
