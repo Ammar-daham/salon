@@ -7,7 +7,7 @@ import { useAuth } from "@/context/AuthContext";
 import { can } from "@/lib/auth/permissions";
 import { resolveBusinessScope } from "@/lib/auth/scope";
 import { useDataTable } from "@/lib/table/useDataTable";
-import { useEmployees } from "@/lib/resources/employees/employees.hooks";
+import { useDeleteEmployee, useEmployees } from "@/lib/resources/employees/employees.hooks";
 import type { Employee } from "@/lib/resources/employees/employees.types";
 import { getErrorMessage } from "@/lib/api/errors";
 
@@ -19,21 +19,27 @@ import EmptyState from "@/components/ui/EmptyState";
 import StatusBadge from "@/components/ui/StatusBadge";
 import Button from "@/components/ui/button/Button";
 import InitialsAvatar from "@/components/ui/InitialsAvatar";
+import ConfirmDialog from "@/components/ui/modal/ConfirmDialog";
 import { SelectInput } from "@/components/ui/form/Field";
-import { ErrorIcon, PlusIcon, UserCircleIcon, UserIcon } from "@/icons";
+import { useToast } from "@/components/ui/toast/ToastProvider";
+import { ErrorIcon, PlusIcon, TrashBinIcon, UserCircleIcon, UserIcon } from "@/icons";
 
 export default function EmployeeListView() {
 	const { user } = useAuth();
 	const router = useRouter();
+	const { toast } = useToast();
 	const scope = resolveBusinessScope(user);
 
 	const businessId = scope.kind === "business" ? scope.businessId : null;
 	const { data, isPending, isError, error, refetch, source } = useEmployees(businessId);
+	const remove = useDeleteEmployee();
 
 	const [statusFilter, setStatusFilter] = useState<"ALL" | "ACTIVE" | "INACTIVE">("ALL");
 	const [businessFilter, setBusinessFilter] = useState<string>("ALL");
+	const [pendingDelete, setPendingDelete] = useState<Employee | null>(null);
 
 	const canCreate = can(user, "employee:create");
+	const canDelete = can(user, "employee:delete");
 	const crossBusiness = scope.kind === "platform";
 
 	const salons = useMemo(() => {
@@ -68,6 +74,22 @@ export default function EmployeeListView() {
 		filters,
 		pageSize: 15,
 	});
+
+	async function handleDelete() {
+		if (!pendingDelete) return;
+		const target = pendingDelete;
+		try {
+			await remove.mutateAsync({ businessId: target.businessId, id: target.id });
+			toast({
+				tone: "success",
+				title: "Removed from roster",
+				description: `${target.firstName} ${target.lastName} is no longer on the team roster.`,
+			});
+			setPendingDelete(null);
+		} catch (err) {
+			toast({ tone: "error", title: "Couldn't remove from roster", description: getErrorMessage(err) });
+		}
+	}
 
 	if (scope.kind === "unresolved") {
 		return (
@@ -148,9 +170,23 @@ export default function EmployeeListView() {
 			header: "",
 			align: "right",
 			render: (e) => (
-				<Button size="sm" variant="outline" onClick={() => router.push(`/employees/${e.id}`)}>
-					View
-				</Button>
+				<div className="flex justify-end gap-1">
+					<Button size="sm" variant="outline" onClick={() => router.push(`/employees/${e.id}`)}>
+						View
+					</Button>
+					{canDelete && (
+						<Button
+							size="sm"
+							variant="ghost"
+							aria-label={`Remove ${e.firstName} ${e.lastName} from the roster`}
+							onClick={() => setPendingDelete(e)}
+							startIcon={<TrashBinIcon className="size-4" />}
+							className="text-error-600 hover:bg-error-50 hover:text-error-700 dark:hover:bg-error-500/10"
+						>
+							Delete
+						</Button>
+					)}
+				</div>
 			),
 		},
 	];
@@ -282,6 +318,27 @@ export default function EmployeeListView() {
 					)}
 				</>
 			)}
+			<ConfirmDialog
+				isOpen={pendingDelete !== null}
+				onClose={() => setPendingDelete(null)}
+				onConfirm={handleDelete}
+				loading={remove.isPending}
+				title={`Remove ${pendingDelete?.firstName ?? ""} ${pendingDelete?.lastName ?? ""} from the roster?`.trim()}
+				confirmLabel="Remove from roster"
+				description={
+					pendingDelete ? (
+						<>
+							This removes{" "}
+							<strong className="text-ink">
+								{pendingDelete.firstName} {pendingDelete.lastName}
+							</strong>
+							&apos;s employment record from {pendingDelete.businessName}. Their user account
+							itself is untouched — they can still sign in, they just won&apos;t be on this
+							team&apos;s roster anymore. This can&apos;t be undone.
+						</>
+					) : null
+				}
+			/>
 		</>
 	);
 }

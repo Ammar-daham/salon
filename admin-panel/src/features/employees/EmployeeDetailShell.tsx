@@ -43,6 +43,7 @@ export default function EmployeeDetailShell({
 		{ label: "Profile", href: `/employees/${id}`, exact: true },
 		{ label: "Schedule", href: `/employees/${id}/schedule` },
 		{ label: "Appointments", href: `/employees/${id}/appointments` },
+		{ label: "Settings", href: `/employees/${id}/settings` },
 	];
 
 	return (

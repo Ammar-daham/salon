@@ -11,7 +11,8 @@ export interface Employee {
 	businessName: string;
 	/** ISO date ("YYYY-MM-DD"), not a timestamp - staff.hired_at is a DATE column. */
 	hiredAt: string;
-	/** Hex colour for a future calendar view (DB-04). No UI reads or writes this yet. */
+	/** Hex colour for a future calendar view (DB-04). Editable from Employee settings,
+	 *  but nothing renders it yet - no calendar view exists to read it. */
 	calendarColour: string | null;
 }
 
