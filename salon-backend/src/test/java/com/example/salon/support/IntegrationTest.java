@@ -58,6 +58,7 @@ public abstract class IntegrationTest
 		public static final long GLOW_ADMIN_ID = 2;
 		public static final long URBAN_ADMIN_ID = 3;
 		public static final long GLOW_EMPLOYEE_ID = 4;
+		public static final long URBAN_EMPLOYEE_ID = 6;
 
 		public static final long GLOW = 1;
 		public static final long URBAN = 2;
@@ -72,6 +73,9 @@ public abstract class IntegrationTest
 		public static final long GLOW_HAIRCUT = 1;
 		public static final long GLOW_MANICURE = 2;
 		public static final long URBAN_FADE = 3;
+
+		public static final long GLOW_STAFF = 1;
+		public static final long URBAN_STAFF = 2;
 
 		private Fixture()
 		{

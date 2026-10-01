@@ -1,21 +1,48 @@
 package com.example.salon.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.time.Instant;
+import java.time.LocalDate;
 
 public class Staff {
-    public long id;
+    public Long id;
     public String title;
-    public boolean isActive;
-    public long userId;
-    public long businessId;
+    public boolean active;
+    @JsonProperty("user_id")
+    public Long userId;
+    @JsonIgnore
+    public Long businessId;
+    @JsonProperty("hired_at")
+    public LocalDate hiredAt;
+    @JsonProperty("calendar_colour")
+    public String calendarColour;
+    @JsonProperty("created_at")
     public Instant createdAt;
+    @JsonProperty("updated_at")
     public Instant updatedAt;
 
-    public Staff(long id, String title, boolean isActive, long userId, long businessId) {
+    public Staff(
+            @JsonProperty("id") Long id,
+            @JsonProperty("title") String title,
+            @JsonProperty("is_active") boolean active,
+            @JsonProperty("user_id") Long userId,
+            @JsonProperty("hired_at") LocalDate hiredAt,
+            @JsonProperty("calendar_colour") String calendarColour,
+            @JsonProperty("created_at") Instant createdAt,
+            @JsonProperty("updated_at") Instant updatedAt) {
         this.id = id;
+        this.title = title;
+        this.active = active;
+        this.userId = userId;
+        this.hiredAt = hiredAt;
+        this.calendarColour = calendarColour;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
     }
 
-    public long getId() {
+    public Long getId() {
         return id;
     }
 
@@ -24,15 +51,23 @@ public class Staff {
     }
 
     public boolean isActive() {
-        return isActive;
+        return active;
     }
 
-    public long getUserId() {
+    public Long getUserId() {
         return userId;
     }
 
-    public long getBusinessId() {
+    public Long getBusinessId() {
         return businessId;
+    }
+
+    public LocalDate getHiredAt() {
+        return hiredAt;
+    }
+
+    public String getCalendarColour() {
+        return calendarColour;
     }
 
     public Instant getCreatedAt() {
@@ -43,7 +78,7 @@ public class Staff {
         return updatedAt;
     }
 
-    public void setId(long id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
@@ -52,15 +87,23 @@ public class Staff {
     }
 
     public void setActive(boolean active) {
-        isActive = active;
+        this.active = active;
     }
 
-    public void setUserId(long userId) {
+    public void setUserId(Long userId) {
         this.userId = userId;
     }
 
-    public void setBusinessId(long businessId) {
+    public void setBusinessId(Long businessId) {
         this.businessId = businessId;
+    }
+
+    public void setHiredAt(LocalDate hiredAt) {
+        this.hiredAt = hiredAt;
+    }
+
+    public void setCalendarColour(String calendarColour) {
+        this.calendarColour = calendarColour;
     }
 
     public void setCreatedAt(Instant createdAt) {
