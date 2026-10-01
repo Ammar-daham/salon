@@ -212,10 +212,37 @@ Root causes:
 - **Tenant isolation / privilege escalation** — [BE-01](#be-01) to [BE-05](#be-05). The single most serious problem.
 - <a id="be-22"></a>**BE-22 — No rate limiting or account lockout** on `POST /api/v1/auth/login`.
   **→ [`feature/salon-backend-login-rate-limiting`](../VERSION_CONTROL_GUIDE.md#br-3-1)**
-- <a id="be-23"></a>**BE-23 — No server-side validation.** `spring-boot-starter-validation` is a dependency
+- <a id="be-23"></a>✅ **BE-23 — No server-side validation.** `spring-boot-starter-validation` is a dependency
   but there are zero `@Valid`/`@NotBlank`/`@Email`/`@Size` annotations. Password strength and email
   format are unchecked server-side; request bodies bind straight onto domain models (mass assignment
   of `role`, `status`, ids). **→ [`feature/salon-backend-request-validation`](../VERSION_CONTROL_GUIDE.md#br-1-4)**
+  *(fixed: every write endpoint now takes a per-endpoint record DTO in `dto/` (`CreateBusinessRequest`,
+  `UpdateBusinessRequest`, `CreateUserRequest`, `UpdateUserRequest`, `SalonServiceRequest`,
+  `AddressRequest`, `ContactRequest`) validated with `@Valid` and Bean Validation annotations
+  (`@NotBlank`/`@Email`/`@Size`/`@Positive`/`@PositiveOrZero`), instead of the domain models binding
+  the request body directly. Password is `@Size(min = 8, max = 72)` - 72 because
+  `BCryptPasswordEncoder` silently ignores input past that length, so a longer password would be
+  accepted without adding any real strength. A `MethodArgumentNotValidException` handler in
+  `GlobalControllerExceptionHandler` turns a failed constraint into a 400 with a readable message
+  instead of falling through to the catch-all 500.
+  This closes the mass-assignment hole, not just documents it: `CreateBusinessRequest` has no
+  `status` field, so a non-super-admin could no longer POST `{"status":"APPROVED"}` and have
+  `Business.setStatus` apply it before `BusinessDataAccessService.addBusiness`'s null-check ever ran
+  - previously a real self-approval path, now simply not part of the accepted shape. `role` and
+  `business_id` were already guarded in `UserService` and stay guarded there; the DTOs remove the
+  possibility of new fields sneaking in the same way as this fix closed off `status`.
+  `JacksonConfig` disables `FAIL_ON_UNKNOWN_PROPERTIES` (in code, not `application.yml` -
+  [BE-30](#be-30) is exactly why: that file is gitignored, so a setting that must always apply can't
+  live there) so a client that still sends a wider shape (e.g. the admin panel echoing a nested
+  `contacts` list on a business update) isn't rejected outright - BE-06/BE-07's "nested child is
+  silently ignored, not an error" behaviour is unchanged, just enforced by the DTO's shape instead of
+  by the service reading only some fields off the full domain model. Guarded by `RequestValidationTest`
+  (one test per validated rule) and
+  `RegressionTest.aMissingRequiredFieldIsARejectedRequestNotAServerCrash`, which replaces the old
+  `aServerSideNullPointerBecomesA500NotAMasked400`: that test's exact scenario (a user update missing
+  `role`) is now caught by `UpdateUserRequest`'s `@NotNull role` before it can reach the code that
+  used to NPE, so it's correctly a 400, not a 500 - BE-27's catch-all for a genuinely unexpected
+  exception is untouched.)*
 - <a id="be-24"></a>✅ **BE-24 — Session fixation.** `AuthController.login` saves the security context
   manually and never rotates the session id. Call `request.changeSessionId()` before `saveContext`.
   **→ [`fix/salon-backend-session-hardening`](../VERSION_CONTROL_GUIDE.md#br-0-11)**

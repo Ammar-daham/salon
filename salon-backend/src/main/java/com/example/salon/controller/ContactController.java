@@ -1,8 +1,10 @@
 package com.example.salon.controller;
 
+import com.example.salon.dto.ContactRequest;
 import com.example.salon.model.Contact;
 import com.example.salon.security.AuthenticatedUser;
 import com.example.salon.service.ContactService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -34,9 +36,9 @@ public class ContactController
 	}
 
 	@PutMapping("/{id}")
-	public void updateContactById(@PathVariable int id, @RequestBody Contact contact, @AuthenticationPrincipal AuthenticatedUser principal)
+	public void updateContactById(@PathVariable int id, @Valid @RequestBody ContactRequest request, @AuthenticationPrincipal AuthenticatedUser principal)
 	{
-		contactService.updateContactById(id, contact, principal);
+		contactService.updateContactById(id, request.toContact(), principal);
 	}
 
 	@DeleteMapping("/{id}")

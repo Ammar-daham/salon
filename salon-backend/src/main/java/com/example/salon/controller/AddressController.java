@@ -1,8 +1,10 @@
 package com.example.salon.controller;
 
+import com.example.salon.dto.AddressRequest;
 import com.example.salon.model.Address;
 import com.example.salon.security.AuthenticatedUser;
 import com.example.salon.service.AddressService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -34,9 +36,9 @@ public class AddressController
 	}
 
 	@PutMapping("/{id}")
-	public void updateAddress(@PathVariable int id, @RequestBody Address address, @AuthenticationPrincipal AuthenticatedUser principal)
+	public void updateAddress(@PathVariable int id, @Valid @RequestBody AddressRequest request, @AuthenticationPrincipal AuthenticatedUser principal)
 	{
-		addressService.updateAddressById(id, address, principal);
+		addressService.updateAddressById(id, request.toAddress(), principal);
 	}
 
 	@DeleteMapping("/{id}")

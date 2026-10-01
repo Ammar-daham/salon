@@ -1,8 +1,11 @@
 package com.example.salon.controller;
 
+import com.example.salon.dto.CreateUserRequest;
+import com.example.salon.dto.UpdateUserRequest;
 import com.example.salon.model.User;
 import com.example.salon.security.AuthenticatedUser;
 import com.example.salon.service.UserService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -25,8 +28,9 @@ public class UserController
 	}
 
 	@PostMapping
-	public User addUser(@RequestBody User user, @AuthenticationPrincipal AuthenticatedUser principal)
+	public User addUser(@Valid @RequestBody CreateUserRequest request, @AuthenticationPrincipal AuthenticatedUser principal)
 	{
+		User user = request.toUser();
 		User u = userService.addUser(user, principal);
 		URI location = ServletUriComponentsBuilder
 				.fromCurrentRequest()
@@ -50,9 +54,9 @@ public class UserController
 	}
 
 	@PutMapping("/{id}")
-	public void updateUserById(@PathVariable long id, @RequestBody User user, @AuthenticationPrincipal AuthenticatedUser principal)
+	public void updateUserById(@PathVariable long id, @Valid @RequestBody UpdateUserRequest request, @AuthenticationPrincipal AuthenticatedUser principal)
 	{
-		userService.updateUserById(id, user, principal);
+		userService.updateUserById(id, request.toUser(), principal);
 	}
 
 	@DeleteMapping("/{id}")

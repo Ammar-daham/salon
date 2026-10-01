@@ -76,9 +76,18 @@ findings it depends on are linked by their `BE-xx` / `DB-xx` IDs.
   [`feature/admin-panel-calendar`](../VERSION_CONTROL_GUIDE.md#br-2-7)**
 - <a id="fe-05"></a>**FE-05 — No login rate limiting / lockout** (backend, [BE-22](../salon-backend/AUDIT_FINDINGS.md#be-22)) — the
   sign-in form is the entry point. **→ [`feature/salon-backend-login-rate-limiting`](../VERSION_CONTROL_GUIDE.md#br-3-1)**
-- <a id="fe-06"></a>**FE-06 — Password policy is client-only.** `UserForm` enforces ≥ 8 characters; the
+- <a id="fe-06"></a>✅ **FE-06 — Password policy is client-only.** `UserForm` enforces ≥ 8 characters; the
   backend accepts any non-blank password. A direct API call bypasses it. Email format is likewise
   HTML5-only ([BE-23](../salon-backend/AUDIT_FINDINGS.md#be-23)). **→ [`feature/salon-backend-request-validation`](../VERSION_CONTROL_GUIDE.md#br-1-4)**
+  *(fixed by [BE-23](../salon-backend/AUDIT_FINDINGS.md#be-23): `CreateUserRequest` now enforces
+  `@Size(min = 8)` on password and `@Email` on email server-side, matching `UserForm`'s own ≥ 8 rule,
+  so a direct API call can no longer bypass either check. No admin-panel change was needed: a failed
+  check comes back as an ordinary 400 with a `message`, which `normalizeError`/`getErrorMessage`
+  (`src/lib/api/errors.ts`) already surfaces generically - the same path every other 400 goes through.
+  The one thing this doesn't do is give per-field errors matching `UserForm`'s `password`/`email` keys;
+  `ErrorResponse` is still a single message string, so a server-side rejection shows as one general
+  error rather than highlighting the specific field. That's unchanged from before this fix and is a
+  distinct enhancement, not a regression.)*
 - <a id="fe-07"></a>**FE-07 — Session fixation & insecure cookie** (backend, [BE-24](../salon-backend/AUDIT_FINDINGS.md#be-24),
   [BE-25](../salon-backend/AUDIT_FINDINGS.md#be-25)) — session id not rotated on login; `secure` flag not forced; timeout is the
   implicit 30-minute default. **→ [`fix/salon-backend-session-hardening`](../VERSION_CONTROL_GUIDE.md#br-0-11),

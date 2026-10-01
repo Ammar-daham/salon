@@ -215,16 +215,23 @@ class RegressionTest extends IntegrationTest
 				.andExpect(jsonPath("$.errorCode").value("NOT_FOUND"));
 	}
 
-	/** BE-27: a server-side NPE (here, an update body with no role) is a logged 500, no longer a masked 400. */
+	/**
+	 * BE-27: a server-side NPE is a logged 500, no longer a masked 400. This used to be reproduced
+	 * with an update body missing "role", which unboxed a null Role and crashed. BE-23's
+	 * UpdateUserRequest now rejects that same body with a validation 400 before it can reach the
+	 * code that used to NPE - a deliberate rejection, not the NPE-swallowing BE-27 removed. The
+	 * catch-all in GlobalControllerExceptionHandler that turns a genuinely unexpected exception into
+	 * a logged 500 is untouched.
+	 */
 	@Test
-	void aServerSideNullPointerBecomesA500NotAMasked400() throws Exception
+	void aMissingRequiredFieldIsARejectedRequestNotAServerCrash() throws Exception
 	{
 		mvc.perform(put("/api/v1/users/" + Fixture.GLOW_EMPLOYEE_ID).session(loginAs(Fixture.GLOW_ADMIN))
 						.contentType(MediaType.APPLICATION_JSON)
 						.content("""
 								{"first_name": "Mia", "last_name": "Stylist"}
 								"""))
-				.andExpect(status().isInternalServerError());
+				.andExpect(status().isBadRequest());
 	}
 	
 	/** BE-07: a nested new child (id null) on a business update used to auto-unbox to an NPE / 400. */

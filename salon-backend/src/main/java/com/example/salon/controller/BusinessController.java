@@ -1,8 +1,11 @@
 package com.example.salon.controller;
 
+import com.example.salon.dto.CreateBusinessRequest;
+import com.example.salon.dto.UpdateBusinessRequest;
 import com.example.salon.model.Business;
 import com.example.salon.security.AuthenticatedUser;
 import com.example.salon.service.BusinessService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -25,8 +28,9 @@ public class BusinessController
     }
 
     @PostMapping
-    public Business addBusiness(@RequestBody Business business) 
+    public Business addBusiness(@Valid @RequestBody CreateBusinessRequest request)
     {
+        Business business = request.toBusiness();
         Business b = businessService.addBusiness(business);
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest()
@@ -50,9 +54,9 @@ public class BusinessController
     }
 
     @PutMapping("/{id}")
-    public void updateBusiness(@PathVariable int id, @RequestBody Business business, @AuthenticationPrincipal AuthenticatedUser principal) 
+    public void updateBusiness(@PathVariable int id, @Valid @RequestBody UpdateBusinessRequest request, @AuthenticationPrincipal AuthenticatedUser principal)
     {
-        businessService.updateBusinessById(id, business, principal);
+        businessService.updateBusinessById(id, request.toBusiness(), principal);
     }
 
     @DeleteMapping("/{id}")
