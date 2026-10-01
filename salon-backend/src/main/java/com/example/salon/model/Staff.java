@@ -6,7 +6,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.Instant;
 import java.time.LocalDate;
 
-public class Staff {
+public class Staff
+{
     public Long id;
     public String title;
     public boolean active;
@@ -31,7 +32,8 @@ public class Staff {
             @JsonProperty("hired_at") LocalDate hiredAt,
             @JsonProperty("calendar_colour") String calendarColour,
             @JsonProperty("created_at") Instant createdAt,
-            @JsonProperty("updated_at") Instant updatedAt) {
+            @JsonProperty("updated_at") Instant updatedAt)
+    {
         this.id = id;
         this.title = title;
         this.active = active;
@@ -42,75 +44,93 @@ public class Staff {
         this.updatedAt = updatedAt;
     }
 
-    public Long getId() {
+    public Long getId()
+    {
         return id;
     }
 
-    public String getTitle() {
+    public String getTitle()
+    {
         return title;
     }
 
-    public boolean isActive() {
+    public boolean isActive()
+    {
         return active;
     }
 
-    public Long getUserId() {
+    public Long getUserId()
+    {
         return userId;
     }
 
-    public Long getBusinessId() {
+    public Long getBusinessId()
+    {
         return businessId;
     }
 
-    public LocalDate getHiredAt() {
+    public LocalDate getHiredAt()
+    {
         return hiredAt;
     }
 
-    public String getCalendarColour() {
+    public String getCalendarColour()
+    {
         return calendarColour;
     }
 
-    public Instant getCreatedAt() {
+    public Instant getCreatedAt()
+    {
         return createdAt;
     }
 
-    public Instant getUpdatedAt() {
+    public Instant getUpdatedAt()
+    {
         return updatedAt;
     }
 
-    public void setId(Long id) {
+    public void setId(Long id)
+    {
         this.id = id;
     }
 
-    public void setTitle(String title) {
+    public void setTitle(String title)
+    {
         this.title = title;
     }
 
-    public void setActive(boolean active) {
+    public void setActive(boolean active)
+    {
         this.active = active;
     }
 
-    public void setUserId(Long userId) {
+    public void setUserId(Long userId)
+    {
         this.userId = userId;
     }
 
-    public void setBusinessId(Long businessId) {
+    public void setBusinessId(Long businessId)
+    {
         this.businessId = businessId;
     }
 
-    public void setHiredAt(LocalDate hiredAt) {
+    public void setHiredAt(LocalDate hiredAt)
+    {
         this.hiredAt = hiredAt;
     }
 
-    public void setCalendarColour(String calendarColour) {
+    public void setCalendarColour(String calendarColour)
+    {
         this.calendarColour = calendarColour;
     }
 
-    public void setCreatedAt(Instant createdAt) {
+    public void setCreatedAt(Instant createdAt)
+    {
         this.createdAt = createdAt;
     }
 
-    public void setUpdatedAt(Instant updatedAt) {
+    public void setUpdatedAt(Instant updatedAt)
+    {
         this.updatedAt = updatedAt;
     }
 }
