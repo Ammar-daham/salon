@@ -74,6 +74,9 @@ public abstract class IntegrationTest
 		public static final long GLOW_MANICURE = 2;
 		public static final long URBAN_FADE = 3;
 
+		public static final long GLOW_CUSTOMER = 1;
+		public static final long URBAN_CUSTOMER = 2;
+
 		public static final long GLOW_STAFF = 1;
 		public static final long URBAN_STAFF = 2;
 

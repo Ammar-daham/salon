@@ -57,6 +57,23 @@ public final class AccessControl
 	}
 
 	/**
+	 * Staff work (customers today, appointments later): a SUPER_ADMIN anywhere, or an ADMIN or
+	 * EMPLOYEE of that business. A CUSTOMER never qualifies, even with a business_id.
+	 */
+	public static void requireStaffOfBusiness(AuthenticatedUser caller, long businessId)
+	{
+		if (isSuperAdmin(caller)) {
+			return;
+		}
+		Role role = caller.getUser().getRole();
+		Long callerBusinessId = caller.getUser().getBusinessId();
+		if ((role != Role.ADMIN && role != Role.EMPLOYEE)
+				|| callerBusinessId == null || callerBusinessId != businessId) {
+			throw new AccessDeniedException("You can only access your own business");
+		}
+	}
+
+	/**
 	 * Read/modify access to a single user record: a SUPER_ADMIN may touch anyone, a user may touch
 	 * themselves, and an ADMIN may touch other users only within their own business. 
 	 */

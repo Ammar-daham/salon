@@ -33,9 +33,14 @@ INSERT INTO staff (id, user_id, business_id, title, is_active, hired_at) VALUES
     (1, 4, 1, 'Senior Stylist', true, '2021-03-15'),
     (2, 6, 2, 'Barber', true, '2020-11-02');
 
+INSERT INTO customers (id, business_id, first_name, last_name, email, phone, notes, marketing_consent) VALUES
+    (1, 1, 'Olivia', 'Client', 'olivia@example.test', '+49 30 7770001', 'Prefers mornings.', true),
+    (2, 2, 'Noah', 'Client', NULL, '+49 30 7770002', NULL, false);
+
 SELECT setval(pg_get_serial_sequence('businesses', 'id'), (SELECT max(id) FROM businesses));
 SELECT setval(pg_get_serial_sequence('users', 'id'), (SELECT max(id) FROM users));
 SELECT setval(pg_get_serial_sequence('addresses', 'id'), (SELECT max(id) FROM addresses));
 SELECT setval(pg_get_serial_sequence('contacts', 'id'), (SELECT max(id) FROM contacts));
 SELECT setval(pg_get_serial_sequence('services', 'id'), (SELECT max(id) FROM services));
 SELECT setval(pg_get_serial_sequence('staff', 'id'), (SELECT max(id) FROM staff));
+SELECT setval(pg_get_serial_sequence('customers', 'id'), (SELECT max(id) FROM customers));

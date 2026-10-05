@@ -5,8 +5,7 @@
 -- Populates a freshly-migrated database with realistic sample data across every
 -- role and resource: a platform super admin, three businesses each with an
 -- address, contacts, a handful of services, an admin, two employees (plus a
--- matching `staff` row), and a set of customers linked to businesses via
--- `business_customers`.
+-- matching `staff` row), and a few customers per business in `customers`.
 --
 -- This is a standalone script, NOT a Flyway migration - it is not picked up by
 -- FlywayConfig (which only scans classpath:db/migration) and will never run
@@ -23,11 +22,10 @@
 --
 --   Password123!
 --
--- CUSTOMER rows are left with a NULL email/password_hash, matching the app's
--- real behaviour - customers don't log in, per V3's migration comment.
+-- Customers are rows in `customers`, not users, so they have no login.
 -- =============================================================================
 
--- TRUNCATE business_customers, staff, services, contacts,
+-- TRUNCATE customers, staff, services, contacts,
 --     addresses, users, businesses RESTART IDENTITY CASCADE;
 
 BEGIN;
@@ -52,8 +50,6 @@ DECLARE
     serenity_emp1_id  BIGINT;
     serenity_emp2_id  BIGINT;
 
-    cust1_id BIGINT; cust2_id BIGINT; cust3_id BIGINT;
-    cust4_id BIGINT; cust5_id BIGINT; cust6_id BIGINT;
 BEGIN
 
     -- =========================================================================
@@ -183,31 +179,15 @@ BEGIN
     INSERT INTO staff (user_id, business_id, title, is_active, hired_at) VALUES (serenity_emp2_id, serenity_id, 'Esthetician', false, '2019-09-09');
 
     -- =========================================================================
-    -- Customers - no login, no business_id column, linked to businesses only
-    -- through business_customers. Each gets one phone contact.
+    -- Customers - a salon's own records (DB-03), no login.
     -- =========================================================================
-    INSERT INTO users (first_name, last_name, role) VALUES ('Olivia', 'Customer', 'CUSTOMER') RETURNING id INTO cust1_id;
-    INSERT INTO users (first_name, last_name, role) VALUES ('Liam', 'Customer', 'CUSTOMER') RETURNING id INTO cust2_id;
-    INSERT INTO users (first_name, last_name, role) VALUES ('Emma', 'Customer', 'CUSTOMER') RETURNING id INTO cust3_id;
-    INSERT INTO users (first_name, last_name, role) VALUES ('Ava', 'Customer', 'CUSTOMER') RETURNING id INTO cust4_id;
-    INSERT INTO users (first_name, last_name, role) VALUES ('Grace', 'Customer', 'CUSTOMER') RETURNING id INTO cust5_id;
-    INSERT INTO users (first_name, last_name, role) VALUES ('Mason', 'Customer', 'CUSTOMER') RETURNING id INTO cust6_id;
-
-    INSERT INTO contacts (type, value, user_id) VALUES
-        ('phone', '+49 30 9990001', cust1_id),
-        ('phone', '+49 30 9990002', cust2_id),
-        ('phone', '+49 30 9990003', cust3_id),
-        ('phone', '+49 30 9990004', cust4_id),
-        ('phone', '+49 30 9990005', cust5_id),
-        ('phone', '+49 30 9990006', cust6_id);
-
-    INSERT INTO business_customers (business_id, user_id) VALUES
-        (glow_id, cust1_id),
-        (glow_id, cust2_id),
-        (urban_id, cust3_id),
-        (urban_id, cust4_id),
-        (serenity_id, cust5_id),
-        (serenity_id, cust6_id);
+    INSERT INTO customers (business_id, first_name, last_name, email, phone, notes, marketing_consent) VALUES
+        (glow_id, 'Olivia', 'Customer', 'olivia@example.com', '+49 30 9990001', 'Prefers morning appointments.', true),
+        (glow_id, 'Liam', 'Customer', NULL, '+49 30 9990002', NULL, false),
+        (urban_id, 'Emma', 'Customer', 'emma@example.com', '+49 30 9990003', NULL, true),
+        (urban_id, 'Ava', 'Customer', NULL, '+49 30 9990004', 'Sensitive scalp.', false),
+        (serenity_id, 'Grace', 'Customer', 'grace@example.com', '+49 30 9990005', NULL, false),
+        (serenity_id, 'Mason', 'Customer', NULL, '+49 30 9990006', NULL, false);
 
 END $$;
 
