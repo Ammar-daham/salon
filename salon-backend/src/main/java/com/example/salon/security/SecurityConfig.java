@@ -1,6 +1,8 @@
 package com.example.salon.security;
 
 import com.example.salon.dao.UserDao;
+import com.example.salon.logging.CallerLoggingFilter;
+import com.example.salon.logging.RequestLog;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -15,6 +17,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
+import org.springframework.security.web.context.SecurityContextHolderFilter;
 import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -63,6 +66,8 @@ public class SecurityConfig
 	{
 		http
 				.securityContext(sc -> sc.securityContextRepository(securityContextRepository))
+				// Records who the caller is for the request log line (RequestLoggingFilter).
+				.addFilterAfter(new CallerLoggingFilter(), SecurityContextHolderFilter.class)
 				.cors(Customizer.withDefaults())
 				// CSRF is disabled: this is a JSON-only API (no form-encoded submissions), and
 				// credentialed cross-origin access is already restricted by the CORS policy below.
@@ -109,6 +114,8 @@ public class SecurityConfig
 		configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
 		configuration.setAllowedHeaders(List.of("*"));
 		configuration.setAllowCredentials(true);
+		// Lets the panel read the id to show it alongside an error, so a report can be matched to the logs.
+		configuration.setExposedHeaders(List.of(RequestLog.REQUEST_ID_HEADER));
 
 		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
 		source.registerCorsConfiguration("/**", configuration);

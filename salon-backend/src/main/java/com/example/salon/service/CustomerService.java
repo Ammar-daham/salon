@@ -6,6 +6,8 @@ import com.example.salon.exception.ErrorCode;
 import com.example.salon.model.Customer;
 import com.example.salon.security.AccessControl;
 import com.example.salon.security.AuthenticatedUser;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.security.access.AccessDeniedException;
@@ -21,6 +23,8 @@ import java.util.List;
 @Service
 public class CustomerService
 {
+    private static final Logger log = LoggerFactory.getLogger(CustomerService.class);
+
     private final CustomerDao customerDao;
     private final BusinessService businessService;
 
@@ -39,6 +43,7 @@ public class CustomerService
 
         customer.setBusinessId(businessId);
         customer.setId(customerDao.addCustomer(customer));
+        log.info("Created customer {} in business {}", customer.getId(), businessId);
         return getCustomerById(businessId, customer.getId(), caller);
     }
 
@@ -66,6 +71,7 @@ public class CustomerService
         int row = customerDao.updateCustomerById(businessId, customerId, customer);
         if (row == 0)
             throw new BaseException("Customer with id " + customerId + " not found.", ErrorCode.NOT_FOUND);
+        log.info("Updated customer {} in business {}", customerId, businessId);
     }
 
     @Transactional
@@ -75,6 +81,7 @@ public class CustomerService
         int row = customerDao.deleteCustomerById(businessId, customerId);
         if (row == 0)
             throw new BaseException("Customer with id " + customerId + " not found.", ErrorCode.NOT_FOUND);
+        log.info("Deleted customer {} from business {}", customerId, businessId);
     }
 
     private static void requireAdminOfBusiness(AuthenticatedUser caller, long businessId)

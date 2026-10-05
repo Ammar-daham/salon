@@ -37,3 +37,6 @@ out/
 .vscode/
 
 src/main/resources/application.yml
+
+### Log files (logback-spring.xml, prod profile) ###
+logs/

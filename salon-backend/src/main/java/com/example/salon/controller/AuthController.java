@@ -2,12 +2,16 @@ package com.example.salon.controller;
 
 import com.example.salon.exception.BaseException;
 import com.example.salon.exception.ErrorCode;
+import com.example.salon.logging.RequestLog;
+import com.example.salon.model.User;
 import com.example.salon.security.AuthUserResponse;
 import com.example.salon.security.AuthenticatedUser;
 import com.example.salon.security.LoginRequest;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -27,6 +31,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class AuthController
 {
+	private static final Logger log = LoggerFactory.getLogger(AuthController.class);
+
 	private final AuthenticationManager authenticationManager;
 	private final SecurityContextRepository securityContextRepository;
 
@@ -46,6 +52,8 @@ public class AuthController
 					UsernamePasswordAuthenticationToken.unauthenticated(request.email(), request.password())
 			);
 		} catch (AuthenticationException ex) {
+			// Masked: enough to notice repeated attempts on one account, without logging the address.
+			log.warn("Failed sign-in for {}", RequestLog.maskEmail(request.email()));
 			throw new BaseException("Invalid email or password", ErrorCode.UNAUTHORIZED);
 		}
 
@@ -60,12 +68,16 @@ public class AuthController
 		SecurityContextHolder.setContext(context);
 		securityContextRepository.saveContext(context, servletRequest, servletResponse);
 
-		return AuthUserResponse.from(((AuthenticatedUser) authResult.getPrincipal()).getUser());
+		User user = ((AuthenticatedUser) authResult.getPrincipal()).getUser();
+		log.info("User {} signed in", user.getId());
+		return AuthUserResponse.from(user);
 	}
 
 	@PostMapping("/logout")
-	public void logout(HttpServletRequest request)
+	public void logout(HttpServletRequest request, @AuthenticationPrincipal AuthenticatedUser principal)
 	{
+		if (principal != null)
+			log.info("User {} signed out", principal.getUser().getId());
 		SecurityContextHolder.clearContext();
 		HttpSession session = request.getSession(false);
 		if (session != null) {

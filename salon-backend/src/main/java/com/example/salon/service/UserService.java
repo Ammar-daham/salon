@@ -7,6 +7,8 @@ import com.example.salon.model.Role;
 import com.example.salon.model.User;
 import com.example.salon.security.AccessControl;
 import com.example.salon.security.AuthenticatedUser;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -20,6 +22,7 @@ import java.util.List;
 @Service
 public class UserService
 {
+	private static final Logger log = LoggerFactory.getLogger(UserService.class);
 
 	private final UserDao userDao;
 	private final PasswordEncoder passwordEncoder;
@@ -79,6 +82,7 @@ public class UserService
 				throw new BaseException("Email already in use.", ErrorCode.DUPLICATE_RESOURCE);
 			throw ex;
 		}
+		log.info("Created user {} with role {} in business {}", user.getId(), user.getRole(), user.getBusinessId());
 		return user;
 	}
 
@@ -122,6 +126,9 @@ public class UserService
 		long row = userDao.updateUserById(id, user);
 		if (row == 0)
 			throw new BaseException("User with id " + id + " not found", ErrorCode.NOT_FOUND);
+		if (user.getRole() != existing.getRole())
+			log.info("User {} role changed from {} to {}", id, existing.getRole(), user.getRole());
+		log.info("Updated user {}", id);
 	}
 
 	@Transactional
@@ -132,6 +139,7 @@ public class UserService
 		long row = userDao.deleteUserById(id);
 		if (row == 0)
 			throw new BaseException("User with id " + id + " not found", ErrorCode.NOT_FOUND);
+		log.info("Deleted user {}", id);
 	}
 
 
