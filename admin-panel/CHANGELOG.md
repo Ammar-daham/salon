@@ -9,14 +9,18 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 
 ## [Unreleased]
 
-Requires salon-backend with the customers API (DB-03).
+Requires salon-backend with the customers API (DB-03) and migration V9 (DB-07, DB-08).
 
 ### Changed
 - Customers run on live data from `/businesses/{id}/customers` instead of generated sample data
   (FE-03). The list shows name, email, phone and client-since date; the tags, visit, spend and
   last-visit columns are gone until appointments exist.
+- Prices show in the salon's own currency instead of always EUR, in the services table, the salon
+  overview and the service form's price label (DB-08).
+- Address coordinates are read as numbers, matching the backend (DB-07).
 
 ### Added
+- A currency picker on the salon create and settings forms (DB-08).
 - Add a client (`/customers/new`) and edit one (`/customers/:id/edit`). Admins can edit notes from
   the Notes tab and delete clients from the list; employees can add and view clients (FE-03).
 

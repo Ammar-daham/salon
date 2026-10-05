@@ -7,6 +7,7 @@ const dto: BusinessDto = {
 	description: "Hair and nails",
 	image: "https://example.test/glow.png",
 	status: "APPROVED",
+	currency: "EUR",
 	created_at: "2026-09-01T10:00:00Z",
 	updated_at: null,
 	addresses: [
@@ -16,8 +17,8 @@ const dto: BusinessDto = {
 			city: "Berlin",
 			country: "DE",
 			postal_code: "10115",
-			latitude: "52.52",
-			longitude: "13.40",
+			latitude: 52.52,
+			longitude: 13.4,
 			user_id: null,
 		},
 	],
@@ -42,6 +43,7 @@ describe("toBusiness", () => {
 			description: "Hair and nails",
 			image: "https://example.test/glow.png",
 			status: "APPROVED",
+			currency: "EUR",
 			createdAt: "2026-09-01T10:00:00Z",
 			updatedAt: null,
 			addresses: [
@@ -51,8 +53,8 @@ describe("toBusiness", () => {
 					city: "Berlin",
 					country: "DE",
 					postalCode: "10115",
-					latitude: "52.52",
-					longitude: "13.40",
+					latitude: 52.52,
+					longitude: 13.4,
 				},
 			],
 			contacts: [{ id: 1, type: "phone", value: "+49 30 1234567" }],
@@ -106,5 +108,10 @@ describe("toBusinessRequest", () => {
 
 	it("sends status when given", () => {
 		expect(toBusinessRequest({ ...input, status: "PENDING" })).toEqual({ ...input, status: "PENDING" });
+	});
+
+	it("omits currency when not given, so the stored currency is preserved", () => {
+		expect(toBusinessRequest(input)).not.toHaveProperty("currency");
+		expect(toBusinessRequest({ ...input, currency: "SEK" })).toEqual({ ...input, currency: "SEK" });
 	});
 });

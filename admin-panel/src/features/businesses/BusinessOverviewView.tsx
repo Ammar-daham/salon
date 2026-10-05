@@ -2,14 +2,12 @@
 
 import { useParams } from "next/navigation";
 import { useBusiness } from "@/lib/resources/businesses/businesses.hooks";
+import { formatMoney } from "@/lib/utils/money";
 import Card from "@/components/ui/Card";
 import StatTile from "@/components/ui/StatTile";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { ListIcon, DollarLineIcon, TimeIcon } from "@/icons";
 
-function money(value: number) {
-	return new Intl.NumberFormat(undefined, { style: "currency", currency: "EUR" }).format(value);
-}
 
 export default function BusinessOverviewView() {
 	// useParams() is a plain object on the client — only the server `params` prop
@@ -65,7 +63,7 @@ export default function BusinessOverviewView() {
 				<StatTile
 					icon={<DollarLineIcon className="size-5" />}
 					label="Average price"
-					value={active.length ? money(avgPrice) : "—"}
+					value={active.length ? formatMoney(avgPrice, business.currency) : "—"}
 				/>
 				<StatTile
 					icon={<TimeIcon className="size-5" />}

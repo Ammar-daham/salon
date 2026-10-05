@@ -33,8 +33,9 @@ export interface Address {
 	city: string;
 	country: string;
 	postalCode: string | null;
-	latitude: string | null;
-	longitude: string | null;
+	/** NUMERIC(9,6) on the backend, so a JSON number (DB-07). Both set or both null. */
+	latitude: number | null;
+	longitude: number | null;
 }
 
 export interface Contact {
@@ -61,6 +62,8 @@ export interface Business {
 	 *  supplies a URL or a data URI. */
 	image: string;
 	status: BusinessStatus;
+	/** ISO 4217 code every price at this salon is in, e.g. "EUR" (DB-08). */
+	currency: string;
 	createdAt: string;
 	updatedAt: string | null;
 	addresses: Address[];
@@ -83,4 +86,6 @@ export interface BusinessInput {
 	/** Only meaningful on create. `addBusiness` defaults null to PENDING, and
 	 *  that is the one moment status is writable from a plain create form. */
 	status?: BusinessStatus;
+	/** Omitted on create means EUR; omitted on update keeps the stored one. */
+	currency?: string;
 }

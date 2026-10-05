@@ -34,6 +34,8 @@ interface ServiceFormModalProps {
 	/** Offered only when creating as a platform admin, who has no salon of their
 	 *  own to default to. */
 	businessOptions?: { id: Id; name: string }[];
+	/** The chosen salon's currency, for the price label. Null until a salon is chosen. */
+	currencyFor: (businessId: Id) => string | null;
 }
 
 type Errors = Partial<Record<"name" | "durationMinutes" | "price" | "businessId", string>>;
@@ -47,6 +49,7 @@ export default function ServiceFormModal({
 	existing,
 	businessId = null,
 	businessOptions,
+	currencyFor,
 }: ServiceFormModalProps) {
 	const isEdit = initial != null;
 
@@ -59,6 +62,8 @@ export default function ServiceFormModal({
 		businessId != null ? String(businessId) : "",
 	);
 	const [errors, setErrors] = useState<Errors>({});
+
+	const currency = targetBusiness ? currencyFor(Number(targetBusiness)) : null;
 
 	const needsBusinessChoice = !isEdit && businessId == null && (businessOptions?.length ?? 0) > 0;
 
@@ -174,7 +179,7 @@ export default function ServiceFormModal({
 							)}
 						</Field>
 
-						<Field label="Price (EUR)" required error={errors.price}>
+						<Field label={currency ? `Price (${currency})` : "Price"} required error={errors.price}>
 							{(p) => (
 								<TextInput
 									{...p}
