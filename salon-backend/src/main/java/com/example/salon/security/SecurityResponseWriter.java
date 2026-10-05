@@ -1,5 +1,6 @@
 package com.example.salon.security;
 
+import com.example.salon.logging.RequestLog;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.HttpStatus;
@@ -26,6 +27,7 @@ final class SecurityResponseWriter
 				escape(errorCode), escape(message), status.name(), Instant.now(), escape(request.getRequestURI())
 		);
 
+		RequestLog.recordError(request, errorCode, message);
 		response.setStatus(status.value());
 		response.setContentType(MediaType.APPLICATION_JSON_VALUE);
 		response.getWriter().write(body);

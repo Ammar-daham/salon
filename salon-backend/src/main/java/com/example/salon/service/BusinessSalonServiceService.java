@@ -6,6 +6,8 @@ import com.example.salon.exception.ErrorCode;
 import com.example.salon.model.SalonService;
 import com.example.salon.security.AccessControl;
 import com.example.salon.security.AuthenticatedUser;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -15,6 +17,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class BusinessSalonServiceService 
 {
+    private static final Logger log = LoggerFactory.getLogger(BusinessSalonServiceService.class);
+
     private final SalonServiceDao salonServiceDao;
 
     @Autowired
@@ -33,6 +37,7 @@ public class BusinessSalonServiceService
         } catch (DuplicateKeyException ex) {
             throw new BaseException("Service could not be created due to a conflict.", ErrorCode.DUPLICATE_RESOURCE);
         }
+        log.info("Created service {} in business {}", salonService.getId(), businessId);
         return salonService;
     }
 
@@ -55,6 +60,7 @@ public class BusinessSalonServiceService
         int row = salonServiceDao.updateServiceById(serviceId, salonService);
         if (row == 0)
             throw new BaseException("Service with id " + serviceId + " not found.", ErrorCode.NOT_FOUND);
+        log.info("Updated service {} in business {}", serviceId, businessId);
     }
 
     @Transactional
@@ -65,5 +71,6 @@ public class BusinessSalonServiceService
         int row = salonServiceDao.deleteServiceById(serviceId);
         if (row == 0)
             throw new BaseException("Service with id " + serviceId + " not found.", ErrorCode.NOT_FOUND);
+        log.info("Deleted service {} from business {}", serviceId, businessId);
     }
 }

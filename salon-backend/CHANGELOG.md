@@ -20,6 +20,15 @@ version. The version lives in [`gradle.properties`](gradle.properties); each rel
   decimals (DB-08).
 
 ### Added
+- Request logging: one line per request with the caller, status, duration and, for a failure, the
+  error code and message sent back. Every log line carries the request id, which is also returned in
+  the `X-Request-Id` header (exposed to CORS clients). Bodies, query values and full emails are never
+  logged (BE-42).
+- Event logs for every create, update and delete in the services, for sign-in and sign-out, and a
+  masked email for each failed sign-in (BE-42).
+- Under the `prod` profile (`SPRING_PROFILES_ACTIVE=prod`), logs also go to
+  `${LOG_PATH:-logs}/salon-backend.log`, rolled daily and at 50 MB and kept for 30 days, 2 GB at most
+  (BE-42).
 - `currency` on businesses (ISO 4217, default `EUR`): every price at a salon is in its currency.
   Optional on create and update; omitting it on update keeps the stored one (DB-08).
 - Customers API at `/api/v1/businesses/{businessId}/customers` (list, get, create, replace, delete).

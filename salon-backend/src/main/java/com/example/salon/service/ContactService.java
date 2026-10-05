@@ -6,6 +6,8 @@ import com.example.salon.exception.ErrorCode;
 import com.example.salon.model.Contact;
 import com.example.salon.security.AccessControl;
 import com.example.salon.security.AuthenticatedUser;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
@@ -15,6 +17,7 @@ import java.util.List;
 @Service
 public class ContactService
 {
+	private static final Logger log = LoggerFactory.getLogger(ContactService.class);
 
 	private final ContactDao contactDao;
 
@@ -46,6 +49,7 @@ public class ContactService
 		int row = contactDao.updateContactById(id, contact);
 		if (row == 0)
 			throw new BaseException("Contact with id " + id + " not found", ErrorCode.NOT_FOUND);
+		log.info("Updated contact {}", id);
 	}
 
 	public void delectContactById(int id, AuthenticatedUser caller)
@@ -54,6 +58,7 @@ public class ContactService
 		int row = contactDao.deleteContactById(id);
 		if (row == 0)
 			throw new BaseException("Contact with id " + id + " not found", ErrorCode.NOT_FOUND);
+		log.info("Deleted contact {}", id);
 	}
 
 	private void requireWritePermission(int id, AuthenticatedUser caller)

@@ -46,6 +46,7 @@ public class BusinessService
             log.warn("Unmapped duplicate-key creating business '{}'", business.getName(), ex);
             throw new BaseException("Business could not be created due to a conflict.", ErrorCode.DUPLICATE_RESOURCE);
         }
+        log.info("Created business {} with status {}", business.getId(), business.getStatus());
         return business;
     }
 
@@ -100,6 +101,9 @@ public class BusinessService
         int row = businessDao.updateBusinessById(id, business);
         if (row == 0)
             throw new BaseException("Business with id " + id + " not found.", ErrorCode.NOT_FOUND);
+        if (business.getStatus() != null && business.getStatus() != existing.getStatus())
+            log.info("Business {} status changed from {} to {}", id, existing.getStatus(), business.getStatus());
+        log.info("Updated business {}", id);
     }
 
     @Transactional
@@ -122,5 +126,6 @@ public class BusinessService
         }
         if (row == 0)
             throw new BaseException("Business with id " + id + " not found.", ErrorCode.NOT_FOUND);
+        log.info("Deleted business {} with its services, addresses, contacts and customers", id);
     }
 }
