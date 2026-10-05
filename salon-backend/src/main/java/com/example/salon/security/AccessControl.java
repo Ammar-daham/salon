@@ -43,7 +43,7 @@ public final class AccessControl
 
 	/**
 	 * A SUPER_ADMIN may act on any business; anyone else only on the one they belong to.
-	 * Shared by the business and service endpoints so tenant ownership is enforced identically.
+	 * Shared by the business, service and opening-hours endpoints so tenant ownership is enforced identically.
 	 */
 	public static void requireBusinessAccess(AuthenticatedUser caller, long businessId)
 	{

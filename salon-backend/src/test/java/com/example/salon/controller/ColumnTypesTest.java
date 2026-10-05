@@ -13,7 +13,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-/** DB-07 coordinates, DB-08 money and currency, as the API sees them. */
+/** DB-07 coordinates, DB-08 money and currency, DB-09 time zone, as the API sees them. */
 class ColumnTypesTest extends IntegrationTest
 {
 	private static String service(String price)
@@ -104,6 +104,60 @@ class ColumnTypesTest extends IntegrationTest
 								"""))
 				.andExpect(status().isOk());
 		mvc.perform(get(glow).session(admin)).andExpect(jsonPath("$.currency").value("SEK"));
+	}
+
+	@Test
+	void salonsKeepBerlinTimeUnlessToldOtherwise() throws Exception
+	{
+		MockHttpSession superAdmin = loginAs(Fixture.SUPER_ADMIN);
+
+		mvc.perform(get("/api/v1/businesses/" + Fixture.GLOW).session(superAdmin))
+				.andExpect(jsonPath("$.timezone").value("Europe/Berlin"));
+
+		mvc.perform(post("/api/v1/businesses").session(superAdmin)
+						.contentType(MediaType.APPLICATION_JSON)
+						.content("""
+								{"name": "Nordic Nails", "image": "x", "timezone": "Europe/Stockholm"}
+								"""))
+				.andExpect(status().isCreated())
+				.andExpect(jsonPath("$.timezone").value("Europe/Stockholm"));
+		mvc.perform(post("/api/v1/businesses").session(superAdmin)
+						.contentType(MediaType.APPLICATION_JSON)
+						.content("""
+								{"name": "Default Zone", "image": "x"}
+								"""))
+				.andExpect(status().isCreated())
+				.andExpect(jsonPath("$.timezone").value("Europe/Berlin"));
+	}
+
+	@Test
+	void aTimeZoneMustBeAnIanaRegionNotAnOffset() throws Exception
+	{
+		MockHttpSession admin = loginAs(Fixture.GLOW_ADMIN);
+		String glow = "/api/v1/businesses/" + Fixture.GLOW;
+
+		// A fixed offset ignores daylight saving time: 09:00 would be off by an hour half the year.
+		for (String zone : new String[] {"+01:00", "CET+1", "Mars/Olympus_Mons", "europe/berlin"}) {
+			mvc.perform(put(glow).session(admin).contentType(MediaType.APPLICATION_JSON)
+							.content("""
+									{"name": "Glow Beauty Studio", "timezone": "%s"}
+									""".formatted(zone)))
+					.andExpect(status().isBadRequest())
+					.andExpect(jsonPath("$.message").value("timezone must be an IANA time zone ID, e.g. Europe/Berlin"));
+		}
+
+		// Omitted keeps the stored zone, like currency.
+		mvc.perform(put(glow).session(admin).contentType(MediaType.APPLICATION_JSON)
+						.content("""
+								{"name": "Glow Beauty Studio", "timezone": "Europe/Vienna"}
+								"""))
+				.andExpect(status().isOk());
+		mvc.perform(put(glow).session(admin).contentType(MediaType.APPLICATION_JSON)
+						.content("""
+								{"name": "Glow Beauty Studio"}
+								"""))
+				.andExpect(status().isOk());
+		mvc.perform(get(glow + "/hours").session(admin)).andExpect(jsonPath("$.timezone").value("Europe/Vienna"));
 	}
 
 	@Test

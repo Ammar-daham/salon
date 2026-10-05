@@ -37,11 +37,12 @@ public class BusinessDataAccessService implements BusinessDao
 
         if (business.getStatus() == null) business.setStatus(Status.PENDING);
         if (business.getCurrency() == null) business.setCurrency("EUR");
+        if (business.getTimezone() == null) business.setTimezone("Europe/Berlin");
 
         String sql = """
                 INSERT INTO businesses
-                (name, description, image, status, currency)
-                VALUES (?, ?, ?, ?, ?)
+                (name, description, image, status, currency, timezone)
+                VALUES (?, ?, ?, ?, ?, ?)
                 RETURNING id
                 """;
 
@@ -52,7 +53,8 @@ public class BusinessDataAccessService implements BusinessDao
                 business.getDescription(),
                 business.getImage(),
                 business.getStatus().name(),
-                business.getCurrency()
+                business.getCurrency(),
+                business.getTimezone()
         );
         business.setId(businessId);
 
@@ -80,7 +82,7 @@ public class BusinessDataAccessService implements BusinessDao
     {
         String sql = """
                 SELECT id, name, description,
-                updated_at, created_at, image, status, currency
+                updated_at, created_at, image, status, currency, timezone
                 FROM businesses
                 """;
         List<Business> businesses = jdbcTemplate.query(sql, (rs, i) -> mapBusiness(rs));
@@ -99,7 +101,7 @@ public class BusinessDataAccessService implements BusinessDao
     {
         String sql = """
                 SELECT id, name, description,
-                updated_at, created_at, image, status, currency
+                updated_at, created_at, image, status, currency, timezone
                 FROM businesses
                 WHERE id = ?
                 """;
@@ -124,6 +126,7 @@ public class BusinessDataAccessService implements BusinessDao
                 image = COALESCE(?, image),
                 status = COALESCE(?, status),
                 currency = COALESCE(?, currency),
+                timezone = COALESCE(?, timezone),
                  updated_at = now() WHERE id = ?
                 """;
         
@@ -134,6 +137,7 @@ public class BusinessDataAccessService implements BusinessDao
                 business.getImage(),
                 business.getStatus() == null ? null : business.getStatus().name(),
                 business.getCurrency(),
+                business.getTimezone(),
                 id
         );
     }
@@ -160,6 +164,7 @@ public class BusinessDataAccessService implements BusinessDao
                 Status.valueOf(rs.getString("status"))
         );
         business.setCurrency(rs.getString("currency"));
+        business.setTimezone(rs.getString("timezone"));
         return business;
     }
 }

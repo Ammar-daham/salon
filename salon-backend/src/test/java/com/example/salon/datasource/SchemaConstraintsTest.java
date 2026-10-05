@@ -81,6 +81,38 @@ class SchemaConstraintsTest extends IntegrationTest
 				.hasMessageContaining("addresses_coordinates_pair_check");
 	}
 
+	@Test
+	void theDatabaseRejectsBackwardsOrOverlappingOpeningHours()
+	{
+		// DB-14: seed.sql opens Glow on Tuesday (2) 09:00-18:00.
+		String insert = "INSERT INTO business_hours (business_id, day_of_week, opens_at, closes_at) VALUES (?, ?, ?::time, ?::time)";
+
+		assertThatThrownBy(() -> jdbcTemplate.update(insert, Fixture.GLOW, 1, "18:00", "09:00"))
+				.isInstanceOf(DataIntegrityViolationException.class)
+				.hasMessageContaining("business_hours_order_check");
+		assertThatThrownBy(() -> jdbcTemplate.update(insert, Fixture.GLOW, 8, "09:00", "18:00"))
+				.isInstanceOf(DataIntegrityViolationException.class)
+				.hasMessageContaining("business_hours_day_of_week_check");
+		assertThatThrownBy(() -> jdbcTemplate.update(insert, Fixture.GLOW, 2, "17:00", "19:00"))
+				.isInstanceOf(DataIntegrityViolationException.class)
+				.hasMessageContaining("business_hours_no_overlap");
+
+		// Touching the existing interval, or the same times at another salon, is allowed.
+		jdbcTemplate.update(insert, Fixture.GLOW, 2, "18:00", "20:00");
+		jdbcTemplate.update(insert, Fixture.URBAN, 2, "09:00", "18:00");
+	}
+
+	@Test
+	void deletingASalonDeletesItsOpeningHours()
+	{
+		// Serenity has no staff, so it can be deleted (BE-17).
+		jdbcTemplate.update("INSERT INTO business_hours VALUES (?, 1, '09:00', '17:00')", Fixture.SERENITY_PENDING);
+		jdbcTemplate.update("DELETE FROM businesses WHERE id = ?", Fixture.SERENITY_PENDING);
+
+		assertThat(jdbcTemplate.queryForObject("SELECT count(*) FROM business_hours WHERE business_id = ?",
+				Integer.class, Fixture.SERENITY_PENDING)).isZero();
+	}
+
 	private int count(String table, long id)
 	{
 		return jdbcTemplate.queryForObject("SELECT count(*) FROM " + table + " WHERE id = ?", Integer.class, id);

@@ -37,6 +37,11 @@ INSERT INTO customers (id, business_id, first_name, last_name, email, phone, not
     (1, 1, 'Olivia', 'Client', 'olivia@example.test', '+49 30 7770001', 'Prefers mornings.', true),
     (2, 2, 'Noah', 'Client', NULL, '+49 30 7770002', NULL, false);
 
+-- Glow: Tuesday to Friday 09:00-18:00, Saturday 10:00-14:00. Urban has no hours yet.
+INSERT INTO business_hours (business_id, day_of_week, opens_at, closes_at) VALUES
+    (1, 2, '09:00', '18:00'), (1, 3, '09:00', '18:00'), (1, 4, '09:00', '18:00'), (1, 5, '09:00', '18:00'),
+    (1, 6, '10:00', '14:00');
+
 SELECT setval(pg_get_serial_sequence('businesses', 'id'), (SELECT max(id) FROM businesses));
 SELECT setval(pg_get_serial_sequence('users', 'id'), (SELECT max(id) FROM users));
 SELECT setval(pg_get_serial_sequence('addresses', 'id'), (SELECT max(id) FROM addresses));

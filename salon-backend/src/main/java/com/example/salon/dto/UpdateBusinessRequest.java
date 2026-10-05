@@ -7,8 +7,8 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 /**
- * description/image/status/currency are nullable on purpose: BusinessDataAccessService.updateBusinessById
- * COALESCEs image, status and currency, so omitting them keeps the stored value. Whether a non-null status is
+ * description/image/status/currency/timezone are nullable on purpose: BusinessDataAccessService.updateBusinessById
+ * COALESCEs image, status, currency and timezone, so omitting them keeps the stored value. Whether a non-null status is
  * actually honoured is still gated by caller role in BusinessService, not by this shape.
  */
 public record UpdateBusinessRequest(
@@ -16,7 +16,8 @@ public record UpdateBusinessRequest(
 		String description,
 		String image,
 		Status status,
-		@Pattern(regexp = "^[A-Z]{3}$") String currency)
+		@Pattern(regexp = "^[A-Z]{3}$") String currency,
+		@TimeZoneId String timezone)
 {
 	public Business toBusiness()
 	{
@@ -24,6 +25,7 @@ public record UpdateBusinessRequest(
 		business.setImage(image);
 		business.setStatus(status);
 		business.setCurrency(currency);
+		business.setTimezone(timezone);
 		return business;
 	}
 }

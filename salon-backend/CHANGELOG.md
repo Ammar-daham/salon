@@ -20,6 +20,20 @@ version. The version lives in [`gradle.properties`](gradle.properties); each rel
   decimals (DB-08).
 
 ### Added
+- Opening hours at `/api/v1/businesses/{businessId}/hours`. `GET` returns the salon's `timezone` and
+  its weekly `hours`, each with a `day_of_week` (`MONDAY` to `SUNDAY`) and `opens_at`/`closes_at` as
+  `"HH:mm"` on the salon's clock; anyone who can see the salon can read them. `PUT {"hours": [...]}`
+  replaces the whole week and returns it in order: a day left out is closed, and a day can have
+  several intervals (e.g. a lunch break). An interval must end after it starts, can't run past
+  midnight, and can't overlap another on the same day. Only the salon's ADMIN or a SUPER_ADMIN can
+  change them (DB-14).
+- `timezone` on businesses (an IANA ID, default `Europe/Berlin`): the clock a salon's hours are on.
+  Optional on create and update; omitting it on update keeps the stored one. Fixed offsets such as
+  `+01:00` are rejected, since they ignore daylight saving time (DB-09).
+- Migration V10: `businesses.timezone` (existing salons get `Europe/Berlin`) and a `business_hours`
+  table that rejects backwards or overlapping intervals itself. V10 enables the `btree_gist`
+  extension, so the database user needs the CREATE privilege on the database (the owner has it)
+  (DB-09, DB-14).
 - Request logging: one line per request with the caller, status, duration and, for a failure, the
   error code and message sent back. Every log line carries the request id, which is also returned in
   the `X-Request-Id` header (exposed to CORS clients). Bodies, query values and full emails are never
