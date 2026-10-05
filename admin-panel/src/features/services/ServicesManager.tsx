@@ -28,11 +28,14 @@ import ConfirmDialog from "@/components/ui/modal/ConfirmDialog";
 import { SelectInput } from "@/components/ui/form/Field";
 import { useToast } from "@/components/ui/toast/ToastProvider";
 import { ErrorIcon, ListIcon, PencilIcon, PlusIcon, TrashBinIcon } from "@/icons";
+import { formatMoney } from "@/lib/utils/money";
 import ServiceFormModal from "./ServiceFormModal";
 
 export interface ServiceRow extends SalonService {
 	businessId: Id;
 	businessName: string;
+	/** The salon's currency; a service price has none of its own. */
+	currency: string;
 }
 
 interface ServicesManagerProps {
@@ -40,10 +43,6 @@ interface ServicesManagerProps {
 	businessId: Id | null;
 	/** Rendered above the table by the page; the manager owns everything below. */
 	renderToolbarExtras?: React.ReactNode;
-}
-
-function money(value: number) {
-	return new Intl.NumberFormat(undefined, { style: "currency", currency: "EUR" }).format(value);
 }
 
 export default function ServicesManager({ businessId }: ServicesManagerProps) {
@@ -75,7 +74,7 @@ export default function ServicesManager({ businessId }: ServicesManagerProps) {
 	const rows: ServiceRow[] = useMemo(
 		() =>
 			scoped.flatMap((b) =>
-				b.services.map((s) => ({ ...s, businessId: b.id, businessName: b.name })),
+				b.services.map((s) => ({ ...s, businessId: b.id, businessName: b.name, currency: b.currency })),
 			),
 		[scoped],
 	);
@@ -180,7 +179,7 @@ export default function ServicesManager({ businessId }: ServicesManagerProps) {
 			header: "Price",
 			sortable: true,
 			align: "right",
-			render: (s) => <span className="tabular-nums">{money(s.price)}</span>,
+			render: (s) => <span className="tabular-nums">{formatMoney(s.price, s.currency)}</span>,
 		},
 		{
 			key: "status",
@@ -369,6 +368,7 @@ export default function ServicesManager({ businessId }: ServicesManagerProps) {
 					initial={editing}
 					businessId={editing?.businessId ?? businessId}
 					businessOptions={crossBusiness ? scoped.map((b) => ({ id: b.id, name: b.name })) : undefined}
+					currencyFor={(id) => scoped.find((b) => b.id === id)?.currency ?? null}
 					existing={siblingsFor(editing?.businessId ?? businessId)}
 				/>
 			)}

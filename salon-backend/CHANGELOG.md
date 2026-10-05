@@ -14,13 +14,23 @@ version. The version lives in [`gradle.properties`](gradle.properties); each rel
 ### Breaking API changes
 - `DELETE /api/v1/businesses/{id}` returns 409 `CONFLICT` while the salon still has staff; remove or
   move them first (BE-17).
+- Address `latitude`/`longitude` are JSON numbers instead of strings, in range, and given together
+  or not at all; input is rounded to 6 decimals (DB-07).
+- A service `price` is required (it used to default to 0 when omitted) and accepts at most 2
+  decimals (DB-08).
 
 ### Added
+- `currency` on businesses (ISO 4217, default `EUR`): every price at a salon is in its currency.
+  Optional on create and update; omitting it on update keeps the stored one (DB-08).
 - Customers API at `/api/v1/businesses/{businessId}/customers` (list, get, create, replace, delete).
   ADMIN and EMPLOYEE of the salon can list, view and add customers; only ADMIN can edit or delete
   them; SUPER_ADMIN can do all of it for any salon (DB-03).
 - Migration V8: a `customers` table replaces `business_customers`; existing links are copied over
   with each customer's name, email and first phone number (DB-03).
+- Migration V9: every timestamp column is `timestamptz` (DB-09); coordinates are `NUMERIC(9,6)`
+  with range checks, and stored values that aren't a valid pair are cleared (DB-07); prices can't
+  be negative and salons get a `currency` column (DB-08). V9 stops with an error if a service
+  already has a negative price.
 
 ### Fixed
 - `users.updated_at` is set on every update, and user responses now include it (BE-12).
@@ -37,6 +47,8 @@ version. The version lives in [`gradle.properties`](gradle.properties); each rel
   error if two users' emails differ only by case or a row has two owners.
 - Dropped the unused `spring-boot-starter-data-jpa` for `spring-boot-starter-jdbc`; Hibernate no
   longer starts. `@Transactional` is Spring's (BE-36).
+- Prices are `BigDecimal` end to end instead of `double`, so they are exact and keep their two
+  decimals in JSON (DB-08).
 - Flyway is managed by the Spring Boot BOM: `flyway-core` goes from 10.0.0 to 11.14.1, matching
   `flyway-database-postgresql` (BE-37).
 

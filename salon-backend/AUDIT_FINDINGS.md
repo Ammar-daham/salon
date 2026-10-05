@@ -351,9 +351,9 @@ new users to the caller's business; `application.yml` is not tracked in git.
 | <a id="db-04"></a>✅ DB-04 | `staff` duplicates `users.role/business_id`, stubbed in code | Keep as the employment record (title, active, hired_at, calendar colour) with real FKs, or fold into `users`. | [`feature/salon-backend-staff-api`](../VERSION_CONTROL_GUIDE.md#br-1-6) |
 | <a id="db-05"></a>✅ DB-05 | `contacts.value` **globally UNIQUE** | Two customers can't share a family phone; a salon can't share its owner's email. Make it unique per owner or drop it. | [`fix/salon-backend-schema-integrity`](../VERSION_CONTROL_GUIDE.md#br-1-2) |
 | <a id="db-06"></a>✅ DB-06 | Polymorphic `business_id OR user_id` on `addresses`/`contacts`, unchecked | Add `CHECK (num_nonnulls(business_id, user_id) = 1)` — or put phone/email columns directly on businesses and customers and keep one address per business. | [`fix/salon-backend-schema-integrity`](../VERSION_CONTROL_GUIDE.md#br-1-2) |
-| <a id="db-07"></a>DB-07 | `latitude`/`longitude` are `VARCHAR` | `NUMERIC(9,6)` (PostGIS later for "salons near me"). | [`refactor/salon-backend-column-types`](../VERSION_CONTROL_GUIDE.md#br-1-10) |
-| <a id="db-08"></a>DB-08 | Java `double` for money | `BigDecimal` / `NUMERIC(10,2)` + a `currency` column (or integer cents). | [`refactor/salon-backend-column-types`](../VERSION_CONTROL_GUIDE.md#br-1-10) |
-| <a id="db-09"></a>DB-09 | `timestamp` without time zone | `timestamptz` everywhere, plus `businesses.timezone` — mandatory before appointments. | [`refactor/salon-backend-column-types`](../VERSION_CONTROL_GUIDE.md#br-1-10) (column type), [`feature/salon-backend-business-hours`](../VERSION_CONTROL_GUIDE.md#br-2-1) (`timezone`) |
+| <a id="db-07"></a>✅ DB-07 | `latitude`/`longitude` are `VARCHAR` | `NUMERIC(9,6)` (PostGIS later for "salons near me"). | [`refactor/salon-backend-column-types`](../VERSION_CONTROL_GUIDE.md#br-1-10) |
+| <a id="db-08"></a>✅ DB-08 | Java `double` for money | `BigDecimal` / `NUMERIC(10,2)` + a `currency` column (or integer cents). | [`refactor/salon-backend-column-types`](../VERSION_CONTROL_GUIDE.md#br-1-10) |
+| <a id="db-09"></a>✅ DB-09 | `timestamp` without time zone | `timestamptz` everywhere, plus `businesses.timezone` — mandatory before appointments. | [`refactor/salon-backend-column-types`](../VERSION_CONTROL_GUIDE.md#br-1-10) (column type), [`feature/salon-backend-business-hours`](../VERSION_CONTROL_GUIDE.md#br-2-1) (`timezone`) |
 | <a id="db-10"></a>✅ DB-10 | Case-sensitive email index — `Anna@x.com` and `anna@x.com` are two accounts | `UNIQUE INDEX ON users (lower(email))`. | [`fix/salon-backend-schema-integrity`](../VERSION_CONTROL_GUIDE.md#br-1-2) |
 | <a id="db-11"></a>✅ DB-11 | `updated_at` maintained by hand (and forgotten, [BE-12](#be-12)) | A single `set_updated_at()` trigger on every table. | [`fix/salon-backend-schema-integrity`](../VERSION_CONTROL_GUIDE.md#br-1-2) |
 | <a id="db-12"></a>✅ DB-12 | No indexes on FK columns | Index every `business_id`, `user_id`, `service_id`. | [`fix/salon-backend-schema-integrity`](../VERSION_CONTROL_GUIDE.md#br-1-2) |
@@ -376,6 +376,19 @@ DB-12 — every FK column has an index. Guarded by `SchemaConstraintsTest`, `ema
 `/businesses/{id}/customers`: ADMIN and EMPLOYEE of that salon can list, view and add; only ADMIN can
 edit or delete; SUPER_ADMIN anywhere. Guarded by `CustomerControllerTest` and
 `deletingASalonDeletesItsCustomers`.)*
+
+*(DB-07, DB-08 and DB-09 fixed by migration V9 on
+[`refactor/salon-backend-column-types`](../VERSION_CONTROL_GUIDE.md#br-1-10):
+DB-09 — every `created_at`/`updated_at` is `timestamptz`; the cast reads stored values in the JDBC
+session zone they were written in, so the API's instants don't move. `businesses.timezone` is still
+[`feature/salon-backend-business-hours`](../VERSION_CONTROL_GUIDE.md#br-2-1)'s.
+DB-07 — `addresses.latitude`/`longitude` are `NUMERIC(9,6)` with range CHECKs and a both-or-neither
+CHECK; the API takes and returns JSON numbers and rounds input to 6 decimals; unusable stored values are
+cleared.
+DB-08 — `SalonService.price` is a `BigDecimal` (required, at most 2 decimals, never negative, also a
+DB CHECK), and `businesses.currency` (ISO 4217, default `EUR`) says what every price at that salon is in.
+Guarded by `ColumnTypesTest`, `everyTimestampColumnCarriesATimeZone` and
+`theDatabaseRejectsBadMoneyAndCoordinates`.)*
 
 <a id="db-14"></a>**DB-14 — Booking tables don't exist.** Phase 2 needs `business_hours`,
 `staff_schedules`, `staff_time_off`, `staff_services`, `appointments` (customer, staff, service,

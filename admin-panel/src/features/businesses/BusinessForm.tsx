@@ -11,12 +11,14 @@ import {
 	type BusinessInput,
 	type BusinessStatus,
 } from "@/lib/resources/businesses/businesses.types";
+import { CURRENCY_OPTIONS } from "@/lib/utils/money";
 
 export interface BusinessFormValues {
 	name: string;
 	description: string;
 	image: string;
 	status: BusinessStatus;
+	currency: string;
 }
 
 interface BusinessFormProps {
@@ -54,6 +56,7 @@ export default function BusinessForm({
 		description: initial?.description ?? "",
 		image: initial?.image ?? "",
 		status: initial?.status ?? "PENDING",
+		currency: initial?.currency ?? "EUR",
 	});
 	const [errors, setErrors] = useState<Errors>({});
 
@@ -75,6 +78,7 @@ export default function BusinessForm({
 			// Omitted on edit: the update SQL COALESCEs status, and the control
 			// isn't offered there anyway.
 			...(allowStatus ? { status: values.status } : {}),
+			currency: values.currency,
 		});
 	}
 
@@ -141,6 +145,25 @@ export default function BusinessForm({
 							<span className="text-sm text-ink-subtle">Preview</span>
 						</div>
 					)}
+
+					<Field
+						label="Currency"
+						hint="Every service price at this salon is in this currency. Changing it doesn't convert existing prices."
+					>
+						{(p) => (
+							<SelectInput
+								{...p}
+								value={values.currency}
+								onChange={(e) => set("currency", e.target.value)}
+							>
+								{[...new Set([values.currency, ...CURRENCY_OPTIONS])].map((c) => (
+									<option key={c} value={c}>
+										{c}
+									</option>
+								))}
+							</SelectInput>
+						)}
+					</Field>
 
 					{allowStatus && (
 						<Field

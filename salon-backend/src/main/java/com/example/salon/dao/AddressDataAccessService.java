@@ -76,8 +76,8 @@ public class AddressDataAccessService implements AddressDao
 						rs.getString("city"),
 						rs.getString("street"),
 						rs.getString("postal_code"),
-						rs.getString("latitude"),
-						rs.getString("longitude"),
+						rs.getBigDecimal("latitude"),
+						rs.getBigDecimal("longitude"),
 						rs.getTimestamp("created_at").toInstant(),
 						updatedAt != null ? updatedAt.toInstant() : null
 				);
@@ -104,8 +104,8 @@ public class AddressDataAccessService implements AddressDao
 					rs.getString("city"),
 					rs.getString("street"),
 					rs.getString("postal_code"),
-					rs.getString("latitude"),
-					rs.getString("longitude"),
+					rs.getBigDecimal("latitude"),
+					rs.getBigDecimal("longitude"),
 					rs.getTimestamp("created_at").toInstant(),
 					updatedAt != null ? updatedAt.toInstant() : null
 			);
@@ -131,8 +131,8 @@ public class AddressDataAccessService implements AddressDao
 							rs.getString("city"),
 							rs.getString("street"),
 							rs.getString("postal_code"),
-							rs.getString("latitude"),
-							rs.getString("longitude"),
+							rs.getBigDecimal("latitude"),
+							rs.getBigDecimal("longitude"),
 							rs.getTimestamp("created_at").toInstant(),
 							updatedAt != null ? updatedAt.toInstant() : null
 					);
