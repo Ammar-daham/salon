@@ -1,39 +1,69 @@
 "use client";
 
 import { useMemo } from "react";
-import type { Id, DataSource } from "@/lib/api/types";
-import { useBusinesses } from "@/lib/resources/businesses/businesses.hooks";
-import { generateCustomers } from "@/lib/mock/generators";
-import type { Customer } from "./customers.types";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useAuth } from "@/context/AuthContext";
+import { resolveBusinessScope, type BusinessScope } from "@/lib/auth/scope";
+import { queryKeys } from "@/lib/query/queryKeys";
+import type { DataSource, Id } from "@/lib/api/types";
+import { createCustomer, listCustomers, removeCustomer, updateCustomer } from "./customers.api";
+import type { CustomerInput } from "./customers.types";
 
 /**
- * Mock-backed. Customers are just `users` rows with role CUSTOMER, and the
- * `business_customers` join table is an orphan — no Java model, no DAO, no
- * endpoint, and V2 never added its foreign keys. There is also no way to filter
- * GET /users by role or by salon server-side.
+ * Live: customers are a real, business-scoped resource now (DB-03).
  *
- * Visit history and spend depend on appointments, which don't exist at all yet.
+ * The /customers/:id route carries no businessId, so useCustomer composes on top of
+ * the caller's own list query, like useEmployee does. Unlike staff, though, the
+ * customers endpoint 403s any other salon, so the list must follow the caller's scope:
+ * one salon for an ADMIN or EMPLOYEE, every salon only for a SUPER_ADMIN.
  */
-export const source: DataSource = "mock";
+export const source: DataSource = "live";
 
-export function useCustomers(businessId: Id | null) {
-	const { data: businesses, isPending, isError, error, refetch } = useBusinesses();
-
-	const customers = useMemo<Customer[]>(() => {
-		if (!businesses) return [];
-		return businesses
-			.filter((b) => businessId == null || b.id === businessId)
-			.flatMap((b) => generateCustomers(b.id, b.name));
-	}, [businesses, businessId]);
-
-	return { data: customers, isPending, isError, error, refetch, source };
+export function useCustomers(scope: BusinessScope) {
+	const businessId = scope.kind === "business" ? scope.businessId : null;
+	// An unlinked ADMIN/EMPLOYEE has no salon to read; fanning out would only collect 403s.
+	const enabled = scope.kind !== "unresolved";
+	const query = useQuery({
+		queryKey: queryKeys.customers.list(businessId),
+		queryFn: ({ signal }) => listCustomers(businessId, { signal }),
+		enabled,
+	});
+	return { ...query, isPending: enabled && query.isPending, data: query.data ?? [], source };
 }
 
 export function useCustomer(customerId: Id | null) {
-	const { data, isPending, isError, error, refetch } = useCustomers(null);
+	const { user } = useAuth();
+	const { data, isPending, isError, error, refetch } = useCustomers(resolveBusinessScope(user));
 	const customer = useMemo(
 		() => data.find((c) => c.id === customerId) ?? null,
 		[data, customerId],
 	);
 	return { data: customer, isPending, isError, error, refetch, source };
+}
+
+function useCustomerMutation<TVars, TResult>(mutationFn: (vars: TVars) => Promise<TResult>) {
+	const qc = useQueryClient();
+	return useMutation({
+		mutationFn,
+		onSuccess: () => qc.invalidateQueries({ queryKey: queryKeys.customers.all }),
+	});
+}
+
+export function useCreateCustomer() {
+	return useCustomerMutation(({ businessId, input }: { businessId: Id; input: CustomerInput }) =>
+		createCustomer(businessId, input),
+	);
+}
+
+export function useUpdateCustomer() {
+	return useCustomerMutation(
+		({ businessId, id, input }: { businessId: Id; id: Id; input: CustomerInput }) =>
+			updateCustomer(businessId, id, input),
+	);
+}
+
+export function useDeleteCustomer() {
+	return useCustomerMutation(({ businessId, id }: { businessId: Id; id: Id }) =>
+		removeCustomer(businessId, id),
+	);
 }
