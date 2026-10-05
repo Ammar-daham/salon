@@ -4,9 +4,10 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
+import { can } from "@/lib/auth/permissions";
 import { resolveBusinessScope } from "@/lib/auth/scope";
 import { useDataTable } from "@/lib/table/useDataTable";
-import { useCustomers } from "@/lib/resources/customers/customers.hooks";
+import { useCustomers, useDeleteCustomer } from "@/lib/resources/customers/customers.hooks";
 import type { Customer } from "@/lib/resources/customers/customers.types";
 import { getErrorMessage } from "@/lib/api/errors";
 
@@ -17,35 +18,25 @@ import Pagination from "@/components/ui/Pagination";
 import EmptyState from "@/components/ui/EmptyState";
 import Button from "@/components/ui/button/Button";
 import InitialsAvatar from "@/components/ui/InitialsAvatar";
+import ConfirmDialog from "@/components/ui/modal/ConfirmDialog";
 import { SelectInput } from "@/components/ui/form/Field";
-import { ErrorIcon, UserIcon } from "@/icons";
-
-function money(value: number) {
-	return new Intl.NumberFormat(undefined, {
-		style: "currency",
-		currency: "EUR",
-		maximumFractionDigits: 0,
-	}).format(value);
-}
-
-function relativeDays(iso: string) {
-	const days = Math.floor((Date.now() - new Date(iso).getTime()) / 86_400_000);
-	if (days <= 0) return "Today";
-	if (days === 1) return "Yesterday";
-	if (days < 30) return `${days} days ago`;
-	if (days < 365) return `${Math.floor(days / 30)} mo ago`;
-	return `${Math.floor(days / 365)} yr ago`;
-}
+import { useToast } from "@/components/ui/toast/ToastProvider";
+import { ErrorIcon, PlusIcon, TrashBinIcon, UserIcon } from "@/icons";
 
 export default function CustomerListView() {
 	const { user } = useAuth();
 	const router = useRouter();
+	const { toast } = useToast();
 	const scope = resolveBusinessScope(user);
 
-	const businessId = scope.kind === "business" ? scope.businessId : null;
-	const { data, isPending, isError, error, refetch, source } = useCustomers(businessId);
+	const { data, isPending, isError, error, refetch, source } = useCustomers(scope);
+	const remove = useDeleteCustomer();
 
 	const [businessFilter, setBusinessFilter] = useState<string>("ALL");
+	const [pendingDelete, setPendingDelete] = useState<Customer | null>(null);
+
+	const canCreate = can(user, "customer:create");
+	const canDelete = can(user, "customer:delete");
 	const crossBusiness = scope.kind === "platform";
 
 	const salons = useMemo(() => {
@@ -61,21 +52,36 @@ export default function CustomerListView() {
 
 	const table = useDataTable<Customer>({
 		rows: data,
-		searchAccessor: (c) => `${c.firstName} ${c.lastName} ${c.email} ${c.phone} ${c.businessName}`,
+		searchAccessor: (c) =>
+			`${c.firstName} ${c.lastName} ${c.email ?? ""} ${c.phone ?? ""} ${c.businessName}`,
 		sortAccessor: (c, key) => {
 			switch (key) {
-				case "name": return `${c.firstName} ${c.lastName}`;
+				case "name": return `${c.lastName} ${c.firstName}`;
 				case "business": return c.businessName;
-				case "visits": return c.totalVisits;
-				case "spend": return c.totalSpend;
-				case "lastVisit": return c.lastVisit;
+				case "createdAt": return c.createdAt;
 				default: return null;
 			}
 		},
-		initialSort: { key: "lastVisit", direction: "desc" },
+		initialSort: { key: "name", direction: "asc" },
 		filters,
 		pageSize: 15,
 	});
+
+	async function handleDelete() {
+		if (!pendingDelete) return;
+		const target = pendingDelete;
+		try {
+			await remove.mutateAsync({ businessId: target.businessId, id: target.id });
+			toast({
+				tone: "success",
+				title: "Client deleted",
+				description: `${target.firstName} ${target.lastName} has been removed from ${target.businessName}'s client list.`,
+			});
+			setPendingDelete(null);
+		} catch (err) {
+			toast({ tone: "error", title: "Couldn't delete client", description: getErrorMessage(err) });
+		}
+	}
 
 	if (scope.kind === "unresolved") {
 		return (
@@ -105,7 +111,7 @@ export default function CustomerListView() {
 						>
 							{c.firstName} {c.lastName}
 						</Link>
-						<p className="truncate text-xs text-ink-subtle">{c.email}</p>
+						{c.email && <p className="truncate text-xs text-ink-subtle">{c.email}</p>}
 					</div>
 				</div>
 			),
@@ -128,32 +134,42 @@ export default function CustomerListView() {
 			  ]
 			: []),
 		{
-			key: "visits",
-			header: "Visits",
-			sortable: true,
-			render: (c) => <span className="tabular-nums">{c.totalVisits}</span>,
+			key: "phone",
+			header: "Phone",
+			render: (c) => <span className="tabular-nums text-ink-muted">{c.phone ?? "—"}</span>,
 		},
 		{
-			key: "spend",
-			header: "Lifetime spend",
+			key: "createdAt",
+			header: "Client since",
 			sortable: true,
-			align: "right",
-			render: (c) => <span className="tabular-nums">{money(c.totalSpend)}</span>,
-		},
-		{
-			key: "lastVisit",
-			header: "Last visit",
-			sortable: true,
-			render: (c) => <span className="text-ink-muted">{relativeDays(c.lastVisit)}</span>,
+			render: (c) => (
+				<span className="text-ink-muted">
+					{new Date(c.createdAt).toLocaleDateString(undefined, { year: "numeric", month: "short" })}
+				</span>
+			),
 		},
 		{
 			key: "actions",
 			header: "",
 			align: "right",
 			render: (c) => (
-				<Button size="sm" variant="outline" onClick={() => router.push(`/customers/${c.id}`)}>
-					View
-				</Button>
+				<div className="flex justify-end gap-1">
+					<Button size="sm" variant="outline" onClick={() => router.push(`/customers/${c.id}`)}>
+						View
+					</Button>
+					{canDelete && (
+						<Button
+							size="sm"
+							variant="ghost"
+							aria-label={`Delete ${c.firstName} ${c.lastName}`}
+							onClick={() => setPendingDelete(c)}
+							startIcon={<TrashBinIcon className="size-4" />}
+							className="text-error-600 hover:bg-error-50 hover:text-error-700 dark:hover:bg-error-500/10"
+						>
+							Delete
+						</Button>
+					)}
+				</div>
 			),
 		},
 	];
@@ -165,9 +181,19 @@ export default function CustomerListView() {
 				description={
 					crossBusiness
 						? "Clients across every salon on the platform."
-						: "Your salon's clients, their visit history and their notes."
+						: "Your salon's clients, their contact details and their notes."
 				}
 				sampleData={source === "mock"}
+				actions={
+					canCreate && (
+						<Button
+							startIcon={<PlusIcon className="size-4" />}
+							onClick={() => router.push("/customers/new")}
+						>
+							Add client
+						</Button>
+					)
+				}
 			/>
 
 			{isError ? (
@@ -223,7 +249,9 @@ export default function CustomerListView() {
 								description={
 									table.isFiltered
 										? "Try a different search term, or clear the filters."
-										: "Clients appear here once they book their first appointment."
+										: canCreate
+											? "Add your first client to start building your list."
+											: "Clients your salon adds will appear here."
 								}
 								action={
 									table.isFiltered && (
@@ -255,6 +283,27 @@ export default function CustomerListView() {
 					)}
 				</>
 			)}
+
+			<ConfirmDialog
+				isOpen={pendingDelete !== null}
+				onClose={() => setPendingDelete(null)}
+				onConfirm={handleDelete}
+				loading={remove.isPending}
+				title={`Delete ${pendingDelete?.firstName ?? ""} ${pendingDelete?.lastName ?? ""}?`.trim()}
+				confirmLabel="Delete client"
+				description={
+					pendingDelete ? (
+						<>
+							This permanently deletes{" "}
+							<strong className="text-ink">
+								{pendingDelete.firstName} {pendingDelete.lastName}
+							</strong>
+							&apos;s record from {pendingDelete.businessName}, including their contact details
+							and notes. This can&apos;t be undone.
+						</>
+					) : null
+				}
+			/>
 		</>
 	);
 }

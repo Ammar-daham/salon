@@ -29,7 +29,12 @@ export const queryKeys = {
 	},
 	customers: {
 		all: ["customers"] as const,
-		list: () => [...queryKeys.customers.all, "list"] as const,
+		// null/omitted = every business (platform scope); like staff, customers are
+		// fetched per business, so the two cases need distinct keys.
+		list: (businessId?: Id | null) =>
+			businessId == null
+				? ([...queryKeys.customers.all, "list"] as const)
+				: ([...queryKeys.customers.all, "list", businessId] as const),
 		detail: (id: Id) => [...queryKeys.customers.all, "detail", id] as const,
 	},
 	employees: {

@@ -16,6 +16,8 @@ const ROUTES: [string, Access][] = [
 	["/calendar", all],
 	["/customers", all],
 	["/customers/7/notes", all],
+	["/customers/new", all],
+	["/customers/7/edit", admins],
 	["/services", all],
 	["/employees", admins],
 	["/employees/new", admins],

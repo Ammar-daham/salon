@@ -23,6 +23,9 @@ export const endpoints = {
 		staff: (businessId: number) => `/api/v1/businesses/${businessId}/staff`,
 		staffById: (businessId: number, staffId: number) =>
 			`/api/v1/businesses/${businessId}/staff/${staffId}`,
+		customers: (businessId: number) => `/api/v1/businesses/${businessId}/customers`,
+		customerById: (businessId: number, customerId: number) =>
+			`/api/v1/businesses/${businessId}/customers/${customerId}`,
 	},
 	addresses: {
 		root: "/api/v1/addresses",

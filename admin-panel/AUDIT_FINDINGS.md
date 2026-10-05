@@ -9,7 +9,7 @@ behaviour it depends on.
 frontend-specific findings only.
 
 A ✅ next to a finding's ID means its fix has landed; the parenthetical *(fixed: …)* note on that
-finding says what changed. So far: ✅ FE-01, ✅ FE-02, ✅ FE-09, ✅ FE-11.
+finding says what changed. So far: ✅ FE-01, ✅ FE-02, ✅ FE-03, ✅ FE-09, ✅ FE-11.
 
 ## 0. Honest summary
 
@@ -66,7 +66,7 @@ findings it depends on are linked by their `BE-xx` / `DB-xx` IDs.
   `status`. `RouteGuard` / `routeAccess.ts` stay as UX only.)*
 
 ### High
-- <a id="fe-03"></a>**FE-03 — Employees and Customers run on generated mock data.** The rosters are
+- <a id="fe-03"></a>✅ **FE-03 — Employees and Customers run on generated mock data.** The rosters are
   fabricated per real business (`lib/mock/generators.ts`); the "Add staff" action is live, so a newly
   created employee will not appear in the Employees list. Confusing for any real user.
   **→ [`feature/admin-panel-live-employees`](../VERSION_CONTROL_GUIDE.md#br-1-7), [`feature/admin-panel-live-customers`](../VERSION_CONTROL_GUIDE.md#br-1-9)**
@@ -84,6 +84,16 @@ findings it depends on are linked by their `BE-xx` / `DB-xx` IDs.
   `EmptyState` now instead of a chart built on numbers nobody computed. Customers are untouched - that
   half still has no backend at all ([DB-03](../salon-backend/AUDIT_FINDINGS.md#db-03)), not just a
   frontend wiring gap, so `feature/admin-panel-live-customers` remains fully open.)*
+  *(customers half fixed on [`feature/admin-panel-live-customers`](../VERSION_CONTROL_GUIDE.md#br-1-9):
+  `customers.hooks.ts` is `source: "live"`, backed by `customers.api.ts` and the business-scoped
+  customers API ([DB-03](../salon-backend/AUDIT_FINDINGS.md#db-03)). Unlike staff, that API 403s any other
+  salon, so the list follows the caller's scope: one request for an ADMIN or EMPLOYEE, a fan-out per
+  business only for a SUPER_ADMIN, and no request at all for an unlinked account. The list, profile and
+  notes show real data; "Add client" (`/customers/new`, `customer:create`) and "Edit"
+  (`/customers/:id/edit`, `customer:edit`) are live, notes are editable by admins and read-only for
+  employees, and admins can delete from the list. Tags, visit counts, spend and visit dates are gone
+  from `Customer` - nothing on the backend stores them, and visits come from appointments (Phase 2). The
+  last user of `lib/mock/` is gone, so that folder is deleted.)*
 - <a id="fe-04"></a>**FE-04 — Appointments, Calendar and scheduling are placeholders.** The core booking
   product has no UI (and no backend, [DB-14](../salon-backend/AUDIT_FINDINGS.md#db-14)).
   **→ [`feature/admin-panel-hours-and-schedules`](../VERSION_CONTROL_GUIDE.md#br-2-5), [`feature/admin-panel-appointments`](../VERSION_CONTROL_GUIDE.md#br-2-6),

@@ -1,6 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import { useAuth } from "@/context/AuthContext";
+import { can } from "@/lib/auth/permissions";
 import { useCustomer } from "@/lib/resources/customers/customers.hooks";
 import PageHeader from "@/components/ui/PageHeader";
 import EmptyState from "@/components/ui/EmptyState";
@@ -17,6 +19,7 @@ export default function CustomerDetailShell({
 	id: number;
 	children: React.ReactNode;
 }) {
+	const { user } = useAuth();
 	const { data: customer, isPending, source } = useCustomer(id);
 
 	if (isPending) {
@@ -34,7 +37,7 @@ export default function CustomerDetailShell({
 			<EmptyState
 				icon={<UserIcon className="size-6" />}
 				title="Client not found"
-				description="This record may have been removed."
+				description="This record may have been removed, or it belongs to another salon."
 			/>
 		);
 	}
@@ -43,6 +46,7 @@ export default function CustomerDetailShell({
 		{ label: "Profile", href: `/customers/${id}`, exact: true },
 		{ label: "Appointments", href: `/customers/${id}/appointments` },
 		{ label: "Notes", href: `/customers/${id}/notes` },
+		...(can(user, "customer:edit") ? [{ label: "Edit", href: `/customers/${id}/edit` }] : []),
 	];
 
 	return (
@@ -70,13 +74,9 @@ export default function CustomerDetailShell({
 				/>
 			</div>
 
-			{customer.tags.length > 0 && (
+			{customer.marketingConsent && (
 				<div className="mb-4 flex flex-wrap gap-2">
-					{customer.tags.map((tag) => (
-						<StatusBadge key={tag} tone="neutral">
-							{tag}
-						</StatusBadge>
-					))}
+					<StatusBadge tone="success">Marketing opt-in</StatusBadge>
 				</div>
 			)}
 
