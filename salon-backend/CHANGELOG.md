@@ -33,6 +33,8 @@ version. The version lives in [`gradle.properties`](gradle.properties); each rel
   already has a negative price.
 
 ### Fixed
+- Leaving `marketing_consent` out of a customer request means no consent; it used to fail as
+  "Malformed JSON request body".
 - `users.updated_at` is set on every update, and user responses now include it (BE-12).
 - Emails are unique regardless of case, and sign-in accepts any casing of the email (DB-10).
 - Two owners can share a contact value, e.g. a salon's phone that is also its owner's; one owner
