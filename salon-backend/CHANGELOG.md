@@ -15,6 +15,13 @@ version. The version lives in [`gradle.properties`](gradle.properties); each rel
 - `DELETE /api/v1/businesses/{id}` returns 409 `CONFLICT` while the salon still has staff; remove or
   move them first (BE-17).
 
+### Added
+- Customers API at `/api/v1/businesses/{businessId}/customers` (list, get, create, replace, delete).
+  ADMIN and EMPLOYEE of the salon can list, view and add customers; only ADMIN can edit or delete
+  them; SUPER_ADMIN can do all of it for any salon (DB-03).
+- Migration V8: a `customers` table replaces `business_customers`; existing links are copied over
+  with each customer's name, email and first phone number (DB-03).
+
 ### Fixed
 - `users.updated_at` is set on every update, and user responses now include it (BE-12).
 - Emails are unique regardless of case, and sign-in accepts any casing of the email (DB-10).

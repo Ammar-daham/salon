@@ -40,6 +40,18 @@ class SchemaConstraintsTest extends IntegrationTest
 		assertThat(count("addresses", Fixture.GLOW_EMPLOYEE_PERSONAL_ADDRESS)).isZero();
 	}
 
+	@Test
+	void deletingASalonDeletesItsCustomers()
+	{
+		// DB-03: a salon's customer list goes with it. Urban has staff (BE-17), so unlink them first.
+		jdbcTemplate.update("DELETE FROM staff WHERE business_id = ?", Fixture.URBAN);
+		jdbcTemplate.update("DELETE FROM users WHERE business_id = ?", Fixture.URBAN);
+		jdbcTemplate.update("DELETE FROM businesses WHERE id = ?", Fixture.URBAN);
+
+		assertThat(count("customers", Fixture.URBAN_CUSTOMER)).isZero();
+		assertThat(count("customers", Fixture.GLOW_CUSTOMER)).isOne();
+	}
+
 	private int count(String table, long id)
 	{
 		return jdbcTemplate.queryForObject("SELECT count(*) FROM " + table + " WHERE id = ?", Integer.class, id);

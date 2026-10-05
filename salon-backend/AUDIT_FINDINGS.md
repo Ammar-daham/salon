@@ -347,7 +347,7 @@ new users to the caller's business; `application.yml` is not tracked in git.
 |---|---|---|---|
 | <a id="db-01"></a>✅ DB-01 | `users.business_id` has **no FK** | Add FK to `businesses(id)`; deleting a salon currently strands its staff. | [`fix/salon-backend-schema-integrity`](../VERSION_CONTROL_GUIDE.md#br-1-2) |
 | <a id="db-02"></a>✅ DB-02 | `services` ↔ `businesses` is many-to-many, but a service belongs to one salon | Add `services.business_id NOT NULL` FK and drop `business_service`. Fixes shared-service deletion and simplifies ownership checks. | [`refactor/repo-services-owned-by-business`](../VERSION_CONTROL_GUIDE.md#br-1-3) |
-| <a id="db-03"></a>DB-03 | `business_customers` has no PK, no FKs, no code | Replace with a `customers` table (business_id, name, phone, email, notes, marketing consent). Customers needn't be `users` rows until they can log in. | [`feature/salon-backend-customers-api`](../VERSION_CONTROL_GUIDE.md#br-1-8) |
+| <a id="db-03"></a>✅ DB-03 | `business_customers` has no PK, no FKs, no code | Replace with a `customers` table (business_id, name, phone, email, notes, marketing consent). Customers needn't be `users` rows until they can log in. | [`feature/salon-backend-customers-api`](../VERSION_CONTROL_GUIDE.md#br-1-8) |
 | <a id="db-04"></a>✅ DB-04 | `staff` duplicates `users.role/business_id`, stubbed in code | Keep as the employment record (title, active, hired_at, calendar colour) with real FKs, or fold into `users`. | [`feature/salon-backend-staff-api`](../VERSION_CONTROL_GUIDE.md#br-1-6) |
 | <a id="db-05"></a>✅ DB-05 | `contacts.value` **globally UNIQUE** | Two customers can't share a family phone; a salon can't share its owner's email. Make it unique per owner or drop it. | [`fix/salon-backend-schema-integrity`](../VERSION_CONTROL_GUIDE.md#br-1-2) |
 | <a id="db-06"></a>✅ DB-06 | Polymorphic `business_id OR user_id` on `addresses`/`contacts`, unchecked | Add `CHECK (num_nonnulls(business_id, user_id) = 1)` — or put phone/email columns directly on businesses and customers and keep one address per business. | [`fix/salon-backend-schema-integrity`](../VERSION_CONTROL_GUIDE.md#br-1-2) |
@@ -368,6 +368,14 @@ are `ON DELETE CASCADE` (SET NULL would break the CHECK); ownerless rows left by
 DB-10 — the email index is on `lower(email)` and login matches case-insensitively.
 DB-12 — every FK column has an index. Guarded by `SchemaConstraintsTest`, `emailsDifferingOnlyByCaseAreTheSameAccount`,
 `differentOwnersCanShareAContactValue`, `oneOwnerCannotHaveTheSameContactValueTwice` and `loginEmailIsCaseInsensitive`.)*
+
+*(DB-03 fixed by migration V8 on [`feature/salon-backend-customers-api`](../VERSION_CONTROL_GUIDE.md#br-1-8): a
+`customers` table (business_id, first/last name, email, phone, notes, marketing consent, optional
+`user_id` for a future customer login) replaces `business_customers`, whose links are copied over
+(duplicates collapsed, dangling links skipped, the user's first phone carried across). CRUD lives at
+`/businesses/{id}/customers`: ADMIN and EMPLOYEE of that salon can list, view and add; only ADMIN can
+edit or delete; SUPER_ADMIN anywhere. Guarded by `CustomerControllerTest` and
+`deletingASalonDeletesItsCustomers`.)*
 
 <a id="db-14"></a>**DB-14 — Booking tables don't exist.** Phase 2 needs `business_hours`,
 `staff_schedules`, `staff_time_off`, `staff_services`, `appointments` (customer, staff, service,
