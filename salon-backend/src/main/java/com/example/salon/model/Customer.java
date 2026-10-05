@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.time.Instant;
 
-/** A salon's record of one of its customers (DB-03). Not a users row; customers don't log in. */
 public class Customer
 {
     public Long id;
