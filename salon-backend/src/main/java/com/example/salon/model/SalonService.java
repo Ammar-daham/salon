@@ -2,6 +2,7 @@ package com.example.salon.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 
 public class SalonService {
@@ -9,7 +10,7 @@ public class SalonService {
     public String name;
     public String description;
     public Integer duration;
-    public double price;
+    public BigDecimal price;
     public boolean active;
     public Instant createdAt;
     public Instant updatedAt;
@@ -19,7 +20,7 @@ public class SalonService {
             @JsonProperty("name") String name,
             @JsonProperty("description") String description,
             @JsonProperty("duration_minutes") Integer duration,
-            @JsonProperty("price") double price,
+            @JsonProperty("price") BigDecimal price,
             @JsonProperty("is_active") boolean active,
             @JsonProperty("created_at") Instant createdAt,
             @JsonProperty("updated_at") Instant updatedAt) {
@@ -49,7 +50,7 @@ public class SalonService {
         return duration;
     }
 
-    public double getPrice() {
+    public BigDecimal getPrice() {
         return price;
     }
 
@@ -81,7 +82,7 @@ public class SalonService {
         this.duration = duration;
     }
 
-    public void setPrice(double price) {
+    public void setPrice(BigDecimal price) {
         this.price = price;
     }
 

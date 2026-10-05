@@ -3,6 +3,7 @@ package com.example.salon.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 
 public class Address {
@@ -12,8 +13,8 @@ public class Address {
     public String city;
     public String street;
     public String postalCode;
-    public String latitude;
-    public String longitude;
+    public BigDecimal latitude;
+    public BigDecimal longitude;
     public Instant createdAt;
     public Instant updatedAt;
     @JsonIgnore
@@ -26,8 +27,8 @@ public class Address {
                    @JsonProperty("city") String city,
                    @JsonProperty("street") String street,
                    @JsonProperty("postal_code") String postalCode,
-                   @JsonProperty("latitude") String latitude,
-                   @JsonProperty("longitude") String longitude,
+                   @JsonProperty("latitude") BigDecimal latitude,
+                   @JsonProperty("longitude") BigDecimal longitude,
                    @JsonProperty("created_at") Instant createdAt,
                    @JsonProperty("updated_at") Instant updatedAt
     ) {
@@ -62,11 +63,11 @@ public class Address {
         return postalCode;
     }
 
-    public String getLatitude() {
+    public BigDecimal getLatitude() {
         return latitude;
     }
 
-    public String getLongitude() {
+    public BigDecimal getLongitude() {
         return longitude;
     }
 
@@ -106,11 +107,11 @@ public class Address {
         this.postalCode = postalCode;
     }
 
-    public void setLatitude(String latitude) {
+    public void setLatitude(BigDecimal latitude) {
         this.latitude = latitude;
     }
 
-    public void setLongitude(String longitude) {
+    public void setLongitude(BigDecimal longitude) {
         this.longitude = longitude;
     }
 

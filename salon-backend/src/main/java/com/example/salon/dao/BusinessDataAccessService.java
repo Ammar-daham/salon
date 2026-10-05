@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.List;
 
@@ -34,11 +36,12 @@ public class BusinessDataAccessService implements BusinessDao
     {
 
         if (business.getStatus() == null) business.setStatus(Status.PENDING);
+        if (business.getCurrency() == null) business.setCurrency("EUR");
 
         String sql = """
                 INSERT INTO businesses
-                (name, description, image, status)
-                VALUES (?, ?, ?, ?)
+                (name, description, image, status, currency)
+                VALUES (?, ?, ?, ?, ?)
                 RETURNING id
                 """;
 
@@ -48,7 +51,8 @@ public class BusinessDataAccessService implements BusinessDao
                 business.getName(),
                 business.getDescription(),
                 business.getImage(),
-                business.getStatus().name()
+                business.getStatus().name(),
+                business.getCurrency()
         );
         business.setId(businessId);
 
@@ -76,21 +80,10 @@ public class BusinessDataAccessService implements BusinessDao
     {
         String sql = """
                 SELECT id, name, description,
-                updated_at, created_at, image, status
+                updated_at, created_at, image, status, currency
                 FROM businesses
                 """;
-        List<Business> businesses = jdbcTemplate.query(sql, (rs, i) -> {
-            Timestamp updatedAt = rs.getTimestamp("updated_at");
-            return new Business(
-                    rs.getLong("id"),
-                    rs.getString("name"),
-                    rs.getString("description"),
-                    rs.getTimestamp("created_at").toInstant(),
-                    updatedAt != null ? updatedAt.toInstant() : null,
-                    rs.getString("image"),
-                    Status.valueOf(rs.getString("status"))
-            );
-        });
+        List<Business> businesses = jdbcTemplate.query(sql, (rs, i) -> mapBusiness(rs));
 
         for (Business business : businesses) {
             business.setAddresses(addressDao.getAddressesForBusiness(business.getId()));
@@ -106,23 +99,11 @@ public class BusinessDataAccessService implements BusinessDao
     {
         String sql = """
                 SELECT id, name, description,
-                updated_at, created_at, image, status
+                updated_at, created_at, image, status, currency
                 FROM businesses
                 WHERE id = ?
                 """;
-        Business business = jdbcTemplate.queryForObject(sql, (rs, i) -> {
-                    Timestamp updatedAt = rs.getTimestamp("updated_at");
-                    return new Business(
-                            rs.getLong("id"),
-                            rs.getString("name"),
-                            rs.getString("description"),
-                            rs.getTimestamp("created_at").toInstant(),
-                            updatedAt != null ? updatedAt.toInstant() : null,
-                            rs.getString("image"),
-                            Status.valueOf(rs.getString("status"))
-                    );
-                }, id
-        );
+        Business business = jdbcTemplate.queryForObject(sql, (rs, i) -> mapBusiness(rs), id);
 
         business.setAddresses(addressDao.getAddressesForBusiness(business.getId()));
         business.setContacts(contactDao.getContactsForBusiness(business.getId()));
@@ -142,6 +123,7 @@ public class BusinessDataAccessService implements BusinessDao
                 description = ?,
                 image = COALESCE(?, image),
                 status = COALESCE(?, status),
+                currency = COALESCE(?, currency),
                  updated_at = now() WHERE id = ?
                 """;
         
@@ -151,6 +133,7 @@ public class BusinessDataAccessService implements BusinessDao
                 business.getDescription(),
                 business.getImage(),
                 business.getStatus() == null ? null : business.getStatus().name(),
+                business.getCurrency(),
                 id
         );
     }
@@ -162,5 +145,21 @@ public class BusinessDataAccessService implements BusinessDao
         addressDao.getAddressesForBusiness((long) id).forEach(address -> addressDao.deleteAddressById(address.getId()));
 
         return jdbcTemplate.update("DELETE FROM businesses WHERE id = ?", id);
+    }
+
+    private Business mapBusiness(ResultSet rs) throws SQLException
+    {
+        Timestamp updatedAt = rs.getTimestamp("updated_at");
+        Business business = new Business(
+                rs.getLong("id"),
+                rs.getString("name"),
+                rs.getString("description"),
+                rs.getTimestamp("created_at").toInstant(),
+                updatedAt != null ? updatedAt.toInstant() : null,
+                rs.getString("image"),
+                Status.valueOf(rs.getString("status"))
+        );
+        business.setCurrency(rs.getString("currency"));
+        return business;
     }
 }

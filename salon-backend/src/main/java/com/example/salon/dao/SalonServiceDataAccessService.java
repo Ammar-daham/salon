@@ -57,7 +57,7 @@ public class SalonServiceDataAccessService implements SalonServiceDao {
                     rs.getString("name"),
                     rs.getString("description"),
                     rs.getInt("duration_minutes"),
-                    rs.getDouble("price"),
+                    rs.getBigDecimal("price"),
                     rs.getBoolean("is_active"),
                     rs.getTimestamp("created_at").toInstant(),
                     updatedAt != null ? updatedAt.toInstant() : null
@@ -83,7 +83,7 @@ public class SalonServiceDataAccessService implements SalonServiceDao {
                             rs.getString("name"),
                             rs.getString("description"),
                             rs.getInt("duration_minutes"),
-                            rs.getDouble("price"),
+                            rs.getBigDecimal("price"),
                             rs.getBoolean("is_active"),
                             rs.getTimestamp("created_at").toInstant(),
                             updatedAt != null ? updatedAt.toInstant() : null

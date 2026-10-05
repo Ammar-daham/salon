@@ -16,6 +16,8 @@ public class Business {
     public Instant updatedAt;
     public String image;
     public Status status;
+    /** ISO 4217 code every price at this salon is in (DB-08). */
+    public String currency;
     public List<Address> addresses;
     public List<Contact> contacts;
     public List<SalonService> services;
@@ -78,6 +80,10 @@ public class Business {
         return services;
     }
 
+    public String getCurrency() {
+        return currency;
+    }
+
     public Status getStatus() {
         return status;
     }
@@ -116,6 +122,10 @@ public class Business {
 
     public void setServices(List<SalonService> services) {
         this.services = services;
+    }
+
+    public void setCurrency(String currency) {
+        this.currency = currency;
     }
 
     public void setStatus(Status status) {
