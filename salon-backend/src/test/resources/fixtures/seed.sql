@@ -42,8 +42,10 @@ INSERT INTO business_hours (business_id, day_of_week, opens_at, closes_at) VALUE
     (1, 2, '09:00', '18:00'), (1, 3, '09:00', '18:00'), (1, 4, '09:00', '18:00'), (1, 5, '09:00', '18:00'),
     (1, 6, '10:00', '14:00');
 
--- Mia (Glow staff 1) does haircuts.
+-- Mia (Glow staff 1) does haircuts and works Tuesday and Wednesday 09:00-17:00.
 INSERT INTO staff_services (business_id, staff_id, service_id) VALUES (1, 1, 1);
+INSERT INTO staff_schedules (staff_id, day_of_week, starts_at, ends_at) VALUES
+    (1, 2, '09:00', '17:00'), (1, 3, '09:00', '17:00');
 
 SELECT setval(pg_get_serial_sequence('businesses', 'id'), (SELECT max(id) FROM businesses));
 SELECT setval(pg_get_serial_sequence('users', 'id'), (SELECT max(id) FROM users));

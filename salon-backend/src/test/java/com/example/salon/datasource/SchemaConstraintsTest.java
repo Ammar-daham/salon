@@ -129,10 +129,31 @@ class SchemaConstraintsTest extends IntegrationTest
 	}
 
 	@Test
-	void removingAServiceRemovesItFromTheStaffWhoPerformedIt()
+	void theDatabaseRejectsBackwardsOrOverlappingShifts()
+	{
+		// seed.sql: Mia works Tuesday (2) 09:00-17:00.
+		String shift = "INSERT INTO staff_schedules (staff_id, day_of_week, starts_at, ends_at) VALUES (?, ?, ?::time, ?::time)";
+
+		assertThatThrownBy(() -> jdbcTemplate.update(shift, Fixture.GLOW_STAFF, 1, "17:00", "09:00"))
+				.isInstanceOf(DataIntegrityViolationException.class)
+				.hasMessageContaining("staff_schedules_order_check");
+		assertThatThrownBy(() -> jdbcTemplate.update(shift, Fixture.GLOW_STAFF, 2, "16:00", "18:00"))
+				.isInstanceOf(DataIntegrityViolationException.class)
+				.hasMessageContaining("staff_schedules_no_overlap");
+
+		// Touching is fine, and another staff member can work the same hours.
+		jdbcTemplate.update(shift, Fixture.GLOW_STAFF, 2, "17:00", "19:00");
+		jdbcTemplate.update(shift, Fixture.URBAN_STAFF, 2, "09:00", "17:00");
+	}
+
+	@Test
+	void removingAStaffMemberOrAServiceRemovesWhatHungOffIt()
 	{
 		jdbcTemplate.update("DELETE FROM services WHERE id = ?", Fixture.GLOW_HAIRCUT);
 		assertThat(jdbcTemplate.queryForObject("SELECT count(*) FROM staff_services", Integer.class)).isZero();
+
+		jdbcTemplate.update("DELETE FROM staff WHERE id = ?", Fixture.GLOW_STAFF);
+		assertThat(jdbcTemplate.queryForObject("SELECT count(*) FROM staff_schedules", Integer.class)).isZero();
 	}
 
 	private int count(String table, long id)

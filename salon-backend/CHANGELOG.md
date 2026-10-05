@@ -24,8 +24,11 @@ version. The version lives in [`gradle.properties`](gradle.properties); each rel
   `GET` lists them for anyone who can see the salon; `PUT {"service_ids": [...]}` replaces them and
   returns the list. Only the salon's own services can be assigned. Only the salon's ADMIN or a
   SUPER_ADMIN can change them (DB-14).
-- Migration V11: `staff_services`. The database itself refuses to link a staff member to another
-  salon's service (DB-14).
+- Weekly working hours at `.../staff/{staffId}/schedule`, shaped and checked like opening hours but
+  with `starts_at`/`ends_at`. The salon's staff can read them; only its ADMIN or a SUPER_ADMIN can
+  replace them (DB-14).
+- Migration V11: `staff_services` and `staff_schedules`. The database itself refuses to link a staff
+  member to another salon's service, and rejects overlapping shifts (DB-14).
 - Opening hours at `/api/v1/businesses/{businessId}/hours`. `GET` returns the salon's `timezone` and
   its weekly `hours`, each with a `day_of_week` (`MONDAY` to `SUNDAY`) and `opens_at`/`closes_at` as
   `"HH:mm"` on the salon's clock; anyone who can see the salon can read them. `PUT {"hours": [...]}`
