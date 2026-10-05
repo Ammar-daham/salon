@@ -1,5 +1,6 @@
 package com.example.salon.exception;
 
+import com.example.salon.logging.RequestLog;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -84,6 +85,7 @@ public class GlobalControllerExceptionHandler
 
     private ResponseEntity<ErrorResponse> build(HttpStatus status, String code, String message, HttpServletRequest request) 
     {
+        RequestLog.recordError(request, code, message);
         ErrorResponse error = new ErrorResponse();
         error.setErrorCode(code);
         error.setMessage(message);

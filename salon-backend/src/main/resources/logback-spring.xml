@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Logging for salon-backend, built from Spring Boot's own Logback pieces.
+
+  Every line carries the request id (RequestLoggingFilter), so all the lines one request produced
+  can be found with a single grep, and matched to the X-Request-Id the client saw.
+
+  Default (local development, tests): console only.
+
+  Profile "prod" (SPRING_PROFILES_ACTIVE=prod): console and a rolling file.
+    - File: ${LOG_PATH}/salon-backend.log, with LOG_PATH defaulting to ./logs. Set the LOG_PATH
+      environment variable to point it elsewhere, e.g. /var/log/salon.
+    - Rolls daily and at 50 MB, gzips old files, keeps 30 days and at most 2 GB in total.
+-->
+<configuration>
+	<property name="LOG_LEVEL_PATTERN" value="%5p [%X{requestId:-}]"/>
+	<include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+	<include resource="org/springframework/boot/logging/logback/console-appender.xml"/>
+
+	<springProfile name="!prod">
+		<root level="INFO">
+			<appender-ref ref="CONSOLE"/>
+		</root>
+	</springProfile>
+
+	<springProfile name="prod">
+		<property name="LOG_FILE" value="${LOG_PATH:-logs}/salon-backend.log"/>
+		<property name="LOGBACK_ROLLINGPOLICY_FILE_NAME_PATTERN" value="${LOG_PATH:-logs}/salon-backend-%d{yyyy-MM-dd}.%i.log.gz"/>
+		<property name="LOGBACK_ROLLINGPOLICY_MAX_FILE_SIZE" value="50MB"/>
+		<property name="LOGBACK_ROLLINGPOLICY_MAX_HISTORY" value="30"/>
+		<property name="LOGBACK_ROLLINGPOLICY_TOTAL_SIZE_CAP" value="2GB"/>
+		<include resource="org/springframework/boot/logging/logback/file-appender.xml"/>
+
+		<root level="INFO">
+			<appender-ref ref="CONSOLE"/>
+			<appender-ref ref="FILE"/>
+		</root>
+	</springProfile>
+</configuration>

@@ -6,6 +6,8 @@ import com.example.salon.exception.ErrorCode;
 import com.example.salon.model.Address;
 import com.example.salon.security.AccessControl;
 import com.example.salon.security.AuthenticatedUser;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
@@ -15,6 +17,7 @@ import java.util.List;
 @Service
 public class AddressService
 {
+	private static final Logger log = LoggerFactory.getLogger(AddressService.class);
 
 	private final AddressDao addressDao;
 
@@ -46,6 +49,7 @@ public class AddressService
 		int row = addressDao.updateAddressById(id, address);
 		if (row == 0)
 			throw new BaseException("Address with id " + id + " not found", ErrorCode.NOT_FOUND);
+		log.info("Updated address {}", id);
 	}
 
 	public void deleteAddressById(int id, AuthenticatedUser caller)
@@ -54,6 +58,7 @@ public class AddressService
 		int row = addressDao.deleteAddressById(id);
 		if (row == 0)
 			throw new BaseException("Address with id " + id + " not found", ErrorCode.NOT_FOUND);
+		log.info("Deleted address {}", id);
 	}
 
 	private void requireWritePermission(int id, AuthenticatedUser caller)

@@ -340,6 +340,19 @@ new users to the caller's business; `application.yml` is not tracked in git.
   **→ [`chore/salon-backend-production-config`](../VERSION_CONTROL_GUIDE.md#br-3-4)**
 - <a id="be-40"></a>**BE-40 — No Dockerfile/compose, no README** (only `RUNNING_AND_API_GUIDE.md`).
   **→ [`chore/repo-docker-compose`](../VERSION_CONTROL_GUIDE.md#br-3-6)**
+- <a id="be-42"></a>✅ **BE-42 — No record of what the API was asked or what it answered.** Only failures were
+  logged (BE-34), and only to the console: in production nothing says who called which endpoint, what
+  status came back or why a request was refused, there's no way to tie a user's error report to server
+  lines, and the logs vanish with the process.
+  **→ [`feature/salon-backend-request-logging`](../VERSION_CONTROL_GUIDE.md#br-3-9)**
+  *(fixed: `RequestLoggingFilter` writes one line per request — method, path, query parameter names,
+  status, duration, caller id and role, client IP, and for an error the code and message the client
+  was sent — at INFO, WARN for 4xx, ERROR for 5xx. Every line a request produces carries its request
+  id, which is returned as `X-Request-Id` (a short, safe incoming one is reused). Services log each
+  create/update/delete by id, sign-in and sign-out are logged, and a failed sign-in logs a masked email.
+  Bodies, query values and full emails are never logged. `logback-spring.xml` keeps the console for
+  development and, under the `prod` profile, also writes `${LOG_PATH:-logs}/salon-backend.log`, rolled
+  daily and at 50 MB, 30 days / 2 GB kept. Guarded by `RequestLoggingTest`.)*
 
 ## 5. Database design review
 
@@ -426,7 +439,7 @@ and the admin-panel Appointments, Calendar and customer history ([DB-13](#db-13)
 ### Phase 3 — Pre-launch hardening (~1 week)
 Login rate limiting ([BE-22](#be-22)), password reset, production config ([BE-25](#be-25), [BE-28](#be-28)–[BE-30](#be-30),
 [BE-38](#be-38), [BE-39](#be-39)), pagination ([BE-15](#be-15), [BE-26](#be-26)), Docker ([BE-40](#be-40)),
-and admin-panel cleanup and e2e tests.
+request logging ([BE-42](#be-42)), and admin-panel cleanup and e2e tests.
 
 Realistic estimate for a focused solo developer: **5–8 weeks** to a sellable MVP (Phases 0–3).
 

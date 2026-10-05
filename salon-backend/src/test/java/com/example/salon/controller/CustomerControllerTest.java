@@ -143,6 +143,19 @@ class CustomerControllerTest extends IntegrationTest
 	}
 
 	@Test
+	void leavingOutMarketingConsentMeansNoConsent() throws Exception
+	{
+		// Was a 400 "Malformed JSON request body": Jackson 3 rejects a missing primitive boolean.
+		mvc.perform(post(customers(Fixture.GLOW)).session(loginAs(Fixture.GLOW_ADMIN))
+						.contentType(MediaType.APPLICATION_JSON)
+						.content("""
+								{"first_name": "Ella", "last_name": "Walk-in"}
+								"""))
+				.andExpect(status().isCreated())
+				.andExpect(jsonPath("$.marketing_consent").value(false));
+	}
+
+	@Test
 	void customersAreValidated() throws Exception
 	{
 		MockHttpSession admin = loginAs(Fixture.GLOW_ADMIN);
