@@ -21,12 +21,6 @@ function todayIsoDate() {
 	return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
 }
 
-/**
- * POST /users creates the account; POST .../staff creates the roster entry that
- * backs the Employees list. Before BE-08/BE-35, only the first half existed, so
- * "Add employee" silently produced someone who could sign in but would never
- * appear on the team roster (FE-03). This view does both, in order.
- */
 export default function EmployeeCreateView() {
 	const router = useRouter();
 	const { user: currentUser } = useAuth();
