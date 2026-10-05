@@ -5,6 +5,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.List;
 
@@ -50,19 +52,7 @@ public class SalonServiceDataAccessService implements SalonServiceDao {
                 WHERE business_id = ?;
                 """;
 
-        return jdbcTemplate.query(sql, (rs, i) -> {
-            Timestamp updatedAt = rs.getTimestamp("updated_at");
-            return new SalonService(
-                    rs.getLong("id"),
-                    rs.getString("name"),
-                    rs.getString("description"),
-                    rs.getInt("duration_minutes"),
-                    rs.getBigDecimal("price"),
-                    rs.getBoolean("is_active"),
-                    rs.getTimestamp("created_at").toInstant(),
-                    updatedAt != null ? updatedAt.toInstant() : null
-            );
-        }, businessId);
+        return jdbcTemplate.query(sql, (rs, i) -> mapRow(rs), businessId);
     }
 
     @Override
@@ -76,20 +66,7 @@ public class SalonServiceDataAccessService implements SalonServiceDao {
                 AND id = ?;
                 """;
 
-        return jdbcTemplate.queryForObject(sql, (rs, i) -> {
-                    Timestamp updatedAt = rs.getTimestamp("updated_at");
-                    return new SalonService(
-                            rs.getLong("id"),
-                            rs.getString("name"),
-                            rs.getString("description"),
-                            rs.getInt("duration_minutes"),
-                            rs.getBigDecimal("price"),
-                            rs.getBoolean("is_active"),
-                            rs.getTimestamp("created_at").toInstant(),
-                            updatedAt != null ? updatedAt.toInstant() : null
-                    );
-                }, businessId, serviceId
-        );
+        return jdbcTemplate.queryForObject(sql, (rs, i) -> mapRow(rs), businessId, serviceId);
     }
 
 
@@ -117,5 +94,19 @@ public class SalonServiceDataAccessService implements SalonServiceDao {
     public int deleteServiceById(long id) {
         String sql = "DELETE FROM services WHERE id = ?";
         return jdbcTemplate.update(sql, id);
+    }
+
+    private SalonService mapRow(ResultSet rs) throws SQLException {
+        Timestamp updatedAt = rs.getTimestamp("updated_at");
+        return new SalonService(
+                rs.getLong("id"),
+                rs.getString("name"),
+                rs.getString("description"),
+                rs.getInt("duration_minutes"),
+                rs.getBigDecimal("price"),
+                rs.getBoolean("is_active"),
+                rs.getTimestamp("created_at").toInstant(),
+                updatedAt != null ? updatedAt.toInstant() : null
+        );
     }
 }
