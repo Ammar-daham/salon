@@ -393,8 +393,10 @@ edit or delete; SUPER_ADMIN anywhere. Guarded by `CustomerControllerTest` and
 *(DB-07, DB-08 and DB-09 fixed by migration V9 on
 [`refactor/salon-backend-column-types`](../VERSION_CONTROL_GUIDE.md#br-1-10):
 DB-09 — every `created_at`/`updated_at` is `timestamptz`; the cast reads stored values in the JDBC
-session zone they were written in, so the API's instants don't move. `businesses.timezone` is still
-[`feature/salon-backend-business-hours`](../VERSION_CONTROL_GUIDE.md#br-2-1)'s.
+session zone they were written in, so the API's instants don't move. `businesses.timezone` followed in
+migration V10 on [`feature/salon-backend-business-hours`](../VERSION_CONTROL_GUIDE.md#br-2-1): an IANA
+zone per salon (default `Europe/Berlin`); the API rejects unknown zones and fixed offsets. Guarded by
+`salonsKeepBerlinTimeUnlessToldOtherwise` and `aTimeZoneMustBeAnIanaRegionNotAnOffset`.
 DB-07 — `addresses.latitude`/`longitude` are `NUMERIC(9,6)` with range CHECKs and a both-or-neither
 CHECK; the API takes and returns JSON numbers and rounds input to 6 decimals; unusable stored values are
 cleared.
@@ -412,6 +414,14 @@ Guarded by `ColumnTypesTest`, `everyTimestampColumnCarriesATimeZone` and
 [`feature/salon-backend-staff-schedules`](../VERSION_CONTROL_GUIDE.md#br-2-2),
 [`feature/salon-backend-appointments`](../VERSION_CONTROL_GUIDE.md#br-2-3),
 [`feature/salon-backend-availability`](../VERSION_CONTROL_GUIDE.md#br-2-4)**
+*(In progress. `business_hours` landed in migration V10 on
+[`feature/salon-backend-business-hours`](../VERSION_CONTROL_GUIDE.md#br-2-1): one row per opening
+interval, an ISO weekday and wall-clock times in the salon's `timezone`, with CHECKs and a `btree_gist`
+exclusion constraint so a day's intervals can't overlap. `GET`/`PUT /businesses/{id}/hours` read and
+replace the whole week. Guarded by `BusinessHoursControllerTest`,
+`theDatabaseRejectsBackwardsOrOverlappingOpeningHours`, `deletingASalonDeletesItsOpeningHours` and
+`concurrentReplacementsOfASalonsHoursRunOneAfterTheOther`. Staff schedules, appointments and
+availability are still to come.)*
 
 ## 6. MVP roadmap (both apps)
 

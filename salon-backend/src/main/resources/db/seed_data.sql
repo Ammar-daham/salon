@@ -25,7 +25,7 @@
 -- Customers are rows in `customers`, not users, so they have no login.
 -- =============================================================================
 
--- TRUNCATE customers, staff, services, contacts,
+-- TRUNCATE business_hours, customers, staff, services, contacts,
 --     addresses, users, businesses RESTART IDENTITY CASCADE;
 
 BEGIN;
@@ -84,6 +84,11 @@ BEGIN
     INSERT INTO services (business_id, name, description, duration_minutes, price, is_active)
     VALUES (glow_id, 'Classic Manicure', 'Shape, cuticle care and polish.', 30, 25.00, true);
 
+    -- Tuesday to Friday 09:00-18:00, Saturday 09:00-14:00.
+    INSERT INTO business_hours (business_id, day_of_week, opens_at, closes_at)
+    VALUES (glow_id, 2, '09:00', '18:00'), (glow_id, 3, '09:00', '18:00'), (glow_id, 4, '09:00', '18:00'),
+           (glow_id, 5, '09:00', '18:00'), (glow_id, 6, '09:00', '14:00');
+
     INSERT INTO users (first_name, last_name, role, business_id, email, password_hash)
     VALUES ('Anna', 'Admin', 'ADMIN', glow_id, 'anna.admin@glowbeauty.example.com', pw_hash)
     RETURNING id INTO glow_admin_id;
@@ -123,6 +128,15 @@ BEGIN
 
     INSERT INTO services (business_id, name, description, duration_minutes, price, is_active)
     VALUES (urban_id, 'Hot Towel Shave', 'Traditional straight-razor shave.', 40, 35.00, true);
+
+    -- Monday to Friday with a lunch break, Saturday 10:00-16:00.
+    INSERT INTO business_hours (business_id, day_of_week, opens_at, closes_at)
+    VALUES (urban_id, 1, '10:00', '13:00'), (urban_id, 1, '14:00', '20:00'),
+           (urban_id, 2, '10:00', '13:00'), (urban_id, 2, '14:00', '20:00'),
+           (urban_id, 3, '10:00', '13:00'), (urban_id, 3, '14:00', '20:00'),
+           (urban_id, 4, '10:00', '13:00'), (urban_id, 4, '14:00', '20:00'),
+           (urban_id, 5, '10:00', '13:00'), (urban_id, 5, '14:00', '20:00'),
+           (urban_id, 6, '10:00', '16:00');
 
     INSERT INTO users (first_name, last_name, role, business_id, email, password_hash)
     VALUES ('Ben', 'Admin', 'ADMIN', urban_id, 'ben.admin@urbancuts.example.com', pw_hash)

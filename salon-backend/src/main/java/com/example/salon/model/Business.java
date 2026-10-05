@@ -18,6 +18,8 @@ public class Business {
     public Status status;
     /** ISO 4217 code every price at this salon is in (DB-08). */
     public String currency;
+    /** IANA time zone ID the salon's opening hours are in, e.g. "Europe/Berlin" (DB-09). */
+    public String timezone;
     public List<Address> addresses;
     public List<Contact> contacts;
     public List<SalonService> services;
@@ -84,6 +86,10 @@ public class Business {
         return currency;
     }
 
+    public String getTimezone() {
+        return timezone;
+    }
+
     public Status getStatus() {
         return status;
     }
@@ -126,6 +132,10 @@ public class Business {
 
     public void setCurrency(String currency) {
         this.currency = currency;
+    }
+
+    public void setTimezone(String timezone) {
+        this.timezone = timezone;
     }
 
     public void setStatus(Status status) {

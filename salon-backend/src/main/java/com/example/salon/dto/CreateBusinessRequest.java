@@ -14,6 +14,8 @@ public record CreateBusinessRequest(
 		@NotBlank String image,
 		// ISO 4217, e.g. "EUR". Omitted means EUR.
 		@Pattern(regexp = "^[A-Z]{3}$") String currency,
+		// Where the salon is, e.g. "Europe/Berlin": its opening hours are on this clock. Omitted means Europe/Berlin.
+		@TimeZoneId String timezone,
 		@Valid List<AddressRequest> addresses,
 		@Valid List<ContactRequest> contacts)
 {
@@ -22,6 +24,7 @@ public record CreateBusinessRequest(
 		Business business = new Business(name, description);
 		business.setImage(image);
 		business.setCurrency(currency);
+		business.setTimezone(timezone);
 		if (addresses != null)
 			business.setAddresses(addresses.stream().map(AddressRequest::toAddress).toList());
 		if (contacts != null)
