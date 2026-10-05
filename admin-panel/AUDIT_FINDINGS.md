@@ -70,6 +70,20 @@ findings it depends on are linked by their `BE-xx` / `DB-xx` IDs.
   fabricated per real business (`lib/mock/generators.ts`); the "Add staff" action is live, so a newly
   created employee will not appear in the Employees list. Confusing for any real user.
   **→ [`feature/admin-panel-live-employees`](../VERSION_CONTROL_GUIDE.md#br-1-7), [`feature/admin-panel-live-customers`](../VERSION_CONTROL_GUIDE.md#br-1-9)**
+  *(employees half fixed: `employees.hooks.ts` is `source: "live"` now, backed by `employees.api.ts`,
+  which reads the business-scoped staff API (BE-08/BE-35/DB-04) and joins each row's `user_id` against
+  `GET /users` for the name/email the `staff` table doesn't have. There's no "every business's staff in
+  one call" endpoint, so the platform-wide roster (a `SUPER_ADMIN` viewing "every salon") fans out one
+  request per business plus one `/users` call, in parallel - the same N+1 shape BE-15 already flags
+  elsewhere, not a new one. The actual bug this finding names is closed: "Add employee" now creates the
+  `users` row AND the `staff` row (`EmployeeCreateView`, replacing `UserCreateView` on this route only),
+  so a newly hired employee appears on the roster immediately, instead of existing only as an
+  invisible account. `workingHours`/`appointmentsThisWeek` are gone from `Employee` - they were never
+  backed by anything reachable from staff (schedules are Phase 2, appointments Phase 4) and faking
+  zeroes for them once `source` flips to live would be its own small lie; the Schedule tab is an honest
+  `EmptyState` now instead of a chart built on numbers nobody computed. Customers are untouched - that
+  half still has no backend at all ([DB-03](../salon-backend/AUDIT_FINDINGS.md#db-03)), not just a
+  frontend wiring gap, so `feature/admin-panel-live-customers` remains fully open.)*
 - <a id="fe-04"></a>**FE-04 — Appointments, Calendar and scheduling are placeholders.** The core booking
   product has no UI (and no backend, [DB-14](../salon-backend/AUDIT_FINDINGS.md#db-14)).
   **→ [`feature/admin-panel-hours-and-schedules`](../VERSION_CONTROL_GUIDE.md#br-2-5), [`feature/admin-panel-appointments`](../VERSION_CONTROL_GUIDE.md#br-2-6),

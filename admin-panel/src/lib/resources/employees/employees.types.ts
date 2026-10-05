@@ -1,30 +1,39 @@
 import type { Id } from "@/lib/api/types";
-import type { Weekday } from "@/lib/mock/pools";
-
-export interface WorkingDay {
-	day: Weekday;
-	/** null when the employee doesn't work that day. */
-	start: string | null;
-	end: string | null;
-}
 
 export interface Employee {
 	id: Id;
 	firstName: string;
 	lastName: string;
 	email: string;
-	/** Job title. The `staff` table has this column, but its data access layer is
-	 *  stubbed out and isn't even a Spring bean, so nothing can read or write it. */
 	title: string;
 	isActive: boolean;
 	businessId: Id;
 	businessName: string;
+	/** ISO date ("YYYY-MM-DD"), not a timestamp - staff.hired_at is a DATE column. */
 	hiredAt: string;
-	workingHours: WorkingDay[];
-	/** Bookings this week — meaningless until appointments exist. */
-	appointmentsThisWeek: number;
+	/** Hex colour for a future calendar view (DB-04). Editable from Employee settings,
+	 *  but nothing renders it yet - no calendar view exists to read it. */
+	calendarColour: string | null;
 }
 
 export function employeeFullName(e: Pick<Employee, "firstName" | "lastName">) {
 	return `${e.firstName} ${e.lastName}`;
+}
+
+export interface CreateEmployeeInput {
+	/** The user account this employment record is for - it must already exist,
+	 *  belong to this business, and hold an employable role (EMPLOYEE/ADMIN). */
+	userId: Id;
+	title: string;
+	isActive: boolean;
+	hiredAt: string;
+	calendarColour?: string | null;
+}
+
+/** Who the record belongs to isn't editable - delete and recreate instead. */
+export interface UpdateEmployeeInput {
+	title: string;
+	isActive: boolean;
+	hiredAt: string;
+	calendarColour?: string | null;
 }

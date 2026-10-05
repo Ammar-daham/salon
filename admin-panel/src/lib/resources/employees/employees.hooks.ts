@@ -1,39 +1,29 @@
 "use client";
 
 import { useMemo } from "react";
-import type { Id, DataSource } from "@/lib/api/types";
-import { useBusinesses } from "@/lib/resources/businesses/businesses.hooks";
-import { generateEmployees } from "@/lib/mock/generators";
-import type { Employee } from "./employees.types";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { queryKeys } from "@/lib/query/queryKeys";
+import type { DataSource, Id } from "@/lib/api/types";
+import { createEmployee, listEmployees, removeEmployee, updateEmployee } from "./employees.api";
+import type { CreateEmployeeInput, Employee, UpdateEmployeeInput } from "./employees.types";
 
 /**
- * Mock-backed. The `staff` table exists but its data access layer is entirely
- * stubbed and isn't registered as a Spring bean, so there is no endpoint to
- * read or write a roster.
+ * Live: staff is a real, business-scoped resource now (BE-08/BE-35/DB-04).
  *
- * Creating staff, however, is genuinely live — POST /users is correctly scoped
- * server-side. That split is why this page shows a "Sample data" pill while its
- * create action still writes to the real database.
- *
- * Swapping this for the real thing means replacing the body of `useEmployees`
- * and flipping `source`. Nothing at the call sites changes.
+ * There is still no "get one employee" endpoint reachable from just an id - the
+ * /employees/:id route carries no businessId - so useEmployee composes on top of
+ * the same list query the roster view uses, exactly as the mock version did. That
+ * also means the two share one cache entry: opening a detail page after visiting
+ * the list is instant.
  */
-export const source: DataSource = "mock";
+export const source: DataSource = "live";
 
 export function useEmployees(businessId: Id | null) {
-	// Salons are real, so the mock roster is generated against actual business
-	// ids and names — the shape of the platform is true even where the people
-	// aren't.
-	const { data: businesses, isPending, isError, error, refetch } = useBusinesses();
-
-	const employees = useMemo<Employee[]>(() => {
-		if (!businesses) return [];
-		return businesses
-			.filter((b) => businessId == null || b.id === businessId)
-			.flatMap((b) => generateEmployees(b.id, b.name));
-	}, [businesses, businessId]);
-
-	return { data: employees, isPending, isError, error, refetch, source };
+	const query = useQuery({
+		queryKey: queryKeys.employees.list(businessId),
+		queryFn: ({ signal }) => listEmployees(businessId, { signal }),
+	});
+	return { ...query, data: query.data ?? [], source };
 }
 
 export function useEmployee(employeeId: Id | null) {
@@ -43,4 +33,32 @@ export function useEmployee(employeeId: Id | null) {
 		[data, employeeId],
 	);
 	return { data: employee, isPending, isError, error, refetch, source };
+}
+
+function useEmployeeMutation<TVars, TResult>(mutationFn: (vars: TVars) => Promise<TResult>) {
+	const qc = useQueryClient();
+	return useMutation({
+		mutationFn,
+		onSuccess: () => qc.invalidateQueries({ queryKey: queryKeys.employees.all }),
+	});
+}
+
+export function useCreateEmployee() {
+	return useEmployeeMutation(
+		({ businessId, input }: { businessId: Id; input: CreateEmployeeInput }) =>
+			createEmployee(businessId, input),
+	);
+}
+
+export function useUpdateEmployee() {
+	return useEmployeeMutation(
+		({ businessId, id, input }: { businessId: Id; id: Id; input: UpdateEmployeeInput }) =>
+			updateEmployee(businessId, id, input),
+	);
+}
+
+export function useDeleteEmployee() {
+	return useEmployeeMutation(({ businessId, id }: { businessId: Id; id: Id }) =>
+		removeEmployee(businessId, id),
+	);
 }

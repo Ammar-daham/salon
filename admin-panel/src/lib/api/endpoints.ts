@@ -20,6 +20,9 @@ export const endpoints = {
 		services: (businessId: number) => `/api/v1/businesses/${businessId}/services`,
 		serviceById: (businessId: number, serviceId: number) =>
 			`/api/v1/businesses/${businessId}/services/${serviceId}`,
+		staff: (businessId: number) => `/api/v1/businesses/${businessId}/staff`,
+		staffById: (businessId: number, staffId: number) =>
+			`/api/v1/businesses/${businessId}/staff/${staffId}`,
 	},
 	addresses: {
 		root: "/api/v1/addresses",

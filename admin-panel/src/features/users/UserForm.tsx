@@ -24,6 +24,13 @@ interface UserFormProps {
 	onSubmitCreate?: (input: CreateUserInput) => Promise<void>;
 	onSubmitUpdate?: (input: UpdateUserInput) => Promise<void>;
 	onCancel: () => void;
+	/**
+	 * Extra fields rendered inside this same form, between the account and
+	 * password sections - e.g. the Add-employee flow's job title and hire date,
+	 * which belong to a staff record this form knows nothing about. Validating
+	 * and submitting them is the caller's job: this form only provides the slot.
+	 */
+	extraSection?: React.ReactNode;
 }
 
 /**
@@ -45,6 +52,7 @@ export default function UserForm({
 	onSubmitCreate,
 	onSubmitUpdate,
 	onCancel,
+	extraSection,
 }: UserFormProps) {
 	const { user: currentUser } = useAuth();
 	const scope = resolveBusinessScope(currentUser);
@@ -198,6 +206,8 @@ export default function UserForm({
 					)}
 				</div>
 			</Card>
+
+			{extraSection}
 
 			{isCreate && needsCredentials && (
 				<Card

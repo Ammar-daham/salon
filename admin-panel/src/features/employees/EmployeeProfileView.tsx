@@ -4,9 +4,8 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import { useEmployee } from "@/lib/resources/employees/employees.hooks";
 import Card from "@/components/ui/Card";
-import StatTile from "@/components/ui/StatTile";
 import { Skeleton } from "@/components/ui/Skeleton";
-import { CalenderIcon, EnvelopeIcon, TimeIcon } from "@/icons";
+import { EnvelopeIcon } from "@/icons";
 
 export default function EmployeeProfileView() {
 	const params = useParams<{ id: string }>();
@@ -15,35 +14,8 @@ export default function EmployeeProfileView() {
 
 	if (isPending || !employee) return <Skeleton className="h-64 rounded-card" />;
 
-	const workingDays = employee.workingHours.filter((d) => d.start !== null);
-	const weeklyHours = workingDays.reduce((sum, d) => {
-		if (!d.start || !d.end) return sum;
-		const [sh, sm] = d.start.split(":").map(Number);
-		const [eh, em] = d.end.split(":").map(Number);
-		return sum + (eh * 60 + em - (sh * 60 + sm)) / 60;
-	}, 0);
-
 	return (
 		<div className="flex flex-col gap-4 md:gap-6">
-			<div className="grid grid-cols-1 gap-4 sm:grid-cols-3 md:gap-6">
-				<StatTile
-					icon={<CalenderIcon className="size-5" />}
-					label="Working days"
-					value={`${workingDays.length} / 7`}
-				/>
-				<StatTile
-					icon={<TimeIcon className="size-5" />}
-					label="Scheduled hours"
-					value={`${Math.round(weeklyHours)} h`}
-					hint="Per week"
-				/>
-				<StatTile
-					icon={<CalenderIcon className="size-5" />}
-					label="Bookings this week"
-					value={employee.appointmentsThisWeek}
-				/>
-			</div>
-
 			<div className="grid grid-cols-1 gap-4 lg:grid-cols-2 md:gap-6">
 				<Card title="Contact">
 					<ul className="flex flex-col gap-3 text-sm">
@@ -90,14 +62,13 @@ export default function EmployeeProfileView() {
 				</Card>
 			</div>
 
-			<Card title="Why this is sample data">
+			<Card title="What's still not real">
 				<p className="text-sm text-ink-muted">
-					The <code className="rounded bg-neutral-100 px-1 py-0.5 text-xs dark:bg-white/10">staff</code>{" "}
-					table exists in the database, but its data access layer is entirely stubbed out and
-					isn&apos;t registered as a Spring bean — so nothing can read or write a roster.
-					Creating staff accounts, on the other hand, is real: that writes to{" "}
-					<code className="rounded bg-neutral-100 px-1 py-0.5 text-xs dark:bg-white/10">users</code>{" "}
-					through a correctly scoped endpoint.
+					This profile is live - title, salon and hire date all come from the real{" "}
+					<code className="rounded bg-neutral-100 px-1 py-0.5 text-xs dark:bg-white/10">staff</code>{" "}
+					table. Working hours and bookings aren&apos;t shown here because neither exists on the
+					backend yet: there is no business-hours/schedule table and no appointments table. See the
+					Schedule and Appointments tabs.
 				</p>
 			</Card>
 		</div>

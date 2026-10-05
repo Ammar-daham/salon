@@ -34,7 +34,12 @@ export const queryKeys = {
 	},
 	employees: {
 		all: ["employees"] as const,
-		list: () => [...queryKeys.employees.all, "list"] as const,
+		// null/omitted = every business (platform scope); a staff roster is
+		// fetched per business, so the two cases need distinct keys.
+		list: (businessId?: Id | null) =>
+			businessId == null
+				? ([...queryKeys.employees.all, "list"] as const)
+				: ([...queryKeys.employees.all, "list", businessId] as const),
 		detail: (id: Id) => [...queryKeys.employees.all, "detail", id] as const,
 	},
 	stats: {
