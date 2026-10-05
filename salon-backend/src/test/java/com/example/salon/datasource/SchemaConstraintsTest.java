@@ -129,10 +129,11 @@ class SchemaConstraintsTest extends IntegrationTest
 	}
 
 	@Test
-	void theDatabaseRejectsBackwardsOrOverlappingShifts()
+	void theDatabaseRejectsBackwardsOrOverlappingShiftsAndTimeOff()
 	{
-		// seed.sql: Mia works Tuesday (2) 09:00-17:00.
+		// seed.sql: Mia works Tuesday (2) 09:00-17:00 and is off 24-27 December.
 		String shift = "INSERT INTO staff_schedules (staff_id, day_of_week, starts_at, ends_at) VALUES (?, ?, ?::time, ?::time)";
+		String timeOff = "INSERT INTO staff_time_off (staff_id, starts_at, ends_at) VALUES (?, ?::timestamptz, ?::timestamptz)";
 
 		assertThatThrownBy(() -> jdbcTemplate.update(shift, Fixture.GLOW_STAFF, 1, "17:00", "09:00"))
 				.isInstanceOf(DataIntegrityViolationException.class)
@@ -140,10 +141,15 @@ class SchemaConstraintsTest extends IntegrationTest
 		assertThatThrownBy(() -> jdbcTemplate.update(shift, Fixture.GLOW_STAFF, 2, "16:00", "18:00"))
 				.isInstanceOf(DataIntegrityViolationException.class)
 				.hasMessageContaining("staff_schedules_no_overlap");
+		assertThatThrownBy(() -> jdbcTemplate.update(timeOff, Fixture.GLOW_STAFF, "2026-12-26 12:00+01", "2026-12-28 00:00+01"))
+				.isInstanceOf(DataIntegrityViolationException.class)
+				.hasMessageContaining("staff_time_off_no_overlap");
+		assertThatThrownBy(() -> jdbcTemplate.update(timeOff, Fixture.GLOW_STAFF, "2027-01-02 00:00+01", "2027-01-01 00:00+01"))
+				.isInstanceOf(DataIntegrityViolationException.class)
+				.hasMessageContaining("staff_time_off_order_check");
 
-		// Touching is fine, and another staff member can work the same hours.
-		jdbcTemplate.update(shift, Fixture.GLOW_STAFF, 2, "17:00", "19:00");
-		jdbcTemplate.update(shift, Fixture.URBAN_STAFF, 2, "09:00", "17:00");
+		// Another staff member can be off at the same time.
+		jdbcTemplate.update(timeOff, Fixture.URBAN_STAFF, "2026-12-24 00:00+01", "2026-12-27 00:00+01");
 	}
 
 	@Test
@@ -154,6 +160,7 @@ class SchemaConstraintsTest extends IntegrationTest
 
 		jdbcTemplate.update("DELETE FROM staff WHERE id = ?", Fixture.GLOW_STAFF);
 		assertThat(jdbcTemplate.queryForObject("SELECT count(*) FROM staff_schedules", Integer.class)).isZero();
+		assertThat(jdbcTemplate.queryForObject("SELECT count(*) FROM staff_time_off", Integer.class)).isZero();
 	}
 
 	private int count(String table, long id)

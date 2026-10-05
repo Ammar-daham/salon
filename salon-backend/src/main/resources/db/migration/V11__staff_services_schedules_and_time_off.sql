@@ -43,3 +43,30 @@ CREATE TABLE staff_schedules (
     CONSTRAINT staff_schedules_no_overlap EXCLUDE USING gist (
         staff_id WITH =, day_of_week WITH =, timerange(starts_at, ends_at) WITH &&)
 );
+
+/*
+  =======================
+   DB-14: time off
+  =======================
+ */
+-- Points in time rather than wall-clock times: a holiday across a daylight-saving change still lasts
+-- the right number of hours, and appointments (timestamptz too) can be checked against it directly.
+-- The exclusion constraint's index leads with staff_id, so it also serves the foreign key (DB-12).
+CREATE TABLE staff_time_off (
+    id BIGSERIAL NOT NULL PRIMARY KEY,
+    staff_id BIGINT NOT NULL,
+    starts_at TIMESTAMPTZ NOT NULL,
+    ends_at TIMESTAMPTZ NOT NULL,
+    note VARCHAR(255),
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    updated_at TIMESTAMPTZ,
+
+    CONSTRAINT fk_staff_time_off_staff FOREIGN KEY (staff_id) REFERENCES staff(id) ON DELETE CASCADE,
+    CONSTRAINT staff_time_off_order_check CHECK (starts_at < ends_at),
+    -- One person's absences may touch but not overlap: change the existing one instead.
+    CONSTRAINT staff_time_off_no_overlap EXCLUDE USING gist (
+        staff_id WITH =, tstzrange(starts_at, ends_at) WITH &&)
+);
+
+CREATE TRIGGER staff_time_off_set_updated_at BEFORE UPDATE ON staff_time_off
+    FOR EACH ROW EXECUTE FUNCTION set_updated_at();

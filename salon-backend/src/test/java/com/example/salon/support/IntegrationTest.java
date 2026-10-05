@@ -80,6 +80,8 @@ public abstract class IntegrationTest
 		public static final long GLOW_STAFF = 1;
 		public static final long URBAN_STAFF = 2;
 
+		public static final long GLOW_STAFF_CHRISTMAS = 1;
+
 		private Fixture()
 		{
 		}
