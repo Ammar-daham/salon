@@ -42,6 +42,9 @@ INSERT INTO business_hours (business_id, day_of_week, opens_at, closes_at) VALUE
     (1, 2, '09:00', '18:00'), (1, 3, '09:00', '18:00'), (1, 4, '09:00', '18:00'), (1, 5, '09:00', '18:00'),
     (1, 6, '10:00', '14:00');
 
+-- Mia (Glow staff 1) does haircuts.
+INSERT INTO staff_services (business_id, staff_id, service_id) VALUES (1, 1, 1);
+
 SELECT setval(pg_get_serial_sequence('businesses', 'id'), (SELECT max(id) FROM businesses));
 SELECT setval(pg_get_serial_sequence('users', 'id'), (SELECT max(id) FROM users));
 SELECT setval(pg_get_serial_sequence('addresses', 'id'), (SELECT max(id) FROM addresses));

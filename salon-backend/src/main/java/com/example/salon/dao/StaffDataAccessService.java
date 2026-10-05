@@ -7,6 +7,7 @@ import org.springframework.stereotype.Repository;
 
 import java.sql.Timestamp;
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.List;
 
 @Repository
@@ -89,6 +90,25 @@ public class StaffDataAccessService implements StaffDao {
     public int deleteStaffById(long id) {
         String sql = "DELETE FROM staff WHERE id = ?";
         return jdbcTemplate.update(sql, id);
+    }
+
+    @Override
+    public void replaceServicesOfStaff(long businessId, long staffId, Collection<Long> serviceIds) {
+        // Locks the staff row so concurrent replacements run one after the other instead of the second
+        // one inserting rows the first just wrote and failing on the primary key.
+        jdbcTemplate.queryForList("SELECT id FROM staff WHERE id = ? FOR NO KEY UPDATE", Long.class, staffId);
+
+        jdbcTemplate.update("DELETE FROM staff_services WHERE staff_id = ?", staffId);
+        jdbcTemplate.batchUpdate(
+                "INSERT INTO staff_services (business_id, staff_id, service_id) VALUES (?, ?, ?)",
+                serviceIds,
+                serviceIds.size(),
+                (ps, serviceId) -> {
+                    ps.setLong(1, businessId);
+                    ps.setLong(2, staffId);
+                    ps.setLong(3, serviceId);
+                }
+        );
     }
 
     private Staff mapRow(java.sql.ResultSet rs) throws java.sql.SQLException {

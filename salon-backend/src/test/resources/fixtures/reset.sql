@@ -1,2 +1,2 @@
-TRUNCATE business_hours, customers, staff, services, contacts, addresses, users, businesses
-    RESTART IDENTITY CASCADE;
+TRUNCATE staff_services, business_hours, customers, staff, services, contacts, addresses, users,
+    businesses RESTART IDENTITY CASCADE;

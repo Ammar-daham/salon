@@ -56,6 +56,21 @@ public class SalonServiceDataAccessService implements SalonServiceDao {
     }
 
     @Override
+    public List<SalonService> getServicesForStaff(long staffId) {
+        String sql = """
+                SELECT s.id, s.name, s.description,
+                s.duration_minutes, s.price, s.is_active,
+                s.created_at, s.updated_at
+                FROM services s
+                JOIN staff_services ss ON ss.service_id = s.id
+                WHERE ss.staff_id = ?
+                ORDER BY s.name, s.id;
+                """;
+
+        return jdbcTemplate.query(sql, (rs, i) -> mapRow(rs), staffId);
+    }
+
+    @Override
     public SalonService getServiceById(int businessId, int serviceId) {
         String sql = """
                 SELECT id, name, description,

@@ -113,6 +113,28 @@ class SchemaConstraintsTest extends IntegrationTest
 				Integer.class, Fixture.SERENITY_PENDING)).isZero();
 	}
 
+	@Test
+	void aStaffMemberCanOnlyBeLinkedToTheirOwnSalonsServices()
+	{
+		// DB-14: business_id is part of both foreign keys. Mia is Glow's; the fade is Urban's.
+		String link = "INSERT INTO staff_services (business_id, staff_id, service_id) VALUES (?, ?, ?)";
+
+		assertThatThrownBy(() -> jdbcTemplate.update(link, Fixture.GLOW, Fixture.GLOW_STAFF, Fixture.URBAN_FADE))
+				.isInstanceOf(DataIntegrityViolationException.class)
+				.hasMessageContaining("fk_staff_services_service");
+		assertThatThrownBy(() -> jdbcTemplate.update(link, Fixture.URBAN, Fixture.GLOW_STAFF, Fixture.URBAN_FADE))
+				.isInstanceOf(DataIntegrityViolationException.class)
+				.hasMessageContaining("fk_staff_services_staff");
+		jdbcTemplate.update(link, Fixture.GLOW, Fixture.GLOW_STAFF, Fixture.GLOW_MANICURE);
+	}
+
+	@Test
+	void removingAServiceRemovesItFromTheStaffWhoPerformedIt()
+	{
+		jdbcTemplate.update("DELETE FROM services WHERE id = ?", Fixture.GLOW_HAIRCUT);
+		assertThat(jdbcTemplate.queryForObject("SELECT count(*) FROM staff_services", Integer.class)).isZero();
+	}
+
 	private int count(String table, long id)
 	{
 		return jdbcTemplate.queryForObject("SELECT count(*) FROM " + table + " WHERE id = ?", Integer.class, id);

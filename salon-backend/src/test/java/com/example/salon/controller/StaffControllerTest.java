@@ -5,6 +5,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpSession;
 
+import java.util.Arrays;
+
 import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -208,5 +210,67 @@ class StaffControllerTest extends IntegrationTest
 				.andExpect(status().isNotFound());
 		mvc.perform(get("/api/v1/users/" + Fixture.GLOW_EMPLOYEE_ID).session(admin))
 				.andExpect(status().isOk());
+	}
+
+	private static final String MIAS_SERVICES =
+			"/api/v1/businesses/" + Fixture.GLOW + "/staff/" + Fixture.GLOW_STAFF + "/services";
+
+	private static String serviceIds(long... ids)
+	{
+		return "{\"service_ids\": " + Arrays.toString(ids) + "}";
+	}
+
+	@Test
+	void anyoneSignedInCanSeeWhichServicesAStaffMemberPerforms() throws Exception
+	{
+		// DB-14: public like the salon's service list, so the booking flow can offer the right people.
+		mvc.perform(get(MIAS_SERVICES).session(loginAs(Fixture.URBAN_EMPLOYEE)))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$", hasSize(1)))
+				.andExpect(jsonPath("$[0].id").value(Fixture.GLOW_HAIRCUT))
+				.andExpect(jsonPath("$[0].duration_minutes").value(45));
+	}
+
+	@Test
+	void adminReplacesTheServicesAStaffMemberPerforms() throws Exception
+	{
+		MockHttpSession admin = loginAs(Fixture.GLOW_ADMIN);
+
+		mvc.perform(put(MIAS_SERVICES).session(admin).contentType(MediaType.APPLICATION_JSON)
+						.content(serviceIds(Fixture.GLOW_HAIRCUT, Fixture.GLOW_MANICURE, Fixture.GLOW_HAIRCUT)))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$", hasSize(2)))
+				.andExpect(jsonPath("$[0].name").value("Classic Manicure"))
+				.andExpect(jsonPath("$[1].name").value("Signature Haircut"));
+
+		mvc.perform(put(MIAS_SERVICES).session(admin).contentType(MediaType.APPLICATION_JSON).content(serviceIds()))
+				.andExpect(status().isOk());
+		mvc.perform(get(MIAS_SERVICES).session(admin)).andExpect(jsonPath("$", hasSize(0)));
+	}
+
+	@Test
+	void aStaffMemberCannotPerformAnotherSalonsService() throws Exception
+	{
+		MockHttpSession admin = loginAs(Fixture.GLOW_ADMIN);
+
+		mvc.perform(put(MIAS_SERVICES).session(admin).contentType(MediaType.APPLICATION_JSON)
+						.content(serviceIds(Fixture.GLOW_MANICURE, Fixture.URBAN_FADE)))
+				.andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$.message").value("Service with id 3 is not offered by this business."));
+		mvc.perform(get(MIAS_SERVICES).session(admin)).andExpect(jsonPath("$", hasSize(1)));
+	}
+
+	@Test
+	void onlyAnAdminOfTheSalonCanChangeAStaffMembersServices() throws Exception
+	{
+		String body = serviceIds(Fixture.GLOW_MANICURE);
+
+		mvc.perform(put(MIAS_SERVICES).session(loginAs(Fixture.GLOW_EMPLOYEE)).contentType(MediaType.APPLICATION_JSON).content(body))
+				.andExpect(status().isForbidden());
+		mvc.perform(put(MIAS_SERVICES).session(loginAs(Fixture.URBAN_ADMIN)).contentType(MediaType.APPLICATION_JSON).content(body))
+				.andExpect(status().isForbidden());
+		mvc.perform(get("/api/v1/businesses/" + Fixture.GLOW + "/staff/" + Fixture.URBAN_STAFF + "/services")
+						.session(loginAs(Fixture.GLOW_ADMIN)))
+				.andExpect(status().isNotFound());
 	}
 }

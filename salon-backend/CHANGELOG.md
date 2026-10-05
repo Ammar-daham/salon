@@ -20,6 +20,12 @@ version. The version lives in [`gradle.properties`](gradle.properties); each rel
   decimals (DB-08).
 
 ### Added
+- The services each staff member performs, at `/api/v1/businesses/{businessId}/staff/{staffId}/services`.
+  `GET` lists them for anyone who can see the salon; `PUT {"service_ids": [...]}` replaces them and
+  returns the list. Only the salon's own services can be assigned. Only the salon's ADMIN or a
+  SUPER_ADMIN can change them (DB-14).
+- Migration V11: `staff_services`. The database itself refuses to link a staff member to another
+  salon's service (DB-14).
 - Opening hours at `/api/v1/businesses/{businessId}/hours`. `GET` returns the salon's `timezone` and
   its weekly `hours`, each with a `day_of_week` (`MONDAY` to `SUNDAY`) and `opens_at`/`closes_at` as
   `"HH:mm"` on the salon's clock; anyone who can see the salon can read them. `PUT {"hours": [...]}`
