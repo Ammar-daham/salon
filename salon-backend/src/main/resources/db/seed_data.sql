@@ -25,7 +25,7 @@
 -- Customers are rows in `customers`, not users, so they have no login.
 -- =============================================================================
 
--- TRUNCATE staff_time_off, staff_schedules, staff_services, business_hours,
+-- TRUNCATE appointments, staff_time_off, staff_schedules, staff_services, business_hours,
 --     customers, staff, services, contacts, addresses, users, businesses RESTART IDENTITY CASCADE;
 
 BEGIN;
@@ -216,6 +216,23 @@ BEGIN
     INSERT INTO staff_time_off (staff_id, starts_at, ends_at, note)
     SELECT id, '2026-12-24 00:00 Europe/Berlin', '2026-12-27 00:00 Europe/Berlin', 'Christmas'
     FROM staff WHERE user_id = glow_emp1_id;
+
+    -- =========================================================================
+    -- Appointments (DB-14) around today, on Glow's clock: Olivia's haircut with
+    -- Mia last week, Liam's colour with Noah and Olivia's manicure with Mia this
+    -- week. Each price is the service's price when it was booked.
+    -- =========================================================================
+    INSERT INTO appointments (business_id, customer_id, staff_id, service_id, starts_at, ends_at, status, price)
+    SELECT glow_id, c.id, st.id, sv.id, v.starts_at, v.starts_at + make_interval(mins => sv.duration_minutes),
+           v.status, sv.price
+    FROM (VALUES
+            ('Olivia', glow_emp1_id, 'Signature Haircut', (current_date - 7 + time '10:00') AT TIME ZONE 'Europe/Berlin', 'COMPLETED'),
+            ('Liam',   glow_emp2_id, 'Balayage Colour',   (current_date + 2 + time '11:00') AT TIME ZONE 'Europe/Berlin', 'CONFIRMED'),
+            ('Olivia', glow_emp1_id, 'Classic Manicure',  (current_date + 3 + time '15:30') AT TIME ZONE 'Europe/Berlin', 'BOOKED')
+         ) AS v(customer, user_id, service, starts_at, status)
+    JOIN customers c ON c.business_id = glow_id AND c.first_name = v.customer
+    JOIN staff st ON st.user_id = v.user_id
+    JOIN services sv ON sv.business_id = glow_id AND sv.name = v.service;
 
 END $$;
 

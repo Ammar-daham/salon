@@ -53,7 +53,8 @@ public class SalonServiceDataAccessService implements SalonServiceDao
                 duration_minutes, price, is_active,
                 created_at, updated_at
                 FROM services
-                WHERE business_id = ?;
+                WHERE business_id = ?
+                AND deleted_at IS NULL;
                 """;
 
         return jdbcTemplate.query(sql, (rs, i) -> mapRow(rs), businessId);
@@ -69,6 +70,7 @@ public class SalonServiceDataAccessService implements SalonServiceDao
                 FROM services s
                 JOIN staff_services ss ON ss.service_id = s.id
                 WHERE ss.staff_id = ?
+                AND s.deleted_at IS NULL
                 ORDER BY s.name, s.id;
                 """;
 
@@ -84,7 +86,8 @@ public class SalonServiceDataAccessService implements SalonServiceDao
                 created_at, updated_at
                 FROM services
                 WHERE business_id = ?
-                AND id = ?;
+                AND id = ?
+                AND deleted_at IS NULL;
                 """;
 
         return jdbcTemplate.queryForObject(sql, (rs, i) -> mapRow(rs), businessId, serviceId);
@@ -99,7 +102,8 @@ public class SalonServiceDataAccessService implements SalonServiceDao
                 description = ?, duration_minutes = ?,
                 price = ?, is_active = ?,
                 updated_at = now()
-                WHERE id = ?;
+                WHERE id = ?
+                AND deleted_at IS NULL;
                 """;
         return jdbcTemplate.update(
                 sql,
@@ -115,7 +119,8 @@ public class SalonServiceDataAccessService implements SalonServiceDao
     @Override
     public int deleteServiceById(long id) 
     {
-        String sql = "DELETE FROM services WHERE id = ?";
+        // Soft delete (DB-13): appointments keep pointing at the service.
+        String sql = "UPDATE services SET deleted_at = now() WHERE id = ? AND deleted_at IS NULL";
         return jdbcTemplate.update(sql, id);
     }
 

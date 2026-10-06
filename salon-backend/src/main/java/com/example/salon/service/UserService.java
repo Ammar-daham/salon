@@ -10,6 +10,7 @@ import com.example.salon.security.AuthenticatedUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.security.access.AccessDeniedException;
@@ -136,7 +137,16 @@ public class UserService
 	{
 		// getUserById enforces self / own-business / super-admin access (BE-05) and 404s if missing.
 		getUserById((int) id, caller);
-		long row = userDao.deleteUserById(id);
+		long row;
+		try {
+			row = userDao.deleteUserById(id);
+		} catch (DataIntegrityViolationException ex) {
+			if (ex.getMessage() == null || !ex.getMessage().contains("fk_appointments_staff"))
+				throw ex;
+			// Their staff record would go with the account (fk_staff_user), and appointments point at it (DB-13).
+			throw new BaseException("User with id " + id + " is the staff member on appointments, "
+					+ "so the account can't be deleted.", ErrorCode.DUPLICATE_RESOURCE);
+		}
 		if (row == 0)
 			throw new BaseException("User with id " + id + " not found", ErrorCode.NOT_FOUND);
 		log.info("Deleted user {}", id);

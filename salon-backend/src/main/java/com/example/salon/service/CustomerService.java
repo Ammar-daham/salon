@@ -1,5 +1,6 @@
 package com.example.salon.service;
 
+import com.example.salon.dao.AppointmentDao;
 import com.example.salon.dao.CustomerDao;
 import com.example.salon.exception.BaseException;
 import com.example.salon.exception.ErrorCode;
@@ -26,12 +27,14 @@ public class CustomerService
     private static final Logger log = LoggerFactory.getLogger(CustomerService.class);
 
     private final CustomerDao customerDao;
+    private final AppointmentDao appointmentDao;
     private final BusinessService businessService;
 
     @Autowired
-    public CustomerService(CustomerDao customerDao, BusinessService businessService)
+    public CustomerService(CustomerDao customerDao, AppointmentDao appointmentDao, BusinessService businessService)
     {
         this.customerDao = customerDao;
+        this.appointmentDao = appointmentDao;
         this.businessService = businessService;
     }
 
@@ -78,6 +81,10 @@ public class CustomerService
     public void deleteCustomerById(long businessId, long customerId, AuthenticatedUser caller)
     {
         requireAdminOfBusiness(caller, businessId);
+        getCustomerById(businessId, customerId, caller);
+        if (appointmentDao.hasUpcomingAppointmentsForCustomer(customerId))
+            throw new BaseException("Customer with id " + customerId + " still has upcoming appointments. "
+                    + "Cancel or move them first.", ErrorCode.DUPLICATE_RESOURCE);
         int row = customerDao.deleteCustomerById(businessId, customerId);
         if (row == 0)
             throw new BaseException("Customer with id " + customerId + " not found.", ErrorCode.NOT_FOUND);

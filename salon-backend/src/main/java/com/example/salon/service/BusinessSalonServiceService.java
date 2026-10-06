@@ -1,5 +1,6 @@
 package com.example.salon.service;
 
+import com.example.salon.dao.AppointmentDao;
 import com.example.salon.dao.SalonServiceDao;
 import com.example.salon.exception.BaseException;
 import com.example.salon.exception.ErrorCode;
@@ -20,11 +21,13 @@ public class BusinessSalonServiceService
     private static final Logger log = LoggerFactory.getLogger(BusinessSalonServiceService.class);
 
     private final SalonServiceDao salonServiceDao;
+    private final AppointmentDao appointmentDao;
 
     @Autowired
-    public BusinessSalonServiceService(SalonServiceDao salonServiceDao)
+    public BusinessSalonServiceService(SalonServiceDao salonServiceDao, AppointmentDao appointmentDao)
     {
         this.salonServiceDao = salonServiceDao;
+        this.appointmentDao = appointmentDao;
     }
 
     @Transactional
@@ -68,6 +71,9 @@ public class BusinessSalonServiceService
     {
         AccessControl.requireBusinessAccess(caller, businessId);
         getServiceById(businessId, serviceId);
+        if (appointmentDao.hasUpcomingAppointmentsForService(serviceId))
+            throw new BaseException("Service with id " + serviceId + " still has upcoming appointments. "
+                    + "Cancel or move them first.", ErrorCode.DUPLICATE_RESOURCE);
         int row = salonServiceDao.deleteServiceById(serviceId);
         if (row == 0)
             throw new BaseException("Service with id " + serviceId + " not found.", ErrorCode.NOT_FOUND);

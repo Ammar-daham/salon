@@ -47,7 +47,8 @@ public class StaffDataAccessService implements StaffDao {
                 hired_at, calendar_colour,
                 created_at, updated_at
                 FROM staff
-                WHERE business_id = ?;
+                WHERE business_id = ?
+                AND deleted_at IS NULL;
                 """;
 
         return jdbcTemplate.query(sql, (rs, i) -> mapRow(rs), businessId);
@@ -61,7 +62,8 @@ public class StaffDataAccessService implements StaffDao {
                 created_at, updated_at
                 FROM staff
                 WHERE business_id = ?
-                AND id = ?;
+                AND id = ?
+                AND deleted_at IS NULL;
                 """;
 
         return jdbcTemplate.queryForObject(sql, (rs, i) -> mapRow(rs), businessId, staffId);
@@ -74,7 +76,8 @@ public class StaffDataAccessService implements StaffDao {
                 is_active = ?, hired_at = ?,
                 calendar_colour = ?,
                 updated_at = now()
-                WHERE id = ?;
+                WHERE id = ?
+                AND deleted_at IS NULL;
                 """;
         return jdbcTemplate.update(
                 sql,
@@ -88,7 +91,8 @@ public class StaffDataAccessService implements StaffDao {
 
     @Override
     public int deleteStaffById(long id) {
-        String sql = "DELETE FROM staff WHERE id = ?";
+        // Soft delete (DB-13): appointments keep pointing at the staff member.
+        String sql = "UPDATE staff SET deleted_at = now() WHERE id = ? AND deleted_at IS NULL";
         return jdbcTemplate.update(sql, id);
     }
 

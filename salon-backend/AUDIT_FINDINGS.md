@@ -370,7 +370,7 @@ new users to the caller's business; `application.yml` is not tracked in git.
 | <a id="db-10"></a>✅ DB-10 | Case-sensitive email index — `Anna@x.com` and `anna@x.com` are two accounts | `UNIQUE INDEX ON users (lower(email))`. | [`fix/salon-backend-schema-integrity`](../VERSION_CONTROL_GUIDE.md#br-1-2) |
 | <a id="db-11"></a>✅ DB-11 | `updated_at` maintained by hand (and forgotten, [BE-12](#be-12)) | A single `set_updated_at()` trigger on every table. | [`fix/salon-backend-schema-integrity`](../VERSION_CONTROL_GUIDE.md#br-1-2) |
 | <a id="db-12"></a>✅ DB-12 | No indexes on FK columns | Index every `business_id`, `user_id`, `service_id`. | [`fix/salon-backend-schema-integrity`](../VERSION_CONTROL_GUIDE.md#br-1-2) |
-| <a id="db-13"></a>DB-13 | Hard deletes everywhere | Soft delete (`deleted_at`) for businesses, services, staff, customers — past appointments must keep pointing at them. | [`feature/salon-backend-appointments`](../VERSION_CONTROL_GUIDE.md#br-2-3) |
+| <a id="db-13"></a>✅ DB-13 | Hard deletes everywhere | Soft delete (`deleted_at`) for businesses, services, staff, customers — past appointments must keep pointing at them. | [`feature/salon-backend-appointments`](../VERSION_CONTROL_GUIDE.md#br-2-3) |
 
 *(DB-01, DB-05, DB-06, DB-10, DB-11 and DB-12 fixed by migrations V4 and V5 on
 [`fix/salon-backend-schema-integrity`](../VERSION_CONTROL_GUIDE.md#br-1-2):
@@ -405,6 +405,13 @@ DB CHECK), and `businesses.currency` (ISO 4217, default `EUR`) says what every p
 Guarded by `ColumnTypesTest`, `everyTimestampColumnCarriesATimeZone` and
 `theDatabaseRejectsBadMoneyAndCoordinates`.)*
 
+*(DB-13 fixed by migration V12 on [`feature/salon-backend-appointments`](../VERSION_CONTROL_GUIDE.md#br-2-3):
+services, staff and customers get `deleted_at`. The API's DELETE stamps it and every read leaves those
+rows out, so appointments can keep pointing at them. A user's staff record and an account's customer
+record are unique among current rows only, so someone can be taken on again. Businesses stay a hard
+delete: a deleted salon takes its staff, services, customers and appointments with it, as V8 already
+did for customers. Guarded by `SoftDeleteTest`.)*
+
 <a id="db-14"></a>**DB-14 — Booking tables don't exist.** Phase 2 needs `business_hours`,
 `staff_schedules`, `staff_time_off`, `staff_services`, `appointments` (customer, staff, service,
 `start_at`/`end_at`, status, price snapshot, notes) with an exclusion constraint on
@@ -429,7 +436,19 @@ reads and writes on the salon's clock, with an exclusion constraint against over
 `StaffScheduleControllerTest`, the staff-services tests in `StaffControllerTest`,
 `aStaffMemberCanOnlyBeLinkedToTheirOwnSalonsServices`,
 `theDatabaseRejectsBackwardsOrOverlappingShiftsAndTimeOff` and
-`removingAStaffMemberOrAServiceRemovesWhatHungOffIt`. Appointments and availability are still to come.)*
+`removingAStaffMemberOrAServiceRemovesWhatHungOffIt`.
+`appointments` followed in migration V12 on
+[`feature/salon-backend-appointments`](../VERSION_CONTROL_GUIDE.md#br-2-3): one service by one staff member
+for one customer, with `business_id` in every foreign key and a `btree_gist` exclusion constraint on
+`tstzrange(starts_at, ends_at)` per staff member that ignores cancelled and missed appointments, so the
+database itself refuses a double booking. The price is the service's when booked, and the times are read and
+written on the salon's clock like time off. A visit with several services is several appointments, so there is
+no `appointment_services`. `PUT .../status` moves an appointment along `BOOKED → CONFIRMED → COMPLETED / CANCELLED /
+NO_SHOW` (confirming is optional, the last three are final); only a booked or confirmed one can be changed, none is
+ever deleted, and two changes to one appointment take turns on a row lock. Guarded by `AppointmentControllerTest`,
+`theDatabaseRefusesToDoubleBookAStaffMember`, `anAppointmentCanOnlyPointAtItsOwnSalonsCustomerStaffAndService`,
+`whatAnAppointmentPointsAtCanOnlyBeSoftDeleted`, `deletingASalonDeletesItsAppointments` and
+`concurrentStatusChangesToOneAppointmentRunOneAfterTheOther`. Availability and `audit_log` are still to come.)*
 
 ## 6. MVP roadmap (both apps)
 

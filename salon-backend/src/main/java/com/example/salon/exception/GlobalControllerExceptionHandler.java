@@ -14,6 +14,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.time.Instant;
 import java.util.Comparator;
@@ -65,6 +66,14 @@ public class GlobalControllerExceptionHandler
                 .map(error -> error.getField() + " " + error.getDefaultMessage())
                 .collect(Collectors.joining("; "));
         return build(ErrorCode.BAD_REQUEST.getStatus(), ErrorCode.BAD_REQUEST.getCode(), message, request);
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ErrorResponse> handleTypeMismatch(MethodArgumentTypeMismatchException ex, HttpServletRequest request)
+    {
+        // The value isn't echoed: it would end up in the request log, which never records query values (BE-42).
+        return build(ErrorCode.BAD_REQUEST.getStatus(), ErrorCode.BAD_REQUEST.getCode(),
+                ex.getName() + " has an invalid value", request);
     }
 
     @ExceptionHandler(DataAccessException.class)

@@ -1,7 +1,12 @@
 package com.example.salon.datasource;
 
 import com.example.salon.dao.BusinessHoursDao;
+import com.example.salon.model.AppointmentStatus;
 import com.example.salon.model.OpeningInterval;
+import com.example.salon.model.Role;
+import com.example.salon.model.User;
+import com.example.salon.security.AuthenticatedUser;
+import com.example.salon.service.AppointmentService;
 import com.example.salon.service.BusinessService;
 import com.example.salon.support.IntegrationTest;
 import org.junit.jupiter.api.Test;
@@ -37,6 +42,9 @@ class TransactionTest extends IntegrationTest
 
 	@Autowired
 	private BusinessHoursDao businessHoursDao;
+
+	@Autowired
+	private AppointmentService appointmentService;
 
 	@Test
 	void aFailedTransactionRollsBackJdbcWrites()
@@ -76,6 +84,37 @@ class TransactionTest extends IntegrationTest
 		first.get();
 		second.get();
 		assertThat(businessHoursDao.getHoursForBusiness(Fixture.GLOW)).containsExactly(mondayFrom(10));
+	}
+
+	@Test
+	void concurrentStatusChangesToOneAppointmentRunOneAfterTheOther() throws Exception
+	{
+		// Without the row lock in AppointmentService, completing still sees BOOKED and overwrites the cancellation.
+		long id = jdbcTemplate.queryForObject("""
+				INSERT INTO appointments (business_id, customer_id, staff_id, service_id, starts_at, ends_at, price)
+				VALUES (?, ?, ?, ?, '2025-03-04 10:00+01', '2025-03-04 10:45+01', 45.00) RETURNING id""",
+				Long.class, Fixture.GLOW, Fixture.GLOW_CUSTOMER, Fixture.GLOW_STAFF, Fixture.GLOW_HAIRCUT);
+		AuthenticatedUser superAdmin = new AuthenticatedUser(new User(1L, "Sam", "Root", Role.SUPER_ADMIN, null));
+		TransactionTemplate tx = new TransactionTemplate(transactionManager);
+		CountDownLatch firstHasCancelled = new CountDownLatch(1);
+
+		CompletableFuture<Void> first = CompletableFuture.runAsync(() -> tx.executeWithoutResult(status -> {
+			appointmentService.changeStatus(Fixture.GLOW, id, AppointmentStatus.CANCELLED, superAdmin);
+			firstHasCancelled.countDown();
+			try {
+				Thread.sleep(500);
+			} catch (InterruptedException ex) {
+				throw new IllegalStateException(ex);
+			}
+		}));
+		firstHasCancelled.await();
+		CompletableFuture<Void> second = CompletableFuture.runAsync(() ->
+				appointmentService.changeStatus(Fixture.GLOW, id, AppointmentStatus.COMPLETED, superAdmin));
+
+		first.get();
+		assertThatThrownBy(second::get).hasRootCauseMessage("A CANCELLED appointment can't become COMPLETED.");
+		assertThat(jdbcTemplate.queryForObject("SELECT status FROM appointments WHERE id = ?", String.class, id))
+				.isEqualTo("CANCELLED");
 	}
 
 	private static OpeningInterval mondayFrom(int hour)

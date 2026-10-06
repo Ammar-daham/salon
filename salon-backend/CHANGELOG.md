@@ -20,6 +20,33 @@ version. The version lives in [`gradle.properties`](gradle.properties); each rel
   decimals (DB-08).
 
 ### Added
+- Appointments at `/api/v1/businesses/{businessId}/appointments` (book, list, get, replace). A booking
+  names a `customer_id`, `staff_id` and `service_id`, a `starts_at` as `"yyyy-MM-ddTHH:mm"` on the
+  salon's clock, and optional `notes`. The service sets `ends_at` and the `price`; changing the
+  service's price or length later leaves booked appointments alone, and so does moving one, unless
+  its service changes. `POST` and `PUT` return the appointment as stored (DB-14).
+- An appointment reads back with `customer` and `staff` (`id`, `first_name`, `last_name`), `service`
+  (`id`, `name`), `starts_at`, `ends_at`, `status`, `price` (in the salon's `currency`), `notes`,
+  `created_at` and `updated_at`. The names stay readable after the customer,
+  staff member or service is removed (DB-13, DB-14).
+- `PUT .../appointments/{appointmentId}/status` with `{"status": "..."}` moves an appointment along
+  `BOOKED` → `CONFIRMED` → `COMPLETED` / `CANCELLED` / `NO_SHOW` and returns it. Confirming is
+  optional, the last three are final, and an appointment can only be `COMPLETED` or a `NO_SHOW` once
+  it has started. Asking for the current status changes nothing; any other move is a 409. Only a
+  `BOOKED` or `CONFIRMED` appointment can be changed with `PUT`. There is no `DELETE`: cancelling
+  keeps the history (DB-14).
+- `GET .../appointments` lists them by start time. `from` and `to` (`"yyyy-MM-dd"` on the salon's
+  clock, both included), `staff_id` and `customer_id` each narrow the list, and are all optional
+  (DB-14).
+- A booking needs one of the salon's own current customers, an active staff member who performs the
+  service, and an active service; otherwise 400. A staff member can't be booked twice at once (409).
+  ADMIN and EMPLOYEE of the salon can see, book and change any of its appointments; SUPER_ADMIN can
+  anywhere (DB-14).
+- Migration V12: `deleted_at` on services, staff and customers. A user can have one current staff
+  record, and an account one current customer record per salon; removed ones don't count (DB-13).
+  An `appointments` table whose foreign keys only accept the salon's own customer, staff member and
+  service, and whose exclusion constraint refuses to double-book a staff member; cancelled and missed
+  appointments free their time (DB-14).
 - The services each staff member performs, at `/api/v1/businesses/{businessId}/staff/{staffId}/services`.
   `GET` lists them for anyone who can see the salon; `PUT {"service_ids": [...]}` replaces them and
   returns the list. Only the salon's own services can be assigned. Only the salon's ADMIN or a
@@ -70,6 +97,8 @@ version. The version lives in [`gradle.properties`](gradle.properties); each rel
   already has a negative price.
 
 ### Fixed
+- A path or query parameter of the wrong type, e.g. `/businesses/glow`, is a 400 naming the parameter
+  instead of a 500.
 - Leaving `marketing_consent` out of a customer request means no consent; it used to fail as
   "Malformed JSON request body".
 - `users.updated_at` is set on every update, and user responses now include it (BE-12).
@@ -78,6 +107,13 @@ version. The version lives in [`gradle.properties`](gradle.properties); each rel
   still can't list the same value twice (DB-05).
 
 ### Changed
+- Deleting a service, staff member or customer keeps the row, stamped with `deleted_at`, so
+  appointments can keep pointing at it. It is gone from every read as before, and reading, editing or
+  deleting it again is a 404. Someone taken off the staff can be added again, as a new staff record.
+  Deleting a salon still deletes everything that belongs to it (DB-13).
+- Removing a staff member, service or customer that still has upcoming appointments is refused with
+  409 until those are cancelled or moved. Deleting a user whose staff record is on any appointment is
+  refused with 409 (DB-13).
 - Migration V4: `users.business_id` is a foreign key to `businesses`, and a `set_updated_at()`
   trigger maintains `updated_at` on every table (DB-01, DB-11).
 - Migration V5: every address and contact must have exactly one owner and is deleted with it; contact
