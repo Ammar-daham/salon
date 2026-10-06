@@ -78,6 +78,11 @@ class AppointmentControllerTest extends IntegrationTest
 		return Long.parseLong(location.substring(location.lastIndexOf('/') + 1));
 	}
 
+	private ResultActions setStatus(String location, MockHttpSession session, String status) throws Exception
+	{
+		return send(put(location + "/status"), session, "{\"status\": \"" + status + "\"}");
+	}
+
 	@Test
 	void anEmployeeBooksAnAppointmentOnTheSalonsClock() throws Exception
 	{
@@ -222,6 +227,7 @@ class AppointmentControllerTest extends IntegrationTest
 			mvc.perform(get(location).session(session)).andExpect(status().isForbidden());
 			send(post(APPOINTMENTS), session, haircut(nextWeek(12, 0))).andExpect(status().isForbidden());
 			send(put(location), session, haircut(nextWeek(12, 0))).andExpect(status().isForbidden());
+			setStatus(location, session, "CANCELLED").andExpect(status().isForbidden());
 		}
 		mvc.perform(get(APPOINTMENTS)).andExpect(status().isUnauthorized());
 	}
@@ -296,10 +302,10 @@ class AppointmentControllerTest extends IntegrationTest
 	}
 
 	@Test
-	void aStaffMemberServiceOrCustomerWithUpcomingAppointmentsCannotBeRemoved() throws Exception
+	void aStaffMemberServiceOrCustomerCanOnlyBeRemovedOnceTheirUpcomingAppointmentsAreCancelled() throws Exception
 	{
 		MockHttpSession admin = loginAs(Fixture.GLOW_ADMIN);
-		book(admin, haircut(nextWeek(10, 0)));
+		String location = book(admin, haircut(nextWeek(10, 0)));
 
 		mvc.perform(delete(GLOW + "/staff/" + Fixture.GLOW_STAFF).session(admin))
 				.andExpect(status().isConflict())
@@ -309,6 +315,79 @@ class AppointmentControllerTest extends IntegrationTest
 				.andExpect(status().isConflict());
 		mvc.perform(delete(GLOW + "/customers/" + Fixture.GLOW_CUSTOMER).session(admin))
 				.andExpect(status().isConflict());
+
+		setStatus(location, admin, "CANCELLED").andExpect(status().isOk());
+
+		mvc.perform(delete(GLOW + "/staff/" + Fixture.GLOW_STAFF).session(admin)).andExpect(status().isOk());
+		mvc.perform(delete(GLOW + "/services/" + Fixture.GLOW_HAIRCUT).session(admin)).andExpect(status().isOk());
+		mvc.perform(delete(GLOW + "/customers/" + Fixture.GLOW_CUSTOMER).session(admin)).andExpect(status().isOk());
+	}
+
+	@Test
+	void anAppointmentIsConfirmedThenCompletedOnceItHasStartedAndThenItIsFinal() throws Exception
+	{
+		MockHttpSession mia = loginAs(Fixture.GLOW_EMPLOYEE);
+		String location = book(mia, haircut("2025-03-04T10:00"));
+
+		setStatus(location, mia, "CONFIRMED")
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.status").value("CONFIRMED"));
+		setStatus(location, mia, "COMPLETED")
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.status").value("COMPLETED"));
+
+		setStatus(location, mia, "CANCELLED")
+				.andExpect(status().isConflict())
+				.andExpect(jsonPath("$.message").value("A COMPLETED appointment can't become CANCELLED."));
+		send(put(location), mia, haircut("2025-03-04T11:00"))
+				.andExpect(status().isConflict())
+				.andExpect(jsonPath("$.message").value("A COMPLETED appointment can't be changed."));
+		// Saying it again changes nothing.
+		setStatus(location, mia, "COMPLETED").andExpect(status().isOk());
+		mvc.perform(get(location).session(mia))
+				.andExpect(jsonPath("$.status").value("COMPLETED"))
+				.andExpect(jsonPath("$.starts_at").value("2025-03-04T10:00"));
+	}
+
+	@Test
+	void anAppointmentCannotBeCompletedOrMissedBeforeItStartsNorGoBackToBooked() throws Exception
+	{
+		MockHttpSession admin = loginAs(Fixture.GLOW_ADMIN);
+		String location = book(admin, haircut(nextWeek(10, 0)));
+
+		setStatus(location, admin, "COMPLETED")
+				.andExpect(status().isConflict())
+				.andExpect(jsonPath("$.message").value("An appointment can't be marked COMPLETED before it starts."));
+		setStatus(location, admin, "NO_SHOW").andExpect(status().isConflict());
+
+		setStatus(location, admin, "CONFIRMED").andExpect(status().isOk());
+		setStatus(location, admin, "BOOKED")
+				.andExpect(status().isConflict())
+				.andExpect(jsonPath("$.message").value("A CONFIRMED appointment can't become BOOKED."));
+		// Still open, so it can still be moved.
+		send(put(location), admin, haircut(nextWeek(11, 0)))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.status").value("CONFIRMED"));
+
+		setStatus(location, admin, "LATE").andExpect(status().isBadRequest());
+		send(put(location + "/status"), admin, "{}").andExpect(status().isBadRequest());
+	}
+
+	@Test
+	void aCancelledOrMissedAppointmentFreesItsTime() throws Exception
+	{
+		MockHttpSession admin = loginAs(Fixture.GLOW_ADMIN);
+
+		String cancelled = book(admin, haircut(nextWeek(10, 0)));
+		setStatus(cancelled, admin, "CANCELLED").andExpect(status().isOk());
+		book(admin, haircut(nextWeek(10, 0)));
+
+		// Olivia didn't come, so Mia took a walk-in a quarter of an hour later.
+		String missed = book(admin, haircut("2025-03-04T10:00"));
+		setStatus(missed, admin, "NO_SHOW").andExpect(status().isOk());
+		book(admin, haircut("2025-03-04T10:15"));
+
+		mvc.perform(get(APPOINTMENTS).session(admin)).andExpect(jsonPath("$", hasSize(4)));
 	}
 
 	@Test

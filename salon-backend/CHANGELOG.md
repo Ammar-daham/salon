@@ -26,9 +26,15 @@ version. The version lives in [`gradle.properties`](gradle.properties); each rel
   service's price or length later leaves booked appointments alone, and so does moving one, unless
   its service changes. `POST` and `PUT` return the appointment as stored (DB-14).
 - An appointment reads back with `customer` and `staff` (`id`, `first_name`, `last_name`), `service`
-  (`id`, `name`), `starts_at`, `ends_at`, `status` (`BOOKED` for now), `price` (in the salon's
-  `currency`), `notes`, `created_at` and `updated_at`. The names stay readable after the customer,
+  (`id`, `name`), `starts_at`, `ends_at`, `status`, `price` (in the salon's `currency`), `notes`,
+  `created_at` and `updated_at`. The names stay readable after the customer,
   staff member or service is removed (DB-13, DB-14).
+- `PUT .../appointments/{appointmentId}/status` with `{"status": "..."}` moves an appointment along
+  `BOOKED` → `CONFIRMED` → `COMPLETED` / `CANCELLED` / `NO_SHOW` and returns it. Confirming is
+  optional, the last three are final, and an appointment can only be `COMPLETED` or a `NO_SHOW` once
+  it has started. Asking for the current status changes nothing; any other move is a 409. Only a
+  `BOOKED` or `CONFIRMED` appointment can be changed with `PUT`. There is no `DELETE`: cancelling
+  keeps the history (DB-14).
 - `GET .../appointments` lists them by start time. `from` and `to` (`"yyyy-MM-dd"` on the salon's
   clock, both included), `staff_id` and `customer_id` each narrow the list, and are all optional
   (DB-14).

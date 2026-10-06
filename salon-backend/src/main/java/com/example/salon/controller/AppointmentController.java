@@ -1,6 +1,7 @@
 package com.example.salon.controller;
 
 import com.example.salon.dto.AppointmentRequest;
+import com.example.salon.dto.AppointmentStatusRequest;
 import com.example.salon.model.Appointment;
 import com.example.salon.security.AuthenticatedUser;
 import com.example.salon.service.AppointmentService;
@@ -67,5 +68,13 @@ public class AppointmentController
 			@Valid @RequestBody AppointmentRequest request, @AuthenticationPrincipal AuthenticatedUser principal)
 	{
 		return appointmentService.updateAppointment(businessId, appointmentId, request.toBooking(), principal);
+	}
+
+	/** Confirms, completes, cancels or marks a no-show, and returns the appointment. There is no DELETE: cancel it. */
+	@PutMapping("/{appointmentId}/status")
+	public Appointment changeStatus(@PathVariable long businessId, @PathVariable long appointmentId,
+			@Valid @RequestBody AppointmentStatusRequest request, @AuthenticationPrincipal AuthenticatedUser principal)
+	{
+		return appointmentService.changeStatus(businessId, appointmentId, request.status(), principal);
 	}
 }

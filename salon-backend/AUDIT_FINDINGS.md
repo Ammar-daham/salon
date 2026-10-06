@@ -443,9 +443,12 @@ for one customer, with `business_id` in every foreign key and a `btree_gist` exc
 `tstzrange(starts_at, ends_at)` per staff member that ignores cancelled and missed appointments, so the
 database itself refuses a double booking. The price is the service's when booked, and the times are read and
 written on the salon's clock like time off. A visit with several services is several appointments, so there is
-no `appointment_services`. Guarded by `AppointmentControllerTest`, `theDatabaseRefusesToDoubleBookAStaffMember`,
-`anAppointmentCanOnlyPointAtItsOwnSalonsCustomerStaffAndService`, `whatAnAppointmentPointsAtCanOnlyBeSoftDeleted`
-and `deletingASalonDeletesItsAppointments`. Availability and `audit_log` are still to come.)*
+no `appointment_services`. `PUT .../status` moves an appointment along `BOOKED → CONFIRMED → COMPLETED / CANCELLED /
+NO_SHOW` (confirming is optional, the last three are final); only a booked or confirmed one can be changed, none is
+ever deleted, and two changes to one appointment take turns on a row lock. Guarded by `AppointmentControllerTest`,
+`theDatabaseRefusesToDoubleBookAStaffMember`, `anAppointmentCanOnlyPointAtItsOwnSalonsCustomerStaffAndService`,
+`whatAnAppointmentPointsAtCanOnlyBeSoftDeleted`, `deletingASalonDeletesItsAppointments` and
+`concurrentStatusChangesToOneAppointmentRunOneAfterTheOther`. Availability and `audit_log` are still to come.)*
 
 ## 6. MVP roadmap (both apps)
 

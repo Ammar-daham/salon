@@ -7,6 +7,7 @@ import com.example.salon.dao.StaffDao;
 import com.example.salon.exception.BaseException;
 import com.example.salon.exception.ErrorCode;
 import com.example.salon.model.Appointment;
+import com.example.salon.model.AppointmentStatus;
 import com.example.salon.model.Booking;
 import com.example.salon.model.SalonService;
 import com.example.salon.model.Staff;
@@ -21,6 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.util.List;
@@ -30,6 +32,8 @@ import java.util.List;
  * appointments, as a front desk does. A booking must name the salon's own current customer, an active staff
  * member and an active service they perform, and the staff member can't be booked twice at once (the database
  * refuses that). Whether the time suits opening hours, shifts and time off is left to availability.
+ *
+ * An appointment is never deleted: it is cancelled, and stays in the history like every other one that has ended.
  */
 @Service
 public class AppointmentService
@@ -102,7 +106,10 @@ public class AppointmentService
     {
         AccessControl.requireStaffOfBusiness(caller, businessId);
         ZoneId zone = zoneOf(businessId);
-        Appointment existing = findAppointment(businessId, appointmentId, zone);
+        Appointment existing = lockAndFind(businessId, appointmentId, zone);
+        if (!existing.status().isOpen())
+            throw new BaseException("A " + existing.status() + " appointment can't be changed.",
+                    ErrorCode.DUPLICATE_RESOURCE);
 
         boolean newStaff = booking.staffId() != existing.staff().id();
         boolean newService = booking.serviceId() != existing.service().id();
@@ -124,9 +131,43 @@ public class AppointmentService
         return findAppointment(businessId, appointmentId, zone);
     }
 
+    /**
+     * Moves it along BOOKED → CONFIRMED → COMPLETED / CANCELLED / NO_SHOW. Asking for the status it already has
+     * changes nothing. It can only be COMPLETED or a NO_SHOW once it has started.
+     */
+    @Transactional
+    public Appointment changeStatus(long businessId, long appointmentId, AppointmentStatus status,
+            AuthenticatedUser caller)
+    {
+        AccessControl.requireStaffOfBusiness(caller, businessId);
+        ZoneId zone = zoneOf(businessId);
+        Appointment existing = lockAndFind(businessId, appointmentId, zone);
+        if (status == existing.status())
+            return existing;
+        if (!existing.status().canBecome(status))
+            throw new BaseException("A " + existing.status() + " appointment can't become " + status + ".",
+                    ErrorCode.DUPLICATE_RESOURCE);
+        boolean happened = status == AppointmentStatus.COMPLETED || status == AppointmentStatus.NO_SHOW;
+        if (happened && existing.startsAt().isAfter(LocalDateTime.now(zone)))
+            throw new BaseException("An appointment can't be marked " + status + " before it starts.",
+                    ErrorCode.DUPLICATE_RESOURCE);
+
+        appointmentDao.updateStatus(businessId, appointmentId, status);
+        log.info("Appointment {} in business {} went from {} to {}", appointmentId, businessId, existing.status(),
+                status);
+        return findAppointment(businessId, appointmentId, zone);
+    }
+
     private ZoneId zoneOf(long businessId)
     {
         return ZoneId.of(businessService.getBusinessById((int) businessId).getTimezone());
+    }
+
+    /** Locks it first, so of two changes at once the second sees what the first did, e.g. that it was cancelled. */
+    private Appointment lockAndFind(long businessId, long appointmentId, ZoneId zone)
+    {
+        appointmentDao.lockAppointment(businessId, appointmentId);
+        return findAppointment(businessId, appointmentId, zone);
     }
 
     private Appointment findAppointment(long businessId, long appointmentId, ZoneId zone)

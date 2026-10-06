@@ -1,6 +1,7 @@
 package com.example.salon.dao;
 
 import com.example.salon.model.Appointment;
+import com.example.salon.model.AppointmentStatus;
 import com.example.salon.model.Booking;
 
 import java.math.BigDecimal;
@@ -19,9 +20,14 @@ public interface AppointmentDao {
 
     Appointment getAppointmentById(long businessId, long appointmentId, ZoneId zone);
 
+    /** Call inside a transaction: holds the row until it ends, so changes to one appointment run one at a time. */
+    void lockAppointment(long businessId, long appointmentId);
+
     /** A null durationMinutes and price keep the stored length and price. */
     int updateAppointment(long businessId, long appointmentId, Booking booking, Integer durationMinutes,
             BigDecimal price, ZoneId zone);
+
+    int updateStatus(long businessId, long appointmentId, AppointmentStatus status);
 
     /** Upcoming: BOOKED or CONFIRMED, and not over yet. */
     boolean hasUpcomingAppointmentsForStaff(long staffId);

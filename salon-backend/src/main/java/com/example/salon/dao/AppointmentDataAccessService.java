@@ -91,6 +91,13 @@ public class AppointmentDataAccessService implements AppointmentDao
     }
 
     @Override
+    public void lockAppointment(long businessId, long appointmentId)
+    {
+        jdbcTemplate.queryForList("SELECT id FROM appointments WHERE business_id = ? AND id = ? FOR NO KEY UPDATE",
+                Long.class, businessId, appointmentId);
+    }
+
+    @Override
     public int updateAppointment(long businessId, long appointmentId, Booking booking, Integer durationMinutes,
             BigDecimal price, ZoneId zone)
     {
@@ -117,6 +124,13 @@ public class AppointmentDataAccessService implements AppointmentDao
                 businessId,
                 appointmentId
         );
+    }
+
+    @Override
+    public int updateStatus(long businessId, long appointmentId, AppointmentStatus status)
+    {
+        return jdbcTemplate.update("UPDATE appointments SET status = ? WHERE business_id = ? AND id = ?",
+                status.name(), businessId, appointmentId);
     }
 
     @Override
