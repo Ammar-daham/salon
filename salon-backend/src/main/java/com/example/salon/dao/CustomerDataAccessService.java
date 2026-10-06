@@ -81,7 +81,7 @@ public class CustomerDataAccessService implements CustomerDao {
 
     @Override
     public int deleteCustomerById(long businessId, long customerId) {
-        // Soft delete (DB-13): appointments keep pointing at the customer.
+        // Soft delete: appointments keep pointing at the customer.
         return jdbcTemplate.update(
                 "UPDATE customers SET deleted_at = now() WHERE business_id = ? AND id = ? AND deleted_at IS NULL",
                 businessId, customerId);
