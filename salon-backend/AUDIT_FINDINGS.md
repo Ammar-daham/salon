@@ -412,7 +412,7 @@ record are unique among current rows only, so someone can be taken on again. Bus
 delete: a deleted salon takes its staff, services, customers and appointments with it, as V8 already
 did for customers. Guarded by `SoftDeleteTest`.)*
 
-<a id="db-14"></a>**DB-14 — Booking tables don't exist.** Phase 2 needs `business_hours`,
+<a id="db-14"></a>✅ **DB-14 — Booking tables don't exist.** Phase 2 needs `business_hours`,
 `staff_schedules`, `staff_time_off`, `staff_services`, `appointments` (customer, staff, service,
 `start_at`/`end_at`, status, price snapshot, notes) with an exclusion constraint on
 `tstzrange(start_at, end_at)` per staff member so the database itself prevents double-booking,
@@ -421,7 +421,7 @@ did for customers. Guarded by `SoftDeleteTest`.)*
 [`feature/salon-backend-staff-schedules`](../VERSION_CONTROL_GUIDE.md#br-2-2),
 [`feature/salon-backend-appointments`](../VERSION_CONTROL_GUIDE.md#br-2-3),
 [`feature/salon-backend-availability`](../VERSION_CONTROL_GUIDE.md#br-2-4)**
-*(In progress. `business_hours` landed in migration V10 on
+*(fixed over four branches. `business_hours` landed in migration V10 on
 [`feature/salon-backend-business-hours`](../VERSION_CONTROL_GUIDE.md#br-2-1) (#36): one row per opening
 interval, an ISO weekday and wall-clock times in the salon's `timezone`, with CHECKs and a `btree_gist`
 exclusion constraint so a day's intervals can't overlap. `GET`/`PUT /businesses/{id}/hours` read and
@@ -448,7 +448,13 @@ NO_SHOW` (confirming is optional, the last three are final); only a booked or co
 ever deleted, and two changes to one appointment take turns on a row lock. Guarded by `AppointmentControllerTest`,
 `theDatabaseRefusesToDoubleBookAStaffMember`, `anAppointmentCanOnlyPointAtItsOwnSalonsCustomerStaffAndService`,
 `whatAnAppointmentPointsAtCanOnlyBeSoftDeleted`, `deletingASalonDeletesItsAppointments` and
-`concurrentStatusChangesToOneAppointmentRunOneAfterTheOther`. Availability and `audit_log` are still to come.)*
+`concurrentStatusChangesToOneAppointmentRunOneAfterTheOther`.
+Availability followed on [`feature/salon-backend-availability`](../VERSION_CONTROL_GUIDE.md#br-2-4), with no
+schema change: `GET /businesses/{id}/services/{serviceId}/availability` lists each active performer's open slots,
+inside opening hours and their shift, clear of time off and of appointments that still hold time, on a
+quarter-hour grid of the salon's clock. It is advice for the booking form; booking still only refuses a
+double-booking. `audit_log` is the one table not built: BE-42's event logs record every create, update and delete
+for now. Guarded by `AvailabilityControllerTest`.)*
 
 ## 6. MVP roadmap (both apps)
 
