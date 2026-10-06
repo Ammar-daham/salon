@@ -20,6 +20,8 @@ version. The version lives in [`gradle.properties`](gradle.properties); each rel
   decimals (DB-08).
 
 ### Added
+- Migration V12: `deleted_at` on services, staff and customers. A user can have one current staff
+  record, and an account one current customer record per salon; removed ones don't count (DB-13).
 - The services each staff member performs, at `/api/v1/businesses/{businessId}/staff/{staffId}/services`.
   `GET` lists them for anyone who can see the salon; `PUT {"service_ids": [...]}` replaces them and
   returns the list. Only the salon's own services can be assigned. Only the salon's ADMIN or a
@@ -78,6 +80,10 @@ version. The version lives in [`gradle.properties`](gradle.properties); each rel
   still can't list the same value twice (DB-05).
 
 ### Changed
+- Deleting a service, staff member or customer keeps the row, stamped with `deleted_at`, so
+  appointments can keep pointing at it. It is gone from every read as before, and reading, editing or
+  deleting it again is a 404. Someone taken off the staff can be added again, as a new staff record.
+  Deleting a salon still deletes everything that belongs to it (DB-13).
 - Migration V4: `users.business_id` is a foreign key to `businesses`, and a `set_updated_at()`
   trigger maintains `updated_at` on every table (DB-01, DB-11).
 - Migration V5: every address and contact must have exactly one owner and is deleted with it; contact

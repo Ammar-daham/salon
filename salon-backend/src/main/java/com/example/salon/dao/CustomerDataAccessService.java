@@ -48,13 +48,14 @@ public class CustomerDataAccessService implements CustomerDao {
 
     @Override
     public List<Customer> getCustomersForBusiness(long businessId) {
-        String sql = "SELECT " + COLUMNS + " FROM customers WHERE business_id = ? ORDER BY last_name, first_name, id";
+        String sql = "SELECT " + COLUMNS + " FROM customers WHERE business_id = ? AND deleted_at IS NULL"
+                + " ORDER BY last_name, first_name, id";
         return jdbcTemplate.query(sql, (rs, i) -> mapRow(rs), businessId);
     }
 
     @Override
     public Customer getCustomerById(long businessId, long customerId) {
-        String sql = "SELECT " + COLUMNS + " FROM customers WHERE business_id = ? AND id = ?";
+        String sql = "SELECT " + COLUMNS + " FROM customers WHERE business_id = ? AND id = ? AND deleted_at IS NULL";
         return jdbcTemplate.queryForObject(sql, (rs, i) -> mapRow(rs), businessId, customerId);
     }
 
@@ -63,7 +64,7 @@ public class CustomerDataAccessService implements CustomerDao {
         String sql = """
                 UPDATE customers SET first_name = ?, last_name = ?,
                 email = ?, phone = ?, notes = ?, marketing_consent = ?
-                WHERE business_id = ? AND id = ?;
+                WHERE business_id = ? AND id = ? AND deleted_at IS NULL;
                 """;
         return jdbcTemplate.update(
                 sql,
@@ -80,7 +81,10 @@ public class CustomerDataAccessService implements CustomerDao {
 
     @Override
     public int deleteCustomerById(long businessId, long customerId) {
-        return jdbcTemplate.update("DELETE FROM customers WHERE business_id = ? AND id = ?", businessId, customerId);
+        // Soft delete (DB-13): appointments keep pointing at the customer.
+        return jdbcTemplate.update(
+                "UPDATE customers SET deleted_at = now() WHERE business_id = ? AND id = ? AND deleted_at IS NULL",
+                businessId, customerId);
     }
 
     private Customer mapRow(ResultSet rs) throws SQLException {
