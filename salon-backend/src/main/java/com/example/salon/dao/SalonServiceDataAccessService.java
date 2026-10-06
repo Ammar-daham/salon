@@ -11,17 +11,20 @@ import java.sql.Timestamp;
 import java.util.List;
 
 @Repository
-public class SalonServiceDataAccessService implements SalonServiceDao {
+public class SalonServiceDataAccessService implements SalonServiceDao 
+{
     private JdbcTemplate jdbcTemplate;
 
     @Autowired
-    public SalonServiceDataAccessService(JdbcTemplate jdbcTemplate) {
+    public SalonServiceDataAccessService(JdbcTemplate jdbcTemplate) 
+    {
         this.jdbcTemplate = jdbcTemplate;
     }
 
 
     @Override
-    public Long addService(Long businessId, SalonService service) {
+    public Long addService(Long businessId, SalonService service) 
+    {
         String sql = """
                 INSERT INTO services
                 (business_id, name, description,
@@ -43,7 +46,8 @@ public class SalonServiceDataAccessService implements SalonServiceDao {
     }
 
     @Override
-    public List<SalonService> getServicesForBusiness(Long businessId) {
+    public List<SalonService> getServicesForBusiness(Long businessId) 
+    {
         String sql = """
                 SELECT id, name, description,
                 duration_minutes, price, is_active,
@@ -56,7 +60,8 @@ public class SalonServiceDataAccessService implements SalonServiceDao {
     }
 
     @Override
-    public List<SalonService> getServicesForStaff(long staffId) {
+    public List<SalonService> getServicesForStaff(long staffId) 
+    {
         String sql = """
                 SELECT s.id, s.name, s.description,
                 s.duration_minutes, s.price, s.is_active,
@@ -71,7 +76,8 @@ public class SalonServiceDataAccessService implements SalonServiceDao {
     }
 
     @Override
-    public SalonService getServiceById(int businessId, int serviceId) {
+    public SalonService getServiceById(int businessId, int serviceId) 
+    {
         String sql = """
                 SELECT id, name, description,
                 duration_minutes, price, is_active,
@@ -86,7 +92,8 @@ public class SalonServiceDataAccessService implements SalonServiceDao {
 
 
     @Override
-    public int updateServiceById(long id, SalonService service) {
+    public int updateServiceById(long id, SalonService service) 
+    {
         String sql = """
                 UPDATE services SET name = ?,
                 description = ?, duration_minutes = ?,
@@ -106,12 +113,14 @@ public class SalonServiceDataAccessService implements SalonServiceDao {
     }
 
     @Override
-    public int deleteServiceById(long id) {
+    public int deleteServiceById(long id) 
+    {
         String sql = "DELETE FROM services WHERE id = ?";
         return jdbcTemplate.update(sql, id);
     }
 
-    private SalonService mapRow(ResultSet rs) throws SQLException {
+    private SalonService mapRow(ResultSet rs) throws SQLException 
+    {
         Timestamp updatedAt = rs.getTimestamp("updated_at");
         return new SalonService(
                 rs.getLong("id"),
