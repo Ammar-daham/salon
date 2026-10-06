@@ -436,7 +436,16 @@ reads and writes on the salon's clock, with an exclusion constraint against over
 `StaffScheduleControllerTest`, the staff-services tests in `StaffControllerTest`,
 `aStaffMemberCanOnlyBeLinkedToTheirOwnSalonsServices`,
 `theDatabaseRejectsBackwardsOrOverlappingShiftsAndTimeOff` and
-`removingAStaffMemberOrAServiceRemovesWhatHungOffIt`. Appointments and availability are still to come.)*
+`removingAStaffMemberOrAServiceRemovesWhatHungOffIt`.
+`appointments` followed in migration V12 on
+[`feature/salon-backend-appointments`](../VERSION_CONTROL_GUIDE.md#br-2-3): one service by one staff member
+for one customer, with `business_id` in every foreign key and a `btree_gist` exclusion constraint on
+`tstzrange(starts_at, ends_at)` per staff member that ignores cancelled and missed appointments, so the
+database itself refuses a double booking. The price is the service's when booked, and the times are read and
+written on the salon's clock like time off. A visit with several services is several appointments, so there is
+no `appointment_services`. Guarded by `AppointmentControllerTest`, `theDatabaseRefusesToDoubleBookAStaffMember`,
+`anAppointmentCanOnlyPointAtItsOwnSalonsCustomerStaffAndService`, `whatAnAppointmentPointsAtCanOnlyBeSoftDeleted`
+and `deletingASalonDeletesItsAppointments`. Availability and `audit_log` are still to come.)*
 
 ## 6. MVP roadmap (both apps)
 

@@ -94,6 +94,9 @@ public class SecurityConfig
 						.requestMatchers(HttpMethod.POST, "/api/v1/businesses").hasRole("SUPER_ADMIN")
 						// Employees add customers too (front desk). CustomerService scopes it to their own salon.
 						.requestMatchers(HttpMethod.POST, "/api/v1/businesses/*/customers").authenticated()
+						// Employees book and change appointments too. AppointmentService scopes it to their own salon.
+						.requestMatchers(HttpMethod.POST, "/api/v1/businesses/*/appointments").authenticated()
+						.requestMatchers(HttpMethod.PUT, "/api/v1/businesses/*/appointments/**").authenticated()
 						.requestMatchers(HttpMethod.POST, "/api/v1/**").hasAnyRole("ADMIN", "SUPER_ADMIN")
 						.requestMatchers(HttpMethod.PUT, "/api/v1/**").hasAnyRole("ADMIN", "SUPER_ADMIN")
 						.requestMatchers(HttpMethod.DELETE, "/api/v1/**").hasAnyRole("ADMIN", "SUPER_ADMIN")

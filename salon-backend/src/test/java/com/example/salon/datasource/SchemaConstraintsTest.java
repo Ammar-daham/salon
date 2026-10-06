@@ -163,6 +163,102 @@ class SchemaConstraintsTest extends IntegrationTest
 		assertThat(jdbcTemplate.queryForObject("SELECT count(*) FROM staff_time_off", Integer.class)).isZero();
 	}
 
+	private static final String APPOINTMENT = """
+			INSERT INTO appointments (business_id, customer_id, staff_id, service_id, starts_at, ends_at, status, price)
+			VALUES (?, ?, ?, ?, ?::timestamptz, ?::timestamptz, ?, 45.00)
+			""";
+
+	@Test
+	void theDatabaseRefusesToDoubleBookAStaffMember()
+	{
+		// DB-14: Mia has a haircut 10:00-10:45.
+		jdbcTemplate.update(APPOINTMENT, Fixture.GLOW, Fixture.GLOW_CUSTOMER, Fixture.GLOW_STAFF, Fixture.GLOW_HAIRCUT,
+				"2027-03-02 10:00+01", "2027-03-02 10:45+01", "BOOKED");
+
+		assertThatThrownBy(() -> jdbcTemplate.update(APPOINTMENT, Fixture.GLOW, Fixture.GLOW_CUSTOMER, Fixture.GLOW_STAFF,
+				Fixture.GLOW_HAIRCUT, "2027-03-02 10:30+01", "2027-03-02 11:15+01", "CONFIRMED"))
+				.isInstanceOf(DataIntegrityViolationException.class)
+				.hasMessageContaining("appointments_no_double_booking");
+		assertThatThrownBy(() -> jdbcTemplate.update(APPOINTMENT, Fixture.GLOW, Fixture.GLOW_CUSTOMER, Fixture.GLOW_STAFF,
+				Fixture.GLOW_HAIRCUT, "2027-03-02 12:00+01", "2027-03-02 11:00+01", "BOOKED"))
+				.isInstanceOf(DataIntegrityViolationException.class)
+				.hasMessageContaining("appointments_order_check");
+		assertThatThrownBy(() -> jdbcTemplate.update(APPOINTMENT, Fixture.GLOW, Fixture.GLOW_CUSTOMER, Fixture.GLOW_STAFF,
+				Fixture.GLOW_HAIRCUT, "2027-03-02 14:00+01", "2027-03-02 14:45+01", "LATE"))
+				.isInstanceOf(DataIntegrityViolationException.class)
+				.hasMessageContaining("appointments_status_check");
+
+		// Back to back is fine, and a cancelled or missed appointment doesn't hold its time.
+		jdbcTemplate.update(APPOINTMENT, Fixture.GLOW, Fixture.GLOW_CUSTOMER, Fixture.GLOW_STAFF, Fixture.GLOW_HAIRCUT,
+				"2027-03-02 10:45+01", "2027-03-02 11:30+01", "BOOKED");
+		jdbcTemplate.update(APPOINTMENT, Fixture.GLOW, Fixture.GLOW_CUSTOMER, Fixture.GLOW_STAFF, Fixture.GLOW_HAIRCUT,
+				"2027-03-02 10:00+01", "2027-03-02 10:45+01", "CANCELLED");
+		jdbcTemplate.update(APPOINTMENT, Fixture.GLOW, Fixture.GLOW_CUSTOMER, Fixture.GLOW_STAFF, Fixture.GLOW_HAIRCUT,
+				"2027-03-02 10:00+01", "2027-03-02 10:45+01", "NO_SHOW");
+	}
+
+	@Test
+	void anAppointmentCanOnlyPointAtItsOwnSalonsCustomerStaffAndService()
+	{
+		// DB-14: business_id is part of every foreign key. The customer, staff member and fade are Urban's.
+		String at = "2027-03-02 10:00+01";
+		String until = "2027-03-02 10:45+01";
+
+		assertThatThrownBy(() -> jdbcTemplate.update(APPOINTMENT, Fixture.GLOW, Fixture.URBAN_CUSTOMER, Fixture.GLOW_STAFF,
+				Fixture.GLOW_HAIRCUT, at, until, "BOOKED"))
+				.isInstanceOf(DataIntegrityViolationException.class)
+				.hasMessageContaining("fk_appointments_customer");
+		assertThatThrownBy(() -> jdbcTemplate.update(APPOINTMENT, Fixture.GLOW, Fixture.GLOW_CUSTOMER, Fixture.URBAN_STAFF,
+				Fixture.GLOW_HAIRCUT, at, until, "BOOKED"))
+				.isInstanceOf(DataIntegrityViolationException.class)
+				.hasMessageContaining("fk_appointments_staff");
+		assertThatThrownBy(() -> jdbcTemplate.update(APPOINTMENT, Fixture.GLOW, Fixture.GLOW_CUSTOMER, Fixture.GLOW_STAFF,
+				Fixture.URBAN_FADE, at, until, "BOOKED"))
+				.isInstanceOf(DataIntegrityViolationException.class)
+				.hasMessageContaining("fk_appointments_service");
+	}
+
+	@Test
+	void whatAnAppointmentPointsAtCanOnlyBeSoftDeleted()
+	{
+		// DB-13: the API stamps deleted_at; deleting the row outright is refused while an appointment needs it.
+		jdbcTemplate.update(APPOINTMENT, Fixture.GLOW, Fixture.GLOW_CUSTOMER, Fixture.GLOW_STAFF, Fixture.GLOW_HAIRCUT,
+				"2025-03-04 10:00+01", "2025-03-04 10:45+01", "COMPLETED");
+
+		assertThatThrownBy(() -> jdbcTemplate.update("DELETE FROM customers WHERE id = ?", Fixture.GLOW_CUSTOMER))
+				.isInstanceOf(DataIntegrityViolationException.class)
+				.hasMessageContaining("fk_appointments_customer");
+		assertThatThrownBy(() -> jdbcTemplate.update("DELETE FROM staff WHERE id = ?", Fixture.GLOW_STAFF))
+				.isInstanceOf(DataIntegrityViolationException.class)
+				.hasMessageContaining("fk_appointments_staff");
+		assertThatThrownBy(() -> jdbcTemplate.update("DELETE FROM services WHERE id = ?", Fixture.GLOW_HAIRCUT))
+				.isInstanceOf(DataIntegrityViolationException.class)
+				.hasMessageContaining("fk_appointments_service");
+	}
+
+	@Test
+	void deletingASalonDeletesItsAppointments()
+	{
+		// Serenity has no staff of its own (BE-17), so Glow's admin works there for this test.
+		long service = jdbcTemplate.queryForObject("""
+				INSERT INTO services (business_id, name, duration_minutes, price) VALUES (?, 'Massage', 60, 80.00)
+				RETURNING id""", Long.class, Fixture.SERENITY_PENDING);
+		long customer = jdbcTemplate.queryForObject("""
+				INSERT INTO customers (business_id, first_name, last_name) VALUES (?, 'Ada', 'Client') RETURNING id""",
+				Long.class, Fixture.SERENITY_PENDING);
+		long staff = jdbcTemplate.queryForObject("""
+				INSERT INTO staff (user_id, business_id, title, is_active) VALUES (?, ?, 'Therapist', true) RETURNING id""",
+				Long.class, Fixture.GLOW_ADMIN_ID, Fixture.SERENITY_PENDING);
+		jdbcTemplate.update(APPOINTMENT, Fixture.SERENITY_PENDING, customer, staff, service,
+				"2027-03-02 10:00+01", "2027-03-02 11:00+01", "BOOKED");
+
+		// Staff, services and customers go with the salon too, and the appointments' plain foreign keys to them
+		// are checked once the whole delete is done, by which time the appointments are gone as well.
+		jdbcTemplate.update("DELETE FROM businesses WHERE id = ?", Fixture.SERENITY_PENDING);
+
+		assertThat(jdbcTemplate.queryForObject("SELECT count(*) FROM appointments", Integer.class)).isZero();
+	}
+
 	private int count(String table, long id)
 	{
 		return jdbcTemplate.queryForObject("SELECT count(*) FROM " + table + " WHERE id = ?", Integer.class, id);

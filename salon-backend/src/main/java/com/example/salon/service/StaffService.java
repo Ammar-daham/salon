@@ -1,5 +1,6 @@
 package com.example.salon.service;
 
+import com.example.salon.dao.AppointmentDao;
 import com.example.salon.dao.SalonServiceDao;
 import com.example.salon.dao.StaffDao;
 import com.example.salon.dao.UserDao;
@@ -32,15 +33,17 @@ public class StaffService
     private final StaffDao staffDao;
     private final UserDao userDao;
     private final SalonServiceDao salonServiceDao;
+    private final AppointmentDao appointmentDao;
     private final BusinessService businessService;
 
     @Autowired
     public StaffService(StaffDao staffDao, UserDao userDao, SalonServiceDao salonServiceDao,
-            BusinessService businessService)
+            AppointmentDao appointmentDao, BusinessService businessService)
     {
         this.staffDao = staffDao;
         this.userDao = userDao;
         this.salonServiceDao = salonServiceDao;
+        this.appointmentDao = appointmentDao;
         this.businessService = businessService;
     }
 
@@ -103,6 +106,9 @@ public class StaffService
     {
         AccessControl.requireBusinessAccess(caller, businessId);
         getStaffById(businessId, staffId);
+        if (appointmentDao.hasUpcomingAppointmentsForStaff(staffId))
+            throw new BaseException("Staff with id " + staffId + " still has upcoming appointments. "
+                    + "Cancel or move them first.", ErrorCode.DUPLICATE_RESOURCE);
         int row = staffDao.deleteStaffById(staffId);
         if (row == 0)
             throw new BaseException("Staff with id " + staffId + " not found.", ErrorCode.NOT_FOUND);

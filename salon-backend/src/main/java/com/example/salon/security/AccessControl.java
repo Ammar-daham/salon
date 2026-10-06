@@ -57,7 +57,7 @@ public final class AccessControl
 	}
 
 	/**
-	 * Staff work (customers today, appointments later): a SUPER_ADMIN anywhere, or an ADMIN or
+	 * Staff work (customers and appointments): a SUPER_ADMIN anywhere, or an ADMIN or
 	 * EMPLOYEE of that business. A CUSTOMER never qualifies, even with a business_id.
 	 */
 	public static void requireStaffOfBusiness(AuthenticatedUser caller, long businessId)

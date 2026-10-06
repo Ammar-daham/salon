@@ -261,6 +261,15 @@ class RegressionTest extends IntegrationTest
 				.andExpect(jsonPath("$.errorCode").value("NOT_FOUND"));
 	}
 
+	/** A path variable that isn't a number fell through to the catch-all and came back as a 500. */
+	@Test
+	void aMalformedPathVariableIsARejectedRequestNotAServerError() throws Exception
+	{
+		mvc.perform(get("/api/v1/businesses/glow").session(loginAs(Fixture.SUPER_ADMIN)))
+				.andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$.message").value("id has an invalid value"));
+	}
+
 	/**
 	 * BE-27: a server-side NPE is a logged 500, no longer a masked 400. This used to be reproduced
 	 * with an update body missing "role", which unboxed a null Role and crashed. BE-23's
