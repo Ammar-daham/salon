@@ -14,18 +14,21 @@ import java.time.ZoneId;
 import java.util.List;
 
 @Repository
-public class StaffTimeOffDataAccessService implements StaffTimeOffDao {
+public class StaffTimeOffDataAccessService implements StaffTimeOffDao 
+{
     private static final String COLUMNS = "id, starts_at, ends_at, note, created_at, updated_at";
 
     private final JdbcTemplate jdbcTemplate;
 
     @Autowired
-    public StaffTimeOffDataAccessService(JdbcTemplate jdbcTemplate) {
+    public StaffTimeOffDataAccessService(JdbcTemplate jdbcTemplate) 
+    {
         this.jdbcTemplate = jdbcTemplate;
     }
 
     @Override
-    public Long addTimeOff(long staffId, TimeOff timeOff, ZoneId zone) {
+    public Long addTimeOff(long staffId, TimeOff timeOff, ZoneId zone) 
+    {
         String sql = """
                 INSERT INTO staff_time_off (staff_id, starts_at, ends_at, note)
                 VALUES (?, ?, ?, ?)
@@ -42,19 +45,22 @@ public class StaffTimeOffDataAccessService implements StaffTimeOffDao {
     }
 
     @Override
-    public List<TimeOff> getTimeOffForStaff(long staffId, ZoneId zone) {
+    public List<TimeOff> getTimeOffForStaff(long staffId, ZoneId zone) 
+    {
         String sql = "SELECT " + COLUMNS + " FROM staff_time_off WHERE staff_id = ? ORDER BY starts_at";
         return jdbcTemplate.query(sql, (rs, i) -> mapRow(rs, zone), staffId);
     }
 
     @Override
-    public TimeOff getTimeOffById(long staffId, long timeOffId, ZoneId zone) {
+    public TimeOff getTimeOffById(long staffId, long timeOffId, ZoneId zone) 
+    {
         String sql = "SELECT " + COLUMNS + " FROM staff_time_off WHERE staff_id = ? AND id = ?";
         return jdbcTemplate.queryForObject(sql, (rs, i) -> mapRow(rs, zone), staffId, timeOffId);
     }
 
     @Override
-    public int updateTimeOff(long staffId, long timeOffId, TimeOff timeOff, ZoneId zone) {
+    public int updateTimeOff(long staffId, long timeOffId, TimeOff timeOff, ZoneId zone) 
+    {
         String sql = "UPDATE staff_time_off SET starts_at = ?, ends_at = ?, note = ? WHERE staff_id = ? AND id = ?";
         return jdbcTemplate.update(
                 sql,
@@ -67,17 +73,20 @@ public class StaffTimeOffDataAccessService implements StaffTimeOffDao {
     }
 
     @Override
-    public int deleteTimeOff(long staffId, long timeOffId) {
+    public int deleteTimeOff(long staffId, long timeOffId) 
+    {
         return jdbcTemplate.update("DELETE FROM staff_time_off WHERE staff_id = ? AND id = ?", staffId, timeOffId);
     }
 
     // A wall-clock time skipped by a daylight-saving jump moves forward by the gap; a repeated one takes
     // the earlier offset (ZonedDateTime's rules).
-    private static OffsetDateTime onClock(LocalDateTime localDateTime, ZoneId zone) {
+    private static OffsetDateTime onClock(LocalDateTime localDateTime, ZoneId zone) 
+    {
         return localDateTime.atZone(zone).toOffsetDateTime();
     }
 
-    private static TimeOff mapRow(ResultSet rs, ZoneId zone) throws SQLException {
+    private static TimeOff mapRow(ResultSet rs, ZoneId zone) throws SQLException 
+    {
         Timestamp updatedAt = rs.getTimestamp("updated_at");
         return new TimeOff(
                 rs.getLong("id"),
