@@ -1,10 +1,12 @@
 package com.example.salon.service;
 
+import com.example.salon.dao.SalonServiceDao;
 import com.example.salon.dao.StaffDao;
 import com.example.salon.dao.UserDao;
 import com.example.salon.exception.BaseException;
 import com.example.salon.exception.ErrorCode;
 import com.example.salon.model.Role;
+import com.example.salon.model.SalonService;
 import com.example.salon.model.Staff;
 import com.example.salon.model.User;
 import com.example.salon.security.AccessControl;
@@ -17,7 +19,10 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class StaffService
@@ -26,12 +31,17 @@ public class StaffService
 
     private final StaffDao staffDao;
     private final UserDao userDao;
+    private final SalonServiceDao salonServiceDao;
+    private final BusinessService businessService;
 
     @Autowired
-    public StaffService(StaffDao staffDao, UserDao userDao)
+    public StaffService(StaffDao staffDao, UserDao userDao, SalonServiceDao salonServiceDao,
+            BusinessService businessService)
     {
         this.staffDao = staffDao;
         this.userDao = userDao;
+        this.salonServiceDao = salonServiceDao;
+        this.businessService = businessService;
     }
 
     @Transactional
@@ -97,5 +107,35 @@ public class StaffService
         if (row == 0)
             throw new BaseException("Staff with id " + staffId + " not found.", ErrorCode.NOT_FOUND);
         log.info("Removed staff {} from business {}", staffId, businessId);
+    }
+
+    /** The services a staff member performs: public like the salon's own list, so a 404 for a salon you can't see. */
+    public List<SalonService> getServicesOfStaff(long businessId, long staffId, AuthenticatedUser caller)
+    {
+        businessService.getBusinessById((int) businessId, caller);
+        getStaffById(businessId, staffId);
+        return salonServiceDao.getServicesForStaff(staffId);
+    }
+
+    @Transactional
+    public List<SalonService> replaceServicesOfStaff(long businessId, long staffId, List<Long> serviceIds,
+            AuthenticatedUser caller)
+    {
+        AccessControl.requireBusinessAccess(caller, businessId);
+        getStaffById(businessId, staffId);
+
+        Set<Long> offered = salonServiceDao.getServicesForBusiness(businessId).stream()
+                .map(SalonService::getId)
+                .collect(Collectors.toSet());
+        Set<Long> performed = new LinkedHashSet<>(serviceIds);
+        for (Long serviceId : performed) {
+            if (!offered.contains(serviceId))
+                throw new BaseException("Service with id " + serviceId + " is not offered by this business.",
+                        ErrorCode.BAD_REQUEST);
+        }
+
+        staffDao.replaceServicesOfStaff(businessId, staffId, performed);
+        log.info("Staff {} in business {} now performs {} services", staffId, businessId, performed.size());
+        return salonServiceDao.getServicesForStaff(staffId);
     }
 }

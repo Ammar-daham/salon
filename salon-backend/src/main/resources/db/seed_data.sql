@@ -25,8 +25,8 @@
 -- Customers are rows in `customers`, not users, so they have no login.
 -- =============================================================================
 
--- TRUNCATE business_hours, customers, staff, services, contacts,
---     addresses, users, businesses RESTART IDENTITY CASCADE;
+-- TRUNCATE staff_time_off, staff_schedules, staff_services, business_hours,
+--     customers, staff, services, contacts, addresses, users, businesses RESTART IDENTITY CASCADE;
 
 BEGIN;
 
@@ -202,6 +202,20 @@ BEGIN
         (urban_id, 'Ava', 'Customer', NULL, '+49 30 9990004', 'Sensitive scalp.', false),
         (serenity_id, 'Grace', 'Customer', 'grace@example.com', '+49 30 9990005', NULL, false),
         (serenity_id, 'Mason', 'Customer', NULL, '+49 30 9990006', NULL, false);
+
+    -- =========================================================================
+    -- Staff working weeks (DB-14): everyone performs every service of their
+    -- salon and works its opening hours. Mia is off over Christmas.
+    -- =========================================================================
+    INSERT INTO staff_services (business_id, staff_id, service_id)
+    SELECT st.business_id, st.id, sv.id FROM staff st JOIN services sv ON sv.business_id = st.business_id;
+
+    INSERT INTO staff_schedules (staff_id, day_of_week, starts_at, ends_at)
+    SELECT st.id, h.day_of_week, h.opens_at, h.closes_at FROM staff st JOIN business_hours h ON h.business_id = st.business_id;
+
+    INSERT INTO staff_time_off (staff_id, starts_at, ends_at, note)
+    SELECT id, '2026-12-24 00:00 Europe/Berlin', '2026-12-27 00:00 Europe/Berlin', 'Christmas'
+    FROM staff WHERE user_id = glow_emp1_id;
 
 END $$;
 

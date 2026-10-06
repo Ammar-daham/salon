@@ -20,6 +20,20 @@ version. The version lives in [`gradle.properties`](gradle.properties); each rel
   decimals (DB-08).
 
 ### Added
+- The services each staff member performs, at `/api/v1/businesses/{businessId}/staff/{staffId}/services`.
+  `GET` lists them for anyone who can see the salon; `PUT {"service_ids": [...]}` replaces them and
+  returns the list. Only the salon's own services can be assigned. Only the salon's ADMIN or a
+  SUPER_ADMIN can change them (DB-14).
+- Weekly working hours at `.../staff/{staffId}/schedule`, shaped and checked like opening hours but
+  with `starts_at`/`ends_at`. The salon's staff can read them; only its ADMIN or a SUPER_ADMIN can
+  replace them (DB-14).
+- Time off at `.../staff/{staffId}/time-off` (list, get, create, replace, delete): `starts_at` and
+  `ends_at` as `"yyyy-MM-ddTHH:mm"` on the salon's clock, and an optional `note`. A whole day off runs
+  from 00:00 to 00:00 the next day. One person's absences can't overlap (409). Only the salon's
+  admins and the staff member themselves can see it; only an ADMIN or a SUPER_ADMIN can change it
+  (DB-14).
+- Migration V11: `staff_services`, `staff_schedules` and `staff_time_off`. The database itself refuses
+  to link a staff member to another salon's service, and rejects overlapping shifts or absences (DB-14).
 - Opening hours at `/api/v1/businesses/{businessId}/hours`. `GET` returns the salon's `timezone` and
   its weekly `hours`, each with a `day_of_week` (`MONDAY` to `SUNDAY`) and `opens_at`/`closes_at` as
   `"HH:mm"` on the salon's clock; anyone who can see the salon can read them. `PUT {"hours": [...]}`

@@ -8,6 +8,8 @@ public interface SalonServiceDao {
 
     List<SalonService> getServicesForBusiness(Long businessId);
 
+    List<SalonService> getServicesForStaff(long staffId);
+
     SalonService getServiceById(int businessId, int serviceId);
 
     int updateServiceById(long id, SalonService service);

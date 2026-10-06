@@ -415,13 +415,21 @@ Guarded by `ColumnTypesTest`, `everyTimestampColumnCarriesATimeZone` and
 [`feature/salon-backend-appointments`](../VERSION_CONTROL_GUIDE.md#br-2-3),
 [`feature/salon-backend-availability`](../VERSION_CONTROL_GUIDE.md#br-2-4)**
 *(In progress. `business_hours` landed in migration V10 on
-[`feature/salon-backend-business-hours`](../VERSION_CONTROL_GUIDE.md#br-2-1): one row per opening
+[`feature/salon-backend-business-hours`](../VERSION_CONTROL_GUIDE.md#br-2-1) (#36): one row per opening
 interval, an ISO weekday and wall-clock times in the salon's `timezone`, with CHECKs and a `btree_gist`
 exclusion constraint so a day's intervals can't overlap. `GET`/`PUT /businesses/{id}/hours` read and
 replace the whole week. Guarded by `BusinessHoursControllerTest`,
 `theDatabaseRejectsBackwardsOrOverlappingOpeningHours`, `deletingASalonDeletesItsOpeningHours` and
-`concurrentReplacementsOfASalonsHoursRunOneAfterTheOther`. Staff schedules, appointments and
-availability are still to come.)*
+`concurrentReplacementsOfASalonsHoursRunOneAfterTheOther`.
+`staff_services`, `staff_schedules` and `staff_time_off` followed in migration V11 on
+[`feature/salon-backend-staff-schedules`](../VERSION_CONTROL_GUIDE.md#br-2-2). `staff_services`
+carries `business_id` in both composite foreign keys, so a staff member can't be linked to another
+salon's service; weekly hours mirror `business_hours`; time off is a pair of `timestamptz` that the API
+reads and writes on the salon's clock, with an exclusion constraint against overlaps. Guarded by
+`StaffScheduleControllerTest`, the staff-services tests in `StaffControllerTest`,
+`aStaffMemberCanOnlyBeLinkedToTheirOwnSalonsServices`,
+`theDatabaseRejectsBackwardsOrOverlappingShiftsAndTimeOff` and
+`removingAStaffMemberOrAServiceRemovesWhatHungOffIt`. Appointments and availability are still to come.)*
 
 ## 6. MVP roadmap (both apps)
 

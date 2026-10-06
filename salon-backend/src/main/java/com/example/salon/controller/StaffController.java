@@ -1,7 +1,9 @@
 package com.example.salon.controller;
 
 import com.example.salon.dto.CreateStaffRequest;
+import com.example.salon.dto.StaffServicesRequest;
 import com.example.salon.dto.UpdateStaffRequest;
+import com.example.salon.model.SalonService;
 import com.example.salon.model.Staff;
 import com.example.salon.security.AuthenticatedUser;
 import com.example.salon.service.StaffService;
@@ -69,5 +71,20 @@ public class StaffController
 			@AuthenticationPrincipal AuthenticatedUser principal)
 	{
 		staffService.deleteStaffById(businessId, staffId, principal);
+	}
+
+	@GetMapping("/{businessId}/staff/{staffId}/services")
+	public List<SalonService> getServicesOfStaff(@PathVariable long businessId, @PathVariable long staffId,
+			@AuthenticationPrincipal AuthenticatedUser principal)
+	{
+		return staffService.getServicesOfStaff(businessId, staffId, principal);
+	}
+
+	/** Replaces the set and returns the services as stored, by name. */
+	@PutMapping("/{businessId}/staff/{staffId}/services")
+	public List<SalonService> replaceServicesOfStaff(@PathVariable long businessId, @PathVariable long staffId,
+			@Valid @RequestBody StaffServicesRequest request, @AuthenticationPrincipal AuthenticatedUser principal)
+	{
+		return staffService.replaceServicesOfStaff(businessId, staffId, request.serviceIds(), principal);
 	}
 }

@@ -42,6 +42,13 @@ INSERT INTO business_hours (business_id, day_of_week, opens_at, closes_at) VALUE
     (1, 2, '09:00', '18:00'), (1, 3, '09:00', '18:00'), (1, 4, '09:00', '18:00'), (1, 5, '09:00', '18:00'),
     (1, 6, '10:00', '14:00');
 
+-- Mia (Glow staff 1) does haircuts, works Tuesday and Wednesday 09:00-17:00, and is off over Christmas.
+INSERT INTO staff_services (business_id, staff_id, service_id) VALUES (1, 1, 1);
+INSERT INTO staff_schedules (staff_id, day_of_week, starts_at, ends_at) VALUES
+    (1, 2, '09:00', '17:00'), (1, 3, '09:00', '17:00');
+INSERT INTO staff_time_off (id, staff_id, starts_at, ends_at, note) VALUES
+    (1, 1, '2026-12-24 00:00 Europe/Berlin', '2026-12-27 00:00 Europe/Berlin', 'Christmas');
+
 SELECT setval(pg_get_serial_sequence('businesses', 'id'), (SELECT max(id) FROM businesses));
 SELECT setval(pg_get_serial_sequence('users', 'id'), (SELECT max(id) FROM users));
 SELECT setval(pg_get_serial_sequence('addresses', 'id'), (SELECT max(id) FROM addresses));
@@ -49,3 +56,4 @@ SELECT setval(pg_get_serial_sequence('contacts', 'id'), (SELECT max(id) FROM con
 SELECT setval(pg_get_serial_sequence('services', 'id'), (SELECT max(id) FROM services));
 SELECT setval(pg_get_serial_sequence('staff', 'id'), (SELECT max(id) FROM staff));
 SELECT setval(pg_get_serial_sequence('customers', 'id'), (SELECT max(id) FROM customers));
+SELECT setval(pg_get_serial_sequence('staff_time_off', 'id'), (SELECT max(id) FROM staff_time_off));

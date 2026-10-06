@@ -113,6 +113,56 @@ class SchemaConstraintsTest extends IntegrationTest
 				Integer.class, Fixture.SERENITY_PENDING)).isZero();
 	}
 
+	@Test
+	void aStaffMemberCanOnlyBeLinkedToTheirOwnSalonsServices()
+	{
+		// DB-14: business_id is part of both foreign keys. Mia is Glow's; the fade is Urban's.
+		String link = "INSERT INTO staff_services (business_id, staff_id, service_id) VALUES (?, ?, ?)";
+
+		assertThatThrownBy(() -> jdbcTemplate.update(link, Fixture.GLOW, Fixture.GLOW_STAFF, Fixture.URBAN_FADE))
+				.isInstanceOf(DataIntegrityViolationException.class)
+				.hasMessageContaining("fk_staff_services_service");
+		assertThatThrownBy(() -> jdbcTemplate.update(link, Fixture.URBAN, Fixture.GLOW_STAFF, Fixture.URBAN_FADE))
+				.isInstanceOf(DataIntegrityViolationException.class)
+				.hasMessageContaining("fk_staff_services_staff");
+		jdbcTemplate.update(link, Fixture.GLOW, Fixture.GLOW_STAFF, Fixture.GLOW_MANICURE);
+	}
+
+	@Test
+	void theDatabaseRejectsBackwardsOrOverlappingShiftsAndTimeOff()
+	{
+		// seed.sql: Mia works Tuesday (2) 09:00-17:00 and is off 24-27 December.
+		String shift = "INSERT INTO staff_schedules (staff_id, day_of_week, starts_at, ends_at) VALUES (?, ?, ?::time, ?::time)";
+		String timeOff = "INSERT INTO staff_time_off (staff_id, starts_at, ends_at) VALUES (?, ?::timestamptz, ?::timestamptz)";
+
+		assertThatThrownBy(() -> jdbcTemplate.update(shift, Fixture.GLOW_STAFF, 1, "17:00", "09:00"))
+				.isInstanceOf(DataIntegrityViolationException.class)
+				.hasMessageContaining("staff_schedules_order_check");
+		assertThatThrownBy(() -> jdbcTemplate.update(shift, Fixture.GLOW_STAFF, 2, "16:00", "18:00"))
+				.isInstanceOf(DataIntegrityViolationException.class)
+				.hasMessageContaining("staff_schedules_no_overlap");
+		assertThatThrownBy(() -> jdbcTemplate.update(timeOff, Fixture.GLOW_STAFF, "2026-12-26 12:00+01", "2026-12-28 00:00+01"))
+				.isInstanceOf(DataIntegrityViolationException.class)
+				.hasMessageContaining("staff_time_off_no_overlap");
+		assertThatThrownBy(() -> jdbcTemplate.update(timeOff, Fixture.GLOW_STAFF, "2027-01-02 00:00+01", "2027-01-01 00:00+01"))
+				.isInstanceOf(DataIntegrityViolationException.class)
+				.hasMessageContaining("staff_time_off_order_check");
+
+		// Another staff member can be off at the same time.
+		jdbcTemplate.update(timeOff, Fixture.URBAN_STAFF, "2026-12-24 00:00+01", "2026-12-27 00:00+01");
+	}
+
+	@Test
+	void removingAStaffMemberOrAServiceRemovesWhatHungOffIt()
+	{
+		jdbcTemplate.update("DELETE FROM services WHERE id = ?", Fixture.GLOW_HAIRCUT);
+		assertThat(jdbcTemplate.queryForObject("SELECT count(*) FROM staff_services", Integer.class)).isZero();
+
+		jdbcTemplate.update("DELETE FROM staff WHERE id = ?", Fixture.GLOW_STAFF);
+		assertThat(jdbcTemplate.queryForObject("SELECT count(*) FROM staff_schedules", Integer.class)).isZero();
+		assertThat(jdbcTemplate.queryForObject("SELECT count(*) FROM staff_time_off", Integer.class)).isZero();
+	}
+
 	private int count(String table, long id)
 	{
 		return jdbcTemplate.queryForObject("SELECT count(*) FROM " + table + " WHERE id = ?", Integer.class, id);
