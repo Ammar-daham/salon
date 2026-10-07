@@ -20,6 +20,16 @@ version. The version lives in [`gradle.properties`](gradle.properties); each rel
   decimals (DB-08).
 
 ### Added
+- Availability at `GET /api/v1/businesses/{businessId}/services/{serviceId}/availability`: the
+  salon's `timezone`, the service's `duration_minutes`, and for each active staff member who performs
+  the service (`id`, `first_name`, `last_name`) their open `slots`, each a `starts_at` and `ends_at`
+  on the salon's clock. A slot lies inside the opening hours and the staff member's shift, is clear
+  of their time off and of appointments that aren't cancelled or missed, hasn't started yet, and
+  starts on a quarter hour (DB-14).
+- `from` and `to` (`"yyyy-MM-dd"` on the salon's clock, both included, at most 31 days) default to
+  today, and `staff_id` narrows availability to one staff member. Only the salon's ADMINs and
+  EMPLOYEEs, or a SUPER_ADMIN, can see it. Booking doesn't require a slot: availability is advice for
+  the booking form, so staff can still fit someone in after hours (DB-14).
 - Appointments at `/api/v1/businesses/{businessId}/appointments` (book, list, get, replace). A booking
   names a `customer_id`, `staff_id` and `service_id`, a `starts_at` as `"yyyy-MM-ddTHH:mm"` on the
   salon's clock, and optional `notes`. The service sets `ends_at` and the `price`; changing the
