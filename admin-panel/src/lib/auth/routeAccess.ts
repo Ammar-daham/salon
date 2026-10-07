@@ -23,6 +23,8 @@ const ROUTE_RULES: RouteRule[] = [
 	{ pattern: /^\/notifications(\/|$)/, permission: "notification:view" },
 	{ pattern: /^\/reports(\/|$)/, permission: "report:view" },
 	{ pattern: /^\/calendar(\/|$)/, permission: "calendar:view" },
+	{ pattern: /^\/appointments\/new(\/|$)/, permission: "appointment:create" },
+	{ pattern: /^\/appointments\/[^/]+\/edit(\/|$)/, permission: "appointment:edit" },
 	{ pattern: /^\/appointments(\/|$)/, permission: "appointment:list" },
 	{ pattern: /^\/services(\/|$)/, permission: "service:list" },
 	{ pattern: /^\/customers\/new(\/|$)/, permission: "customer:create" },

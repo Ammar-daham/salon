@@ -9,8 +9,9 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 
 ## [Unreleased]
 
-Requires salon-backend with the customers API (DB-03), migration V9 (DB-07, DB-08) and the opening
-hours API with migration V10 (DB-09, DB-14).
+Requires salon-backend with the customers API (DB-03), migration V9 (DB-07, DB-08), the opening
+hours API with migration V10 (DB-09, DB-14), and the appointments and availability APIs with
+migration V12 (DB-13, DB-14).
 
 ### Changed
 - Customers run on live data from `/businesses/{id}/customers` instead of generated sample data
@@ -21,6 +22,23 @@ hours API with migration V10 (DB-09, DB-14).
 - Address coordinates are read as numbers, matching the backend (DB-07).
 
 ### Added
+- An Appointments page (`/appointments`) with the salon's bookings by date, on the salon's clock,
+  filterable by status and staff member and searchable by client, service or staff. A SUPER_ADMIN
+  sees every salon's. The same list fills each salon's and each employee's Appointments tab
+  (FE-04).
+- An appointment page (`/appointments/:id`) with the client, staff member, service, notes and the
+  price it was booked at. It can be confirmed, marked completed or a no-show once it has started,
+  or cancelled; the last three are final, so the panel asks first (FE-04).
+- Booking (`/appointments/new`) and changing (`/appointments/:id/edit`) appointments. Pick a client
+  and a service, then one of the salon's open times for a day, from anyone who performs it or one
+  staff member. A time outside the open times can be typed in for one staff member, and changing an
+  appointment can keep its current time. A SUPER_ADMIN picks the salon first. "Book appointment" on
+  a salon's or employee's Appointments tab starts the form with them; a booked or confirmed
+  appointment's page has an Edit button (FE-04).
+- A client's Appointments tab (`/customers/:id/appointments`) lists every booking they've had or
+  have coming, newest first, with "Book appointment" starting the form with them. Their profile's
+  Visits and spend card counts completed visits, what they cost and the last one, and links the next
+  booked or confirmed appointment (FE-04).
 - An Hours tab on each salon (`/businesses/:id/hours`) with its weekly opening hours, on the salon's
   clock. A day without hours is closed, and a second interval makes a lunch break. The week is saved
   whole, and backwards or overlapping intervals are pointed out before saving. Admins edit it;

@@ -31,6 +31,14 @@ export const endpoints = {
 		customers: (businessId: number) => `/api/v1/businesses/${businessId}/customers`,
 		customerById: (businessId: number, customerId: number) =>
 			`/api/v1/businesses/${businessId}/customers/${customerId}`,
+		// No DELETE: an appointment is cancelled through its status instead.
+		appointments: (businessId: number) => `/api/v1/businesses/${businessId}/appointments`,
+		appointmentById: (businessId: number, appointmentId: number) =>
+			`/api/v1/businesses/${businessId}/appointments/${appointmentId}`,
+		appointmentStatus: (businessId: number, appointmentId: number) =>
+			`/api/v1/businesses/${businessId}/appointments/${appointmentId}/status`,
+		availability: (businessId: number, serviceId: number) =>
+			`/api/v1/businesses/${businessId}/services/${serviceId}/availability`,
 	},
 	addresses: {
 		root: "/api/v1/addresses",

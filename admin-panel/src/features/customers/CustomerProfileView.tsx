@@ -3,9 +3,16 @@
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { useCustomer } from "@/lib/resources/customers/customers.hooks";
+import type { Customer } from "@/lib/resources/customers/customers.types";
+import { useAppointments } from "@/lib/resources/appointments/appointments.hooks";
+import { getErrorMessage } from "@/lib/api/errors";
+import { formatMoney } from "@/lib/utils/money";
+import { formatWallDate, timeOf } from "@/lib/utils/wallClock";
 import Card from "@/components/ui/Card";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { EnvelopeIcon } from "@/icons";
+import { appointmentHref } from "@/features/appointments/appointmentLinks";
+import { visitSummary } from "./customerVisits";
 
 function formatDate(iso: string) {
 	return new Date(iso).toLocaleDateString(undefined, {
@@ -91,12 +98,62 @@ export default function CustomerProfileView() {
 				</Card>
 			</div>
 
+			<VisitsCard customer={customer} />
+		</div>
+	);
+}
+
+/** Counted from completed appointments; the Appointments tab lists every one. */
+function VisitsCard({ customer }: { customer: Customer }) {
+	const { data, isPending, isError, error } = useAppointments(customer.businessId, { customerId: customer.id });
+
+	if (isPending) return <Skeleton className="h-40 rounded-card" />;
+
+	if (isError) {
+		return (
 			<Card title="Visits and spend">
-				<p className="text-sm text-ink-muted">
-					Visit counts, lifetime spend and last-visit dates come from appointments, which the
-					backend doesn&apos;t have yet. They&apos;ll appear here once booking lands.
+				<p className="text-sm text-error-600 dark:text-error-300">
+					Couldn&apos;t load their appointments: {getErrorMessage(error)}
 				</p>
 			</Card>
-		</div>
+		);
+	}
+
+	const { visits, spent, currency, lastVisit, next } = visitSummary(data);
+
+	return (
+		<Card title="Visits and spend" description="Completed appointments only, at the price each was booked at.">
+			<dl className="flex flex-col gap-3 text-sm">
+				<div className="flex justify-between gap-4">
+					<dt className="text-ink-muted">Visits</dt>
+					<dd className="tabular-nums text-ink">{visits}</dd>
+				</div>
+				<div className="flex justify-between gap-4">
+					<dt className="text-ink-muted">Spent</dt>
+					<dd className="tabular-nums text-ink">
+						{spent != null && currency ? formatMoney(spent, currency) : "—"}
+					</dd>
+				</div>
+				<div className="flex justify-between gap-4">
+					<dt className="text-ink-muted">Last visit</dt>
+					<dd className="text-ink">{lastVisit ? formatWallDate(lastVisit) : "None yet"}</dd>
+				</div>
+				<div className="flex justify-between gap-4">
+					<dt className="text-ink-muted">Next appointment</dt>
+					<dd>
+						{next ? (
+							<Link
+								href={appointmentHref(next)}
+								className="text-ink hover:text-primary-700 dark:hover:text-primary-300"
+							>
+								{formatWallDate(next.startsAt)}, {timeOf(next.startsAt)} · {next.service.name}
+							</Link>
+						) : (
+							<span className="text-ink">None booked</span>
+						)}
+					</dd>
+				</div>
+			</dl>
+		</Card>
 	);
 }

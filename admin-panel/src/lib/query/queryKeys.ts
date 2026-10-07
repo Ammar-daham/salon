@@ -1,4 +1,5 @@
 import type { Id } from "@/lib/api/types";
+import type { AppointmentFilter } from "@/lib/resources/appointments/appointments.types";
 
 /**
  * Typed key factory. Never inline a key array at a call site — invalidation
@@ -30,8 +31,16 @@ export const queryKeys = {
 	},
 	appointments: {
 		all: ["appointments"] as const,
-		list: () => [...queryKeys.appointments.all, "list"] as const,
+		// null = every salon (platform scope). The filter is part of the key, so each date range,
+		// staff member and client is cached on its own and a booking invalidates them all.
+		lists: () => [...queryKeys.appointments.all, "list"] as const,
+		list: (businessId: Id | null, filter: AppointmentFilter) =>
+			[...queryKeys.appointments.lists(), businessId, filter] as const,
 		detail: (id: Id) => [...queryKeys.appointments.all, "detail", id] as const,
+		// Open slots hang off appointments because every booking, move and cancellation changes them.
+		availabilities: () => [...queryKeys.appointments.all, "availability"] as const,
+		availability: (businessId: Id, serviceId: Id, date: string) =>
+			[...queryKeys.appointments.availabilities(), businessId, serviceId, date] as const,
 	},
 	customers: {
 		all: ["customers"] as const,
