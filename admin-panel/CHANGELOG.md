@@ -35,6 +35,10 @@ migration V12 (DB-13, DB-14).
   appointment can keep its current time. A SUPER_ADMIN picks the salon first. "Book appointment" on
   a salon's or employee's Appointments tab starts the form with them; a booked or confirmed
   appointment's page has an Edit button (FE-04).
+- A client's Appointments tab (`/customers/:id/appointments`) lists every booking they've had or
+  have coming, newest first, with "Book appointment" starting the form with them. Their profile's
+  Visits and spend card counts completed visits, what they cost and the last one, and links the next
+  booked or confirmed appointment (FE-04).
 - An Hours tab on each salon (`/businesses/:id/hours`) with its weekly opening hours, on the salon's
   clock. A day without hours is closed, and a second interval makes a lunch break. The week is saved
   whole, and backwards or overlapping intervals are pointed out before saving. Admins edit it;
