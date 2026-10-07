@@ -46,6 +46,7 @@ export interface BusinessDto {
 	image: string;
 	status: BusinessStatus;
 	currency: string;
+	timezone: string;
 	created_at: string;
 	updated_at: string | null;
 	addresses: AddressDto[] | null;
@@ -86,6 +87,7 @@ export function toBusiness(dto: BusinessDto): Business {
 		image: dto.image,
 		status: dto.status,
 		currency: dto.currency,
+		timezone: dto.timezone,
 		createdAt: dto.created_at,
 		updatedAt: dto.updated_at ?? null,
 		addresses: (dto.addresses ?? []).map(toAddress),
@@ -95,7 +97,7 @@ export function toBusiness(dto: BusinessDto): Business {
 }
 
 /**
- * Create/update body. Only these five fields are read by the backend.
+ * Create/update body. Only these six fields are read by the backend.
  *
  * `status` is sent only when provided: the update SQL uses COALESCE, so omitting
  * it preserves the stored value instead of silently resetting the salon.
@@ -109,5 +111,6 @@ export function toBusinessRequest(input: BusinessInput) {
 		image: input.image,
 		...(input.status ? { status: input.status } : {}),
 		...(input.currency ? { currency: input.currency } : {}),
+		...(input.timezone ? { timezone: input.timezone } : {}),
 	};
 }

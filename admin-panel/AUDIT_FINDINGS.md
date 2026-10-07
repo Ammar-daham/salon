@@ -98,6 +98,11 @@ findings it depends on are linked by their `BE-xx` / `DB-xx` IDs.
   product has no UI (and no backend, [DB-14](../salon-backend/AUDIT_FINDINGS.md#db-14)).
   **→ [`feature/admin-panel-hours-and-schedules`](../VERSION_CONTROL_GUIDE.md#br-2-5), [`feature/admin-panel-appointments`](../VERSION_CONTROL_GUIDE.md#br-2-6),
   [`feature/admin-panel-calendar`](../VERSION_CONTROL_GUIDE.md#br-2-7)**
+  *(In progress. On [`feature/admin-panel-hours-and-schedules`](../VERSION_CONTROL_GUIDE.md#br-2-5), a salon's
+  Hours tab edits its weekly opening hours with one shared week editor that checks the backend's rules before
+  saving, and the salon form sets the time zone they are on. Each employee's Schedule tab edits their weekly
+  shifts with that same editor, against `/businesses/{id}/staff/{staffId}/schedule`. Guarded by
+  `hours.mappers.test.ts`, `hours.validation.test.ts` and `timeZones.test.ts`.)*
 - <a id="fe-05"></a>**FE-05 — No login rate limiting / lockout** (backend, [BE-22](../salon-backend/AUDIT_FINDINGS.md#be-22)) — the
   sign-in form is the entry point. **→ [`feature/salon-backend-login-rate-limiting`](../VERSION_CONTROL_GUIDE.md#br-3-1)**
 - <a id="fe-06"></a>✅ **FE-06 — Password policy is client-only.** `UserForm` enforces ≥ 8 characters; the

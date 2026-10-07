@@ -9,7 +9,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 
 ## [Unreleased]
 
-Requires salon-backend with the customers API (DB-03) and migration V9 (DB-07, DB-08).
+Requires salon-backend with the customers API (DB-03), migration V9 (DB-07, DB-08) and the opening
+hours API with migration V10 (DB-09, DB-14).
 
 ### Changed
 - Customers run on live data from `/businesses/{id}/customers` instead of generated sample data
@@ -20,6 +21,15 @@ Requires salon-backend with the customers API (DB-03) and migration V9 (DB-07, D
 - Address coordinates are read as numbers, matching the backend (DB-07).
 
 ### Added
+- An Hours tab on each salon (`/businesses/:id/hours`) with its weekly opening hours, on the salon's
+  clock. A day without hours is closed, and a second interval makes a lunch break. The week is saved
+  whole, and backwards or overlapping intervals are pointed out before saving. Admins edit it;
+  employees see it read-only (FE-04).
+- A Schedule tab on each employee (`/employees/:id/schedule`) with their weekly shifts, on the
+  salon's clock. A day without shifts is a day off, and the week is saved whole with the same
+  editor as the salon's opening hours. Admins edit it; employees see it read-only (FE-04).
+- A time-zone picker on the salon create and settings forms, listing the browser's IANA zones
+  (DB-09).
 - A currency picker on the salon create and settings forms (DB-08).
 - Add a client (`/customers/new`) and edit one (`/customers/:id/edit`). Admins can edit notes from
   the Notes tab and delete clients from the list; employees can add and view clients (FE-03).

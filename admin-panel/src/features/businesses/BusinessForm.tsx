@@ -12,6 +12,7 @@ import {
 	type BusinessStatus,
 } from "@/lib/resources/businesses/businesses.types";
 import { CURRENCY_OPTIONS } from "@/lib/utils/money";
+import { DEFAULT_TIME_ZONE, timeZoneOptions } from "@/lib/utils/timeZones";
 
 export interface BusinessFormValues {
 	name: string;
@@ -19,6 +20,7 @@ export interface BusinessFormValues {
 	image: string;
 	status: BusinessStatus;
 	currency: string;
+	timezone: string;
 }
 
 interface BusinessFormProps {
@@ -57,6 +59,7 @@ export default function BusinessForm({
 		image: initial?.image ?? "",
 		status: initial?.status ?? "PENDING",
 		currency: initial?.currency ?? "EUR",
+		timezone: initial?.timezone ?? DEFAULT_TIME_ZONE,
 	});
 	const [errors, setErrors] = useState<Errors>({});
 
@@ -79,6 +82,7 @@ export default function BusinessForm({
 			// isn't offered there anyway.
 			...(allowStatus ? { status: values.status } : {}),
 			currency: values.currency,
+			timezone: values.timezone,
 		});
 	}
 
@@ -159,6 +163,25 @@ export default function BusinessForm({
 								{[...new Set([values.currency, ...CURRENCY_OPTIONS])].map((c) => (
 									<option key={c} value={c}>
 										{c}
+									</option>
+								))}
+							</SelectInput>
+						)}
+					</Field>
+
+					<Field
+						label="Time zone"
+						hint="Opening hours, working hours and appointments are on this clock. Changing it keeps appointments at the same moment, so their times shift."
+					>
+						{(p) => (
+							<SelectInput
+								{...p}
+								value={values.timezone}
+								onChange={(e) => set("timezone", e.target.value)}
+							>
+								{timeZoneOptions(values.timezone).map((zone) => (
+									<option key={zone} value={zone}>
+										{zone.replaceAll("_", " ")}
 									</option>
 								))}
 							</SelectInput>
