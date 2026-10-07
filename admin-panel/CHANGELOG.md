@@ -25,6 +25,9 @@ hours API with migration V10 (DB-09, DB-14).
   clock. A day without hours is closed, and a second interval makes a lunch break. The week is saved
   whole, and backwards or overlapping intervals are pointed out before saving. Admins edit it;
   employees see it read-only (FE-04).
+- A Schedule tab on each employee (`/employees/:id/schedule`) with their weekly shifts, on the
+  salon's clock. A day without shifts is a day off, and the week is saved whole with the same
+  editor as the salon's opening hours. Admins edit it; employees see it read-only (FE-04).
 - A time-zone picker on the salon create and settings forms, listing the browser's IANA zones
   (DB-09).
 - A currency picker on the salon create and settings forms (DB-08).

@@ -2,7 +2,10 @@ import { describe, expect, it } from "vitest";
 import {
 	toOpeningHours,
 	toOpeningHoursRequest,
+	toWorkingHours,
+	toWorkingHoursRequest,
 	type BusinessHoursDto,
+	type StaffScheduleDto,
 } from "@/lib/resources/hours/hours.mappers";
 
 const dto: BusinessHoursDto = {
@@ -32,5 +35,25 @@ describe("toOpeningHoursRequest", () => {
 
 	it("sends an empty week, which closes every day", () => {
 		expect(toOpeningHoursRequest([])).toEqual({ hours: [] });
+	});
+});
+
+const schedule: StaffScheduleDto = {
+	timezone: "Europe/Berlin",
+	hours: [{ day_of_week: "WEDNESDAY", starts_at: "09:00", ends_at: "17:00" }],
+};
+
+describe("toWorkingHours", () => {
+	it("reads a shift's starts_at/ends_at into the same start/end as opening hours", () => {
+		expect(toWorkingHours(schedule)).toEqual({
+			timezone: "Europe/Berlin",
+			intervals: [{ dayOfWeek: "WEDNESDAY", start: "09:00", end: "17:00" }],
+		});
+	});
+});
+
+describe("toWorkingHoursRequest", () => {
+	it("sends shifts as starts_at/ends_at, not the salon's opens_at/closes_at", () => {
+		expect(toWorkingHoursRequest(toWorkingHours(schedule).intervals)).toEqual({ hours: schedule.hours });
 	});
 });
