@@ -17,6 +17,11 @@ export const queryKeys = {
 		services: (businessId: Id) =>
 			[...queryKeys.businesses.detail(businessId), "services"] as const,
 	},
+	hours: {
+		all: ["hours"] as const,
+		// The PUT answers with the stored week, so a save writes it straight into this entry.
+		business: (businessId: Id) => [...queryKeys.hours.all, "business", businessId] as const,
+	},
 	users: {
 		all: ["users"] as const,
 		list: () => [...queryKeys.users.all, "list"] as const,

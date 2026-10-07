@@ -8,6 +8,7 @@ const dto: BusinessDto = {
 	image: "https://example.test/glow.png",
 	status: "APPROVED",
 	currency: "EUR",
+	timezone: "Europe/Berlin",
 	created_at: "2026-09-01T10:00:00Z",
 	updated_at: null,
 	addresses: [
@@ -44,6 +45,7 @@ describe("toBusiness", () => {
 			image: "https://example.test/glow.png",
 			status: "APPROVED",
 			currency: "EUR",
+			timezone: "Europe/Berlin",
 			createdAt: "2026-09-01T10:00:00Z",
 			updatedAt: null,
 			addresses: [
@@ -113,5 +115,13 @@ describe("toBusinessRequest", () => {
 	it("omits currency when not given, so the stored currency is preserved", () => {
 		expect(toBusinessRequest(input)).not.toHaveProperty("currency");
 		expect(toBusinessRequest({ ...input, currency: "SEK" })).toEqual({ ...input, currency: "SEK" });
+	});
+
+	it("omits the time zone when not given, so the stored one is preserved", () => {
+		expect(toBusinessRequest(input)).not.toHaveProperty("timezone");
+		expect(toBusinessRequest({ ...input, timezone: "Europe/London" })).toEqual({
+			...input,
+			timezone: "Europe/London",
+		});
 	});
 });

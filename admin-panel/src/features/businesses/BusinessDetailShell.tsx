@@ -89,6 +89,7 @@ export default function BusinessDetailShell({
 		{ label: "Overview", href: `/businesses/${id}`, exact: true },
 		{ label: "Services", href: `/businesses/${id}/services` },
 		{ label: "Team", href: `/businesses/${id}/team` },
+		{ label: "Hours", href: `/businesses/${id}/hours` },
 		{ label: "Appointments", href: `/businesses/${id}/appointments` },
 		{ label: "Settings", href: `/businesses/${id}/settings` },
 	];

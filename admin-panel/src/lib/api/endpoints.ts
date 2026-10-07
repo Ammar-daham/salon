@@ -20,6 +20,8 @@ export const endpoints = {
 		services: (businessId: number) => `/api/v1/businesses/${businessId}/services`,
 		serviceById: (businessId: number, serviceId: number) =>
 			`/api/v1/businesses/${businessId}/services/${serviceId}`,
+		// GET and PUT only: the week is always read and replaced whole.
+		hours: (businessId: number) => `/api/v1/businesses/${businessId}/hours`,
 		staff: (businessId: number) => `/api/v1/businesses/${businessId}/staff`,
 		staffById: (businessId: number, staffId: number) =>
 			`/api/v1/businesses/${businessId}/staff/${staffId}`,

@@ -64,6 +64,8 @@ export interface Business {
 	status: BusinessStatus;
 	/** ISO 4217 code every price at this salon is in, e.g. "EUR" (DB-08). */
 	currency: string;
+	/** IANA zone the salon's hours and appointments are on, e.g. "Europe/Berlin" (DB-09). */
+	timezone: string;
 	createdAt: string;
 	updatedAt: string | null;
 	addresses: Address[];
@@ -88,4 +90,6 @@ export interface BusinessInput {
 	status?: BusinessStatus;
 	/** Omitted on create means EUR; omitted on update keeps the stored one. */
 	currency?: string;
+	/** Omitted on create means Europe/Berlin; omitted on update keeps the stored one. */
+	timezone?: string;
 }
