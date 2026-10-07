@@ -6,10 +6,11 @@ import type { Id } from "@/lib/api/types";
 import { businessesRepository } from "./businesses.api";
 import type { BusinessInput } from "./businesses.types";
 
-export function useBusinesses() {
+export function useBusinesses(enabled = true) {
 	return useQuery({
 		queryKey: queryKeys.businesses.list(),
 		queryFn: ({ signal }) => businessesRepository.list({ signal }),
+		enabled,
 	});
 }
 

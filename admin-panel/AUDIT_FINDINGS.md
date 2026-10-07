@@ -110,7 +110,11 @@ findings it depends on are linked by their `BE-xx` / `DB-xx` IDs.
   times, or a time typed in for one staff member, since availability is advice and the backend only refuses a
   double booking. A client's Appointments tab lists their history, and their profile counts completed visits and
   spend from it. Guarded by `appointments.mappers.test.ts`, `appointments.rules.test.ts`, `wallClock.test.ts`,
-  `appointmentLinks.test.ts`, `routeAccess.test.ts` and `customerVisits.test.ts`.)*
+  `appointmentLinks.test.ts`, `routeAccess.test.ts` and `customerVisits.test.ts`.
+  On [`feature/admin-panel-calendar`](../VERSION_CONTROL_GUIDE.md#br-2-7), the Calendar page shows a salon's day
+  or week on a FullCalendar time grid, run in UTC so the grid reads the salon's wall clock whatever the browser's
+  zone, for the whole team or one staff member, with closed hours or off-shift hours shaded. Clicking a time
+  starts the booking form on that day. Guarded by `calendarLayout.test.ts` and `appointmentLinks.test.ts`.)*
 - <a id="fe-05"></a>**FE-05 — No login rate limiting / lockout** (backend, [BE-22](../salon-backend/AUDIT_FINDINGS.md#be-22)) — the
   sign-in form is the entry point. **→ [`feature/salon-backend-login-rate-limiting`](../VERSION_CONTROL_GUIDE.md#br-3-1)**
 - <a id="fe-06"></a>✅ **FE-06 — Password policy is client-only.** `UserForm` enforces ≥ 8 characters; the

@@ -17,17 +17,19 @@ import AppointmentForm from "./AppointmentForm";
 import { appointmentHref } from "./appointmentLinks";
 
 /**
- * Book an appointment. The ?business=, ?customer= and ?staff= of a "Book" link say who to start
- * with; a salon's own staff always book at their own salon.
+ * Book an appointment. The ?business=, ?customer=, ?staff= and ?date= of a "Book" link say who and
+ * when to start with; a salon's own staff always book at their own salon.
  */
 export default function AppointmentCreateView({
 	businessParam,
 	customerParam,
 	staffParam,
+	dateParam,
 }: {
 	businessParam: Id | null;
 	customerParam: Id | null;
 	staffParam: Id | null;
+	dateParam: string | null;
 }) {
 	const router = useRouter();
 	const { user } = useAuth();
@@ -72,7 +74,7 @@ export default function AppointmentCreateView({
 				<AppointmentForm
 					businessId={scope.kind === "business" ? scope.businessId : businessParam}
 					pickBusiness={scope.kind === "platform"}
-					prefill={{ customerId: customerParam, staffId: staffParam }}
+					prefill={{ customerId: customerParam, staffId: staffParam, date: dateParam }}
 					submitLabel="Book appointment"
 					submitting={book.isPending}
 					onSubmit={handleSubmit}

@@ -1,17 +1,17 @@
 import type { Metadata } from "next";
-import PagePlaceholder from "@/components/ui/PagePlaceholder";
+import CalendarView from "@/features/calendar/CalendarView";
+import { idParam } from "@/features/appointments/appointmentLinks";
 
 export const metadata: Metadata = {
 	title: "Calendar · Salon Admin",
 };
 
-export default function CalendarPage() {
-	return (
-		<PagePlaceholder
-			title="Calendar"
-			description="Day, week and month views across your team."
-			phase="Phase 4"
-			detail="The scheduling grid, drag-to-book and availability checks arrive together."
-		/>
-	);
+// `searchParams` is a Promise in this version of Next and must be awaited.
+export default async function CalendarPage({
+	searchParams,
+}: {
+	searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
+	const { business, staff } = await searchParams;
+	return <CalendarView businessParam={idParam(business)} staffParam={idParam(staff)} />;
 }

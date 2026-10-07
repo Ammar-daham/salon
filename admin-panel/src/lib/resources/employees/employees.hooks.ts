@@ -18,10 +18,12 @@ import type { CreateEmployeeInput, Employee, UpdateEmployeeInput } from "./emplo
  */
 export const source: DataSource = "live";
 
-export function useEmployees(businessId: Id | null) {
+/** Names come from /users, so `enabled` stays false for anyone without employee:list. */
+export function useEmployees(businessId: Id | null, enabled = true) {
 	const query = useQuery({
 		queryKey: queryKeys.employees.list(businessId),
 		queryFn: ({ signal }) => listEmployees(businessId, { signal }),
+		enabled,
 	});
 	return { ...query, data: query.data ?? [], source };
 }
