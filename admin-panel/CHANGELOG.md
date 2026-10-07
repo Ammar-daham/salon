@@ -9,8 +9,9 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 
 ## [Unreleased]
 
-Requires salon-backend with the customers API (DB-03), migration V9 (DB-07, DB-08) and the opening
-hours API with migration V10 (DB-09, DB-14).
+Requires salon-backend with the customers API (DB-03), migration V9 (DB-07, DB-08), the opening
+hours API with migration V10 (DB-09, DB-14), and the appointments and availability APIs with
+migration V12 (DB-13, DB-14).
 
 ### Changed
 - Customers run on live data from `/businesses/{id}/customers` instead of generated sample data
@@ -21,6 +22,13 @@ hours API with migration V10 (DB-09, DB-14).
 - Address coordinates are read as numbers, matching the backend (DB-07).
 
 ### Added
+- An Appointments page (`/appointments`) with the salon's bookings by date, on the salon's clock,
+  filterable by status and staff member and searchable by client, service or staff. A SUPER_ADMIN
+  sees every salon's. The same list fills each salon's and each employee's Appointments tab
+  (FE-04).
+- An appointment page (`/appointments/:id`) with the client, staff member, service, notes and the
+  price it was booked at. It can be confirmed, marked completed or a no-show once it has started,
+  or cancelled; the last three are final, so the panel asks first (FE-04).
 - An Hours tab on each salon (`/businesses/:id/hours`) with its weekly opening hours, on the salon's
   clock. A day without hours is closed, and a second interval makes a lunch break. The week is saved
   whole, and backwards or overlapping intervals are pointed out before saving. Admins edit it;

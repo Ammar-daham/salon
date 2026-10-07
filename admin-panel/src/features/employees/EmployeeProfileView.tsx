@@ -66,9 +66,9 @@ export default function EmployeeProfileView() {
 				<p className="text-sm text-ink-muted">
 					This profile is live - title, salon and hire date all come from the real{" "}
 					<code className="rounded bg-neutral-100 px-1 py-0.5 text-xs dark:bg-white/10">staff</code>{" "}
-					table. Working hours and bookings aren&apos;t shown here because neither exists on the
-					backend yet: there is no business-hours/schedule table and no appointments table. See the
-					Schedule and Appointments tabs.
+					table. Working hours are on the Schedule tab and bookings on the Appointments tab. Which
+					services they perform and their time off are stored by the backend, but can&apos;t be
+					edited here yet.
 				</p>
 			</Card>
 		</div>

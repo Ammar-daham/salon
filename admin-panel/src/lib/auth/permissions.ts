@@ -82,7 +82,8 @@ const EMPLOYEE_GRANTS: Permission[] = [
 	"business:view",
 	"customer:list", "customer:create",
 	"service:list",
-	// Scoped to their own appointments at the row level; no delete, cancel only.
+	// Their whole salon's book, as a front desk does: AppointmentService lets any of its staff
+	// book and change any of its appointments. There is no delete, only cancel.
 	"appointment:list", "appointment:create", "appointment:edit", "appointment:cancel",
 	"calendar:view",
 	"notification:view",
