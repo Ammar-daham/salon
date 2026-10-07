@@ -1,5 +1,7 @@
 package com.example.salon.support;
 
+import com.example.salon.security.LoginThrottle;
+import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
@@ -43,6 +45,16 @@ public abstract class IntegrationTest
 
 	@Autowired
 	protected MockMvc mvc;
+
+	@Autowired
+	private LoginThrottle loginThrottle;
+
+	/** Failed sign-ins are counted in memory, across the shared context; each test starts with none. */
+	@BeforeEach
+	void forgetFailedSignIns()
+	{
+		loginThrottle.reset();
+	}
 
 	/** Ids and credentials from fixtures/seed.sql. */
 	public static final class Fixture

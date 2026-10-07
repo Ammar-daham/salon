@@ -19,6 +19,14 @@ version. The version lives in [`gradle.properties`](gradle.properties); each rel
 - A service `price` is required (it used to default to 0 when omitted) and accepts at most 2
   decimals (DB-08).
 
+### Security
+- Failed sign-ins are limited to five per email and twenty per client address in any 15 minutes.
+  Past that, `POST /api/v1/auth/login` answers 429 `TOO_MANY_REQUESTS` with `Retry-After` in seconds,
+  even for the right password, until the oldest failure is 15 minutes old. A successful sign-in
+  clears the email's failures and doesn't count against the address. Emails without an account lock
+  the same way. The limits are `app.login-throttle.max-failures-per-account`,
+  `max-failures-per-address` and `window` (BE-22).
+
 ### Added
 - Availability at `GET /api/v1/businesses/{businessId}/services/{serviceId}/availability`: the
   salon's `timezone`, the service's `duration_minutes`, and for each active staff member who performs

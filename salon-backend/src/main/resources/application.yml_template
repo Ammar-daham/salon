@@ -6,3 +6,9 @@ app:
     pool-size: 30
   cors:
     allowed-origins: http://localhost:3000
+  # Failed sign-ins (BE-22): at most this many on one email, and from one address, in any window.
+  # These are the defaults, so the block can be left out.
+  login-throttle:
+    max-failures-per-account: 5
+    max-failures-per-address: 20
+    window: 15m

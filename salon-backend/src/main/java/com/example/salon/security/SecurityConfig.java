@@ -6,6 +6,7 @@ import com.example.salon.logging.RequestLog;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -117,8 +118,9 @@ public class SecurityConfig
 		configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
 		configuration.setAllowedHeaders(List.of("*"));
 		configuration.setAllowCredentials(true);
-		// Lets the panel read the id to show it alongside an error, so a report can be matched to the logs.
-		configuration.setExposedHeaders(List.of(RequestLog.REQUEST_ID_HEADER));
+		// Lets the panel read the id to show it alongside an error, so a report can be matched to the logs,
+		// and how long a locked-out sign-in has to wait (BE-22).
+		configuration.setExposedHeaders(List.of(RequestLog.REQUEST_ID_HEADER, HttpHeaders.RETRY_AFTER));
 
 		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
 		source.registerCorsConfiguration("/**", configuration);

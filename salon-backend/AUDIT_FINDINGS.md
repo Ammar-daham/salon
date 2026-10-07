@@ -219,8 +219,21 @@ Root causes:
 
 ### High
 - **Tenant isolation / privilege escalation** — [BE-01](#be-01) to [BE-05](#be-05). The single most serious problem.
-- <a id="be-22"></a>**BE-22 — No rate limiting or account lockout** on `POST /api/v1/auth/login`.
+- <a id="be-22"></a>✅ **BE-22 — No rate limiting or account lockout** on `POST /api/v1/auth/login`.
   **→ [`feature/salon-backend-login-rate-limiting`](../VERSION_CONTROL_GUIDE.md#br-3-1)**
+  *(fixed: `LoginThrottle` allows five failed sign-ins per email, in any case, and twenty per client
+  address, in any 15 minutes. Past that, the email is locked from anywhere, or the address for every email,
+  until the oldest failure is 15 minutes old: 429 `TOO_MANY_REQUESTS` with `Retry-After`, refused before
+  the password is checked, so a right guess while locked looks like a wrong one and costs no bcrypt. An
+  attempt counts from the moment it's let through until it succeeds, so a burst of concurrent requests
+  can't all get past while the first are still being checked. A successful sign-in clears the email's
+  failures and doesn't count against the address, so a salon behind one router isn't locked out by its own
+  staff. Emails with no account are counted the same way, so the lockout doesn't reveal which accounts
+  exist. Each lock is logged with the email masked. The limits are `app.login-throttle.*`. Counts are kept
+  in memory, so they are per instance and cleared on restart, and expired ones are swept once 10,000 are
+  tracked. The address is `getRemoteAddr()`: behind a reverse proxy every client would share the proxy's
+  address, and so its limit, until `server.forward-headers-strategy` is set, which belongs with the
+  production config ([BE-25](#be-25)). Guarded by `LoginThrottleTest` and `LoginRateLimitingTest`.)*
 - <a id="be-23"></a>✅ **BE-23 — No server-side validation.** `spring-boot-starter-validation` is a dependency
   but there are zero `@Valid`/`@NotBlank`/`@Email`/`@Size` annotations. Password strength and email
   format are unchecked server-side; request bodies bind straight onto domain models (mass assignment

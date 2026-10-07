@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -34,6 +35,16 @@ public class GlobalControllerExceptionHandler
             log.error("Server error at {}", request.getRequestURI(), ex);
         }
         return build(ex.getStatus(), ex.getErrorCode(), ex.getMessage(), request);
+    }
+
+    @ExceptionHandler(TooManyAttemptsException.class)
+    public ResponseEntity<ErrorResponse> handleTooManyAttempts(TooManyAttemptsException ex, HttpServletRequest request)
+    {
+        // Retry-After lets a client wait the right time without reading the message.
+        ResponseEntity<ErrorResponse> response = build(ex.getStatus(), ex.getErrorCode(), ex.getMessage(), request);
+        return ResponseEntity.status(response.getStatusCode())
+                .header(HttpHeaders.RETRY_AFTER, String.valueOf(ex.getRetryAfterSeconds()))
+                .body(response.getBody());
     }
 
     @ExceptionHandler(AccessDeniedException.class)
