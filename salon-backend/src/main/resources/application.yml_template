@@ -12,3 +12,22 @@ app:
     max-failures-per-account: 5
     max-failures-per-address: 20
     window: 15m
+  # Forgotten passwords (FE-13): where the emailed link points (the admin panel's reset page, which
+  # reads ?token=), how long it works, and how many a user can be sent an hour. These are the defaults.
+  password-reset:
+    link: http://localhost:3000/reset-password
+    valid-for: 1h
+    max-per-hour: 3
+  mail:
+    from: "Salon Admin <no-reply@localhost>"
+# Without spring.mail.host, emails such as reset links are written to the log instead (outside the
+# prod profile), which is enough for development. To send them, point it at any SMTP server:
+#spring:
+#  mail:
+#    host: smtp.example.com
+#    port: 587
+#    username: add_your_smtp_user
+#    password: add_your_smtp_password
+#    properties:
+#      mail.smtp.auth: true
+#      mail.smtp.starttls.enable: true

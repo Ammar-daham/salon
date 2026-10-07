@@ -1,6 +1,8 @@
 package com.example.salon.controller;
 
 import com.example.salon.dto.ChangePasswordRequest;
+import com.example.salon.dto.ForgotPasswordRequest;
+import com.example.salon.dto.ResetPasswordRequest;
 import com.example.salon.exception.BaseException;
 import com.example.salon.exception.ErrorCode;
 import com.example.salon.logging.RequestLog;
@@ -9,6 +11,7 @@ import com.example.salon.security.AuthUserResponse;
 import com.example.salon.security.AuthenticatedUser;
 import com.example.salon.security.LoginRequest;
 import com.example.salon.security.LoginThrottle;
+import com.example.salon.service.PasswordResetService;
 import com.example.salon.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -45,16 +48,19 @@ public class AuthController
 	private final LoginThrottle loginThrottle;
 	private final PasswordEncoder passwordEncoder;
 	private final UserService userService;
+	private final PasswordResetService passwordResetService;
 
 	@Autowired
 	public AuthController(AuthenticationManager authenticationManager, SecurityContextRepository securityContextRepository,
-			LoginThrottle loginThrottle, PasswordEncoder passwordEncoder, UserService userService)
+			LoginThrottle loginThrottle, PasswordEncoder passwordEncoder, UserService userService,
+			PasswordResetService passwordResetService)
 	{
 		this.authenticationManager = authenticationManager;
 		this.securityContextRepository = securityContextRepository;
 		this.loginThrottle = loginThrottle;
 		this.passwordEncoder = passwordEncoder;
 		this.userService = userService;
+		this.passwordResetService = passwordResetService;
 	}
 
 	@PostMapping("/login")
@@ -108,6 +114,25 @@ public class AuthController
 		saveSignedIn(UsernamePasswordAuthenticationToken.authenticated(signedIn, null, signedIn.getAuthorities()),
 				servletRequest, servletResponse);
 		log.info("User {} changed their password", user.getId());
+	}
+
+	/**
+	 * Emails a reset link if the email has an account that can sign in (FE-13). The answer is the same
+	 * either way, and comes before the email is looked up.
+	 */
+	@PostMapping("/forgot-password")
+	@ResponseStatus(HttpStatus.ACCEPTED)
+	public void forgotPassword(@Valid @RequestBody ForgotPasswordRequest request)
+	{
+		passwordResetService.requestReset(request.email());
+	}
+
+	/** Sets a new password with the token from a reset link. Every session of the user is signed out. */
+	@PostMapping("/reset-password")
+	@ResponseStatus(HttpStatus.NO_CONTENT)
+	public void resetPassword(@Valid @RequestBody ResetPasswordRequest request)
+	{
+		passwordResetService.resetPassword(request.token(), request.password());
 	}
 
 	@PostMapping("/logout")

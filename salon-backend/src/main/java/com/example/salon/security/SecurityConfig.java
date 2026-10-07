@@ -77,6 +77,9 @@ public class SecurityConfig
 				.authorizeHttpRequests(auth -> auth
 						.requestMatchers("/error").permitAll()
 						.requestMatchers(HttpMethod.POST, "/api/v1/auth/login").permitAll()
+						// Forgetting your password means you can't sign in (FE-13).
+						.requestMatchers(HttpMethod.POST, "/api/v1/auth/forgot-password", "/api/v1/auth/reset-password")
+								.permitAll()
 						.requestMatchers("/api/v1/auth/**").authenticated()
 						// Listing every user/address/contact leaks everyone's PII to any logged-in
 						// customer - keep the bulk "list all" endpoints admin-only.

@@ -5,6 +5,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.test.context.DynamicPropertyRegistry;
@@ -24,6 +25,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  */
 @SpringBootTest
 @AutoConfigureMockMvc
+@Import(RecordingMailer.Config.class)
 @Sql(scripts = {"/fixtures/reset.sql", "/fixtures/seed.sql"})
 public abstract class IntegrationTest
 {
@@ -49,11 +51,15 @@ public abstract class IntegrationTest
 	@Autowired
 	private LoginThrottle loginThrottle;
 
-	/** Failed sign-ins are counted in memory, across the shared context; each test starts with none. */
+	@Autowired
+	protected RecordingMailer mailer;
+
+	/** Failed sign-ins and sent emails are kept in memory, across the shared context; each test starts with none. */
 	@BeforeEach
-	void forgetFailedSignIns()
+	void forgetFailedSignInsAndEmails()
 	{
 		loginThrottle.reset();
+		mailer.clear();
 	}
 
 	/** Ids and credentials from fixtures/seed.sql. */
