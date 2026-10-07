@@ -145,6 +145,12 @@ public class UserDataAccessService implements UserDao
 	}
 
 	@Override
+	public long updatePasswordHash(long id, String passwordHash)
+	{
+		return jdbcTemplate.update("UPDATE users SET password_hash = ? WHERE id = ?", passwordHash, id);
+	}
+
+	@Override
 	public long deleteUserById(long id)
 	{
 		contactDao.getContactsForUser(id).forEach(contact -> contactDao.deleteContactById(contact.getId()));

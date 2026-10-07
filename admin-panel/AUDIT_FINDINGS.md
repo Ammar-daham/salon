@@ -173,6 +173,10 @@ findings it depends on are linked by their `BE-xx` / `DB-xx` IDs.
 - <a id="fe-13"></a>**FE-13 — Staff password can never be changed or reset.** `UserForm` says so
   explicitly; no endpoint exists. **→ [`feature/salon-backend-password-reset`](../VERSION_CONTROL_GUIDE.md#br-3-2), then
   [`feature/admin-panel-password-reset`](../VERSION_CONTROL_GUIDE.md#br-3-3)**
+  *(In progress. On [`feature/salon-backend-password-reset`](../VERSION_CONTROL_GUIDE.md#br-3-2),
+  `POST /api/v1/auth/change-password` changes the signed-in user's own password given the current one, and every
+  other session of theirs is signed out: a session whose password hash no longer matches the user's is
+  invalidated on its next request. Guarded by `PasswordChangeTest`.)*
 
 ### Low
 - <a id="fe-14"></a>**FE-14 — TailAdmin leftovers.** `README.md` is the template's README,
