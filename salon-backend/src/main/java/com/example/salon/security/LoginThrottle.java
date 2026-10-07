@@ -20,7 +20,7 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * Failed sign-ins, counted per email and per client address (BE-22). An email gets a few tries in
+ * Failed sign-ins, counted per email and per client address. An email gets a few tries in
  * any window, and an address more, across every email it tries; past that, sign-in is refused until
  * the oldest of them is a window old. The refusal comes before the password is checked, so while
  * locked a right guess gets the same answer as a wrong one.
