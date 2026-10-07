@@ -37,11 +37,11 @@ export function useAppointment(businessId: Id | null, appointmentId: Id | null) 
  * Slots change with every booking anywhere in the salon, and with its hours and shifts, so
  * they are fetched again whenever the form shows them rather than trusted for a minute.
  */
-export function useAvailability(businessId: Id | null, serviceId: Id | null, date: string) {
+export function useAvailability(businessId: Id | null, serviceId: Id | null, date: string | null) {
 	return useQuery({
-		queryKey: queryKeys.appointments.availability(businessId ?? -1, serviceId ?? -1, date),
-		queryFn: ({ signal }) => getAvailability(businessId as Id, serviceId as Id, date, { signal }),
-		enabled: businessId != null && serviceId != null,
+		queryKey: queryKeys.appointments.availability(businessId ?? -1, serviceId ?? -1, date ?? ""),
+		queryFn: ({ signal }) => getAvailability(businessId as Id, serviceId as Id, date as string, { signal }),
+		enabled: businessId != null && serviceId != null && !!date,
 		staleTime: 0,
 	});
 }

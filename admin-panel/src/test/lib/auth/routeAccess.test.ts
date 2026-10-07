@@ -13,6 +13,9 @@ const admins: Access = { SUPER_ADMIN: true, ADMIN: true, EMPLOYEE: false };
 const ROUTES: [string, Access][] = [
 	["/", all],
 	["/appointments", all],
+	["/appointments/new", all],
+	["/appointments/7", all],
+	["/appointments/7/edit", all],
 	["/calendar", all],
 	["/customers", all],
 	["/customers/7/notes", all],

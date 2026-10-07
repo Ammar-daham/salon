@@ -3,6 +3,8 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useAuth } from "@/context/AuthContext";
+import { can } from "@/lib/auth/permissions";
 import type { Id } from "@/lib/api/types";
 import { getErrorMessage } from "@/lib/api/errors";
 import { useDataTable } from "@/lib/table/useDataTable";
@@ -25,7 +27,7 @@ import EmptyState from "@/components/ui/EmptyState";
 import StatusBadge from "@/components/ui/StatusBadge";
 import Button from "@/components/ui/button/Button";
 import { SelectInput, TextInput } from "@/components/ui/form/Field";
-import { ErrorIcon, TaskIcon } from "@/icons";
+import { ErrorIcon, PlusIcon, TaskIcon } from "@/icons";
 import { appointmentHref } from "./appointmentLinks";
 
 type HideableColumn = "customer" | "staff";
@@ -45,6 +47,8 @@ interface AppointmentListProps {
 	hide?: HideableColumn[];
 	/** Shown under "No appointments yet", e.g. how to book one. */
 	emptyHint?: string;
+	/** Where "Book appointment" goes, starting the form with this page's salon, client or staff member. */
+	bookHref?: string;
 }
 
 /**
@@ -58,8 +62,10 @@ export default function AppointmentList({
 	mode = "dates",
 	hide = [],
 	emptyHint,
+	bookHref,
 }: AppointmentListProps) {
 	const router = useRouter();
+	const { user } = useAuth();
 	// The browser's today: close enough for a starting range, and one range may span salons on different clocks.
 	const [from, setFrom] = useState(() => todayOn(browserTimeZone()));
 	const [to, setTo] = useState(() => addDays(todayOn(browserTimeZone()), 6));
@@ -249,11 +255,18 @@ export default function AppointmentList({
 						))}
 					</SelectInput>
 				)}
-				{datesValid && !isPending && !isError && (
-					<p className="text-sm text-ink-subtle lg:ml-auto">
-						{table.total} {table.total === 1 ? "appointment" : "appointments"}
-					</p>
-				)}
+				<div className="flex items-center justify-between gap-3 lg:ml-auto">
+					{datesValid && !isPending && !isError && (
+						<p className="text-sm text-ink-subtle">
+							{table.total} {table.total === 1 ? "appointment" : "appointments"}
+						</p>
+					)}
+					{bookHref && can(user, "appointment:create") && (
+						<Button startIcon={<PlusIcon className="size-4" />} onClick={() => router.push(bookHref)}>
+							Book appointment
+						</Button>
+					)}
+				</div>
 			</div>
 
 			{!datesValid ? (

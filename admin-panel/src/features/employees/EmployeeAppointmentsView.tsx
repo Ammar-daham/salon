@@ -4,6 +4,7 @@ import { useParams } from "next/navigation";
 import { useEmployee } from "@/lib/resources/employees/employees.hooks";
 import { Skeleton } from "@/components/ui/Skeleton";
 import AppointmentList from "@/features/appointments/AppointmentList";
+import { bookingHref } from "@/features/appointments/appointmentLinks";
 
 /** Who a staff member is booked with, by date. */
 export default function EmployeeAppointmentsView() {
@@ -14,5 +15,12 @@ export default function EmployeeAppointmentsView() {
 	const { data: employee } = useEmployee(Number.isNaN(id) ? null : id);
 	if (!employee) return <Skeleton className="h-64 rounded-card" />;
 
-	return <AppointmentList businessId={employee.businessId} staffId={employee.id} hide={["staff"]} />;
+	return (
+		<AppointmentList
+			businessId={employee.businessId}
+			staffId={employee.id}
+			hide={["staff"]}
+			bookHref={bookingHref({ businessId: employee.businessId, staffId: employee.id })}
+		/>
+	);
 }

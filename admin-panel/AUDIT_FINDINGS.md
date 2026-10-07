@@ -106,8 +106,10 @@ findings it depends on are linked by their `BE-xx` / `DB-xx` IDs.
   On [`feature/admin-panel-appointments`](../VERSION_CONTROL_GUIDE.md#br-2-6), the Appointments page and each
   salon's and employee's Appointments tab list bookings by date, shown on the salon's clock rather than the
   browser's, and an appointment's page offers only the status moves the backend accepts: completed and no-show
-  once it has started, and nothing after a final one. Guarded by `appointments.mappers.test.ts`,
-  `appointments.rules.test.ts`, `wallClock.test.ts` and `appointmentLinks.test.ts`.)*
+  once it has started, and nothing after a final one. Appointments are booked and changed from the salon's open
+  times, or a time typed in for one staff member, since availability is advice and the backend only refuses a
+  double booking. Guarded by `appointments.mappers.test.ts`, `appointments.rules.test.ts`, `wallClock.test.ts`,
+  `appointmentLinks.test.ts` and `routeAccess.test.ts`.)*
 - <a id="fe-05"></a>**FE-05 — No login rate limiting / lockout** (backend, [BE-22](../salon-backend/AUDIT_FINDINGS.md#be-22)) — the
   sign-in form is the entry point. **→ [`feature/salon-backend-login-rate-limiting`](../VERSION_CONTROL_GUIDE.md#br-3-1)**
 - <a id="fe-06"></a>✅ **FE-06 — Password policy is client-only.** `UserForm` enforces ≥ 8 characters; the

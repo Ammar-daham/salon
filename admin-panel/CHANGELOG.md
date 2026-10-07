@@ -29,6 +29,12 @@ migration V12 (DB-13, DB-14).
 - An appointment page (`/appointments/:id`) with the client, staff member, service, notes and the
   price it was booked at. It can be confirmed, marked completed or a no-show once it has started,
   or cancelled; the last three are final, so the panel asks first (FE-04).
+- Booking (`/appointments/new`) and changing (`/appointments/:id/edit`) appointments. Pick a client
+  and a service, then one of the salon's open times for a day, from anyone who performs it or one
+  staff member. A time outside the open times can be typed in for one staff member, and changing an
+  appointment can keep its current time. A SUPER_ADMIN picks the salon first. "Book appointment" on
+  a salon's or employee's Appointments tab starts the form with them; a booked or confirmed
+  appointment's page has an Edit button (FE-04).
 - An Hours tab on each salon (`/businesses/:id/hours`) with its weekly opening hours, on the salon's
   clock. A day without hours is closed, and a second interval makes a lunch break. The week is saved
   whole, and backwards or overlapping intervals are pointed out before saving. Admins edit it;

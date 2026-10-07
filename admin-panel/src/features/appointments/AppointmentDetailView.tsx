@@ -2,13 +2,14 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { can } from "@/lib/auth/permissions";
 import { resolveBusinessScope } from "@/lib/auth/scope";
 import type { Id } from "@/lib/api/types";
 import { getErrorMessage, isApiError } from "@/lib/api/errors";
 import { useAppointment, useChangeAppointmentStatus } from "@/lib/resources/appointments/appointments.hooks";
-import { hasStarted, nextStatuses, waitsForStart } from "@/lib/resources/appointments/appointments.rules";
+import { hasStarted, isOpen, nextStatuses, waitsForStart } from "@/lib/resources/appointments/appointments.rules";
 import {
 	APPOINTMENT_STATUS_LABELS,
 	APPOINTMENT_STATUS_TONE,
@@ -27,7 +28,8 @@ import Button from "@/components/ui/button/Button";
 import ConfirmDialog from "@/components/ui/modal/ConfirmDialog";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { useToast } from "@/components/ui/toast/ToastProvider";
-import { ChevronLeftIcon, ErrorIcon, TaskIcon } from "@/icons";
+import { ChevronLeftIcon, ErrorIcon, PencilIcon, TaskIcon } from "@/icons";
+import { appointmentHref } from "./appointmentLinks";
 
 const LONG_DATE: Intl.DateTimeFormatOptions = { weekday: "long", day: "numeric", month: "long", year: "numeric" };
 
@@ -79,6 +81,7 @@ function finalMoveDialog(appointment: Appointment, status: AppointmentStatus) {
  */
 export default function AppointmentDetailView({ id, businessParam }: { id: Id; businessParam: Id | null }) {
 	const { user } = useAuth();
+	const router = useRouter();
 	const { toast } = useToast();
 	const scope = resolveBusinessScope(user);
 	const businessId =
@@ -162,6 +165,18 @@ export default function AppointmentDetailView({ id, businessParam }: { id: Id; b
 			<PageHeader
 				title={appointment.service.name}
 				description={`${formatWallDate(appointment.startsAt, LONG_DATE)}, ${timeOf(appointment.startsAt)}–${timeOf(appointment.endsAt)}`}
+				actions={
+					isOpen(appointment.status) &&
+					can(user, "appointment:edit") && (
+						<Button
+							variant="outline"
+							startIcon={<PencilIcon className="size-4" />}
+							onClick={() => router.push(appointmentHref(appointment, "/edit"))}
+						>
+							Edit
+						</Button>
+					)
+				}
 			/>
 
 			<div className="mb-6 flex flex-wrap items-center gap-3">
