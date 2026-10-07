@@ -4,7 +4,7 @@ import lombok.EqualsAndHashCode;
 
 import java.time.Duration;
 
-/** A 429 that says how long to wait, in the message and as Retry-After (BE-22). */
+/** A 429 that says how long to wait, in the message and as Retry-After. */
 @EqualsAndHashCode(callSuper = true)
 public class TooManyAttemptsException extends BaseException
 {
