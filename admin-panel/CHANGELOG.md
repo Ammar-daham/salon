@@ -39,6 +39,11 @@ migration V12 (DB-13, DB-14).
   have coming, newest first, with "Book appointment" starting the form with them. Their profile's
   Visits and spend card counts completed visits, what they cost and the last one, and links the next
   booked or confirmed appointment (FE-04).
+- A Calendar page (`/calendar`) with a salon's appointments by day or week, on the salon's clock,
+  for the whole team in each staff member's colour or for one of them. Hours outside opening
+  hours, or outside that staff member's shifts, are shaded. Clicking an appointment opens it, and
+  clicking an empty time or "Book" starts the booking form on that day. A SUPER_ADMIN picks the
+  salon first; an employee's Appointments tab links to their week (FE-04).
 - An Hours tab on each salon (`/businesses/:id/hours`) with its weekly opening hours, on the salon's
   clock. A day without hours is closed, and a second interval makes a lunch break. The week is saved
   whole, and backwards or overlapping intervals are pointed out before saving. Admins edit it;

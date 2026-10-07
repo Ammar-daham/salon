@@ -44,8 +44,8 @@ interface AppointmentFormProps {
 	pickBusiness?: boolean;
 	/** The appointment being changed. Leave out to book a new one. */
 	initial?: Appointment;
-	/** Who to start with when booking from a client's or staff member's page. */
-	prefill?: { customerId?: Id | null; staffId?: Id | null };
+	/** Who and when to start with when booking from a client's or staff member's page, or the calendar. */
+	prefill?: { customerId?: Id | null; staffId?: Id | null; date?: string | null };
 	submitLabel: string;
 	submitting: boolean;
 	onSubmit: (input: AppointmentInput, salon: SalonRef) => void | Promise<void>;
@@ -85,7 +85,7 @@ export default function AppointmentForm({
 	const [customerId, setCustomerId] = useState(String(initial?.customer.id ?? prefill?.customerId ?? ""));
 	const [serviceId, setServiceId] = useState(String(initial?.service.id ?? ""));
 	// null until moved: today on the salon's clock, or the day of the appointment being changed.
-	const [date, setDate] = useState<string | null>(initial ? initial.startsAt.slice(0, 10) : null);
+	const [date, setDate] = useState<string | null>(initial ? initial.startsAt.slice(0, 10) : (prefill?.date ?? null));
 	const [staffFilter, setStaffFilter] = useState(String(initial?.staff.id ?? prefill?.staffId ?? ""));
 	const [picked, setPicked] = useState<Choice | null>(
 		initial ? { staffId: initial.staff.id, startsAt: initial.startsAt } : null,

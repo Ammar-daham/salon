@@ -643,8 +643,23 @@ span.flatpickr-weekday,
   border: none;
   color: black;
 }
-.fc.fc-media-screen {
-  @apply min-h-screen;
+
+/* The calendar (FE-04): FullCalendar's own colours on the panel's tokens, so it follows dark mode. */
+.fc {
+  --fc-border-color: var(--border-default);
+  --fc-page-bg-color: var(--surface-raised);
+  --fc-neutral-bg-color: var(--surface-sunken);
+  --fc-today-bg-color: color-mix(in srgb, var(--color-primary-500) 6%, transparent);
+  --fc-non-business-color: color-mix(in srgb, var(--ink) 6%, transparent);
+  --fc-highlight-color: color-mix(in srgb, var(--color-primary-500) 12%, transparent);
+  --fc-now-indicator-color: var(--color-primary-500);
+}
+.fc-timeGridWeek-view {
+  min-width: 720px;
+}
+/* The staff member's colour down the left edge; the fill is a tint of it (calendarLayout.ts). */
+.fc-v-event.appointment-event {
+  border-width: 1px 1px 1px 4px;
 }
 
 .input-date-icon::-webkit-inner-spin-button,
