@@ -115,8 +115,12 @@ findings it depends on are linked by their `BE-xx` / `DB-xx` IDs.
   or week on a FullCalendar time grid, run in UTC so the grid reads the salon's wall clock whatever the browser's
   zone, for the whole team or one staff member, with closed hours or off-shift hours shaded. Clicking a time
   starts the booking form on that day. Guarded by `calendarLayout.test.ts` and `appointmentLinks.test.ts`.)*
-- <a id="fe-05"></a>**FE-05 — No login rate limiting / lockout** (backend, [BE-22](../salon-backend/AUDIT_FINDINGS.md#be-22)) — the
+- <a id="fe-05"></a>✅ **FE-05 — No login rate limiting / lockout** (backend, [BE-22](../salon-backend/AUDIT_FINDINGS.md#be-22)) — the
   sign-in form is the entry point. **→ [`feature/salon-backend-login-rate-limiting`](../VERSION_CONTROL_GUIDE.md#br-3-1)**
+  *(fixed by [BE-22](../salon-backend/AUDIT_FINDINGS.md#be-22): repeated failed sign-ins lock the email and the
+  address they come from, with a 429 whose message says how long to wait. No admin-panel change was needed:
+  `SignInForm` shows the response's `message` for any error (`getErrorMessage`), and only a 401 triggers the
+  global sign-out, so the lockout reads "Too many failed sign-in attempts. Try again in 15 minutes.")*
 - <a id="fe-06"></a>✅ **FE-06 — Password policy is client-only.** `UserForm` enforces ≥ 8 characters; the
   backend accepts any non-blank password. A direct API call bypasses it. Email format is likewise
   HTML5-only ([BE-23](../salon-backend/AUDIT_FINDINGS.md#be-23)). **→ [`feature/salon-backend-request-validation`](../VERSION_CONTROL_GUIDE.md#br-1-4)**
