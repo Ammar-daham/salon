@@ -28,3 +28,9 @@ export interface ChangePasswordInput {
 	currentPassword: string;
 	newPassword: string;
 }
+
+export interface ResetPasswordInput {
+	/** From the emailed link's `?token=`. */
+	token: string;
+	password: string;
+}

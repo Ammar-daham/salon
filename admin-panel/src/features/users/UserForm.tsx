@@ -42,7 +42,8 @@ interface UserFormProps {
  *
  * On edit the backend only writes first_name, last_name and role — email can't
  * be changed at all, and only the account holder can change their password, in
- * Settings. The form shows email as read-only rather than pretending otherwise.
+ * Settings or by a reset link. The form shows email as read-only rather than
+ * pretending otherwise.
  */
 export default function UserForm({
 	mode,
@@ -209,7 +210,7 @@ export default function UserForm({
 			{isCreate && needsCredentials && (
 				<Card
 					title="Password"
-					description="The account holder can change it later in Settings."
+					description="The account holder can change it later in Settings, or reset it by email from the sign-in page."
 				>
 					<div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
 						<Field label="Password" required error={errors.password}>

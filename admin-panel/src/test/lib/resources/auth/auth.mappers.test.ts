@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { toAuthUser, toChangePasswordRequest } from "@/lib/resources/auth/auth.mappers";
+import {
+	toAuthUser,
+	toChangePasswordRequest,
+	toResetPasswordRequest,
+} from "@/lib/resources/auth/auth.mappers";
 
 describe("toAuthUser", () => {
 	it("maps the snake_case /auth/me response, including the business", () => {
@@ -40,6 +44,15 @@ describe("toChangePasswordRequest", () => {
 		expect(toChangePasswordRequest({ currentPassword: "old-secret", newPassword: "new-secret" })).toEqual({
 			current_password: "old-secret",
 			new_password: "new-secret",
+		});
+	});
+});
+
+describe("toResetPasswordRequest", () => {
+	it("sends the link's token and the new password as `password`, not `new_password`", () => {
+		expect(toResetPasswordRequest({ token: "Zm9vYmFy-_", password: "new-secret" })).toEqual({
+			token: "Zm9vYmFy-_",
+			password: "new-secret",
 		});
 	});
 });

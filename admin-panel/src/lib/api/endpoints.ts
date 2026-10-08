@@ -9,6 +9,9 @@ export const endpoints = {
 		logout: "/api/v1/auth/logout",
 		me: "/api/v1/auth/me",
 		changePassword: "/api/v1/auth/change-password",
+		// Both open to anyone, signed in or not.
+		forgotPassword: "/api/v1/auth/forgot-password",
+		resetPassword: "/api/v1/auth/reset-password",
 	},
 	users: {
 		root: "/api/v1/users",

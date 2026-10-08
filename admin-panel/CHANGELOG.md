@@ -27,6 +27,10 @@ migration V12 (DB-13, DB-14), and the password endpoints with migration V13 (FE-
 - Settings (`/settings`) shows your name, email and role, and changes your own password given the
   current one. You stay signed in, and every other session of yours is signed out. A wrong current
   password is pointed out on its field (FE-13).
+- "Forgot password?" on the sign-in page (`/forgot-password`) emails a reset link to the address
+  entered, and says the same whether or not it has an account. The link opens `/reset-password`,
+  which sets a new password, signs out every session of that account and returns to sign-in. A
+  link that's incomplete, used, replaced or expired offers to send a new one (FE-13).
 - An Appointments page (`/appointments`) with the salon's bookings by date, on the salon's clock,
   filterable by status and staff member and searchable by client, service or staff. A SUPER_ADMIN
   sees every salon's. The same list fills each salon's and each employee's Appointments tab
