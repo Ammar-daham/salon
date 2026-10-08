@@ -1,6 +1,9 @@
 package com.example.salon.dao;
 
+import com.example.salon.model.Address;
 import com.example.salon.model.Business;
+import com.example.salon.model.Contact;
+import com.example.salon.model.SalonService;
 import com.example.salon.model.Status;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -9,7 +12,9 @@ import org.springframework.stereotype.Repository;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Repository
 public class BusinessDataAccessService implements BusinessDao 
@@ -86,13 +91,7 @@ public class BusinessDataAccessService implements BusinessDao
                 FROM businesses
                 """;
         List<Business> businesses = jdbcTemplate.query(sql, (rs, i) -> mapBusiness(rs));
-
-        for (Business business : businesses) {
-            business.setAddresses(addressDao.getAddressesForBusiness(business.getId()));
-            business.setContacts(contactDao.getContactsForBusiness(business.getId()));
-            business.setServices(salonServiceDao.getServicesForBusiness(business.getId()));
-        }
-
+        loadChildren(businesses);
         return businesses;
     }
 
@@ -106,12 +105,22 @@ public class BusinessDataAccessService implements BusinessDao
                 WHERE id = ?
                 """;
         Business business = jdbcTemplate.queryForObject(sql, (rs, i) -> mapBusiness(rs), id);
-
-        business.setAddresses(addressDao.getAddressesForBusiness(business.getId()));
-        business.setContacts(contactDao.getContactsForBusiness(business.getId()));
-        business.setServices(salonServiceDao.getServicesForBusiness(business.getId()));
-
+        loadChildren(List.of(business));
         return business;
+    }
+
+    /** Three queries however many businesses there are, rather than three per business (BE-15). */
+    private void loadChildren(List<Business> businesses)
+    {
+        List<Long> ids = businesses.stream().map(Business::getId).toList();
+        Map<Long, List<Address>> addresses = addressDao.getAddressesForBusinesses(ids);
+        Map<Long, List<Contact>> contacts = contactDao.getContactsForBusinesses(ids);
+        Map<Long, List<SalonService>> services = salonServiceDao.getServicesForBusinesses(ids);
+        for (Business business : businesses) {
+            business.setAddresses(addresses.getOrDefault(business.getId(), new ArrayList<>()));
+            business.setContacts(contacts.getOrDefault(business.getId(), new ArrayList<>()));
+            business.setServices(services.getOrDefault(business.getId(), new ArrayList<>()));
+        }
     }
 
     @Override

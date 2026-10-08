@@ -285,10 +285,12 @@ Root causes:
   forwarded address and the timeout.)*
 
 ### Medium
-- <a id="be-26"></a>**BE-26 — SQL built via `%s` column interpolation.** `getAddressesByColumn` /
+- <a id="be-26"></a>✅ **BE-26 — SQL built via `%s` column interpolation.** `getAddressesByColumn` /
   `getContactsByColumn` are public and only fed literals today; one careless caller away from SQL
   injection. **→ [`feature/repo-pagination`](../VERSION_CONTROL_GUIDE.md#br-3-5)** (fixing the N+1
   rewrites exactly these methods)
+  *(fixed: both methods are gone. Addresses and contacts are read by owner with fixed SQL,
+  `business_id = ANY(?)` or `user_id = ANY(?)`, for every owner on a list at once ([BE-15](#be-15)).)*
 - <a id="be-27"></a>✅ **BE-27 — NPEs silently converted to 400** with no logging — hides real server bugs
   as client errors. **→ [`fix/salon-backend-error-handling`](../VERSION_CONTROL_GUIDE.md#br-0-10)**
   *(fixed: the `NullPointerException`→400 handler is gone. Any unhandled exception is now a logged 500

@@ -5,12 +5,27 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Repository
 public class AddressDataAccessService implements AddressDao
 {
+	private static final String SELECT = """
+			SELECT id, street, city,
+			country, postal_code,
+			latitude, longitude,
+			created_at, updated_at,
+			business_id, user_id
+			FROM addresses
+			""";
+
 	private final JdbcTemplate jdbcTemplate;
 
 	@Autowired
@@ -49,100 +64,56 @@ public class AddressDataAccessService implements AddressDao
 	@Override
 	public List<Address> getAddressesForBusiness(Long id)
 	{
-		return getAddressesByColumn("business_id", id);
+		return getAddressesForBusinesses(List.of(id)).getOrDefault(id, List.of());
 	}
 
 	@Override
 	public List<Address> getAddressesForUser(Long id)
 	{
-		return getAddressesByColumn("user_id", id);
+		return getAddressesForUsers(List.of(id)).getOrDefault(id, List.of());
 	}
 
-	public List<Address> getAddressesByColumn(String column, Long id)
+	@Override
+	public Map<Long, List<Address>> getAddressesForBusinesses(Collection<Long> businessIds)
 	{
-		String sql = """
-				SELECT id, street, city,
-				country, postal_code,
-				latitude, longitude,
-				created_at, updated_at
-				FROM addresses WHERE %s = ?;
-				""".formatted(column);
+		return byOwner(SELECT + "WHERE business_id = ANY(?) ORDER BY id", "business_id", businessIds);
+	}
 
-		return jdbcTemplate.query(sql, (rs, i) -> {
-				Timestamp updatedAt = rs.getTimestamp("updated_at");
-				return new Address(
-						rs.getLong("id"),
-						rs.getString("country"),
-						rs.getString("city"),
-						rs.getString("street"),
-						rs.getString("postal_code"),
-						rs.getBigDecimal("latitude"),
-						rs.getBigDecimal("longitude"),
-						rs.getTimestamp("created_at").toInstant(),
-						updatedAt != null ? updatedAt.toInstant() : null
-				);
-			}, id
-		);
+	@Override
+	public Map<Long, List<Address>> getAddressesForUsers(Collection<Long> userIds)
+	{
+		return byOwner(SELECT + "WHERE user_id = ANY(?) ORDER BY id", "user_id", userIds);
+	}
+
+	/** One query for every owner's addresses (BE-15), grouped by the owner in ownerColumn. */
+	private Map<Long, List<Address>> byOwner(String sql, String ownerColumn, Collection<Long> ownerIds)
+	{
+		Map<Long, List<Address>> byOwner = new HashMap<>();
+		if (ownerIds.isEmpty()) {
+			return byOwner;
+		}
+		jdbcTemplate.query(sql, rs -> {
+			byOwner.computeIfAbsent(rs.getLong(ownerColumn), owner -> new ArrayList<>()).add(mapRow(rs));
+		}, (Object) ownerIds.toArray(Long[]::new));
+		return byOwner;
 	}
 
 	@Override
 	public List<Address> getAllAddresses()
 	{
-		String sql = """
-				SELECT id, street, city,
-				country, postal_code,
-				latitude, longitude,
-				created_at, updated_at
-				from addresses
-				""";
-
-		return jdbcTemplate.query(sql, (rs, i) -> {
-			Timestamp updatedAt = rs.getTimestamp("updated_at");
-			return new Address(
-					rs.getLong("id"),
-					rs.getString("country"),
-					rs.getString("city"),
-					rs.getString("street"),
-					rs.getString("postal_code"),
-					rs.getBigDecimal("latitude"),
-					rs.getBigDecimal("longitude"),
-					rs.getTimestamp("created_at").toInstant(),
-					updatedAt != null ? updatedAt.toInstant() : null
-			);
-		});
+		return jdbcTemplate.query(SELECT + "ORDER BY id", (rs, i) -> mapRow(rs));
 	}
 
 	@Override
 	public Address getAddressById(int id)
 	{
-		String sql = """
-				SELECT id, street, city,
-				country, postal_code,
-				latitude, longitude,
-				created_at, updated_at,
-				business_id, user_id
-				FROM addresses WHERE id = ?
-				""";
-		return jdbcTemplate.queryForObject(sql, (rs, i) -> {
-					Timestamp updatedAt = rs.getTimestamp("updated_at");
-					Address address = new Address(
-							rs.getLong("id"),
-							rs.getString("country"),
-							rs.getString("city"),
-							rs.getString("street"),
-							rs.getString("postal_code"),
-							rs.getBigDecimal("latitude"),
-							rs.getBigDecimal("longitude"),
-							rs.getTimestamp("created_at").toInstant(),
-							updatedAt != null ? updatedAt.toInstant() : null
-					);
-					// AddressService's owner-or-admin check needs the owner, so read it here.
-					address.setBusinessId(rs.getObject("business_id", Long.class));
-					address.setUserId(rs.getObject("user_id", Long.class));
-					return address;
-				},
-				id
-		);
+		return jdbcTemplate.queryForObject(SELECT + "WHERE id = ?", (rs, i) -> {
+			Address address = mapRow(rs);
+			// AddressService's owner-or-admin check needs the owner, so read it here.
+			address.setBusinessId(rs.getObject("business_id", Long.class));
+			address.setUserId(rs.getObject("user_id", Long.class));
+			return address;
+		}, id);
 	}
 
 	@Override
@@ -171,5 +142,21 @@ public class AddressDataAccessService implements AddressDao
 	{
 		String sql = "DELETE FROM addresses WHERE id = ?";
 		return jdbcTemplate.update(sql, id);
+	}
+
+	private static Address mapRow(ResultSet rs) throws SQLException
+	{
+		Timestamp updatedAt = rs.getTimestamp("updated_at");
+		return new Address(
+				rs.getLong("id"),
+				rs.getString("country"),
+				rs.getString("city"),
+				rs.getString("street"),
+				rs.getString("postal_code"),
+				rs.getBigDecimal("latitude"),
+				rs.getBigDecimal("longitude"),
+				rs.getTimestamp("created_at").toInstant(),
+				updatedAt != null ? updatedAt.toInstant() : null
+		);
 	}
 }
