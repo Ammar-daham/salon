@@ -1,4 +1,4 @@
-import type { AuthUser } from "./auth.types";
+import type { AuthUser, ChangePasswordInput } from "./auth.types";
 
 export interface AuthUserDto {
 	id: number;
@@ -17,5 +17,12 @@ export function toAuthUser(dto: AuthUserDto): AuthUser {
 		email: dto.email,
 		role: dto.role,
 		businessId: dto.business_id,
+	};
+}
+
+export function toChangePasswordRequest(input: ChangePasswordInput) {
+	return {
+		current_password: input.currentPassword,
+		new_password: input.newPassword,
 	};
 }

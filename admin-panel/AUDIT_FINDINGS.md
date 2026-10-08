@@ -181,7 +181,10 @@ findings it depends on are linked by their `BE-xx` / `DB-xx` IDs.
   `POST /api/v1/auth/reset-password` sets the new password with its token. Guarded by `PasswordChangeTest`,
   `PasswordResetTest` and `MailersTest`. The admin panel's forgot and reset pages, and its change-password form,
   are left to [`feature/admin-panel-password-reset`](../VERSION_CONTROL_GUIDE.md#br-3-3); the reset page must
-  live at `/reset-password` and read `?token=`.)*
+  live at `/reset-password` and read `?token=`.
+  On [`feature/admin-panel-password-reset`](../VERSION_CONTROL_GUIDE.md#br-3-3), Settings changes the signed-in
+  user's own password, and every password field checks the backend's 8 to 72 characters before sending.
+  Guarded by `auth.validation.test.ts` and `auth.mappers.test.ts`.)*
 
 ### Low
 - <a id="fe-14"></a>**FE-14 — TailAdmin leftovers.** `README.md` is the template's README,

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { toAuthUser } from "@/lib/resources/auth/auth.mappers";
+import { toAuthUser, toChangePasswordRequest } from "@/lib/resources/auth/auth.mappers";
 
 describe("toAuthUser", () => {
 	it("maps the snake_case /auth/me response, including the business", () => {
@@ -32,5 +32,14 @@ describe("toAuthUser", () => {
 			business_id: null,
 		});
 		expect(user.businessId).toBeNull();
+	});
+});
+
+describe("toChangePasswordRequest", () => {
+	it("sends both passwords in snake_case", () => {
+		expect(toChangePasswordRequest({ currentPassword: "old-secret", newPassword: "new-secret" })).toEqual({
+			current_password: "old-secret",
+			new_password: "new-secret",
+		});
 	});
 });

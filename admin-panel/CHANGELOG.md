@@ -10,8 +10,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 ## [Unreleased]
 
 Requires salon-backend with the customers API (DB-03), migration V9 (DB-07, DB-08), the opening
-hours API with migration V10 (DB-09, DB-14), and the appointments and availability APIs with
-migration V12 (DB-13, DB-14).
+hours API with migration V10 (DB-09, DB-14), the appointments and availability APIs with
+migration V12 (DB-13, DB-14), and the password endpoints with migration V13 (FE-13).
 
 ### Changed
 - Customers run on live data from `/businesses/{id}/customers` instead of generated sample data
@@ -20,8 +20,13 @@ migration V12 (DB-13, DB-14).
 - Prices show in the salon's own currency instead of always EUR, in the services table, the salon
   overview and the service form's price label (DB-08).
 - Address coordinates are read as numbers, matching the backend (DB-07).
+- A new account's password must also be at most 72 characters, the backend's limit, and each
+  password field has its own show/hide toggle (FE-13).
 
 ### Added
+- Settings (`/settings`) shows your name, email and role, and changes your own password given the
+  current one. You stay signed in, and every other session of yours is signed out. A wrong current
+  password is pointed out on its field (FE-13).
 - An Appointments page (`/appointments`) with the salon's bookings by date, on the salon's clock,
   filterable by status and staff member and searchable by client, service or staff. A SUPER_ADMIN
   sees every salon's. The same list fills each salon's and each employee's Appointments tab

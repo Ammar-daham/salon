@@ -23,3 +23,8 @@ export interface AuthUser {
 	 */
 	businessId: number | null;
 }
+
+export interface ChangePasswordInput {
+	currentPassword: string;
+	newPassword: string;
+}
