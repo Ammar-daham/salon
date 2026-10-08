@@ -9,7 +9,8 @@ behaviour it depends on.
 frontend-specific findings only.
 
 A ✅ next to a finding's ID means its fix has landed; the parenthetical *(fixed: …)* note on that
-finding says what changed. So far: ✅ FE-01, ✅ FE-02, ✅ FE-03, ✅ FE-09, ✅ FE-11.
+finding says what changed. So far: ✅ FE-01, ✅ FE-02, ✅ FE-03, ✅ FE-05, ✅ FE-06, ✅ FE-09, ✅ FE-11,
+✅ FE-13.
 
 ## 0. Honest summary
 
@@ -170,18 +171,21 @@ findings it depends on are linked by their `BE-xx` / `DB-xx` IDs.
 - <a id="fe-12"></a>**FE-12 — Stale identity.** The backend session keeps a snapshot of the user, so a role
   change made in the Users page doesn't take effect for that user until they sign in again
   ([BE-14](../salon-backend/AUDIT_FINDINGS.md#be-14)). **→ [`fix/salon-backend-session-hardening`](../VERSION_CONTROL_GUIDE.md#br-0-11)**
-- <a id="fe-13"></a>**FE-13 — Staff password can never be changed or reset.** `UserForm` says so
+- <a id="fe-13"></a>✅ **FE-13 — Staff password can never be changed or reset.** `UserForm` says so
   explicitly; no endpoint exists. **→ [`feature/salon-backend-password-reset`](../VERSION_CONTROL_GUIDE.md#br-3-2), then
   [`feature/admin-panel-password-reset`](../VERSION_CONTROL_GUIDE.md#br-3-3)**
-  *(In progress. On [`feature/salon-backend-password-reset`](../VERSION_CONTROL_GUIDE.md#br-3-2),
+  *(fixed: on [`feature/salon-backend-password-reset`](../VERSION_CONTROL_GUIDE.md#br-3-2),
   `POST /api/v1/auth/change-password` changes the signed-in user's own password given the current one, and every
   other session of theirs is signed out: a session whose password hash no longer matches the user's is
   invalidated on its next request. `POST /api/v1/auth/forgot-password` emails a single-use link, valid for an
   hour, to `app.password-reset.link?token=`, answering the same whether or not the account exists, and
   `POST /api/v1/auth/reset-password` sets the new password with its token. Guarded by `PasswordChangeTest`,
-  `PasswordResetTest` and `MailersTest`. The admin panel's forgot and reset pages, and its change-password form,
-  are left to [`feature/admin-panel-password-reset`](../VERSION_CONTROL_GUIDE.md#br-3-3); the reset page must
-  live at `/reset-password` and read `?token=`.)*
+  `PasswordResetTest` and `MailersTest`.
+  On [`feature/admin-panel-password-reset`](../VERSION_CONTROL_GUIDE.md#br-3-3), Settings changes the signed-in
+  user's own password. "Forgot password?" on the sign-in page asks for a link at `/forgot-password`, saying the
+  same whether or not the email has an account, and the link's `/reset-password?token=` page sets the new
+  password and returns to sign-in. Every password field checks the backend's 8 to 72 characters before
+  sending. Guarded by `auth.validation.test.ts` and `auth.mappers.test.ts`.)*
 
 ### Low
 - <a id="fe-14"></a>**FE-14 — TailAdmin leftovers.** `README.md` is the template's README,

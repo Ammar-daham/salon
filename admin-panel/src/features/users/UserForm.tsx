@@ -6,12 +6,12 @@ import { grantableRoles } from "@/lib/auth/permissions";
 import { resolveBusinessScope } from "@/lib/auth/scope";
 import { useBusinesses } from "@/lib/resources/businesses/businesses.hooks";
 import { ROLE_LABELS, type Role } from "@/lib/resources/auth/auth.types";
+import { newPasswordErrors } from "@/lib/resources/auth/auth.validation";
 import type { CreateUserInput, UpdateUserInput, User } from "@/lib/resources/users/users.types";
 
 import Card from "@/components/ui/Card";
 import Button from "@/components/ui/button/Button";
-import Field, { SelectInput, TextInput } from "@/components/ui/form/Field";
-import { EyeCloseIcon, EyeIcon } from "@/icons";
+import Field, { PasswordInput, SelectInput, TextInput } from "@/components/ui/form/Field";
 
 type Errors = Partial<Record<string, string>>;
 
@@ -40,9 +40,10 @@ interface UserFormProps {
  *  - any other caller has their own businessId substituted server-side
  *  - email + password are required for every role except CUSTOMER
  *
- * On edit the backend only writes first_name, last_name and role — email and
- * password cannot be changed at all, and there is no reset endpoint. The form
- * shows email as read-only rather than pretending otherwise.
+ * On edit the backend only writes first_name, last_name and role — email can't
+ * be changed at all, and only the account holder can change their password, in
+ * Settings or by a reset link. The form shows email as read-only rather than
+ * pretending otherwise.
  */
 export default function UserForm({
 	mode,
@@ -71,7 +72,6 @@ export default function UserForm({
 	const [email, setEmail] = useState(initial?.email ?? "");
 	const [password, setPassword] = useState("");
 	const [confirmPassword, setConfirmPassword] = useState("");
-	const [showPassword, setShowPassword] = useState(false);
 	const [role, setRole] = useState<Role>(initial?.role ?? grantable[0] ?? "EMPLOYEE");
 	const [businessId, setBusinessId] = useState("");
 	const [errors, setErrors] = useState<Errors>({});
@@ -87,9 +87,7 @@ export default function UserForm({
 			if (!email.trim()) found.email = "Email is required for accounts that sign in.";
 			else if (!/^\S+@\S+\.\S+$/.test(email.trim())) found.email = "Enter a valid email address.";
 
-			if (!password) found.password = "Password is required.";
-			else if (password.length < 8) found.password = "Use at least 8 characters.";
-			if (password !== confirmPassword) found.confirmPassword = "Passwords don't match.";
+			Object.assign(found, newPasswordErrors(password, confirmPassword));
 		}
 
 		if (mustPickBusiness && !businessId) {
@@ -212,40 +210,23 @@ export default function UserForm({
 			{isCreate && needsCredentials && (
 				<Card
 					title="Password"
-					description="The account holder can't change this later — there's no password reset yet."
+					description="The account holder can change it later in Settings, or reset it by email from the sign-in page."
 				>
 					<div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
 						<Field label="Password" required error={errors.password}>
 							{(p) => (
-								<div className="relative">
-									<TextInput
-										{...p}
-										type={showPassword ? "text" : "password"}
-										value={password}
-										onChange={(e) => setPassword(e.target.value)}
-										autoComplete="new-password"
-										className="pr-11"
-									/>
-									<button
-										type="button"
-										onClick={() => setShowPassword((v) => !v)}
-										aria-label={showPassword ? "Hide password" : "Show password"}
-										className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-subtle"
-									>
-										{showPassword ? (
-											<EyeIcon className="size-5 fill-current" />
-										) : (
-											<EyeCloseIcon className="size-5 fill-current" />
-										)}
-									</button>
-								</div>
+								<PasswordInput
+									{...p}
+									value={password}
+									onChange={(e) => setPassword(e.target.value)}
+									autoComplete="new-password"
+								/>
 							)}
 						</Field>
 						<Field label="Confirm password" required error={errors.confirmPassword}>
 							{(p) => (
-								<TextInput
+								<PasswordInput
 									{...p}
-									type={showPassword ? "text" : "password"}
 									value={confirmPassword}
 									onChange={(e) => setConfirmPassword(e.target.value)}
 									autoComplete="new-password"

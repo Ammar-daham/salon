@@ -7,8 +7,8 @@ import { toCreateUserRequest, toUpdateUserRequest, toUser, type UserDto } from "
 /**
  * Known limits this repository cannot paper over:
  *  - the list is platform-wide with no scoping or filtering
- *  - PUT only writes first_name, last_name and role; email and password can
- *    never be edited, and there is no password-reset endpoint
+ *  - PUT only writes first_name, last_name and role; email can never be
+ *    edited, and a password only by its owner, through auth.api
  */
 export const usersRepository: Repository<User, CreateUserInput, UpdateUserInput> = {
 	source: "live",

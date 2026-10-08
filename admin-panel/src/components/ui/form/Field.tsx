@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useId } from "react";
+import React, { useId, useState } from "react";
 import { cn } from "@/lib/utils/cn";
+import { EyeCloseIcon, EyeIcon } from "@/icons";
 
 interface FieldProps {
 	label: string;
@@ -83,6 +84,36 @@ export const TextInput = React.forwardRef<
 			className={cn(controlBase, "h-11", controlTone(props["aria-invalid"] === true), className)}
 			{...props}
 		/>
+	);
+});
+
+/** A password with its own show/hide toggle, so showing one field never shows another. */
+export const PasswordInput = React.forwardRef<
+	HTMLInputElement,
+	Omit<React.InputHTMLAttributes<HTMLInputElement>, "type">
+>(function PasswordInput({ className, ...props }, ref) {
+	const [visible, setVisible] = useState(false);
+	return (
+		<div className="relative">
+			<TextInput
+				ref={ref}
+				{...props}
+				type={visible ? "text" : "password"}
+				className={cn("pr-11", className)}
+			/>
+			<button
+				type="button"
+				onClick={() => setVisible((v) => !v)}
+				aria-label={visible ? "Hide password" : "Show password"}
+				className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-subtle"
+			>
+				{visible ? (
+					<EyeIcon className="size-5 fill-current" />
+				) : (
+					<EyeCloseIcon className="size-5 fill-current" />
+				)}
+			</button>
+		</div>
 	);
 });
 
