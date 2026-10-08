@@ -158,8 +158,13 @@ findings it depends on are linked by their `BE-xx` / `DB-xx` IDs.
   *(fixed: both repositories' `remove(id)` now send a plain body-less `DELETE` — no re-fetch, no echoed
   record. Relies on the backend's [BE-10](../salon-backend/AUDIT_FINDINGS.md#be-10) fix, which deletes
   children from the canonical record, so this must ship after `fix/salon-backend-server-side-deletes`.)*
-- <a id="fe-10"></a>**FE-10 — CSRF is CORS-only** (backend, [BE-28](../salon-backend/AUDIT_FINDINGS.md#be-28)) — fine while
+- <a id="fe-10"></a>✅ **FE-10 — CSRF is CORS-only** (backend, [BE-28](../salon-backend/AUDIT_FINDINGS.md#be-28)) — fine while
   `allowed-origins` stays pinned to the panel's origin. **→ [`chore/salon-backend-production-config`](../VERSION_CONTROL_GUIDE.md#br-3-4)**
+  *(documented by [BE-28](../salon-backend/AUDIT_FINDINGS.md#be-28): still no CSRF token, and the backend's
+  `SecurityConfig` says why that holds and when it stops. No admin-panel change: the panel already sends
+  only `Content-Type` and `Accept`, which the backend's CORS headers now list explicitly
+  ([BE-29](../salon-backend/AUDIT_FINDINGS.md#be-29)). Each origin the panel is served from has to be in
+  the backend's `allowed-origins`.)*
 - <a id="fe-11"></a>✅ **FE-11 — `GET /businesses` open to every authenticated role** — intended for a future
   customer app; confirm, and hide non-APPROVED salons from non-admins.
   **→ [`fix/salon-backend-business-tenant-scoping`](../VERSION_CONTROL_GUIDE.md#br-0-4)**

@@ -70,8 +70,16 @@ public class SecurityConfig
 				// Records who the caller is for the request log line (RequestLoggingFilter).
 				.addFilterAfter(new CallerLoggingFilter(), SecurityContextHolderFilter.class)
 				.cors(Customizer.withDefaults())
-				// CSRF is disabled: this is a JSON-only API (no form-encoded submissions), and
-				// credentialed cross-origin access is already restricted by the CORS policy below.
+				// No CSRF token (BE-28). Another site can't use a signed-in user's session because:
+				// - the browser sends its Origin with every POST, PUT and DELETE, including a form's or a
+				//   fetch() that skips the preflight, and the CORS filter answers 403 to any Origin not in
+				//   app.cors.allowed-origins before a controller runs (CrossOriginTest);
+				// - the session cookie is SameSite=Lax (server.servlet.session.cookie.same-site), so a browser
+				//   leaves it off another site's writes in the first place;
+				// - no GET changes anything.
+				// This holds while allowed-origins lists only origins this app's own frontends are served
+				// from, and every one of them is trusted. Before adding a third-party origin, or a GET that
+				// changes something, turn CSRF protection back on (CookieCsrfTokenRepository).
 				.csrf(AbstractHttpConfigurer::disable)
 				.sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
 				.authorizeHttpRequests(auth -> auth
@@ -122,8 +130,11 @@ public class SecurityConfig
 		CorsConfiguration configuration = new CorsConfiguration();
 		configuration.setAllowedOrigins(Arrays.stream(allowedOrigins.split(",")).map(String::trim).toList());
 		configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-		configuration.setAllowedHeaders(List.of("*"));
+		// Only what the panel sends (BE-29): JSON, and a request id to match its error reports to the logs.
+		configuration.setAllowedHeaders(List.of(HttpHeaders.CONTENT_TYPE, HttpHeaders.ACCEPT, RequestLog.REQUEST_ID_HEADER));
 		configuration.setAllowCredentials(true);
+		// Fails startup, rather than every request, if allowed-origins is "*": any site could then use the session.
+		configuration.validateAllowCredentials();
 		// Lets the panel read the id to show it alongside an error, so a report can be matched to the logs,
 		// and how long a locked-out sign-in has to wait (BE-22).
 		configuration.setExposedHeaders(List.of(RequestLog.REQUEST_ID_HEADER, HttpHeaders.RETRY_AFTER));

@@ -20,6 +20,12 @@ version. The version lives in [`gradle.properties`](gradle.properties); each rel
   decimals (DB-08).
 
 ### Security
+- A CORS preflight may ask only for `Content-Type`, `Accept` and `X-Request-Id`, the headers the
+  admin panel sends; it used to allow any header (BE-29).
+- There's still no CSRF token, and `SecurityConfig` now says why that holds and when it stops holding:
+  any request whose `Origin` isn't in `app.cors.allowed-origins` is refused with 403 before it runs,
+  including the POSTs a form or `fetch()` on another site can send without a preflight. A `*` in
+  `allowed-origins` stops startup (BE-28).
 - Failed sign-ins are limited to five per email and twenty per client address in any 15 minutes.
   Past that, `POST /api/v1/auth/login` answers 429 `TOO_MANY_REQUESTS` with `Retry-After` in seconds,
   even for the right password, until the oldest failure is 15 minutes old. A successful sign-in

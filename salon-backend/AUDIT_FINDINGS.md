@@ -285,14 +285,25 @@ Root causes:
   (`ErrorCode.INTERNAL_ERROR`) via a catch-all; a dedicated `AccessDeniedException` handler keeps
   authorization failures at 403 so the catch-all can't turn them into 500. Guarded by
   `aServerSideNullPointerBecomesA500NotAMasked400` in `RegressionTest`.)*
-- <a id="be-28"></a>**BE-28 — CSRF is CORS-only** (disabled, relying on a pinned origin). Defensible, but
+- <a id="be-28"></a>✅ **BE-28 — CSRF is CORS-only** (disabled, relying on a pinned origin). Defensible, but
   any loosening of `app.cors.allowed-origins` reopens CSRF on every write. Document it or add a
   double-submit token. **→ [`chore/salon-backend-production-config`](../VERSION_CONTROL_GUIDE.md#br-3-4)**
+  *(documented, no token: `SecurityConfig` says why another site can't use a signed-in session and
+  what would break that. Browsers send `Origin` with every POST, PUT and DELETE, including a form's or a
+  `fetch()` that skips the preflight, and Spring's CORS filter answers 403 to any origin not in
+  `allowed-origins` before a controller runs; the session cookie is `SameSite=Lax`; no GET changes
+  anything. It stops holding if `allowed-origins` gets an origin that isn't this app's own frontend, or
+  a GET starts changing something, and the comment says to turn on `CookieCsrfTokenRepository` first.
+  A `*` origin now stops startup. Guarded by `CrossOriginTest`, which signs in and then has "another
+  site" try a body-less logout and a `text/plain` password change with the session.)*
 - **Case-sensitive email uniqueness** — see [DB-10](#db-10).
 
 ### Low
-- <a id="be-29"></a>**BE-29 — CORS `allowedHeaders("*")` with `allowCredentials(true)`.**
+- <a id="be-29"></a>✅ **BE-29 — CORS `allowedHeaders("*")` with `allowCredentials(true)`.**
   **→ [`chore/salon-backend-production-config`](../VERSION_CONTROL_GUIDE.md#br-3-4)**
+  *(fixed: only `Content-Type`, `Accept` and `X-Request-Id`, the headers the admin panel sends. A
+  preflight's answer leaves any other header out, so the browser doesn't send the request. Guarded by
+  `CrossOriginTest`.)*
 - <a id="be-30"></a>**BE-30 — DB credentials only via the gitignored `application.yml`**; no documented
   env-var override for production. **→ [`chore/salon-backend-production-config`](../VERSION_CONTROL_GUIDE.md#br-3-4)**
 
