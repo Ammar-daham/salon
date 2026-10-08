@@ -232,8 +232,8 @@ Root causes:
   exist. Each lock is logged with the email masked. The limits are `app.login-throttle.*`. Counts are kept
   in memory, so they are per instance and cleared on restart, and expired ones are swept once 10,000 are
   tracked. The address is `getRemoteAddr()`: behind a reverse proxy every client would share the proxy's
-  address, and so its limit, until `server.forward-headers-strategy` is set, which belongs with the
-  production config ([BE-25](#be-25)). Guarded by `LoginThrottleTest` and `LoginRateLimitingTest`.)*
+  address, and so its limit, until `server.forward-headers-strategy` is set, as the `prod` profile now
+  does ([BE-25](#be-25)). Guarded by `LoginThrottleTest` and `LoginRateLimitingTest`.)*
 - <a id="be-23"></a>✅ **BE-23 — No server-side validation.** `spring-boot-starter-validation` is a dependency
   but there are zero `@Valid`/`@NotBlank`/`@Email`/`@Size` annotations. Password strength and email
   format are unchecked server-side; request bodies bind straight onto domain models (mass assignment
@@ -270,9 +270,19 @@ Root causes:
   **→ [`fix/salon-backend-session-hardening`](../VERSION_CONTROL_GUIDE.md#br-0-11)**
   *(fixed: `login` now calls `changeSessionId()` on any pre-existing session before saving the context.
   Guarded by `AuthenticationTest.loginRotatesThePreExistingSessionId`.)*
-- <a id="be-25"></a>**BE-25 — Secure cookie not enforced.** No `server.servlet.session.cookie.secure: true`,
+- <a id="be-25"></a>✅ **BE-25 — Secure cookie not enforced.** No `server.servlet.session.cookie.secure: true`,
   no HTTPS requirement for production; session timeout is the implicit 30-minute default.
   **→ [`chore/salon-backend-production-config`](../VERSION_CONTROL_GUIDE.md#br-3-4)**
+  *(fixed under the `prod` profile, `application-prod.yml`: the session cookie is `Secure`, `HttpOnly`
+  and `SameSite=Lax`, and the timeout is an explicit 30 minutes (`SALON_SESSION_TIMEOUT`).
+  `server.forward-headers-strategy: native` believes the `X-Forwarded-Proto` and `-For` of a proxy on a
+  private address, so a request that reached the proxy over HTTPS is secure here, and Spring Security's
+  HSTS header goes out with it. `RequireHttpsFilter` answers 403 to any other request except the health
+  check a load balancer probes directly, so a proxy that's plain HTTP, or doesn't send
+  `X-Forwarded-Proto`, fails loudly instead of quietly working without HSTS. Development keeps plain
+  HTTP; the template sets the same timeout and `SameSite`. Guarded by `ProductionProfileTest`, which
+  starts the profile on a real Tomcat and checks the cookie flags, HSTS, the 403, the health check, the
+  forwarded address and the timeout.)*
 
 ### Medium
 - <a id="be-26"></a>**BE-26 — SQL built via `%s` column interpolation.** `getAddressesByColumn` /
@@ -304,8 +314,14 @@ Root causes:
   *(fixed: only `Content-Type`, `Accept` and `X-Request-Id`, the headers the admin panel sends. A
   preflight's answer leaves any other header out, so the browser doesn't send the request. Guarded by
   `CrossOriginTest`.)*
-- <a id="be-30"></a>**BE-30 — DB credentials only via the gitignored `application.yml`**; no documented
+- <a id="be-30"></a>✅ **BE-30 — DB credentials only via the gitignored `application.yml`**; no documented
   env-var override for production. **→ [`chore/salon-backend-production-config`](../VERSION_CONTROL_GUIDE.md#br-3-4)**
+  *(fixed: `application-prod.yml` is tracked and holds no secrets. It reads every secret and every
+  value that differs per deployment from a `SALON_*` environment variable with no default, so a missing
+  one stops startup naming it instead of falling back to a localhost value, and its header lists them.
+  Production also requires an SMTP server, since reset links have to arrive. The template's
+  `pool-size` never bound to anything (Hikari's setting is `maximum-pool-size`), so every pool had 10
+  connections; that's fixed there, and is `SALON_DB_POOL_SIZE` in production.)*
 
 ### Confirmed solid
 BCrypt hashing; `password`/`passwordHash` never serialized; generic login error (no user enumeration);

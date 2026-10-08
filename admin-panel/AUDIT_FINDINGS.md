@@ -134,14 +134,16 @@ findings it depends on are linked by their `BE-xx` / `DB-xx` IDs.
   `ErrorResponse` is still a single message string, so a server-side rejection shows as one general
   error rather than highlighting the specific field. That's unchanged from before this fix and is a
   distinct enhancement, not a regression.)*
-- <a id="fe-07"></a>**FE-07 — Session fixation & insecure cookie** (backend, [BE-24](../salon-backend/AUDIT_FINDINGS.md#be-24),
+- <a id="fe-07"></a>✅ **FE-07 — Session fixation & insecure cookie** (backend, [BE-24](../salon-backend/AUDIT_FINDINGS.md#be-24),
   [BE-25](../salon-backend/AUDIT_FINDINGS.md#be-25)) — session id not rotated on login; `secure` flag not forced; timeout is the
   implicit 30-minute default. **→ [`fix/salon-backend-session-hardening`](../VERSION_CONTROL_GUIDE.md#br-0-11),
   [`chore/salon-backend-production-config`](../VERSION_CONTROL_GUIDE.md#br-3-4)**
   *(session fixation fixed by [BE-24](../salon-backend/AUDIT_FINDINGS.md#be-24): the backend now rotates the
   session id on login, and the browser picks up the new `JSESSIONID` from `Set-Cookie`, so no admin-panel
-  change was needed. The `secure` flag and timeout remain open under
-  [BE-25](../salon-backend/AUDIT_FINDINGS.md#be-25).)*
+  change was needed. The `secure` flag and an explicit 30-minute timeout come with the backend's `prod`
+  profile, [BE-25](../salon-backend/AUDIT_FINDINGS.md#be-25). No admin-panel change either, but in
+  production the panel must call the API over HTTPS: `NEXT_PUBLIC_API_URL` an `https://` URL, and the
+  panel's own origin in the backend's `SALON_ALLOWED_ORIGINS`. Over plain HTTP the API answers 403.)*
 
 ### Medium
 - <a id="fe-08"></a>**FE-08 — No frontend tests.** No unit tests for `permissions.ts` / `routeAccess.ts` /

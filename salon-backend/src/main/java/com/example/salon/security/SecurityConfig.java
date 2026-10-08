@@ -37,6 +37,9 @@ public class SecurityConfig
 	@Value("${app.cors.allowed-origins:http://localhost:3000}")
 	private String allowedOrigins;
 
+	@Value("${app.require-https:false}")
+	private boolean requireHttps;
+
 	public SecurityConfig(RestAuthenticationEntryPoint restAuthenticationEntryPoint,
 			RestAccessDeniedHandler restAccessDeniedHandler)
 	{
@@ -121,6 +124,10 @@ public class SecurityConfig
 						.authenticationEntryPoint(restAuthenticationEntryPoint)
 						.accessDeniedHandler(restAccessDeniedHandler)
 				);
+		if (requireHttps) {
+			// Under the prod profile: nothing but the health check over plain HTTP (BE-25).
+			http.addFilterBefore(new RequireHttpsFilter(), SecurityContextHolderFilter.class);
+		}
 		return http.build();
 	}
 
