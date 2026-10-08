@@ -1,0 +1,88 @@
+# The production profile: run the app with SPRING_PROFILES_ACTIVE=prod.
+#
+# What differs per deployment, and every secret, comes from an environment variable with no default,
+# so a missing one stops startup instead of quietly using a development value (BE-30):
+#
+#   SALON_DB_URL               jdbc:postgresql://<host>:5432/<database>
+#   SALON_DB_USERNAME
+#   SALON_DB_PASSWORD
+#   SALON_ALLOWED_ORIGINS      The admin panel's origin, or several comma-separated: https://admin.example.com
+#   SALON_PASSWORD_RESET_LINK  The admin panel's reset page: https://admin.example.com/reset-password
+#   SALON_MAIL_FROM            Who emails are from, an address the SMTP server may send as:
+#                              Salon Admin <no-reply@example.com>
+#   SALON_SMTP_HOST            An SMTP server that takes STARTTLS, usually on port 587
+#   SALON_SMTP_USERNAME
+#   SALON_SMTP_PASSWORD
+#
+# These have defaults: SALON_SMTP_PORT (587), SALON_DB_POOL_SIZE (10 connections) and
+# SALON_SESSION_TIMEOUT (30m without a request signs a user out). LOG_PATH (./logs) is where
+# logback-spring.xml writes the log file. Anything else can be set the Spring Boot way, e.g. SERVER_PORT
+# or APP_LOGINTHROTTLE_WINDOW.
+#
+# The app expects a reverse proxy or load balancer in front that terminates TLS and sends
+# X-Forwarded-For and X-Forwarded-Proto. Those headers are only believed from a private network address;
+# for a proxy elsewhere, set SERVER_TOMCAT_REMOTEIP_INTERNALPROXIES to a regex matching its address.
+# A request that didn't reach the proxy over HTTPS is refused, except the health check.
+#
+# The server.* settings apply when the app runs on its own (java -jar). Deployed into a separate Tomcat,
+# that Tomcat's own configuration decides them.
+
+app:
+  datasource:
+    jdbc-url: ${SALON_DB_URL}
+    username: ${SALON_DB_USERNAME}
+    password: ${SALON_DB_PASSWORD}
+    maximum-pool-size: ${SALON_DB_POOL_SIZE:10}
+  cors:
+    allowed-origins: ${SALON_ALLOWED_ORIGINS}
+  password-reset:
+    link: ${SALON_PASSWORD_RESET_LINK}
+  mail:
+    from: ${SALON_MAIL_FROM}
+  # Plain HTTP gets a 403 (BE-25).
+  require-https: true
+  # Whatever a developer's application.yml says (BE-38).
+  flyway:
+    baseline-on-migrate: false
+
+spring:
+  # Reset links have to reach people, so production needs a mail server (FE-13).
+  mail:
+    host: ${SALON_SMTP_HOST}
+    port: ${SALON_SMTP_PORT:587}
+    username: ${SALON_SMTP_USERNAME}
+    password: ${SALON_SMTP_PASSWORD}
+    properties:
+      mail.smtp.auth: true
+      # Encrypted, and never the password in the clear if the server doesn't offer STARTTLS.
+      mail.smtp.starttls.enable: true
+      mail.smtp.starttls.required: true
+      # Milliseconds. A mail server that stops answering would otherwise hold a thread forever.
+      mail.smtp.connectiontimeout: 10000
+      mail.smtp.timeout: 10000
+      mail.smtp.writetimeout: 10000
+
+server:
+  port: 8081
+  # Believe the proxy's X-Forwarded-* headers (from a private address only, see above): HTTPS is then
+  # recognised, and sign-in limits count each client's address rather than the proxy's (BE-22).
+  forward-headers-strategy: native
+  servlet:
+    session:
+      timeout: ${SALON_SESSION_TIMEOUT:30m}
+      cookie:
+        # Sent only over HTTPS (BE-25), unreadable to scripts, and left off other sites' requests (BE-28).
+        secure: true
+        http-only: true
+        same-site: lax
+
+management:
+  endpoint:
+    health:
+      # /actuator/health/liveness and /actuator/health/readiness, for an orchestrator.
+      probes:
+        enabled: true
+  health:
+    # A mail server outage shouldn't take the app out of the load balancer.
+    mail:
+      enabled: false

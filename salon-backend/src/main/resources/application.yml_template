@@ -3,7 +3,7 @@ app:
     jdbc-url: jdbc:postgresql://localhost:5432/salondb
     username: add_your_user_name
     password: add_your_password_here
-    pool-size: 30
+    maximum-pool-size: 10
   cors:
     allowed-origins: http://localhost:3000
   # Failed sign-ins (BE-22): at most this many on one email, and from one address, in any window.
@@ -20,6 +20,21 @@ app:
     max-per-hour: 3
   mail:
     from: "Salon Admin <no-reply@localhost>"
+  # Migrations (BE-38): a database with tables but no flyway_schema_history stops startup. Set this to
+  # true once to adopt a database that predates Flyway (it's marked as already at V1), then remove it.
+  flyway:
+    baseline-on-migrate: false
+server:
+  port: 8081
+  servlet:
+    session:
+      # Signed out after this long without a request (BE-25).
+      timeout: 30m
+      cookie:
+        # Left off other sites' requests (BE-28). The prod profile also makes it HTTPS-only.
+        same-site: lax
+# For production, don't copy this file: run with SPRING_PROFILES_ACTIVE=prod and the environment
+# variables listed in application-prod.yml.
 # Without spring.mail.host, emails such as reset links are written to the log instead (outside the
 # prod profile), which is enough for development. To send them, point it at any SMTP server:
 #spring:

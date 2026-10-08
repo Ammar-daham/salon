@@ -232,8 +232,8 @@ Root causes:
   exist. Each lock is logged with the email masked. The limits are `app.login-throttle.*`. Counts are kept
   in memory, so they are per instance and cleared on restart, and expired ones are swept once 10,000 are
   tracked. The address is `getRemoteAddr()`: behind a reverse proxy every client would share the proxy's
-  address, and so its limit, until `server.forward-headers-strategy` is set, which belongs with the
-  production config ([BE-25](#be-25)). Guarded by `LoginThrottleTest` and `LoginRateLimitingTest`.)*
+  address, and so its limit, until `server.forward-headers-strategy` is set, as the `prod` profile now
+  does ([BE-25](#be-25)). Guarded by `LoginThrottleTest` and `LoginRateLimitingTest`.)*
 - <a id="be-23"></a>✅ **BE-23 — No server-side validation.** `spring-boot-starter-validation` is a dependency
   but there are zero `@Valid`/`@NotBlank`/`@Email`/`@Size` annotations. Password strength and email
   format are unchecked server-side; request bodies bind straight onto domain models (mass assignment
@@ -270,9 +270,19 @@ Root causes:
   **→ [`fix/salon-backend-session-hardening`](../VERSION_CONTROL_GUIDE.md#br-0-11)**
   *(fixed: `login` now calls `changeSessionId()` on any pre-existing session before saving the context.
   Guarded by `AuthenticationTest.loginRotatesThePreExistingSessionId`.)*
-- <a id="be-25"></a>**BE-25 — Secure cookie not enforced.** No `server.servlet.session.cookie.secure: true`,
+- <a id="be-25"></a>✅ **BE-25 — Secure cookie not enforced.** No `server.servlet.session.cookie.secure: true`,
   no HTTPS requirement for production; session timeout is the implicit 30-minute default.
   **→ [`chore/salon-backend-production-config`](../VERSION_CONTROL_GUIDE.md#br-3-4)**
+  *(fixed under the `prod` profile, `application-prod.yml`: the session cookie is `Secure`, `HttpOnly`
+  and `SameSite=Lax`, and the timeout is an explicit 30 minutes (`SALON_SESSION_TIMEOUT`).
+  `server.forward-headers-strategy: native` believes the `X-Forwarded-Proto` and `-For` of a proxy on a
+  private address, so a request that reached the proxy over HTTPS is secure here, and Spring Security's
+  HSTS header goes out with it. `RequireHttpsFilter` answers 403 to any other request except the health
+  check a load balancer probes directly, so a proxy that's plain HTTP, or doesn't send
+  `X-Forwarded-Proto`, fails loudly instead of quietly working without HSTS. Development keeps plain
+  HTTP; the template sets the same timeout and `SameSite`. Guarded by `ProductionProfileTest`, which
+  starts the profile on a real Tomcat and checks the cookie flags, HSTS, the 403, the health check, the
+  forwarded address and the timeout.)*
 
 ### Medium
 - <a id="be-26"></a>**BE-26 — SQL built via `%s` column interpolation.** `getAddressesByColumn` /
@@ -285,16 +295,33 @@ Root causes:
   (`ErrorCode.INTERNAL_ERROR`) via a catch-all; a dedicated `AccessDeniedException` handler keeps
   authorization failures at 403 so the catch-all can't turn them into 500. Guarded by
   `aServerSideNullPointerBecomesA500NotAMasked400` in `RegressionTest`.)*
-- <a id="be-28"></a>**BE-28 — CSRF is CORS-only** (disabled, relying on a pinned origin). Defensible, but
+- <a id="be-28"></a>✅ **BE-28 — CSRF is CORS-only** (disabled, relying on a pinned origin). Defensible, but
   any loosening of `app.cors.allowed-origins` reopens CSRF on every write. Document it or add a
   double-submit token. **→ [`chore/salon-backend-production-config`](../VERSION_CONTROL_GUIDE.md#br-3-4)**
+  *(documented, no token: `SecurityConfig` says why another site can't use a signed-in session and
+  what would break that. Browsers send `Origin` with every POST, PUT and DELETE, including a form's or a
+  `fetch()` that skips the preflight, and Spring's CORS filter answers 403 to any origin not in
+  `allowed-origins` before a controller runs; the session cookie is `SameSite=Lax`; no GET changes
+  anything. It stops holding if `allowed-origins` gets an origin that isn't this app's own frontend, or
+  a GET starts changing something, and the comment says to turn on `CookieCsrfTokenRepository` first.
+  A `*` origin now stops startup. Guarded by `CrossOriginTest`, which signs in and then has "another
+  site" try a body-less logout and a `text/plain` password change with the session.)*
 - **Case-sensitive email uniqueness** — see [DB-10](#db-10).
 
 ### Low
-- <a id="be-29"></a>**BE-29 — CORS `allowedHeaders("*")` with `allowCredentials(true)`.**
+- <a id="be-29"></a>✅ **BE-29 — CORS `allowedHeaders("*")` with `allowCredentials(true)`.**
   **→ [`chore/salon-backend-production-config`](../VERSION_CONTROL_GUIDE.md#br-3-4)**
-- <a id="be-30"></a>**BE-30 — DB credentials only via the gitignored `application.yml`**; no documented
+  *(fixed: only `Content-Type`, `Accept` and `X-Request-Id`, the headers the admin panel sends. A
+  preflight's answer leaves any other header out, so the browser doesn't send the request. Guarded by
+  `CrossOriginTest`.)*
+- <a id="be-30"></a>✅ **BE-30 — DB credentials only via the gitignored `application.yml`**; no documented
   env-var override for production. **→ [`chore/salon-backend-production-config`](../VERSION_CONTROL_GUIDE.md#br-3-4)**
+  *(fixed: `application-prod.yml` is tracked and holds no secrets. It reads every secret and every
+  value that differs per deployment from a `SALON_*` environment variable with no default, so a missing
+  one stops startup naming it instead of falling back to a localhost value, and its header lists them.
+  Production also requires an SMTP server, since reset links have to arrive. The template's
+  `pool-size` never bound to anything (Hikari's setting is `maximum-pool-size`), so every pool had 10
+  connections; that's fixed there, and is `SALON_DB_POOL_SIZE` in production.)*
 
 ### Confirmed solid
 BCrypt hashing; `password`/`passwordHash` never serialized; generic login error (no user enumeration);
@@ -347,10 +374,21 @@ new users to the caller's business; `application.yml` is not tracked in git.
   **→ [`chore/salon-backend-dependency-cleanup`](../VERSION_CONTROL_GUIDE.md#br-1-1)**
   *(fixed: both artifacts are unversioned in `build.gradle`, so the Spring Boot BOM resolves them to
   the same release (11.14.1 with Boot 4.0.1).)*
-- <a id="be-38"></a>**BE-38 — Flyway `baselineOnMigrate(true)`** can mask missing migrations on an
+- <a id="be-38"></a>✅ **BE-38 — Flyway `baselineOnMigrate(true)`** can mask missing migrations on an
   existing database. **→ [`chore/salon-backend-production-config`](../VERSION_CONTROL_GUIDE.md#br-3-4)**
-- <a id="be-39"></a>**BE-39 — No actuator/health endpoint.**
+  *(fixed: off everywhere, not just in production, since a developer pointed at the wrong database is
+  the likelier case. A database with tables but no `flyway_schema_history` now stops startup instead of
+  being marked as at V1 and migrated from V2 on top of whatever is there; `app.flyway.baseline-on-migrate`
+  adopts a pre-Flyway database once. `validateMigrationNaming` also stops startup on a migration file
+  Flyway can't parse, which it used to skip without a word. Guarded by `FlywayConfigTest`, which runs the
+  app's Flyway configuration against a scratch schema.)*
+- <a id="be-39"></a>✅ **BE-39 — No actuator/health endpoint.**
   **→ [`chore/salon-backend-production-config`](../VERSION_CONTROL_GUIDE.md#br-3-4)**
+  *(fixed: `spring-boot-starter-actuator` exposes only `GET /actuator/health`, open without signing in:
+  200 `{"status":"UP"}`, or 503 `DOWN` while the database doesn't answer, and never which part failed.
+  Every other actuator endpoint stays unexposed and denied. A passing check is logged at DEBUG, so a
+  probe every few seconds doesn't bury the request log. Guarded by `HealthCheckTest` and
+  `RequestLoggingTest.passingHealthChecksStayOutOfTheLog`.)*
 - <a id="be-40"></a>**BE-40 — No Dockerfile/compose, no README** (only `RUNNING_AND_API_GUIDE.md`).
   **→ [`chore/repo-docker-compose`](../VERSION_CONTROL_GUIDE.md#br-3-6)**
 - <a id="be-42"></a>✅ **BE-42 — No record of what the API was asked or what it answered.** Only failures were

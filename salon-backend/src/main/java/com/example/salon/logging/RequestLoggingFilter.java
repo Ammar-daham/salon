@@ -89,6 +89,8 @@ public class RequestLoggingFilter extends OncePerRequestFilter
 			log.error("{}", line);
 		} else if (status >= 400) {
 			log.warn("{}", line);
+		} else if (request.getRequestURI().startsWith("/actuator/health")) {
+			log.debug("{}", line); // A load balancer's probe, every few seconds; only a failing one is news.
 		} else {
 			log.info("{}", line);
 		}

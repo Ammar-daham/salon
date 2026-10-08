@@ -134,14 +134,16 @@ findings it depends on are linked by their `BE-xx` / `DB-xx` IDs.
   `ErrorResponse` is still a single message string, so a server-side rejection shows as one general
   error rather than highlighting the specific field. That's unchanged from before this fix and is a
   distinct enhancement, not a regression.)*
-- <a id="fe-07"></a>**FE-07 — Session fixation & insecure cookie** (backend, [BE-24](../salon-backend/AUDIT_FINDINGS.md#be-24),
+- <a id="fe-07"></a>✅ **FE-07 — Session fixation & insecure cookie** (backend, [BE-24](../salon-backend/AUDIT_FINDINGS.md#be-24),
   [BE-25](../salon-backend/AUDIT_FINDINGS.md#be-25)) — session id not rotated on login; `secure` flag not forced; timeout is the
   implicit 30-minute default. **→ [`fix/salon-backend-session-hardening`](../VERSION_CONTROL_GUIDE.md#br-0-11),
   [`chore/salon-backend-production-config`](../VERSION_CONTROL_GUIDE.md#br-3-4)**
   *(session fixation fixed by [BE-24](../salon-backend/AUDIT_FINDINGS.md#be-24): the backend now rotates the
   session id on login, and the browser picks up the new `JSESSIONID` from `Set-Cookie`, so no admin-panel
-  change was needed. The `secure` flag and timeout remain open under
-  [BE-25](../salon-backend/AUDIT_FINDINGS.md#be-25).)*
+  change was needed. The `secure` flag and an explicit 30-minute timeout come with the backend's `prod`
+  profile, [BE-25](../salon-backend/AUDIT_FINDINGS.md#be-25). No admin-panel change either, but in
+  production the panel must call the API over HTTPS: `NEXT_PUBLIC_API_URL` an `https://` URL, and the
+  panel's own origin in the backend's `SALON_ALLOWED_ORIGINS`. Over plain HTTP the API answers 403.)*
 
 ### Medium
 - <a id="fe-08"></a>**FE-08 — No frontend tests.** No unit tests for `permissions.ts` / `routeAccess.ts` /
@@ -158,8 +160,13 @@ findings it depends on are linked by their `BE-xx` / `DB-xx` IDs.
   *(fixed: both repositories' `remove(id)` now send a plain body-less `DELETE` — no re-fetch, no echoed
   record. Relies on the backend's [BE-10](../salon-backend/AUDIT_FINDINGS.md#be-10) fix, which deletes
   children from the canonical record, so this must ship after `fix/salon-backend-server-side-deletes`.)*
-- <a id="fe-10"></a>**FE-10 — CSRF is CORS-only** (backend, [BE-28](../salon-backend/AUDIT_FINDINGS.md#be-28)) — fine while
+- <a id="fe-10"></a>✅ **FE-10 — CSRF is CORS-only** (backend, [BE-28](../salon-backend/AUDIT_FINDINGS.md#be-28)) — fine while
   `allowed-origins` stays pinned to the panel's origin. **→ [`chore/salon-backend-production-config`](../VERSION_CONTROL_GUIDE.md#br-3-4)**
+  *(documented by [BE-28](../salon-backend/AUDIT_FINDINGS.md#be-28): still no CSRF token, and the backend's
+  `SecurityConfig` says why that holds and when it stops. No admin-panel change: the panel already sends
+  only `Content-Type` and `Accept`, which the backend's CORS headers now list explicitly
+  ([BE-29](../salon-backend/AUDIT_FINDINGS.md#be-29)). Each origin the panel is served from has to be in
+  the backend's `allowed-origins`.)*
 - <a id="fe-11"></a>✅ **FE-11 — `GET /businesses` open to every authenticated role** — intended for a future
   customer app; confirm, and hide non-APPROVED salons from non-admins.
   **→ [`fix/salon-backend-business-tenant-scoping`](../VERSION_CONTROL_GUIDE.md#br-0-4)**

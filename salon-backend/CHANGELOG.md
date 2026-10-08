@@ -20,6 +20,19 @@ version. The version lives in [`gradle.properties`](gradle.properties); each rel
   decimals (DB-08).
 
 ### Security
+- Under the `prod` profile the session cookie is `Secure`, `HttpOnly` and `SameSite=Lax`, a request
+  that didn't come over HTTPS is refused with 403 (all but `/actuator/health`), and HTTPS responses
+  carry `Strict-Transport-Security`. A session ends after an explicit 30 minutes without a request,
+  `SALON_SESSION_TIMEOUT` (BE-25).
+- Under the `prod` profile the `X-Forwarded-For` and `X-Forwarded-Proto` of a proxy on a private
+  network address are believed, so HTTPS is recognised and the sign-in limits count each client's
+  address instead of the proxy's (BE-22, BE-25).
+- A CORS preflight may ask only for `Content-Type`, `Accept` and `X-Request-Id`, the headers the
+  admin panel sends; it used to allow any header (BE-29).
+- There's still no CSRF token, and `SecurityConfig` now says why that holds and when it stops holding:
+  any request whose `Origin` isn't in `app.cors.allowed-origins` is refused with 403 before it runs,
+  including the POSTs a form or `fetch()` on another site can send without a preflight. A `*` in
+  `allowed-origins` stops startup (BE-28).
 - Failed sign-ins are limited to five per email and twenty per client address in any 15 minutes.
   Past that, `POST /api/v1/auth/login` answers 429 `TOO_MANY_REQUESTS` with `Retry-After` in seconds,
   even for the right password, until the oldest failure is 15 minutes old. A successful sign-in
@@ -33,6 +46,16 @@ version. The version lives in [`gradle.properties`](gradle.properties); each rel
   an hour (FE-13).
 
 ### Added
+- A `prod` profile, `application-prod.yml`, configured from the environment. `SALON_DB_URL`,
+  `SALON_DB_USERNAME`, `SALON_DB_PASSWORD`, `SALON_ALLOWED_ORIGINS`, `SALON_PASSWORD_RESET_LINK`,
+  `SALON_MAIL_FROM`, `SALON_SMTP_HOST`, `SALON_SMTP_USERNAME` and `SALON_SMTP_PASSWORD` are required,
+  and a missing one stops startup naming it; `SALON_SMTP_PORT` (587), `SALON_DB_POOL_SIZE` (10) and
+  `SALON_SESSION_TIMEOUT` (30m) have defaults. It requires an SMTP server with STARTTLS, gives mail 10
+  seconds to answer, listens on 8081, and adds `/actuator/health/liveness` and `/readiness` (BE-30).
+- `GET /actuator/health` for a load balancer or orchestrator, without signing in: 200
+  `{"status":"UP"}`, or 503 `{"status":"DOWN"}` while the database doesn't answer, and never which
+  part failed. Nothing else from Spring Boot Actuator is exposed. A passing check isn't written to the
+  request log (BE-39).
 - `POST /api/v1/auth/change-password` with `current_password` and `new_password` (8 to 72
   characters) changes the signed-in user's own password and answers 204. The session that changed it
   stays signed in, under a new id. A wrong current password is a 400 and counts as a failed sign-in
@@ -134,6 +157,8 @@ version. The version lives in [`gradle.properties`](gradle.properties); each rel
   already has a negative price.
 
 ### Fixed
+- `app.datasource.pool-size` in the template never did anything, so the pool always had Hikari's
+  default of 10 connections. The setting is `maximum-pool-size` (BE-30).
 - A path or query parameter of the wrong type, e.g. `/businesses/glow`, is a 400 naming the parameter
   instead of a 500.
 - Leaving `marketing_consent` out of a customer request means no consent; it used to fail as
@@ -144,6 +169,11 @@ version. The version lives in [`gradle.properties`](gradle.properties); each rel
   still can't list the same value twice (DB-05).
 
 ### Changed
+- Startup stops with an error, instead of migrating, when the database has tables but no Flyway
+  history: it's the wrong database, or a restore that lost `flyway_schema_history`. It used to be
+  marked as already at V1 and migrated from V2. `app.flyway.baseline-on-migrate: true` adopts a
+  database that predates Flyway, once. A migration file whose name Flyway can't parse, such as
+  `V14_name.sql`, also stops startup instead of being skipped (BE-38).
 - Deleting a service, staff member or customer keeps the row, stamped with `deleted_at`, so
   appointments can keep pointing at it. It is gone from every read as before, and reading, editing or
   deleting it again is a 404. Someone taken off the staff can be added again, as a new staff record.
