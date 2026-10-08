@@ -7,7 +7,9 @@ import { can } from "@/lib/auth/permissions";
 import type { Id } from "@/lib/api/types";
 import { getErrorMessage } from "@/lib/api/errors";
 import { useBusiness, useBusinesses } from "@/lib/resources/businesses/businesses.hooks";
-import { useCustomers } from "@/lib/resources/customers/customers.hooks";
+import { useCustomer, useCustomerPage } from "@/lib/resources/customers/customers.hooks";
+import type { Customer } from "@/lib/resources/customers/customers.types";
+import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { useAvailability } from "@/lib/resources/appointments/appointments.hooks";
 import type { SalonRef } from "@/lib/resources/appointments/appointments.mappers";
 import {
@@ -23,10 +25,18 @@ import { cn } from "@/lib/utils/cn";
 import Card from "@/components/ui/Card";
 import Button from "@/components/ui/button/Button";
 import Field, { SelectInput, TextInput, TextareaInput } from "@/components/ui/form/Field";
+import SearchInput from "@/components/ui/SearchInput";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { ChevronLeftIcon } from "@/icons";
 
 type Errors = Partial<Record<"business" | "customer" | "service" | "time", string>>;
+
+/** How many of a salon's clients the picker offers at once; searching finds the rest (BE-15). */
+const CLIENT_OPTIONS = 50;
+
+function clientLabel(c: Customer) {
+	return `${c.firstName} ${c.lastName}${c.phone ? ` · ${c.phone}` : c.email ? ` · ${c.email}` : ""}`;
+}
 
 // Mirrors the backend's AppointmentRequest limit.
 const NOTES_MAX = 5000;
@@ -78,9 +88,19 @@ export default function AppointmentForm({
 
 	const { data: businesses, isPending: businessesPending } = useBusinesses();
 	const { data: business, isPending: businessPending } = useBusiness(salonId);
-	const { data: customers, isPending: customersPending } = useCustomers(
+	const [clientSearch, setClientSearch] = useState("");
+	const settledClientSearch = useDebouncedValue(clientSearch.trim());
+	const clients = useCustomerPage(
 		salonId != null ? { kind: "business", businessId: salonId } : { kind: "unresolved" },
+		{ q: settledClientSearch || undefined, size: CLIENT_OPTIONS, sort: "name" },
 	);
+	const customersPending = clients.isPending;
+	// Who the form starts on, from a client's page or the appointment being changed, read on its own:
+	// they needn't be among the clients on offer, and may have been removed since.
+	const startingClientId = initial?.customer.id ?? prefill?.customerId ?? null;
+	const startingClient = useCustomer(startingClientId);
+	// The client last picked stays on offer while the search changes.
+	const [pickedClient, setPickedClient] = useState<{ id: Id; label: string } | null>(null);
 
 	const [customerId, setCustomerId] = useState(String(initial?.customer.id ?? prefill?.customerId ?? ""));
 	const [serviceId, setServiceId] = useState(String(initial?.service.id ?? ""));
@@ -98,19 +118,40 @@ export default function AppointmentForm({
 	const service = business?.services.find((s) => String(s.id) === serviceId) ?? null;
 	const availability = useAvailability(salonId, serviceId ? Number(serviceId) : null, day);
 
-	// What is on offer, plus whatever the appointment being changed already has, even if it is gone.
+	// The clients the search found, in name order, plus the one picked and the one the form started on,
+	// even if the appointment being changed has a client who is gone.
 	const customerOptions = useMemo(() => {
-		const options = [...customers]
-			.sort((a, b) => a.lastName.localeCompare(b.lastName) || a.firstName.localeCompare(b.firstName))
-			.map((c) => ({
-				id: c.id,
-				label: `${c.firstName} ${c.lastName}${c.phone ? ` · ${c.phone}` : c.email ? ` · ${c.email}` : ""}`,
-			}));
-		if (initial && !customersPending && !options.some((c) => c.id === initial.customer.id)) {
-			options.unshift({ id: initial.customer.id, label: `${personName(initial.customer)} (removed)` });
+		const options = (clients.data?.items ?? []).map((c) => ({ id: c.id, label: clientLabel(c) }));
+		const keep: { id: Id; label: string }[] = [];
+		if (startingClient.data) {
+			// Only at their own salon: a SUPER_ADMIN may pick another one before booking.
+			if (startingClient.data.businessId === salonId) {
+				keep.push({ id: startingClient.data.id, label: clientLabel(startingClient.data) });
+			}
+		} else if (initial) {
+			keep.push({
+				id: initial.customer.id,
+				label: `${personName(initial.customer)}${startingClient.isError ? " (removed)" : ""}`,
+			});
+		}
+		if (pickedClient) keep.push(pickedClient);
+		for (const option of keep) {
+			if (!options.some((c) => c.id === option.id)) options.unshift(option);
 		}
 		return options;
-	}, [customers, customersPending, initial]);
+	}, [clients.data, startingClient.data, startingClient.isError, initial, pickedClient, salonId]);
+
+	const clientCount = clients.data?.totalItems ?? 0;
+	const clientHint =
+		salonId == null || customersPending
+			? undefined
+			: clientCount === 0
+				? settledClientSearch
+					? "No clients match that search."
+					: "This salon has no clients yet."
+				: clientCount > (clients.data?.items.length ?? 0)
+					? `Showing ${clients.data?.items.length} of ${clientCount}. Search to find others.`
+					: undefined;
 
 	const serviceOptions = useMemo(() => {
 		if (!business) return [];
@@ -156,6 +197,8 @@ export default function AppointmentForm({
 	function chooseSalon(value: string) {
 		setPickedBusiness(value);
 		setCustomerId("");
+		setClientSearch("");
+		setPickedClient(null);
 		setServiceId("");
 		setDate(null);
 		setStaffFilter("");
@@ -231,22 +274,35 @@ export default function AppointmentForm({
 							label="Client"
 							required
 							error={errors.customer}
-							hint={salonId != null && !customersPending && customers.length === 0 ? "This salon has no clients yet." : undefined}
+							hint={clientHint}
 						>
 							{(p) => (
-								<SelectInput
-									{...p}
-									value={customer}
-									onChange={(e) => setCustomerId(e.target.value)}
-									disabled={salonId == null || customersPending}
-								>
-									<option value="">{salonId != null && customersPending ? "Loading clients…" : "Select a client…"}</option>
-									{customerOptions.map((c) => (
-										<option key={c.id} value={c.id}>
-											{c.label}
-										</option>
-									))}
-								</SelectInput>
+								<div className="flex flex-col gap-2">
+									{salonId != null && (
+										<SearchInput
+											value={clientSearch}
+											onChange={setClientSearch}
+											placeholder="Search by name, email or phone…"
+											aria-label="Search clients"
+										/>
+									)}
+									<SelectInput
+										{...p}
+										value={customer}
+										onChange={(e) => {
+											setCustomerId(e.target.value);
+											setPickedClient(customerOptions.find((c) => String(c.id) === e.target.value) ?? null);
+										}}
+										disabled={salonId == null || customersPending}
+									>
+										<option value="">{salonId != null && customersPending ? "Loading clients…" : "Select a client…"}</option>
+										{customerOptions.map((c) => (
+											<option key={c.id} value={c.id}>
+												{c.label}
+											</option>
+										))}
+									</SelectInput>
+								</div>
 							)}
 						</Field>
 

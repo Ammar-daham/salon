@@ -1,8 +1,9 @@
-import type { Id } from "@/lib/api/types";
 import type { Customer, CustomerInput } from "./customers.types";
 
 export interface CustomerDto {
 	id: number;
+	business_id: number;
+	business_name: string;
 	user_id: number | null;
 	first_name: string;
 	last_name: string;
@@ -23,8 +24,7 @@ interface CustomerRequestDto {
 	marketing_consent: boolean;
 }
 
-/** The customer response doesn't carry its salon (business_id is server-side only), so the caller supplies it. */
-export function toCustomer(dto: CustomerDto, businessId: Id, businessName: string): Customer {
+export function toCustomer(dto: CustomerDto): Customer {
 	return {
 		id: dto.id,
 		firstName: dto.first_name,
@@ -34,8 +34,8 @@ export function toCustomer(dto: CustomerDto, businessId: Id, businessName: strin
 		notes: dto.notes,
 		marketingConsent: dto.marketing_consent,
 		userId: dto.user_id,
-		businessId,
-		businessName,
+		businessId: dto.business_id,
+		businessName: dto.business_name,
 		createdAt: dto.created_at,
 		updatedAt: dto.updated_at,
 	};

@@ -1,40 +1,44 @@
 import { apiClient } from "@/lib/api/client";
 import { endpoints } from "@/lib/api/endpoints";
-import type { Id, ListParams } from "@/lib/api/types";
-import type { BusinessDto } from "@/lib/resources/businesses/businesses.mappers";
+import { pageParams, toPage, type PageDto } from "@/lib/api/paging";
+import type { Id, ListParams, Page, PageQuery } from "@/lib/api/types";
 import { toCustomer, toCustomerRequest, type CustomerDto } from "./customers.mappers";
 import type { Customer, CustomerInput } from "./customers.types";
 
 /**
- * Customers are business-scoped and the backend 403s any other salon's list, so a
- * salon-scoped caller fetches exactly one list. Only a platform caller (businessId
- * == null, i.e. SUPER_ADMIN) fans out one request per business, in parallel - the
- * same N+1 shape as employees, for the same reason: there is no cross-salon endpoint.
+ * sort is name (last name first), created_at or business_name; q matches the name, email or phone.
+ * businessId narrows to one salon, or null for every salon the caller may see.
  */
-export async function listCustomers(businessId: Id | null, params?: ListParams): Promise<Customer[]> {
-	const { data: allBusinesses } = await apiClient.get<BusinessDto[]>(endpoints.businesses.root, {
+export interface CustomerPageQuery extends PageQuery {
+	businessId?: Id | null;
+}
+
+/**
+ * Customers across salons (BE-15). The server decides whose: every salon's for a SUPER_ADMIN, only
+ * their own salon's for anyone else, and naming another salon is a 403.
+ */
+export async function listCustomers(query: CustomerPageQuery, params?: ListParams): Promise<Page<Customer>> {
+	const { data } = await apiClient.get<PageDto<CustomerDto>>(endpoints.customers.root, {
+		params: pageParams(query, { business_id: query.businessId }),
 		signal: params?.signal,
 	});
-	const businesses =
-		businessId == null ? allBusinesses : allBusinesses.filter((b) => b.id === businessId);
+	return toPage(data, toCustomer);
+}
 
-	const perBusiness = await Promise.all(
-		businesses.map(async (business) => {
-			const { data } = await apiClient.get<CustomerDto[]>(endpoints.businesses.customers(business.id), {
-				signal: params?.signal,
-			});
-			return data.map((dto) => toCustomer(dto, business.id, business.name));
-		}),
-	);
-	return perBusiness.flat();
+/** By id alone, as the /customers/:id pages have no salon in their path. Another salon's is a 404. */
+export async function getCustomer(customerId: Id, params?: ListParams): Promise<Customer> {
+	const { data } = await apiClient.get<CustomerDto>(endpoints.customers.byId(customerId), {
+		signal: params?.signal,
+	});
+	return toCustomer(data);
 }
 
 export async function createCustomer(businessId: Id, input: CustomerInput): Promise<Customer> {
-	const [{ data }, { data: business }] = await Promise.all([
-		apiClient.post<CustomerDto>(endpoints.businesses.customers(businessId), toCustomerRequest(input)),
-		apiClient.get<BusinessDto>(endpoints.businesses.byId(businessId)),
-	]);
-	return toCustomer(data, businessId, business.name);
+	const { data } = await apiClient.post<CustomerDto>(
+		endpoints.businesses.customers(businessId),
+		toCustomerRequest(input),
+	);
+	return toCustomer(data);
 }
 
 /** A full replace: every field in `input` is written, and a null clears it. */

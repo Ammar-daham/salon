@@ -2,6 +2,7 @@ import { apiClient } from "@/lib/api/client";
 import { endpoints } from "@/lib/api/endpoints";
 import type { Id, ListParams } from "@/lib/api/types";
 import type { BusinessDto } from "@/lib/resources/businesses/businesses.mappers";
+import { listAllBusinesses } from "@/lib/resources/businesses/businesses.api";
 import {
 	toAppointment,
 	toAppointmentQuery,
@@ -19,17 +20,19 @@ import type {
 	Availability,
 } from "./appointments.types";
 
-const toSalonRef = (dto: BusinessDto): SalonRef => ({
-	id: dto.id,
-	name: dto.name,
-	currency: dto.currency,
-	timezone: dto.timezone,
+// The same four fields, under the same names, on a BusinessDto and a Business.
+const toSalonRef = (salon: Pick<BusinessDto, "id" | "name" | "currency" | "timezone">): SalonRef => ({
+	id: salon.id,
+	name: salon.name,
+	currency: salon.currency,
+	timezone: salon.timezone,
 });
 
 /**
  * Only a salon's own staff (and a SUPER_ADMIN) can read its appointments, so a salon-scoped
- * caller reads one salon. A platform caller (businessId == null) fans out one request per salon,
- * in parallel, as customers do: there is no cross-salon endpoint. Each salon's come in start order.
+ * caller reads one salon. A platform caller (businessId == null) reads every salon's, in parallel:
+ * there is no cross-salon appointments endpoint, and a date range keeps each one short. Each salon's
+ * come in start order.
  */
 export async function listAppointments(
 	businessId: Id | null,
@@ -39,7 +42,7 @@ export async function listAppointments(
 	const signal = params?.signal;
 	const salons =
 		businessId == null
-			? (await apiClient.get<BusinessDto[]>(endpoints.businesses.root, { signal })).data.map(toSalonRef)
+			? (await listAllBusinesses({ signal })).map(toSalonRef)
 			: [toSalonRef((await apiClient.get<BusinessDto>(endpoints.businesses.byId(businessId), { signal })).data)];
 
 	const perSalon = await Promise.all(

@@ -1,15 +1,17 @@
 "use client";
 
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { queryKeys } from "@/lib/query/queryKeys";
 import type { Id } from "@/lib/api/types";
-import { usersRepository } from "./users.api";
+import { usersRepository, type UserPageQuery } from "./users.api";
 import type { CreateUserInput, UpdateUserInput } from "./users.types";
 
-export function useUsers() {
+/** One page of users; the last page stays on screen while the next one loads. */
+export function useUserPage(query: UserPageQuery) {
 	return useQuery({
-		queryKey: queryKeys.users.list(),
-		queryFn: ({ signal }) => usersRepository.list({ signal }),
+		queryKey: queryKeys.users.page(query),
+		queryFn: ({ signal }) => usersRepository.list(query, { signal }),
+		placeholderData: keepPreviousData,
 	});
 }
 

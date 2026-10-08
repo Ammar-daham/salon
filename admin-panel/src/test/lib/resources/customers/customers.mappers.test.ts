@@ -8,6 +8,8 @@ import {
 
 const dto: CustomerDto = {
 	id: 1,
+	business_id: 1,
+	business_name: "Glow Beauty Studio",
 	user_id: null,
 	first_name: "Olivia",
 	last_name: "Client",
@@ -20,8 +22,8 @@ const dto: CustomerDto = {
 };
 
 describe("toCustomer", () => {
-	it("maps the DTO plus the caller-supplied salon", () => {
-		expect(toCustomer(dto, 1, "Glow Beauty Studio")).toEqual({
+	it("maps the DTO, with the salon it belongs to", () => {
+		expect(toCustomer(dto)).toEqual({
 			id: 1,
 			firstName: "Olivia",
 			lastName: "Client",
@@ -76,7 +78,7 @@ describe("toCustomerRequest", () => {
 
 describe("customerInputFrom", () => {
 	it("carries every current field into the full-replace body, overriding only what changed", () => {
-		const customer = toCustomer(dto, 1, "Glow Beauty Studio");
+		const customer = toCustomer(dto);
 		expect(customerInputFrom(customer, { notes: "Now prefers evenings." })).toEqual({
 			firstName: "Olivia",
 			lastName: "Client",

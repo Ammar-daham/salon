@@ -1,12 +1,12 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { can } from "@/lib/auth/permissions";
-import { useDataTable } from "@/lib/table/useDataTable";
-import { useDeleteUser, useUsers } from "@/lib/resources/users/users.hooks";
+import { useServerTable, useStayOnAPage } from "@/lib/table/useServerTable";
+import { useDeleteUser, useUserPage } from "@/lib/resources/users/users.hooks";
 import { ROLE_LABELS, type Role } from "@/lib/resources/auth/auth.types";
 import type { User } from "@/lib/resources/users/users.types";
 import { getErrorMessage } from "@/lib/api/errors";
@@ -41,36 +41,22 @@ export default function UserListView() {
 	const router = useRouter();
 	const { toast } = useToast();
 
-	const { data, isPending, isError, error, refetch } = useUsers();
-	const remove = useDeleteUser();
-
 	const [roleFilter, setRoleFilter] = useState<Role | "ALL">("ALL");
 	const [pendingDelete, setPendingDelete] = useState<User | null>(null);
 
+	// Searched, filtered, sorted and paged by the server (BE-15). Sort keys are the API's.
+	const table = useServerTable({ initialSort: { key: "name", direction: "asc" }, pageSize: 15 });
+	const { data, isPending, isError, error, refetch } = useUserPage({
+		...table.query,
+		role: roleFilter === "ALL" ? undefined : roleFilter,
+	});
+	useStayOnAPage(table, data);
+	const remove = useDeleteUser();
+
 	const canCreate = can(currentUser, "user:create");
 	const canDelete = can(currentUser, "user:delete");
-
-	const filters = useMemo(
-		() => [(u: User) => roleFilter === "ALL" || u.role === roleFilter],
-		[roleFilter],
-	);
-
-	const table = useDataTable<User>({
-		rows: data ?? [],
-		searchAccessor: (u) => `${u.firstName} ${u.lastName} ${u.email ?? ""}`,
-		sortAccessor: (u, key) => {
-			switch (key) {
-				case "name": return `${u.firstName} ${u.lastName}`;
-				case "email": return u.email ?? "";
-				case "role": return u.role;
-				case "createdAt": return u.createdAt;
-				default: return null;
-			}
-		},
-		initialSort: { key: "name", direction: "asc" },
-		filters,
-		pageSize: 15,
-	});
+	const isFiltered = table.isSearching || roleFilter !== "ALL";
+	const total = data?.totalItems ?? 0;
 
 	async function handleDelete() {
 		if (!pendingDelete) return;
@@ -125,7 +111,7 @@ export default function UserListView() {
 			render: (u) => <StatusBadge tone={ROLE_TONE[u.role]}>{ROLE_LABELS[u.role]}</StatusBadge>,
 		},
 		{
-			key: "createdAt",
+			key: "created_at",
 			header: "Joined",
 			sortable: true,
 			render: (u) => (
@@ -209,7 +195,10 @@ export default function UserListView() {
 						<SelectInput
 							aria-label="Filter by role"
 							value={roleFilter}
-							onChange={(e) => setRoleFilter(e.target.value as Role | "ALL")}
+							onChange={(e) => {
+								setRoleFilter(e.target.value as Role | "ALL");
+								table.firstPage();
+							}}
 							className="sm:w-48"
 						>
 							<option value="ALL">All roles</option>
@@ -221,14 +210,14 @@ export default function UserListView() {
 						</SelectInput>
 						{!isPending && (
 							<p className="text-sm text-ink-subtle sm:ml-auto">
-								{table.total} {table.total === 1 ? "account" : "accounts"}
+								{total} {total === 1 ? "account" : "accounts"}
 							</p>
 						)}
 					</div>
 
 					<DataTable
 						columns={columns}
-						rows={table.rows}
+						rows={data?.items ?? []}
 						rowKey={(u) => u.id}
 						loading={isPending}
 						sort={table.sort}
@@ -236,14 +225,14 @@ export default function UserListView() {
 						empty={
 							<EmptyState
 								icon={<GroupIcon className="size-6" />}
-								title={table.isFiltered ? "No accounts match" : "No accounts yet"}
+								title={isFiltered ? "No accounts match" : "No accounts yet"}
 								description={
-									table.isFiltered
+									isFiltered
 										? "Try a different search term, or clear the role filter."
 										: "Create the first account to get started."
 								}
 								action={
-									table.isFiltered ? (
+									isFiltered ? (
 										<Button
 											variant="outline"
 											onClick={() => {
@@ -268,13 +257,13 @@ export default function UserListView() {
 						}
 					/>
 
-					{!isPending && table.total > 0 && (
+					{!isPending && data && total > 0 && (
 						<div className="mt-px rounded-b-card border border-t-0 border-border-default bg-surface-raised">
 							<Pagination
 								page={table.page}
-								pageCount={table.pageCount}
-								total={table.total}
-								pageSize={table.pageSize}
+								pageCount={data.totalPages}
+								total={total}
+								pageSize={data.size}
 								onPageChange={table.setPage}
 							/>
 						</div>

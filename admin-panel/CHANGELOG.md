@@ -11,9 +11,24 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 
 Requires salon-backend with the customers API (DB-03), migration V9 (DB-07, DB-08), the opening
 hours API with migration V10 (DB-09, DB-14), the appointments and availability APIs with
-migration V12 (DB-13, DB-14), and the password endpoints with migration V13 (FE-13).
+migration V12 (DB-13, DB-14), the password endpoints with migration V13 (FE-13), and the paged
+lists, `GET /customers` and named staff records (BE-15).
 
 ### Changed
+- The Businesses, Users and Customers pages are searched, filtered, sorted and paged by the server
+  instead of downloading every row first (BE-15). A search is sent once typing pauses. Salons are
+  searched by name, description or city, users by name or email, and clients by name, email or
+  phone; contacts and the salon name are no longer searched, and salons can't be sorted by city or
+  service count.
+- A SUPER_ADMIN's Customers page reads every salon's clients in one request, and its salon filter
+  lists every salon, not just those with clients on the page. A client's page loads that client
+  alone (BE-15).
+- The booking form's client picker searches the salon's clients by name, email or phone and offers
+  the first 50 matches, rather than listing every client. Whoever the form starts on, from a
+  client's page or the appointment being changed, stays on offer (BE-15).
+- The dashboard's platform tiles are counted by the server (BE-15).
+- Staff names come with each staff record, so the Employees pages no longer download every user to
+  name them. An employee's page only finds someone on your own roster (BE-15).
 - Customers run on live data from `/businesses/{id}/customers` instead of generated sample data
   (FE-03). The list shows name, email, phone and client-since date; the tags, visit, spend and
   last-visit columns are gone until appointments exist.

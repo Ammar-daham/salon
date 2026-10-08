@@ -52,4 +52,9 @@ export const endpoints = {
 		root: "/api/v1/contacts",
 		byId: (id: number) => `/api/v1/contacts/${id}`,
 	},
+	// Across salons: a SUPER_ADMIN's are every salon's, anyone else's only their own salon's.
+	customers: {
+		root: "/api/v1/customers",
+		byId: (id: number) => `/api/v1/customers/${id}`,
+	},
 } as const;
