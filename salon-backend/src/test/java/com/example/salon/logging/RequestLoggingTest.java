@@ -130,4 +130,12 @@ class RequestLoggingTest extends IntegrationTest
 		assertThat(output).contains("GET /api/v1/businesses?q -> 200");
 		assertThat(logLines(output)).doesNotContain("s3cret-search");
 	}
+
+	@Test
+	void passingHealthChecksStayOutOfTheLog(CapturedOutput output) throws Exception
+	{
+		mvc.perform(get("/actuator/health")).andExpect(status().isOk());
+
+		assertThat(logLines(output)).doesNotContain("/actuator/health");
+	}
 }

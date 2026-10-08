@@ -76,6 +76,9 @@ public class SecurityConfig
 				.sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
 				.authorizeHttpRequests(auth -> auth
 						.requestMatchers("/error").permitAll()
+						// For a load balancer or orchestrator: UP or DOWN and nothing more (BE-39). No other
+						// actuator endpoint is exposed, and anyRequest() below would deny it anyway.
+						.requestMatchers(HttpMethod.GET, "/actuator/health/**").permitAll()
 						.requestMatchers(HttpMethod.POST, "/api/v1/auth/login").permitAll()
 						// Forgetting your password means you can't sign in (FE-13).
 						.requestMatchers(HttpMethod.POST, "/api/v1/auth/forgot-password", "/api/v1/auth/reset-password")

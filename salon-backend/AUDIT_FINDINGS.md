@@ -349,8 +349,13 @@ new users to the caller's business; `application.yml` is not tracked in git.
   the same release (11.14.1 with Boot 4.0.1).)*
 - <a id="be-38"></a>**BE-38 — Flyway `baselineOnMigrate(true)`** can mask missing migrations on an
   existing database. **→ [`chore/salon-backend-production-config`](../VERSION_CONTROL_GUIDE.md#br-3-4)**
-- <a id="be-39"></a>**BE-39 — No actuator/health endpoint.**
+- <a id="be-39"></a>✅ **BE-39 — No actuator/health endpoint.**
   **→ [`chore/salon-backend-production-config`](../VERSION_CONTROL_GUIDE.md#br-3-4)**
+  *(fixed: `spring-boot-starter-actuator` exposes only `GET /actuator/health`, open without signing in:
+  200 `{"status":"UP"}`, or 503 `DOWN` while the database doesn't answer, and never which part failed.
+  Every other actuator endpoint stays unexposed and denied. A passing check is logged at DEBUG, so a
+  probe every few seconds doesn't bury the request log. Guarded by `HealthCheckTest` and
+  `RequestLoggingTest.passingHealthChecksStayOutOfTheLog`.)*
 - <a id="be-40"></a>**BE-40 — No Dockerfile/compose, no README** (only `RUNNING_AND_API_GUIDE.md`).
   **→ [`chore/repo-docker-compose`](../VERSION_CONTROL_GUIDE.md#br-3-6)**
 - <a id="be-42"></a>✅ **BE-42 — No record of what the API was asked or what it answered.** Only failures were

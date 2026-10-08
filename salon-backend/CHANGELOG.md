@@ -33,6 +33,10 @@ version. The version lives in [`gradle.properties`](gradle.properties); each rel
   an hour (FE-13).
 
 ### Added
+- `GET /actuator/health` for a load balancer or orchestrator, without signing in: 200
+  `{"status":"UP"}`, or 503 `{"status":"DOWN"}` while the database doesn't answer, and never which
+  part failed. Nothing else from Spring Boot Actuator is exposed. A passing check isn't written to the
+  request log (BE-39).
 - `POST /api/v1/auth/change-password` with `current_password` and `new_password` (8 to 72
   characters) changes the signed-in user's own password and answers 204. The session that changed it
   stays signed in, under a new id. A wrong current password is a 400 and counts as a failed sign-in
