@@ -20,6 +20,10 @@ app:
     max-per-hour: 3
   mail:
     from: "Salon Admin <no-reply@localhost>"
+  # Migrations (BE-38): a database with tables but no flyway_schema_history stops startup. Set this to
+  # true once to adopt a database that predates Flyway (it's marked as already at V1), then remove it.
+  flyway:
+    baseline-on-migrate: false
 # Without spring.mail.host, emails such as reset links are written to the log instead (outside the
 # prod profile), which is enough for development. To send them, point it at any SMTP server:
 #spring:

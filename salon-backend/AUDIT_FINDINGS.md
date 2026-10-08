@@ -347,8 +347,14 @@ new users to the caller's business; `application.yml` is not tracked in git.
   **→ [`chore/salon-backend-dependency-cleanup`](../VERSION_CONTROL_GUIDE.md#br-1-1)**
   *(fixed: both artifacts are unversioned in `build.gradle`, so the Spring Boot BOM resolves them to
   the same release (11.14.1 with Boot 4.0.1).)*
-- <a id="be-38"></a>**BE-38 — Flyway `baselineOnMigrate(true)`** can mask missing migrations on an
+- <a id="be-38"></a>✅ **BE-38 — Flyway `baselineOnMigrate(true)`** can mask missing migrations on an
   existing database. **→ [`chore/salon-backend-production-config`](../VERSION_CONTROL_GUIDE.md#br-3-4)**
+  *(fixed: off everywhere, not just in production, since a developer pointed at the wrong database is
+  the likelier case. A database with tables but no `flyway_schema_history` now stops startup instead of
+  being marked as at V1 and migrated from V2 on top of whatever is there; `app.flyway.baseline-on-migrate`
+  adopts a pre-Flyway database once. `validateMigrationNaming` also stops startup on a migration file
+  Flyway can't parse, which it used to skip without a word. Guarded by `FlywayConfigTest`, which runs the
+  app's Flyway configuration against a scratch schema.)*
 - <a id="be-39"></a>✅ **BE-39 — No actuator/health endpoint.**
   **→ [`chore/salon-backend-production-config`](../VERSION_CONTROL_GUIDE.md#br-3-4)**
   *(fixed: `spring-boot-starter-actuator` exposes only `GET /actuator/health`, open without signing in:

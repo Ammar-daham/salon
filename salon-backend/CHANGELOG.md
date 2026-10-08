@@ -148,6 +148,11 @@ version. The version lives in [`gradle.properties`](gradle.properties); each rel
   still can't list the same value twice (DB-05).
 
 ### Changed
+- Startup stops with an error, instead of migrating, when the database has tables but no Flyway
+  history: it's the wrong database, or a restore that lost `flyway_schema_history`. It used to be
+  marked as already at V1 and migrated from V2. `app.flyway.baseline-on-migrate: true` adopts a
+  database that predates Flyway, once. A migration file whose name Flyway can't parse, such as
+  `V14_name.sql`, also stops startup instead of being skipped (BE-38).
 - Deleting a service, staff member or customer keeps the row, stamped with `deleted_at`, so
   appointments can keep pointing at it. It is gone from every read as before, and reading, editing or
   deleting it again is a 404. Someone taken off the staff can be added again, as a new staff record.
