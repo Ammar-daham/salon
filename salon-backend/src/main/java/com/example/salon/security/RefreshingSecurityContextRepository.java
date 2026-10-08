@@ -19,7 +19,8 @@ import java.util.Optional;
  * Wraps the session-backed repository so the {@link AuthenticatedUser} stored at login is only
  * trusted for its id. On every request the user is re-read from the database: a changed role or
  * business takes effect immediately, and a deleted user (or one whose login was removed) has their
- * session invalidated instead of keeping their old access until it expires.
+ * session invalidated instead of keeping their old access until it expires. So does every session
+ * that signed in before the password was changed (FE-13).
  */
 public class RefreshingSecurityContextRepository implements SecurityContextRepository
 {
@@ -87,9 +88,12 @@ public class RefreshingSecurityContextRepository implements SecurityContextRepos
 			return context;
 		}
 
-		// Same rule as AppUserDetailsService: no password hash means the user can't sign in.
+		// Same rule as AppUserDetailsService: no password hash means the user can't sign in. A different
+		// one means the password was changed since this session signed in: BCrypt salts every hash, so
+		// even setting the same password again gives a new one.
+		String signedInWith = principal.getUser().getPasswordHash();
 		Optional<User> current = userDao.findById(principal.getUser().getId())
-				.filter(user -> user.getPasswordHash() != null);
+				.filter(user -> user.getPasswordHash() != null && user.getPasswordHash().equals(signedInWith));
 
 		SecurityContext fresh = SecurityContextHolder.createEmptyContext();
 		if (current.isEmpty()) {

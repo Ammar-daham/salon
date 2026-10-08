@@ -152,5 +152,16 @@ public class UserService
 		log.info("Deleted user {}", id);
 	}
 
+	/**
+	 * Sets a password the caller has already checked the user may set, and returns the user as stored.
+	 * Every session that signed in with the old one is signed out (RefreshingSecurityContextRepository).
+	 */
+	public User setPassword(long id, String password)
+	{
+		userDao.updatePasswordHash(id, passwordEncoder.encode(password));
+		return userDao.findById(id)
+				.orElseThrow(() -> new BaseException("User with id " + id + " not found", ErrorCode.NOT_FOUND));
+	}
+
 
 }

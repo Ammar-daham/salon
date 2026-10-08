@@ -21,5 +21,7 @@ public interface UserDao
 
 	long updateUserById(long id, User user);
 
+	long updatePasswordHash(long id, String passwordHash);
+
 	long deleteUserById(long id);
 }

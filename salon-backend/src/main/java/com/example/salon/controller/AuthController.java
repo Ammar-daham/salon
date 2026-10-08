@@ -1,5 +1,8 @@
 package com.example.salon.controller;
 
+import com.example.salon.dto.ChangePasswordRequest;
+import com.example.salon.dto.ForgotPasswordRequest;
+import com.example.salon.dto.ResetPasswordRequest;
 import com.example.salon.exception.BaseException;
 import com.example.salon.exception.ErrorCode;
 import com.example.salon.logging.RequestLog;
@@ -8,12 +11,16 @@ import com.example.salon.security.AuthUserResponse;
 import com.example.salon.security.AuthenticatedUser;
 import com.example.salon.security.LoginRequest;
 import com.example.salon.security.LoginThrottle;
+import com.example.salon.service.PasswordResetService;
+import com.example.salon.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -21,11 +28,13 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 @RequestMapping("api/v1/auth")
@@ -37,14 +46,21 @@ public class AuthController
 	private final AuthenticationManager authenticationManager;
 	private final SecurityContextRepository securityContextRepository;
 	private final LoginThrottle loginThrottle;
+	private final PasswordEncoder passwordEncoder;
+	private final UserService userService;
+	private final PasswordResetService passwordResetService;
 
 	@Autowired
 	public AuthController(AuthenticationManager authenticationManager, SecurityContextRepository securityContextRepository,
-			LoginThrottle loginThrottle)
+			LoginThrottle loginThrottle, PasswordEncoder passwordEncoder, UserService userService,
+			PasswordResetService passwordResetService)
 	{
 		this.authenticationManager = authenticationManager;
 		this.securityContextRepository = securityContextRepository;
 		this.loginThrottle = loginThrottle;
+		this.passwordEncoder = passwordEncoder;
+		this.userService = userService;
+		this.passwordResetService = passwordResetService;
 	}
 
 	@PostMapping("/login")
@@ -67,20 +83,56 @@ public class AuthController
 		}
 		attempt.succeeded();
 
-		// Rotate the id of any session that existed before login, so an id planted or observed
-		// while anonymous can't be reused as this user's authenticated session (session fixation).
-		if (servletRequest.getSession(false) != null) {
-			servletRequest.changeSessionId();
-		}
-
-		SecurityContext context = SecurityContextHolder.createEmptyContext();
-		context.setAuthentication(authResult);
-		SecurityContextHolder.setContext(context);
-		securityContextRepository.saveContext(context, servletRequest, servletResponse);
+		saveSignedIn(authResult, servletRequest, servletResponse);
 
 		User user = ((AuthenticatedUser) authResult.getPrincipal()).getUser();
 		log.info("User {} signed in", user.getId());
 		return AuthUserResponse.from(user);
+	}
+
+	/**
+	 * The signed-in user's own password (FE-13). Every other session of theirs is signed out; this
+	 * one stays signed in, under a new id.
+	 */
+	@PostMapping("/change-password")
+	@ResponseStatus(HttpStatus.NO_CONTENT)
+	public void changePassword(@Valid @RequestBody ChangePasswordRequest request,
+			@AuthenticationPrincipal AuthenticatedUser principal,
+			HttpServletRequest servletRequest, HttpServletResponse servletResponse)
+	{
+		User user = principal.getUser();
+		// A wrong current password counts as a failed sign-in, so a stolen session can't be used to guess it.
+		LoginThrottle.Attempt attempt = loginThrottle.admit(user.getEmail(), servletRequest.getRemoteAddr());
+		if (!passwordEncoder.matches(request.currentPassword(), user.getPasswordHash())) {
+			attempt.failed();
+			throw new BaseException("Current password is incorrect", ErrorCode.BAD_REQUEST);
+		}
+		attempt.succeeded();
+
+		User updated = userService.setPassword(user.getId(), request.newPassword());
+		AuthenticatedUser signedIn = new AuthenticatedUser(updated);
+		saveSignedIn(UsernamePasswordAuthenticationToken.authenticated(signedIn, null, signedIn.getAuthorities()),
+				servletRequest, servletResponse);
+		log.info("User {} changed their password", user.getId());
+	}
+
+	/**
+	 * Emails a reset link if the email has an account that can sign in (FE-13). The answer is the same
+	 * either way, and comes before the email is looked up.
+	 */
+	@PostMapping("/forgot-password")
+	@ResponseStatus(HttpStatus.ACCEPTED)
+	public void forgotPassword(@Valid @RequestBody ForgotPasswordRequest request)
+	{
+		passwordResetService.requestReset(request.email());
+	}
+
+	/** Sets a new password with the token from a reset link. Every session of the user is signed out. */
+	@PostMapping("/reset-password")
+	@ResponseStatus(HttpStatus.NO_CONTENT)
+	public void resetPassword(@Valid @RequestBody ResetPasswordRequest request)
+	{
+		passwordResetService.resetPassword(request.token(), request.password());
 	}
 
 	@PostMapping("/logout")
@@ -99,5 +151,19 @@ public class AuthController
 	public AuthUserResponse me(@AuthenticationPrincipal AuthenticatedUser principal)
 	{
 		return AuthUserResponse.from(principal.getUser());
+	}
+
+	private void saveSignedIn(Authentication authentication, HttpServletRequest request, HttpServletResponse response)
+	{
+		// Rotate the id of any session that existed before, so an id planted or observed while anonymous
+		// (session fixation), or one from before a password change, can't be reused.
+		if (request.getSession(false) != null) {
+			request.changeSessionId();
+		}
+
+		SecurityContext context = SecurityContextHolder.createEmptyContext();
+		context.setAuthentication(authentication);
+		SecurityContextHolder.setContext(context);
+		securityContextRepository.saveContext(context, request, response);
 	}
 }

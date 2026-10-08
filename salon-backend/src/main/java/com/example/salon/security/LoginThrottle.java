@@ -95,6 +95,15 @@ public class LoginThrottle
 		return wait.isPositive() ? Optional.of(wait) : Optional.empty();
 	}
 
+	/** Forgets an email's failures, e.g. once its password has been reset by email (FE-13). */
+	public void clear(String email)
+	{
+		String account = accountKey(email);
+		if (account != null) {
+			accounts.remove(account);
+		}
+	}
+
 	/** Forgets every attempt. For tests, which share one instance. */
 	public void reset()
 	{

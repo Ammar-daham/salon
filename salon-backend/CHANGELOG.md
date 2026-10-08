@@ -26,8 +26,27 @@ version. The version lives in [`gradle.properties`](gradle.properties); each rel
   clears the email's failures and doesn't count against the address. Emails without an account lock
   the same way. The limits are `app.login-throttle.max-failures-per-account`,
   `max-failures-per-address` and `window` (BE-22).
+- Changing a password signs out every session that signed in with the old one, however it was
+  changed (FE-13).
+- A password reset link carries a random 256-bit token of which only a SHA-256 is stored. It works
+  once, for an hour, and asking for a new one retires the earlier links. A user is sent at most three
+  an hour (FE-13).
 
 ### Added
+- `POST /api/v1/auth/change-password` with `current_password` and `new_password` (8 to 72
+  characters) changes the signed-in user's own password and answers 204. The session that changed it
+  stays signed in, under a new id. A wrong current password is a 400 and counts as a failed sign-in
+  towards the lockout (BE-22, FE-13).
+- `POST /api/v1/auth/forgot-password` with an `email` answers 202 straight away and, if the email
+  has an account that can sign in, emails it a link to `app.password-reset.link` with `?token=`.
+  The answer is the same, and as quick, whether or not the account exists (FE-13).
+- `POST /api/v1/auth/reset-password` with that `token` and a new `password` (8 to 72 characters)
+  sets the password, answers 204, signs out every session of the user and lifts any sign-in lockout
+  on the email. A used, replaced, expired or made-up token is a 400 (FE-13).
+- Email through any SMTP server set in `spring.mail.*`, from `app.mail.from`. Without
+  `spring.mail.host` an email is written to the log instead, except under the `prod` profile, which
+  only logs that it wasn't sent (FE-13).
+- Migration V13: a `password_reset_tokens` table (FE-13).
 - Availability at `GET /api/v1/businesses/{businessId}/services/{serviceId}/availability`: the
   salon's `timezone`, the service's `duration_minutes`, and for each active staff member who performs
   the service (`id`, `first_name`, `last_name`) their open `slots`, each a `starts_at` and `ends_at`
