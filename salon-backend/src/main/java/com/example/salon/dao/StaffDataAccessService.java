@@ -12,6 +12,15 @@ import java.util.List;
 
 @Repository
 public class StaffDataAccessService implements StaffDao {
+    private static final String SELECT = """
+            SELECT s.id, s.title, s.is_active, s.user_id,
+            s.hired_at, s.calendar_colour,
+            s.created_at, s.updated_at,
+            u.first_name, u.last_name, u.email
+            FROM staff s
+            JOIN users u ON u.id = s.user_id
+            """;
+
     private final JdbcTemplate jdbcTemplate;
 
     @Autowired
@@ -42,13 +51,10 @@ public class StaffDataAccessService implements StaffDao {
 
     @Override
     public List<Staff> getStaffForBusiness(Long businessId) {
-        String sql = """
-                SELECT id, title, is_active, user_id,
-                hired_at, calendar_colour,
-                created_at, updated_at
-                FROM staff
-                WHERE business_id = ?
-                AND deleted_at IS NULL;
+        String sql = SELECT + """
+                WHERE s.business_id = ?
+                AND s.deleted_at IS NULL
+                ORDER BY s.id;
                 """;
 
         return jdbcTemplate.query(sql, (rs, i) -> mapRow(rs), businessId);
@@ -56,14 +62,10 @@ public class StaffDataAccessService implements StaffDao {
 
     @Override
     public Staff getStaffById(long businessId, long staffId) {
-        String sql = """
-                SELECT id, title, is_active, user_id,
-                hired_at, calendar_colour,
-                created_at, updated_at
-                FROM staff
-                WHERE business_id = ?
-                AND id = ?
-                AND deleted_at IS NULL;
+        String sql = SELECT + """
+                WHERE s.business_id = ?
+                AND s.id = ?
+                AND s.deleted_at IS NULL;
                 """;
 
         return jdbcTemplate.queryForObject(sql, (rs, i) -> mapRow(rs), businessId, staffId);
@@ -118,7 +120,7 @@ public class StaffDataAccessService implements StaffDao {
     private Staff mapRow(java.sql.ResultSet rs) throws java.sql.SQLException {
         Timestamp updatedAt = rs.getTimestamp("updated_at");
         LocalDate hiredAt = rs.getObject("hired_at", LocalDate.class);
-        return new Staff(
+        Staff staff = new Staff(
                 rs.getLong("id"),
                 rs.getString("title"),
                 rs.getBoolean("is_active"),
@@ -128,5 +130,9 @@ public class StaffDataAccessService implements StaffDao {
                 rs.getTimestamp("created_at").toInstant(),
                 updatedAt != null ? updatedAt.toInstant() : null
         );
+        staff.setFirstName(rs.getString("first_name"));
+        staff.setLastName(rs.getString("last_name"));
+        staff.setEmail(rs.getString("email"));
+        return staff;
     }
 }

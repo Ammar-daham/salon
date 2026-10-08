@@ -48,15 +48,17 @@ public class StaffController
 	}
 
 	@GetMapping("/{businessId}/staff")
-	public List<Staff> getStaffForBusiness(@PathVariable Long businessId)
+	public List<Staff> getStaffForBusiness(@PathVariable Long businessId,
+			@AuthenticationPrincipal AuthenticatedUser principal)
 	{
-		return staffService.getStaffForBusiness(businessId);
+		return staffService.getStaffForBusiness(businessId, principal);
 	}
 
 	@GetMapping("/{businessId}/staff/{staffId}")
-	public Staff getStaffById(@PathVariable long businessId, @PathVariable long staffId)
+	public Staff getStaffById(@PathVariable long businessId, @PathVariable long staffId,
+			@AuthenticationPrincipal AuthenticatedUser principal)
 	{
-		return staffService.getStaffById(businessId, staffId);
+		return staffService.getStaffById(businessId, staffId, principal);
 	}
 
 	@PutMapping("/{businessId}/staff/{staffId}")

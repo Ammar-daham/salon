@@ -73,12 +73,36 @@ public class StaffService
             throw new BaseException("This user already has a staff record.", ErrorCode.DUPLICATE_RESOURCE);
         }
         log.info("Added user {} to the staff of business {} as staff {}", staff.getUserId(), businessId, staff.getId());
+        return staffDao.getStaffById(businessId, staff.getId());
+    }
+
+    public List<Staff> getStaffForBusiness(Long businessId, AuthenticatedUser caller)
+    {
+        List<Staff> staff = staffDao.getStaffForBusiness(businessId);
+        if (!seesEmails(caller, businessId)) {
+            staff.forEach(s -> s.setEmail(null));
+        }
         return staff;
     }
 
-    public List<Staff> getStaffForBusiness(Long businessId)
+    public Staff getStaffById(long businessId, long staffId, AuthenticatedUser caller)
     {
-        return staffDao.getStaffForBusiness(businessId);
+        Staff staff = getStaffById(businessId, staffId);
+        if (!seesEmails(caller, businessId)) {
+            staff.setEmail(null);
+        }
+        return staff;
+    }
+
+    /**
+     * Anyone signed in can see a salon's roster, and who is on it, but an email only goes to the
+     * salon's admins and super admins: the same people who can read it on /users.
+     */
+    private static boolean seesEmails(AuthenticatedUser caller, long businessId)
+    {
+        Long callerBusinessId = caller.getUser().getBusinessId();
+        return AccessControl.isSuperAdmin(caller)
+                || (AccessControl.isAdmin(caller) && callerBusinessId != null && callerBusinessId == businessId);
     }
 
     public Staff getStaffById(long businessId, long staffId)

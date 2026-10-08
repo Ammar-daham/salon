@@ -46,6 +46,9 @@ version. The version lives in [`gradle.properties`](gradle.properties); each rel
   an hour (FE-13).
 
 ### Added
+- A staff record says who it is: `first_name` and `last_name` for everyone who can see the roster,
+  and `email` for the salon's admins and super admins only (null for anyone else, as `/users` hides
+  it from them). `POST .../staff` answers with the names too (BE-15).
 - A `prod` profile, `application-prod.yml`, configured from the environment. `SALON_DB_URL`,
   `SALON_DB_USERNAME`, `SALON_DB_PASSWORD`, `SALON_ALLOWED_ORIGINS`, `SALON_PASSWORD_RESET_LINK`,
   `SALON_MAIL_FROM`, `SALON_SMTP_HOST`, `SALON_SMTP_USERNAME` and `SALON_SMTP_PASSWORD` are required,
