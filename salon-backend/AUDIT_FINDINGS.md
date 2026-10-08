@@ -168,9 +168,21 @@ Root causes:
   without a password hash, has their session invalidated and gets a 401. Guarded by `SessionRefreshTest`.)*
 
 ### Medium
-- <a id="be-15"></a>**BE-15 — N+1 queries, no pagination.** `getBusinesses()` runs 1 + 3N queries;
+- <a id="be-15"></a>✅ **BE-15 — N+1 queries, no pagination.** `getBusinesses()` runs 1 + 3N queries;
   `getAllUsers()` 1 + 2N. No list endpoint pages or filters.
   **→ [`feature/repo-pagination`](../VERSION_CONTROL_GUIDE.md#br-3-5)**
+  *(fixed: a list's addresses, contacts and services are read in one query each for the whole page
+  (`business_id = ANY(?)`), so ten salons take the same queries as three. Salons, users and customers
+  answer one page, `{items, page, size, total_items, total_pages}`, at most 100 rows, and take a
+  search (`q`), filters (`status`, `role`, `business_id`) and a `sort`, all applied in SQL. That
+  includes which salons a non-admin may see, so the totals count only those. Sort keys are an enum
+  per DAO and each DAO writes its own ORDER BY, so a client's `sort` never reaches the SQL ([BE-26](#be-26)).
+  `GET /api/v1/customers` lists customers across salons for a super admin, replacing the admin
+  panel's one-request-per-salon fan-out, and staff records name their person, so the panel no longer
+  downloads every user to label its staff list. Breaking for every client of the three lists. Still
+  unpaged: a salon's staff, time off and appointments, which are bounded by a salon or a date range,
+  and the admin-only `GET /addresses` and `/contacts`. Guarded by `ListEndpointsTest` and
+  `ListQueriesTest`.)*
 - <a id="be-16"></a>✅ **BE-16 — Deleting a business hard-deletes rows in the shared `services` table**
   instead of unlinking them. **→ [`refactor/repo-services-owned-by-business`](../VERSION_CONTROL_GUIDE.md#br-1-3)**
   ([DB-02](#db-02))

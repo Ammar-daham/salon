@@ -4,6 +4,9 @@ import com.example.salon.model.Address;
 import com.example.salon.model.Contact;
 import com.example.salon.model.Role;
 import com.example.salon.model.User;
+import com.example.salon.paging.Page;
+import com.example.salon.paging.PageQuery;
+import com.example.salon.paging.Sort;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -92,20 +95,26 @@ public class UserDataAccessService implements UserDao
 	}
 
 	@Override
-	public List<User> getAllUsers()
+	public Page<User> getUsers(Filter filter, Sort<SortBy> sort, PageQuery page)
 	{
-		String sql = "SELECT * FROM users";
-		List<User> users = jdbcTemplate.query(sql, userRowMapper());
-		loadChildren(users);
-		return users;
-	}
+		ListQuery query = new ListQuery();
+		if (filter.businessId() != null)
+			query.where("business_id = ?", filter.businessId());
+		if (filter.role() != null)
+			query.where("role = ?", filter.role().name());
+		String term = ListQuery.containing(filter.search());
+		if (term != null)
+			query.where("(concat_ws(' ', first_name, last_name) ILIKE ? OR email ILIKE ?)", term, term);
+		List<String> columns = switch (sort.key()) {
+			case NAME -> List.of("lower(first_name)", "lower(last_name)");
+			case EMAIL -> List.of("lower(email)");
+			case ROLE -> List.of("role");
+			case CREATED_AT -> List.of("created_at");
+		};
 
-	@Override
-	public List<User> getUsersByBusinessId(long businessId)
-	{
-		String sql = "SELECT * FROM users WHERE business_id = ?";
-		List<User> users = jdbcTemplate.query(sql, userRowMapper(), businessId);
-		loadChildren(users);
+		Page<User> users = query.page(jdbcTemplate, "*", "users", ListQuery.orderBy(columns, sort.descending(), "id"),
+				page, userRowMapper());
+		loadChildren(users.items());
 		return users;
 	}
 

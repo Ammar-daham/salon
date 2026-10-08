@@ -5,6 +5,9 @@ import com.example.salon.model.Business;
 import com.example.salon.model.Contact;
 import com.example.salon.model.SalonService;
 import com.example.salon.model.Status;
+import com.example.salon.paging.Page;
+import com.example.salon.paging.PageQuery;
+import com.example.salon.paging.Sort;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -83,15 +86,36 @@ public class BusinessDataAccessService implements BusinessDao
         return businessId;
     }
 
-    public List<Business> getBusinesses() 
+    @Override
+    public Page<Business> getBusinesses(Filter filter, Sort<SortBy> sort, PageQuery page)
     {
-        String sql = """
-                SELECT id, name, description,
-                updated_at, created_at, image, status, currency, timezone
-                FROM businesses
-                """;
-        List<Business> businesses = jdbcTemplate.query(sql, (rs, i) -> mapBusiness(rs));
-        loadChildren(businesses);
+        ListQuery query = new ListQuery();
+        if (!filter.everyStatus()) {
+            if (filter.ownBusinessId() != null)
+                query.where("(status = 'APPROVED' OR id = ?)", filter.ownBusinessId());
+            else
+                query.where("status = 'APPROVED'");
+        }
+        if (filter.status() != null)
+            query.where("status = ?", filter.status().name());
+        String term = ListQuery.containing(filter.search());
+        if (term != null) {
+            query.where("""
+                    (name ILIKE ? OR description ILIKE ?
+                    OR EXISTS (SELECT 1 FROM addresses a WHERE a.business_id = businesses.id AND a.city ILIKE ?))
+                    """, term, term, term);
+        }
+        List<String> columns = switch (sort.key()) {
+            case NAME -> List.of("lower(name)");
+            case STATUS -> List.of("status");
+            case CREATED_AT -> List.of("created_at");
+        };
+
+        Page<Business> businesses = query.page(jdbcTemplate,
+                "id, name, description, updated_at, created_at, image, status, currency, timezone",
+                "businesses", ListQuery.orderBy(columns, sort.descending(), "id"), page,
+                (rs, i) -> mapBusiness(rs));
+        loadChildren(businesses.items());
         return businesses;
     }
 
