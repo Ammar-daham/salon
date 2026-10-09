@@ -85,7 +85,7 @@ public class AddressDataAccessService implements AddressDao
 		return byOwner(SELECT + "WHERE user_id = ANY(?) ORDER BY id", "user_id", userIds);
 	}
 
-	/** One query for every owner's addresses (BE-15), grouped by the owner in ownerColumn. */
+	/** One query for every owner's addresses, grouped by the owner in ownerColumn. */
 	private Map<Long, List<Address>> byOwner(String sql, String ownerColumn, Collection<Long> ownerIds)
 	{
 		Map<Long, List<Address>> byOwner = new HashMap<>();
