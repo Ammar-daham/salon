@@ -12,6 +12,10 @@ version. The version lives in [`gradle.properties`](gradle.properties); each rel
 ## [Unreleased]
 
 ### Breaking API changes
+- `GET /api/v1/businesses`, `GET /api/v1/users` and `GET /api/v1/businesses/{id}/customers` answer
+  one page instead of an array: `{"items": [...], "page": 1, "size": 20, "total_items": 57,
+  "total_pages": 3}`. `page` counts from 1 and `size` is 1 to 100, 20 if left out; anything else is a
+  400. A page past the end has no items but the same totals (BE-15).
 - `DELETE /api/v1/businesses/{id}` returns 409 `CONFLICT` while the salon still has staff; remove or
   move them first (BE-17).
 - Address `latitude`/`longitude` are JSON numbers instead of strings, in range, and given together
@@ -46,6 +50,20 @@ version. The version lives in [`gradle.properties`](gradle.properties); each rel
   an hour (FE-13).
 
 ### Added
+- The paged lists take `q`, a search that ignores case, and `sort`, a key or `-key` for the other
+  way round. Salons: `q` matches the name, description or a city; `status` narrows to one status;
+  `sort` is `name` (the default), `status` or `created_at`. Users: `q` matches the name or email;
+  `role` narrows to one role; `sort` is `name` (the default), `email`, `role` or `created_at`.
+  Customers: `q` matches the name, email or phone; `sort` is `name` (the default, last name first),
+  `created_at` or `business_name`. An unknown `sort`, `status` or `role` is a 400 (BE-15).
+- `GET /api/v1/customers`, paged the same way, lists customers across salons for a super admin, or
+  one salon's with `business_id`. Salon staff get only their own salon's, and naming another is a
+  403. `GET /api/v1/customers/{id}` reads one without its salon in the path; another salon's is a
+  404 (BE-15).
+- Customers read back with `business_id` and `business_name` (BE-15).
+- A staff record says who it is: `first_name` and `last_name` for everyone who can see the roster,
+  and `email` for the salon's admins and super admins only (null for anyone else, as `/users` hides
+  it from them). `POST .../staff` answers with the names too (BE-15).
 - A `prod` profile, `application-prod.yml`, configured from the environment. `SALON_DB_URL`,
   `SALON_DB_USERNAME`, `SALON_DB_PASSWORD`, `SALON_ALLOWED_ORIGINS`, `SALON_PASSWORD_RESET_LINK`,
   `SALON_MAIL_FROM`, `SALON_SMTP_HOST`, `SALON_SMTP_USERNAME` and `SALON_SMTP_PASSWORD` are required,
@@ -169,6 +187,11 @@ version. The version lives in [`gradle.properties`](gradle.properties); each rel
   still can't list the same value twice (DB-05).
 
 ### Changed
+- Which salons a non-admin sees, the approved ones and their own, is decided in the query, so the
+  totals count only those (BE-15).
+- Listing salons or users reads their addresses, contacts and services in one query each instead of
+  one per salon or user, so ten salons take 11 queries rather than 32. Each one's addresses, contacts
+  and services come in id order (BE-15).
 - Startup stops with an error, instead of migrating, when the database has tables but no Flyway
   history: it's the wrong database, or a restore that lost `flyway_schema_history`. It used to be
   marked as already at V1 and migrated from V2. `app.flyway.baseline-on-migrate: true` adopts a

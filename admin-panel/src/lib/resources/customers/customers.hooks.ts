@@ -1,44 +1,48 @@
 "use client";
 
-import { useMemo } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useAuth } from "@/context/AuthContext";
-import { resolveBusinessScope, type BusinessScope } from "@/lib/auth/scope";
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import type { BusinessScope } from "@/lib/auth/scope";
 import { queryKeys } from "@/lib/query/queryKeys";
 import type { DataSource, Id } from "@/lib/api/types";
-import { createCustomer, listCustomers, removeCustomer, updateCustomer } from "./customers.api";
+import {
+	createCustomer,
+	getCustomer,
+	listCustomers,
+	removeCustomer,
+	updateCustomer,
+	type CustomerPageQuery,
+} from "./customers.api";
 import type { CustomerInput } from "./customers.types";
 
-/**
- * Live: customers are a real, business-scoped resource now (DB-03).
- *
- * The /customers/:id route carries no businessId, so useCustomer composes on top of
- * the caller's own list query, like useEmployee does. Unlike staff, though, the
- * customers endpoint 403s any other salon, so the list must follow the caller's scope:
- * one salon for an ADMIN or EMPLOYEE, every salon only for a SUPER_ADMIN.
- */
+/** Live: customers are a real, business-scoped resource (DB-03), listed across salons (BE-15). */
 export const source: DataSource = "live";
 
-export function useCustomers(scope: BusinessScope) {
-	const businessId = scope.kind === "business" ? scope.businessId : null;
-	// An unlinked ADMIN/EMPLOYEE has no salon to read; fanning out would only collect 403s.
+/**
+ * One page of customers in the caller's scope: their own salon's, or for a platform caller every
+ * salon's unless the query names one. An unlinked ADMIN or EMPLOYEE has no salon to read.
+ */
+export function useCustomerPage(scope: BusinessScope, query: Omit<CustomerPageQuery, "businessId"> & { businessId?: Id | null }) {
 	const enabled = scope.kind !== "unresolved";
-	const query = useQuery({
-		queryKey: queryKeys.customers.list(businessId),
-		queryFn: ({ signal }) => listCustomers(businessId, { signal }),
+	const pageQuery: CustomerPageQuery = {
+		...query,
+		businessId: scope.kind === "business" ? scope.businessId : (query.businessId ?? null),
+	};
+	const result = useQuery({
+		queryKey: queryKeys.customers.page(pageQuery),
+		queryFn: ({ signal }) => listCustomers(pageQuery, { signal }),
+		placeholderData: keepPreviousData,
 		enabled,
 	});
-	return { ...query, isPending: enabled && query.isPending, data: query.data ?? [], source };
+	return { ...result, isPending: enabled && result.isPending, source };
 }
 
 export function useCustomer(customerId: Id | null) {
-	const { user } = useAuth();
-	const { data, isPending, isError, error, refetch } = useCustomers(resolveBusinessScope(user));
-	const customer = useMemo(
-		() => data.find((c) => c.id === customerId) ?? null,
-		[data, customerId],
-	);
-	return { data: customer, isPending, isError, error, refetch, source };
+	const result = useQuery({
+		queryKey: queryKeys.customers.detail(customerId ?? -1),
+		queryFn: ({ signal }) => getCustomer(customerId as Id, { signal }),
+		enabled: customerId != null,
+	});
+	return { ...result, data: result.data ?? null, isPending: customerId != null && result.isPending, source };
 }
 
 function useCustomerMutation<TVars, TResult>(mutationFn: (vars: TVars) => Promise<TResult>) {

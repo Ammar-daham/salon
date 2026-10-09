@@ -62,15 +62,19 @@ public final class AccessControl
 	 */
 	public static void requireStaffOfBusiness(AuthenticatedUser caller, long businessId)
 	{
+		if (!isStaffOfBusiness(caller, businessId)) {
+			throw new AccessDeniedException("You can only access your own business");
+		}
+	}
+
+	public static boolean isStaffOfBusiness(AuthenticatedUser caller, long businessId)
+	{
 		if (isSuperAdmin(caller)) {
-			return;
+			return true;
 		}
 		Role role = caller.getUser().getRole();
 		Long callerBusinessId = caller.getUser().getBusinessId();
-		if ((role != Role.ADMIN && role != Role.EMPLOYEE)
-				|| callerBusinessId == null || callerBusinessId != businessId) {
-			throw new AccessDeniedException("You can only access your own business");
-		}
+		return (role == Role.ADMIN || role == Role.EMPLOYEE) && callerBusinessId != null && callerBusinessId == businessId;
 	}
 
 	/**

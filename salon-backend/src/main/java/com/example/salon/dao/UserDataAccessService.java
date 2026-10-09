@@ -1,7 +1,12 @@
 package com.example.salon.dao;
 
+import com.example.salon.model.Address;
+import com.example.salon.model.Contact;
 import com.example.salon.model.Role;
 import com.example.salon.model.User;
+import com.example.salon.paging.Page;
+import com.example.salon.paging.PageQuery;
+import com.example.salon.paging.Sort;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -9,7 +14,9 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Repository
@@ -88,26 +95,26 @@ public class UserDataAccessService implements UserDao
 	}
 
 	@Override
-	public List<User> getAllUsers()
+	public Page<User> getUsers(Filter filter, Sort<SortBy> sort, PageQuery page)
 	{
-		String sql = "SELECT * FROM users";
-		List<User> users = jdbcTemplate.query(sql, userRowMapper());
-		for (User user : users) {
-			user.setAddresses(addressDao.getAddressesForUser(user.getId()));
-			user.setContacts(contactDao.getContactsForUser(user.getId()));
-		}
-		return users;
-	}
+		ListQuery query = new ListQuery();
+		if (filter.businessId() != null)
+			query.where("business_id = ?", filter.businessId());
+		if (filter.role() != null)
+			query.where("role = ?", filter.role().name());
+		String term = ListQuery.containing(filter.search());
+		if (term != null)
+			query.where("(concat_ws(' ', first_name, last_name) ILIKE ? OR email ILIKE ?)", term, term);
+		List<String> columns = switch (sort.key()) {
+			case NAME -> List.of("lower(first_name)", "lower(last_name)");
+			case EMAIL -> List.of("lower(email)");
+			case ROLE -> List.of("role");
+			case CREATED_AT -> List.of("created_at");
+		};
 
-	@Override
-	public List<User> getUsersByBusinessId(long businessId)
-	{
-		String sql = "SELECT * FROM users WHERE business_id = ?";
-		List<User> users = jdbcTemplate.query(sql, userRowMapper(), businessId);
-		for (User user : users) {
-			user.setAddresses(addressDao.getAddressesForUser(user.getId()));
-			user.setContacts(contactDao.getContactsForUser(user.getId()));
-		}
+		Page<User> users = query.page(jdbcTemplate, "*", "users", ListQuery.orderBy(columns, sort.descending(), "id"),
+				page, userRowMapper());
+		loadChildren(users.items());
 		return users;
 	}
 
@@ -115,9 +122,20 @@ public class UserDataAccessService implements UserDao
 	public User getUserById(int id)
 	{
 		User user = jdbcTemplate.queryForObject("SELECT * FROM users WHERE id = ?", userRowMapper(), id);
-		user.setAddresses(addressDao.getAddressesForUser(user.getId()));
-		user.setContacts(contactDao.getContactsForUser(user.getId()));
+		loadChildren(List.of(user));
 		return user;
+	}
+
+	/** Two queries however many users there are, rather than two per user (BE-15). */
+	private void loadChildren(List<User> users)
+	{
+		List<Long> ids = users.stream().map(User::getId).toList();
+		Map<Long, List<Address>> addresses = addressDao.getAddressesForUsers(ids);
+		Map<Long, List<Contact>> contacts = contactDao.getContactsForUsers(ids);
+		for (User user : users) {
+			user.setAddresses(addresses.getOrDefault(user.getId(), new ArrayList<>()));
+			user.setContacts(contacts.getOrDefault(user.getId(), new ArrayList<>()));
+		}
 	}
 
 	@Override

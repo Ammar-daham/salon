@@ -1,23 +1,30 @@
 import { apiClient } from "@/lib/api/client";
 import { endpoints } from "@/lib/api/endpoints";
-import type { Id, ListParams, Repository } from "@/lib/api/types";
+import { pageParams, toPage, type PageDto } from "@/lib/api/paging";
+import type { Id, ListParams, PageQuery, Repository } from "@/lib/api/types";
+import type { Role } from "@/lib/resources/auth/auth.types";
 import type { CreateUserInput, UpdateUserInput, User } from "./users.types";
 import { toCreateUserRequest, toUpdateUserRequest, toUser, type UserDto } from "./users.mappers";
 
+/** sort is name, email, role or created_at; q matches the name or email. */
+export interface UserPageQuery extends PageQuery {
+	role?: Role;
+}
+
 /**
- * Known limits this repository cannot paper over:
- *  - the list is platform-wide with no scoping or filtering
- *  - PUT only writes first_name, last_name and role; email can never be
- *    edited, and a password only by its owner, through auth.api
+ * The list is every user for a SUPER_ADMIN and the caller's own salon's for an ADMIN, decided by
+ * the server. PUT only writes first_name, last_name and role; email can never be edited, and a
+ * password only by its owner, through auth.api.
  */
-export const usersRepository: Repository<User, CreateUserInput, UpdateUserInput> = {
+export const usersRepository: Repository<User, CreateUserInput, UpdateUserInput, UserPageQuery> = {
 	source: "live",
 
-	async list(params?: ListParams) {
-		const { data } = await apiClient.get<UserDto[]>(endpoints.users.root, {
+	async list(query: UserPageQuery, params?: ListParams) {
+		const { data } = await apiClient.get<PageDto<UserDto>>(endpoints.users.root, {
+			params: pageParams(query, { role: query.role }),
 			signal: params?.signal,
 		});
-		return (data ?? []).map(toUser);
+		return toPage(data, toUser);
 	},
 
 	async get(id: Id, params?: ListParams) {

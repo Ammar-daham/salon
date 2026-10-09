@@ -1,6 +1,5 @@
 package com.example.salon.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.time.Instant;
@@ -8,8 +7,11 @@ import java.time.Instant;
 public class Customer
 {
     public Long id;
-    @JsonIgnore
+    @JsonProperty("business_id")
     public Long businessId;
+    // Read with the customer, so a list across salons says whose client each one is.
+    @JsonProperty("business_name")
+    public String businessName;
     @JsonProperty("user_id")
     public Long userId;
     @JsonProperty("first_name")
@@ -100,6 +102,16 @@ public class Customer
     public void setId(Long id)
     {
         this.id = id;
+    }
+
+    public String getBusinessName()
+    {
+        return businessName;
+    }
+
+    public void setBusinessName(String businessName)
+    {
+        this.businessName = businessName;
     }
 
     public void setBusinessId(Long businessId)

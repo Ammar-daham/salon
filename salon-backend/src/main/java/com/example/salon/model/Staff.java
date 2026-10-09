@@ -15,6 +15,13 @@ public class Staff
     public Long userId;
     @JsonIgnore
     public Long businessId;
+    // Who the staff member is, read from their user account: the roster is shown without loading every user.
+    @JsonProperty("first_name")
+    public String firstName;
+    @JsonProperty("last_name")
+    public String lastName;
+    // Only for the salon's admins and super admins, as on /users; null for anyone else.
+    public String email;
     @JsonProperty("hired_at")
     public LocalDate hiredAt;
     @JsonProperty("calendar_colour")
@@ -132,5 +139,35 @@ public class Staff
     public void setUpdatedAt(Instant updatedAt)
     {
         this.updatedAt = updatedAt;
+    }
+
+    public String getFirstName()
+    {
+        return firstName;
+    }
+
+    public void setFirstName(String firstName)
+    {
+        this.firstName = firstName;
+    }
+
+    public String getLastName()
+    {
+        return lastName;
+    }
+
+    public void setLastName(String lastName)
+    {
+        this.lastName = lastName;
+    }
+
+    public String getEmail()
+    {
+        return email;
+    }
+
+    public void setEmail(String email)
+    {
+        this.email = email;
     }
 }

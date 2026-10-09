@@ -5,6 +5,9 @@ import com.example.salon.exception.BaseException;
 import com.example.salon.exception.ErrorCode;
 import com.example.salon.model.Business;
 import com.example.salon.model.Status;
+import com.example.salon.paging.Page;
+import com.example.salon.paging.PageQuery;
+import com.example.salon.paging.Sort;
 import com.example.salon.security.AccessControl;
 import com.example.salon.security.AuthenticatedUser;
 import org.slf4j.Logger;
@@ -17,7 +20,6 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 
 @Service
 public class BusinessService
@@ -50,11 +52,13 @@ public class BusinessService
         return business;
     }
 
-    public List<Business> getAllBusiness(AuthenticatedUser caller) 
+    /** Admins see every salon; anyone else the approved ones and their own (FE-11), counted in SQL so pages add up. */
+    public Page<Business> getBusinesses(String search, Status status, Sort<BusinessDao.SortBy> sort, PageQuery page,
+            AuthenticatedUser caller)
     {
-        return businessDao.getBusinesses().stream()
-                .filter(business -> isVisibleTo(business, caller))
-                .toList();
+        BusinessDao.Filter filter = new BusinessDao.Filter(search, status, AccessControl.isAdmin(caller),
+                caller.getUser().getBusinessId());
+        return businessDao.getBusinesses(filter, sort, page);
     }
 
     public Business getBusinessById(int id, AuthenticatedUser caller) 

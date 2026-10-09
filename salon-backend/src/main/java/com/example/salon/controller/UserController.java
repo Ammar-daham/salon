@@ -1,8 +1,13 @@
 package com.example.salon.controller;
 
+import com.example.salon.dao.UserDao;
 import com.example.salon.dto.CreateUserRequest;
 import com.example.salon.dto.UpdateUserRequest;
+import com.example.salon.model.Role;
 import com.example.salon.model.User;
+import com.example.salon.paging.Page;
+import com.example.salon.paging.PageQuery;
+import com.example.salon.paging.Sort;
 import com.example.salon.security.AuthenticatedUser;
 import com.example.salon.service.UserService;
 import jakarta.validation.Valid;
@@ -13,7 +18,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
-import java.util.List;
 
 @RequestMapping("api/v1/users")
 @RestController
@@ -41,10 +45,18 @@ public class UserController
 		return ResponseEntity.created(location).body(u);
 	}
 
+	/** A page of users (BE-15). q searches the name and email; sort is name, email, role or created_at. */
 	@GetMapping
-	public List<User> getUsers(@AuthenticationPrincipal AuthenticatedUser principal)
+	public Page<User> getUsers(
+			@RequestParam(required = false) String q,
+			@RequestParam(required = false) Role role,
+			@RequestParam(defaultValue = "name") String sort,
+			@RequestParam(required = false) Integer page,
+			@RequestParam(required = false) Integer size,
+			@AuthenticationPrincipal AuthenticatedUser principal)
 	{
-		return userService.getAllUsers(principal);
+		return userService.getUsers(q, role, Sort.parse(sort, UserDao.SortBy.class), PageQuery.of(page, size),
+				principal);
 	}
 
 	@GetMapping("/{id}")
