@@ -133,7 +133,7 @@ public class BusinessDataAccessService implements BusinessDao
         return business;
     }
 
-    /** Three queries however many businesses there are, rather than three per business (BE-15). */
+    /** Three queries however many businesses there are, rather than three per business. */
     private void loadChildren(List<Business> businesses)
     {
         List<Long> ids = businesses.stream().map(Business::getId).toList();
