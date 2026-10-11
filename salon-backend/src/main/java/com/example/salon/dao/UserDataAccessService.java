@@ -126,7 +126,7 @@ public class UserDataAccessService implements UserDao
 		return user;
 	}
 
-	/** Two queries however many users there are, rather than two per user (BE-15). */
+	/** Two queries however many users there are, rather than two per user. */
 	private void loadChildren(List<User> users)
 	{
 		List<Long> ids = users.stream().map(User::getId).toList();
