@@ -8,7 +8,11 @@ import org.springframework.stereotype.Repository;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Repository
 public class SalonServiceDataAccessService implements SalonServiceDao 
@@ -48,16 +52,30 @@ public class SalonServiceDataAccessService implements SalonServiceDao
     @Override
     public List<SalonService> getServicesForBusiness(Long businessId) 
     {
+        return getServicesForBusinesses(List.of(businessId)).getOrDefault(businessId, List.of());
+    }
+
+    @Override
+    public Map<Long, List<SalonService>> getServicesForBusinesses(Collection<Long> businessIds)
+    {
+        Map<Long, List<SalonService>> byBusiness = new HashMap<>();
+        if (businessIds.isEmpty()) {
+            return byBusiness;
+        }
         String sql = """
-                SELECT id, name, description,
+                SELECT id, business_id, name, description,
                 duration_minutes, price, is_active,
                 created_at, updated_at
                 FROM services
-                WHERE business_id = ?
-                AND deleted_at IS NULL;
+                WHERE business_id = ANY(?)
+                AND deleted_at IS NULL
+                ORDER BY id;
                 """;
-
-        return jdbcTemplate.query(sql, (rs, i) -> mapRow(rs), businessId);
+        // One query for every business's services (BE-15).
+        jdbcTemplate.query(sql, rs -> {
+            byBusiness.computeIfAbsent(rs.getLong("business_id"), business -> new ArrayList<>()).add(mapRow(rs));
+        }, (Object) businessIds.toArray(Long[]::new));
+        return byBusiness;
     }
 
     @Override

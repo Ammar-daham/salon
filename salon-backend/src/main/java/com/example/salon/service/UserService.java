@@ -5,6 +5,9 @@ import com.example.salon.exception.BaseException;
 import com.example.salon.exception.ErrorCode;
 import com.example.salon.model.Role;
 import com.example.salon.model.User;
+import com.example.salon.paging.Page;
+import com.example.salon.paging.PageQuery;
+import com.example.salon.paging.Sort;
 import com.example.salon.security.AccessControl;
 import com.example.salon.security.AuthenticatedUser;
 import org.slf4j.Logger;
@@ -18,7 +21,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 
 @Service
 public class UserService
@@ -87,16 +89,18 @@ public class UserService
 		return user;
 	}
 
-	public List<User> getAllUsers(AuthenticatedUser caller)
+	/** Every user for a super admin; for an admin, their own business's (BE-01), or none without one. */
+	public Page<User> getUsers(String search, Role role, Sort<UserDao.SortBy> sort, PageQuery page,
+			AuthenticatedUser caller)
 	{
-		if (AccessControl.isSuperAdmin(caller)) {
-			return userDao.getAllUsers();
+		Long businessId = null;
+		if (!AccessControl.isSuperAdmin(caller)) {
+			businessId = caller.getUser().getBusinessId();
+			if (businessId == null) {
+				return Page.empty(page);
+			}
 		}
-		Long businessId = caller.getUser().getBusinessId();
-		if (businessId == null) {
-			return List.of();
-		}
-		return userDao.getUsersByBusinessId(businessId);
+		return userDao.getUsers(new UserDao.Filter(search, role, businessId), sort, page);
 	}
 
 	public User getUserById(int id, AuthenticatedUser caller)

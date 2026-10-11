@@ -40,7 +40,9 @@ class CustomerControllerTest extends IntegrationTest
 				.andExpect(jsonPath("$.first_name").value("Ella"))
 				.andExpect(jsonPath("$.marketing_consent").value(true))
 				.andExpect(jsonPath("$.created_at").value(notNullValue()))
-				.andExpect(jsonPath("$.business_id").doesNotExist())
+				// Whose client it is, for lists across salons.
+				.andExpect(jsonPath("$.business_id").value(Fixture.GLOW))
+				.andExpect(jsonPath("$.business_name").value("Glow Beauty Studio"))
 				.andReturn().getResponse().getHeader("Location");
 
 		mvc.perform(get(location).session(admin))
@@ -48,7 +50,7 @@ class CustomerControllerTest extends IntegrationTest
 				.andExpect(jsonPath("$.notes").value("Allergic to latex."));
 
 		mvc.perform(get(customers(Fixture.GLOW)).session(admin))
-				.andExpect(jsonPath("$", hasSize(2)));
+				.andExpect(jsonPath("$.items", hasSize(2)));
 	}
 
 	@Test
@@ -58,7 +60,7 @@ class CustomerControllerTest extends IntegrationTest
 
 		mvc.perform(get(customers(Fixture.GLOW)).session(employee))
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("$[0].first_name").value("Olivia"));
+				.andExpect(jsonPath("$.items[0].first_name").value("Olivia"));
 
 		mvc.perform(post(customers(Fixture.GLOW)).session(employee)
 						.contentType(MediaType.APPLICATION_JSON).content(NEW_CUSTOMER))

@@ -6,6 +6,10 @@ export interface StaffDto {
 	title: string;
 	is_active: boolean;
 	user_id: number;
+	first_name: string;
+	last_name: string;
+	/** Only for the salon's admins and super admins; null for anyone else. */
+	email: string | null;
 	hired_at: string;
 	calendar_colour: string | null;
 	created_at: string | null;
@@ -24,18 +28,13 @@ interface CreateStaffRequestDto extends StaffRequestDto {
 	user_id: Id;
 }
 
-/** The staff endpoint knows nothing about names or email - that's User data, joined in by the caller. */
-export function toEmployee(
-	dto: StaffDto,
-	businessId: Id,
-	businessName: string,
-	user: { firstName: string; lastName: string; email: string | null },
-): Employee {
+/** A staff record names its person; which salon it's at comes from the caller, who asked by salon. */
+export function toEmployee(dto: StaffDto, businessId: Id, businessName: string): Employee {
 	return {
 		id: dto.id,
-		firstName: user.firstName,
-		lastName: user.lastName,
-		email: user.email ?? "",
+		firstName: dto.first_name,
+		lastName: dto.last_name,
+		email: dto.email ?? "",
 		title: dto.title,
 		isActive: dto.is_active,
 		businessId,

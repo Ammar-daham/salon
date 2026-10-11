@@ -1,8 +1,13 @@
 package com.example.salon.controller;
 
+import com.example.salon.dao.BusinessDao;
 import com.example.salon.dto.CreateBusinessRequest;
 import com.example.salon.dto.UpdateBusinessRequest;
 import com.example.salon.model.Business;
+import com.example.salon.model.Status;
+import com.example.salon.paging.Page;
+import com.example.salon.paging.PageQuery;
+import com.example.salon.paging.Sort;
 import com.example.salon.security.AuthenticatedUser;
 import com.example.salon.service.BusinessService;
 import jakarta.validation.Valid;
@@ -13,7 +18,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
-import java.util.List;
 
 @RequestMapping("api/v1/businesses")
 @RestController
@@ -41,10 +45,18 @@ public class BusinessController
         return ResponseEntity.created(location).body(b);
     }
 
+    /** A page of salons (BE-15). q searches the name, description and city; sort is name, status or created_at. */
     @GetMapping
-    public List<Business> getAllBusiness(@AuthenticationPrincipal AuthenticatedUser principal) 
+    public Page<Business> getBusinesses(
+            @RequestParam(required = false) String q,
+            @RequestParam(required = false) Status status,
+            @RequestParam(defaultValue = "name") String sort,
+            @RequestParam(required = false) Integer page,
+            @RequestParam(required = false) Integer size,
+            @AuthenticationPrincipal AuthenticatedUser principal)
     {
-        return businessService.getAllBusiness(principal);
+        return businessService.getBusinesses(q, status, Sort.parse(sort, BusinessDao.SortBy.class),
+                PageQuery.of(page, size), principal);
     }
 
     @GetMapping("/{id}")

@@ -1,17 +1,24 @@
 import { apiClient } from "@/lib/api/client";
 import { endpoints } from "@/lib/api/endpoints";
-import type { Id, ListParams, Repository } from "@/lib/api/types";
-import type { Business, BusinessInput } from "./businesses.types";
+import { fetchAllPages, pageParams, toPage, type PageDto } from "@/lib/api/paging";
+import type { Id, ListParams, PageQuery, Repository } from "@/lib/api/types";
+import type { Business, BusinessInput, BusinessStatus } from "./businesses.types";
 import { toBusiness, toBusinessRequest, type BusinessDto } from "./businesses.mappers";
 
-export const businessesRepository: Repository<Business, BusinessInput, BusinessInput> = {
+/** sort is name, status or created_at; q matches the name, description or a city. */
+export interface BusinessPageQuery extends PageQuery {
+	status?: BusinessStatus;
+}
+
+export const businessesRepository: Repository<Business, BusinessInput, BusinessInput, BusinessPageQuery> = {
 	source: "live",
 
-	async list(params?: ListParams) {
-		const { data } = await apiClient.get<BusinessDto[]>(endpoints.businesses.root, {
+	async list(query: BusinessPageQuery, params?: ListParams) {
+		const { data } = await apiClient.get<PageDto<BusinessDto>>(endpoints.businesses.root, {
+			params: pageParams(query, { status: query.status }),
 			signal: params?.signal,
 		});
-		return (data ?? []).map(toBusiness);
+		return toPage(data, toBusiness);
 	},
 
 	async get(id: Id, params?: ListParams) {
@@ -37,3 +44,12 @@ export const businessesRepository: Repository<Business, BusinessInput, BusinessI
 		await apiClient.delete(endpoints.businesses.byId(id));
 	},
 };
+
+/**
+ * Every salon the caller can see, by name: for pickers, and for reading something per salon across
+ * the platform. A platform's salons stay few enough for that; its people and clients are paged instead.
+ */
+export async function listAllBusinesses(params?: ListParams): Promise<Business[]> {
+	const rows = await fetchAllPages<BusinessDto>(endpoints.businesses.root, { sort: "name" }, params?.signal);
+	return rows.map(toBusiness);
+}

@@ -22,10 +22,10 @@ interface UseDataTableOptions<T> {
 }
 
 /**
- * Search, sort and pagination all happen client-side — the backend exposes no
- * query parameters on any list endpoint, so there is nothing to delegate to.
- * Collections are small enough (one salon's staff, one platform's businesses)
- * that this is correct rather than merely expedient.
+ * Search, sort and pagination in the browser, for lists the backend sends whole:
+ * a salon's staff and services, and appointments over a date range. They stay
+ * small enough that this is correct rather than merely expedient. Lists that grow
+ * with use (salons, users, clients) are paged by the server: see `useServerTable`.
  */
 export function useDataTable<T>({
 	rows,

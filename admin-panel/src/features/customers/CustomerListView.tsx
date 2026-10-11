@@ -1,13 +1,14 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { can } from "@/lib/auth/permissions";
 import { resolveBusinessScope } from "@/lib/auth/scope";
-import { useDataTable } from "@/lib/table/useDataTable";
-import { useCustomers, useDeleteCustomer } from "@/lib/resources/customers/customers.hooks";
+import { useServerTable, useStayOnAPage } from "@/lib/table/useServerTable";
+import { useBusinesses } from "@/lib/resources/businesses/businesses.hooks";
+import { useCustomerPage, useDeleteCustomer } from "@/lib/resources/customers/customers.hooks";
 import type { Customer } from "@/lib/resources/customers/customers.types";
 import { getErrorMessage } from "@/lib/api/errors";
 
@@ -29,9 +30,6 @@ export default function CustomerListView() {
 	const { toast } = useToast();
 	const scope = resolveBusinessScope(user);
 
-	const { data, isPending, isError, error, refetch, source } = useCustomers(scope);
-	const remove = useDeleteCustomer();
-
 	const [businessFilter, setBusinessFilter] = useState<string>("ALL");
 	const [pendingDelete, setPendingDelete] = useState<Customer | null>(null);
 
@@ -39,33 +37,18 @@ export default function CustomerListView() {
 	const canDelete = can(user, "customer:delete");
 	const crossBusiness = scope.kind === "platform";
 
-	const salons = useMemo(() => {
-		const seen = new Map<number, string>();
-		data.forEach((c) => seen.set(Number(c.businessId), c.businessName));
-		return [...seen.entries()].map(([id, name]) => ({ id, name }));
-	}, [data]);
-
-	const filters = useMemo(
-		() => [(c: Customer) => businessFilter === "ALL" || String(c.businessId) === businessFilter],
-		[businessFilter],
-	);
-
-	const table = useDataTable<Customer>({
-		rows: data,
-		searchAccessor: (c) =>
-			`${c.firstName} ${c.lastName} ${c.email ?? ""} ${c.phone ?? ""} ${c.businessName}`,
-		sortAccessor: (c, key) => {
-			switch (key) {
-				case "name": return `${c.lastName} ${c.firstName}`;
-				case "business": return c.businessName;
-				case "createdAt": return c.createdAt;
-				default: return null;
-			}
-		},
-		initialSort: { key: "name", direction: "asc" },
-		filters,
-		pageSize: 15,
+	// Searched, filtered, sorted and paged by the server, across salons for a platform caller (BE-15).
+	const table = useServerTable({ initialSort: { key: "name", direction: "asc" }, pageSize: 15 });
+	const { data, isPending, isError, error, refetch, source } = useCustomerPage(scope, {
+		...table.query,
+		businessId: businessFilter === "ALL" ? null : Number(businessFilter),
 	});
+	useStayOnAPage(table, data);
+	const { data: salons } = useBusinesses(crossBusiness);
+	const remove = useDeleteCustomer();
+
+	const isFiltered = table.isSearching || businessFilter !== "ALL";
+	const total = data?.totalItems ?? 0;
 
 	async function handleDelete() {
 		if (!pendingDelete) return;
@@ -119,7 +102,7 @@ export default function CustomerListView() {
 		...(crossBusiness
 			? [
 					{
-						key: "business",
+						key: "business_name",
 						header: "Salon",
 						sortable: true,
 						render: (c: Customer) => (
@@ -139,7 +122,7 @@ export default function CustomerListView() {
 			render: (c) => <span className="tabular-nums text-ink-muted">{c.phone ?? "—"}</span>,
 		},
 		{
-			key: "createdAt",
+			key: "created_at",
 			header: "Client since",
 			sortable: true,
 			render: (c) => (
@@ -217,11 +200,14 @@ export default function CustomerListView() {
 							<SelectInput
 								aria-label="Filter by salon"
 								value={businessFilter}
-								onChange={(e) => setBusinessFilter(e.target.value)}
+								onChange={(e) => {
+									setBusinessFilter(e.target.value);
+									table.firstPage();
+								}}
 								className="sm:w-56"
 							>
 								<option value="ALL">All salons</option>
-								{salons.map((s) => (
+								{(salons ?? []).map((s) => (
 									<option key={s.id} value={s.id}>
 										{s.name}
 									</option>
@@ -230,14 +216,14 @@ export default function CustomerListView() {
 						)}
 						{!isPending && (
 							<p className="text-sm text-ink-subtle sm:ml-auto">
-								{table.total} {table.total === 1 ? "client" : "clients"}
+								{total} {total === 1 ? "client" : "clients"}
 							</p>
 						)}
 					</div>
 
 					<DataTable
 						columns={columns}
-						rows={table.rows}
+						rows={data?.items ?? []}
 						rowKey={(c) => c.id}
 						loading={isPending}
 						sort={table.sort}
@@ -245,16 +231,16 @@ export default function CustomerListView() {
 						empty={
 							<EmptyState
 								icon={<UserIcon className="size-6" />}
-								title={table.isFiltered ? "No clients match" : "No clients yet"}
+								title={isFiltered ? "No clients match" : "No clients yet"}
 								description={
-									table.isFiltered
+									isFiltered
 										? "Try a different search term, or clear the filters."
 										: canCreate
 											? "Add your first client to start building your list."
 											: "Clients your salon adds will appear here."
 								}
 								action={
-									table.isFiltered && (
+									isFiltered && (
 										<Button
 											variant="outline"
 											onClick={() => {
@@ -270,13 +256,13 @@ export default function CustomerListView() {
 						}
 					/>
 
-					{!isPending && table.total > 0 && (
+					{!isPending && data && total > 0 && (
 						<div className="mt-px rounded-b-card border border-t-0 border-border-default bg-surface-raised">
 							<Pagination
 								page={table.page}
-								pageCount={table.pageCount}
-								total={table.total}
-								pageSize={table.pageSize}
+								pageCount={data.totalPages}
+								total={total}
+								pageSize={data.size}
 								onPageChange={table.setPage}
 							/>
 						</div>

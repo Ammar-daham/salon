@@ -2,6 +2,8 @@
 
 import { useMemo } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useAuth } from "@/context/AuthContext";
+import { scopedBusinessId } from "@/lib/auth/scope";
 import { queryKeys } from "@/lib/query/queryKeys";
 import type { DataSource, Id } from "@/lib/api/types";
 import { createEmployee, listEmployees, removeEmployee, updateEmployee } from "./employees.api";
@@ -18,7 +20,7 @@ import type { CreateEmployeeInput, Employee, UpdateEmployeeInput } from "./emplo
  */
 export const source: DataSource = "live";
 
-/** Names come from /users, so `enabled` stays false for anyone without employee:list. */
+/** `enabled` stays false for anyone without employee:list. */
 export function useEmployees(businessId: Id | null, enabled = true) {
 	const query = useQuery({
 		queryKey: queryKeys.employees.list(businessId),
@@ -28,8 +30,10 @@ export function useEmployees(businessId: Id | null, enabled = true) {
 	return { ...query, data: query.data ?? [], source };
 }
 
+/** Found in the caller's own roster: their salon's, or every salon's for a platform caller. */
 export function useEmployee(employeeId: Id | null) {
-	const { data, isPending, isError, error, refetch } = useEmployees(null);
+	const { user } = useAuth();
+	const { data, isPending, isError, error, refetch } = useEmployees(scopedBusinessId(user));
 	const employee = useMemo(
 		() => data.find((e) => e.id === employeeId) ?? null,
 		[data, employeeId],

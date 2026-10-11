@@ -5,10 +5,10 @@ import { useState } from "react";
 import { isApiError } from "@/lib/api/errors";
 
 /**
- * Caching is architectural here, not an optimisation. The backend has no
- * pagination, and `GET /business` fans out into per-business address, contact
- * and service queries — so refetching on every mount turns one page view into a
- * query storm. A shared cache with a stale window is what makes the UI viable.
+ * Caching is architectural here, not an optimisation. A platform-wide staff roster
+ * or appointment list still reads every salon's in parallel, so refetching on every
+ * mount would turn one page view into a burst of requests. A shared cache with a
+ * stale window keeps that to once a minute at most.
  */
 export default function QueryProvider({ children }: { children: React.ReactNode }) {
 	const [client] = useState(

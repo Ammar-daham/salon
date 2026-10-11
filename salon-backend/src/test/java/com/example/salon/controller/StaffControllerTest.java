@@ -8,6 +8,7 @@ import org.springframework.mock.web.MockHttpSession;
 import java.util.Arrays;
 
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.nullValue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -36,6 +37,8 @@ class StaffControllerTest extends IntegrationTest
 				.andExpect(jsonPath("$.user_id").value(Fixture.GLOW_ADMIN_ID))
 				.andExpect(jsonPath("$.hired_at").value("2024-01-15"))
 				.andExpect(jsonPath("$.calendar_colour").value("#FF5733"))
+				.andExpect(jsonPath("$.first_name").value("Anna"))
+				.andExpect(jsonPath("$.last_name").value("Admin"))
 				.andReturn().getResponse().getHeader("Location");
 
 		mvc.perform(get(location).session(admin))
@@ -152,6 +155,28 @@ class StaffControllerTest extends IntegrationTest
 				.andExpect(jsonPath("$", hasSize(1)))
 				.andExpect(jsonPath("$[0].id").value(Fixture.GLOW_STAFF))
 				.andExpect(jsonPath("$[0].user_id").value(Fixture.GLOW_EMPLOYEE_ID));
+	}
+
+	@Test
+	void theRosterNamesEachStaffMemberAndShowsEmailsOnlyToTheSalonsAdmins() throws Exception
+	{
+		String roster = "/api/v1/businesses/" + Fixture.GLOW + "/staff";
+		for (String admin : new String[] {Fixture.GLOW_ADMIN, Fixture.SUPER_ADMIN}) {
+			mvc.perform(get(roster).session(loginAs(admin)))
+					.andExpect(jsonPath("$[0].first_name").value("Mia"))
+					.andExpect(jsonPath("$[0].last_name").value("Stylist"))
+					.andExpect(jsonPath("$[0].email").value(Fixture.GLOW_EMPLOYEE));
+			mvc.perform(get(roster + "/" + Fixture.GLOW_STAFF).session(loginAs(admin)))
+					.andExpect(jsonPath("$.email").value(Fixture.GLOW_EMPLOYEE));
+		}
+		// Not another salon's admin, nor a colleague: on /users neither of them could read it either.
+		for (String other : new String[] {Fixture.URBAN_ADMIN, Fixture.GLOW_EMPLOYEE}) {
+			mvc.perform(get(roster).session(loginAs(other)))
+					.andExpect(jsonPath("$[0].first_name").value("Mia"))
+					.andExpect(jsonPath("$[0].email").value(nullValue()));
+			mvc.perform(get(roster + "/" + Fixture.GLOW_STAFF).session(loginAs(other)))
+					.andExpect(jsonPath("$.email").value(nullValue()));
+		}
 	}
 
 	@Test

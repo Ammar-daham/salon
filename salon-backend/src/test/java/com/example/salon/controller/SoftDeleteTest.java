@@ -88,7 +88,9 @@ class SoftDeleteTest extends IntegrationTest
 
 		mvc.perform(delete(olivia).session(admin)).andExpect(status().isOk());
 
-		mvc.perform(get(GLOW + "/customers").session(admin)).andExpect(jsonPath("$", hasSize(0)));
+		mvc.perform(get(GLOW + "/customers").session(admin))
+				.andExpect(jsonPath("$.items", hasSize(0)))
+				.andExpect(jsonPath("$.total_items").value(0));
 		mvc.perform(put(olivia).session(admin).contentType(MediaType.APPLICATION_JSON).content("""
 				{"first_name": "Olivia", "last_name": "Client"}
 				""")).andExpect(status().isNotFound());

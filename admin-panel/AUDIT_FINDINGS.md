@@ -85,6 +85,9 @@ findings it depends on are linked by their `BE-xx` / `DB-xx` IDs.
   `EmptyState` now instead of a chart built on numbers nobody computed. Customers are untouched - that
   half still has no backend at all ([DB-03](../salon-backend/AUDIT_FINDINGS.md#db-03)), not just a
   frontend wiring gap, so `feature/admin-panel-live-customers` remains fully open.)*
+  *(since [BE-15](../salon-backend/AUDIT_FINDINGS.md#be-15), both fan-outs described here are smaller:
+  staff records carry the person's name, so the roster no longer joins against `GET /users`, and
+  `GET /customers` lists clients across salons in one paged request.)*
   *(customers half fixed on [`feature/admin-panel-live-customers`](../VERSION_CONTROL_GUIDE.md#br-1-9):
   `customers.hooks.ts` is `source: "live"`, backed by `customers.api.ts` and the business-scoped
   customers API ([DB-03](../salon-backend/AUDIT_FINDINGS.md#db-03)). Unlike staff, that API 403s any other

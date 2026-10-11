@@ -378,9 +378,9 @@ class AuthorizationRulesTest extends IntegrationTest
 	{
 		mvc.perform(get("/api/v1/users").session(loginAs(Fixture.GLOW_ADMIN)))
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("$[*].email", hasItem(Fixture.GLOW_EMPLOYEE)))
-				.andExpect(jsonPath("$[*].email", not(hasItem(Fixture.URBAN_ADMIN))))
-				.andExpect(jsonPath("$[*].email", not(hasItem(Fixture.SUPER_ADMIN))));
+				.andExpect(jsonPath("$.items[*].email", hasItem(Fixture.GLOW_EMPLOYEE)))
+				.andExpect(jsonPath("$.items[*].email", not(hasItem(Fixture.URBAN_ADMIN))))
+				.andExpect(jsonPath("$.items[*].email", not(hasItem(Fixture.SUPER_ADMIN))));
 	}
 
 	@Test
@@ -388,8 +388,8 @@ class AuthorizationRulesTest extends IntegrationTest
 	{
 		mvc.perform(get("/api/v1/users").session(loginAs(Fixture.SUPER_ADMIN)))
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("$[*].email", hasItem(Fixture.GLOW_EMPLOYEE)))
-				.andExpect(jsonPath("$[*].email", hasItem(Fixture.URBAN_ADMIN)));
+				.andExpect(jsonPath("$.items[*].email", hasItem(Fixture.GLOW_EMPLOYEE)))
+				.andExpect(jsonPath("$.items[*].email", hasItem(Fixture.URBAN_ADMIN)));
 	}
 
 	@Test
@@ -476,8 +476,10 @@ class AuthorizationRulesTest extends IntegrationTest
 
 		mvc.perform(get("/api/v1/businesses").session(employee))
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("$[*].id", hasItem((int) Fixture.URBAN)))
-				.andExpect(jsonPath("$[*].id", not(hasItem((int) Fixture.SERENITY_PENDING))));
+				.andExpect(jsonPath("$.items[*].id", hasItem((int) Fixture.URBAN)))
+				.andExpect(jsonPath("$.items[*].id", not(hasItem((int) Fixture.SERENITY_PENDING))))
+				// Counted in SQL, so the hidden salon isn't in the total either.
+				.andExpect(jsonPath("$.total_items").value(2));
 
 		// 404, not 403: an unapproved salon is invisible, not forbidden.
 		mvc.perform(get("/api/v1/businesses/" + Fixture.SERENITY_PENDING).session(employee))
@@ -496,7 +498,7 @@ class AuthorizationRulesTest extends IntegrationTest
 
 		MockHttpSession glowEmployee = loginAs(Fixture.GLOW_EMPLOYEE);
 		mvc.perform(get("/api/v1/businesses").session(glowEmployee))
-				.andExpect(jsonPath("$[*].id", hasItem((int) Fixture.GLOW)));
+				.andExpect(jsonPath("$.items[*].id", hasItem((int) Fixture.GLOW)));
 		mvc.perform(get("/api/v1/businesses/" + Fixture.GLOW).session(glowEmployee))
 				.andExpect(status().isOk());
 
@@ -508,7 +510,7 @@ class AuthorizationRulesTest extends IntegrationTest
 	void adminsSeeEverySalonIncludingUnapprovedOnes() throws Exception
 	{
 		mvc.perform(get("/api/v1/businesses").session(loginAs(Fixture.GLOW_ADMIN)))
-				.andExpect(jsonPath("$[*].id", hasItem((int) Fixture.SERENITY_PENDING)));
+				.andExpect(jsonPath("$.items[*].id", hasItem((int) Fixture.SERENITY_PENDING)));
 	}
 
 	@Test

@@ -1,12 +1,12 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { can } from "@/lib/auth/permissions";
-import { useDataTable } from "@/lib/table/useDataTable";
-import { useBusinesses, useDeleteBusiness } from "@/lib/resources/businesses/businesses.hooks";
+import { useServerTable, useStayOnAPage } from "@/lib/table/useServerTable";
+import { useBusinessPage, useDeleteBusiness } from "@/lib/resources/businesses/businesses.hooks";
 import {
 	BUSINESS_STATUSES,
 	BUSINESS_STATUS_LABELS,
@@ -37,38 +37,22 @@ export default function BusinessListView() {
 	const router = useRouter();
 	const { toast } = useToast();
 
-	const { data, isPending, isError, error, refetch } = useBusinesses();
-	const remove = useDeleteBusiness();
-
 	const [statusFilter, setStatusFilter] = useState<BusinessStatus | "ALL">("ALL");
 	const [pendingDelete, setPendingDelete] = useState<Business | null>(null);
 
+	// Searched, filtered, sorted and paged by the server (BE-15). Sort keys are the API's.
+	const table = useServerTable({ initialSort: { key: "name", direction: "asc" }, pageSize: 10 });
+	const { data, isPending, isError, error, refetch } = useBusinessPage({
+		...table.query,
+		status: statusFilter === "ALL" ? undefined : statusFilter,
+	});
+	useStayOnAPage(table, data);
+	const remove = useDeleteBusiness();
+
 	const canCreate = can(user, "business:create");
 	const canDelete = can(user, "business:delete");
-
-	const statusPredicate = useMemo(
-		() => (row: Business) => statusFilter === "ALL" || row.status === statusFilter,
-		[statusFilter],
-	);
-
-	const table = useDataTable<Business>({
-		rows: data ?? [],
-		searchAccessor: (b) =>
-			[b.name, b.description ?? "", cityOf(b), ...b.contacts.map((c) => c.value)].join(" "),
-		sortAccessor: (b, key) => {
-			switch (key) {
-				case "name": return b.name;
-				case "status": return b.status;
-				case "city": return cityOf(b);
-				case "services": return b.services.length;
-				case "createdAt": return b.createdAt;
-				default: return null;
-			}
-		},
-		initialSort: { key: "name", direction: "asc" },
-		filters: [statusPredicate],
-		pageSize: 10,
-	});
+	const isFiltered = table.isSearching || statusFilter !== "ALL";
+	const total = data?.totalItems ?? 0;
 
 	async function handleDelete() {
 		if (!pendingDelete) return;
@@ -128,15 +112,14 @@ export default function BusinessListView() {
 				</StatusBadge>
 			),
 		},
-		{ key: "city", header: "City", sortable: true, render: (b) => cityOf(b) },
+		{ key: "city", header: "City", render: (b) => cityOf(b) },
 		{
 			key: "services",
 			header: "Services",
-			sortable: true,
 			render: (b) => <span className="tabular-nums">{b.services.length}</span>,
 		},
 		{
-			key: "createdAt",
+			key: "created_at",
 			header: "Added",
 			sortable: true,
 			render: (b) => (
@@ -202,14 +185,17 @@ export default function BusinessListView() {
 						<SearchInput
 							value={table.search}
 							onChange={table.setSearch}
-							placeholder="Search by name, city or contact…"
+							placeholder="Search by name, description or city…"
 							aria-label="Search salons"
 							className="sm:max-w-sm"
 						/>
 						<SelectInput
 							aria-label="Filter by status"
 							value={statusFilter}
-							onChange={(e) => setStatusFilter(e.target.value as BusinessStatus | "ALL")}
+							onChange={(e) => {
+								setStatusFilter(e.target.value as BusinessStatus | "ALL");
+								table.firstPage();
+							}}
 							className="sm:w-48"
 						>
 							<option value="ALL">All statuses</option>
@@ -221,20 +207,20 @@ export default function BusinessListView() {
 						</SelectInput>
 						{!isPending && (
 							<p className="text-sm text-ink-subtle sm:ml-auto">
-								{table.total} {table.total === 1 ? "salon" : "salons"}
+								{total} {total === 1 ? "salon" : "salons"}
 							</p>
 						)}
 					</div>
 
 					<DataTable
 						columns={columns}
-						rows={table.rows}
+						rows={data?.items ?? []}
 						rowKey={(b) => b.id}
 						loading={isPending}
 						sort={table.sort}
 						onSort={table.toggleSort}
 						empty={
-							table.isFiltered ? (
+							isFiltered ? (
 								<EmptyState
 									icon={<BoxIcon className="size-6" />}
 									title="No salons match your filters"
@@ -271,13 +257,13 @@ export default function BusinessListView() {
 						}
 					/>
 
-					{!isPending && table.total > 0 && (
+					{!isPending && data && total > 0 && (
 						<div className="mt-px rounded-b-card border border-t-0 border-border-default bg-surface-raised">
 							<Pagination
 								page={table.page}
-								pageCount={table.pageCount}
-								total={table.total}
-								pageSize={table.pageSize}
+								pageCount={data.totalPages}
+								total={total}
+								pageSize={data.size}
 								onPageChange={table.setPage}
 							/>
 						</div>

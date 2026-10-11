@@ -11,17 +11,18 @@ const dto: StaffDto = {
 	title: "Senior Stylist",
 	is_active: true,
 	user_id: 4,
+	first_name: "Mia",
+	last_name: "Stylist",
+	email: "mia.stylist@glow.test",
 	hired_at: "2021-03-15",
 	calendar_colour: "#FF5733",
 	created_at: "2026-09-01T10:00:00Z",
 	updated_at: null,
 };
 
-const user = { firstName: "Mia", lastName: "Stylist", email: "mia.stylist@glow.test" };
-
 describe("toEmployee", () => {
-	it("maps the staff DTO plus the caller-supplied business and joined user", () => {
-		expect(toEmployee(dto, 1, "Glow Beauty Studio", user)).toEqual({
+	it("maps the staff DTO, names included, plus the caller-supplied business", () => {
+		expect(toEmployee(dto, 1, "Glow Beauty Studio")).toEqual({
 			id: 1,
 			firstName: "Mia",
 			lastName: "Stylist",
@@ -35,8 +36,8 @@ describe("toEmployee", () => {
 		});
 	});
 
-	it("normalises a null email to an empty string", () => {
-		expect(toEmployee(dto, 1, "Glow Beauty Studio", { ...user, email: null }).email).toBe("");
+	it("normalises a null email, which only the salon's admins are sent, to an empty string", () => {
+		expect(toEmployee({ ...dto, email: null }, 1, "Glow Beauty Studio").email).toBe("");
 	});
 });
 

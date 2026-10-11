@@ -5,6 +5,9 @@ import com.example.salon.dao.CustomerDao;
 import com.example.salon.exception.BaseException;
 import com.example.salon.exception.ErrorCode;
 import com.example.salon.model.Customer;
+import com.example.salon.paging.Page;
+import com.example.salon.paging.PageQuery;
+import com.example.salon.paging.Sort;
 import com.example.salon.security.AccessControl;
 import com.example.salon.security.AuthenticatedUser;
 import org.slf4j.Logger;
@@ -15,7 +18,6 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 
 /**
  * Customer records are PII, so every call is scoped to the caller's own salon. Staff (ADMIN and
@@ -50,11 +52,38 @@ public class CustomerService
         return getCustomerById(businessId, customer.getId(), caller);
     }
 
-    public List<Customer> getCustomersForBusiness(long businessId, AuthenticatedUser caller)
+    public Page<Customer> getCustomersForBusiness(long businessId, String search, Sort<CustomerDao.SortBy> sort,
+            PageQuery page, AuthenticatedUser caller)
     {
         AccessControl.requireStaffOfBusiness(caller, businessId);
         businessService.getBusinessById((int) businessId);
-        return customerDao.getCustomersForBusiness(businessId);
+        return customerDao.getCustomers(new CustomerDao.Filter(businessId, search), sort, page);
+    }
+
+    /**
+     * Customers across salons (BE-15): every salon's for a super admin, or one salon's with businessId.
+     * Anyone else only ever gets their own salon's, whether they name it or not.
+     */
+    public Page<Customer> getCustomers(Long businessId, String search, Sort<CustomerDao.SortBy> sort, PageQuery page,
+            AuthenticatedUser caller)
+    {
+        Long scope = businessId;
+        if (!AccessControl.isSuperAdmin(caller)) {
+            scope = businessId != null ? businessId : caller.getUser().getBusinessId();
+            if (scope == null)
+                throw new AccessDeniedException("You can only access your own business");
+            AccessControl.requireStaffOfBusiness(caller, scope);
+        }
+        return customerDao.getCustomers(new CustomerDao.Filter(scope, search), sort, page);
+    }
+
+    /** A customer by id alone. Another salon's is a 404, so ids can't be used to find out who's whose client. */
+    public Customer getCustomer(long customerId, AuthenticatedUser caller)
+    {
+        return customerDao.findCustomer(customerId)
+                .filter(customer -> AccessControl.isStaffOfBusiness(caller, customer.getBusinessId()))
+                .orElseThrow(() -> new BaseException("Customer with id " + customerId + " not found.",
+                        ErrorCode.NOT_FOUND));
     }
 
     public Customer getCustomerById(long businessId, long customerId, AuthenticatedUser caller)

@@ -1,5 +1,8 @@
 import type { Id } from "@/lib/api/types";
 import type { AppointmentFilter } from "@/lib/resources/appointments/appointments.types";
+import type { BusinessPageQuery } from "@/lib/resources/businesses/businesses.api";
+import type { CustomerPageQuery } from "@/lib/resources/customers/customers.api";
+import type { UserPageQuery } from "@/lib/resources/users/users.api";
 
 /**
  * Typed key factory. Never inline a key array at a call site — invalidation
@@ -13,7 +16,11 @@ import type { AppointmentFilter } from "@/lib/resources/appointments/appointment
 export const queryKeys = {
 	businesses: {
 		all: ["businesses"] as const,
+		// Every list of salons, so an edit refreshes the pickers and each cached page alike.
 		list: () => [...queryKeys.businesses.all, "list"] as const,
+		listAll: () => [...queryKeys.businesses.list(), "all"] as const,
+		// The query is part of the key, so each page, search and filter is cached on its own.
+		page: (query: BusinessPageQuery) => [...queryKeys.businesses.list(), "page", query] as const,
 		detail: (id: Id) => [...queryKeys.businesses.all, "detail", id] as const,
 		services: (businessId: Id) =>
 			[...queryKeys.businesses.detail(businessId), "services"] as const,
@@ -27,6 +34,7 @@ export const queryKeys = {
 	users: {
 		all: ["users"] as const,
 		list: () => [...queryKeys.users.all, "list"] as const,
+		page: (query: UserPageQuery) => [...queryKeys.users.list(), query] as const,
 		detail: (id: Id) => [...queryKeys.users.all, "detail", id] as const,
 	},
 	appointments: {
@@ -44,12 +52,8 @@ export const queryKeys = {
 	},
 	customers: {
 		all: ["customers"] as const,
-		// null/omitted = every business (platform scope); like staff, customers are
-		// fetched per business, so the two cases need distinct keys.
-		list: (businessId?: Id | null) =>
-			businessId == null
-				? ([...queryKeys.customers.all, "list"] as const)
-				: ([...queryKeys.customers.all, "list", businessId] as const),
+		// The query names the salon, or none for every salon (platform scope).
+		page: (query: CustomerPageQuery) => [...queryKeys.customers.all, "list", query] as const,
 		detail: (id: Id) => [...queryKeys.customers.all, "detail", id] as const,
 	},
 	employees: {
