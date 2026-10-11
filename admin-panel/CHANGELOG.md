@@ -39,6 +39,10 @@ lists, `GET /customers` and named staff records (BE-15).
   password field has its own show/hide toggle (FE-13).
 
 ### Added
+- A `Dockerfile`: the panel built into Next.js's standalone server and run with Node 20 as a non-root
+  user on port 3000. The API address is the `NEXT_PUBLIC_API_URL` build argument, as Next.js copies
+  it into the browser code while building. `NEXT_OUTPUT=standalone` switches the build to that
+  output; `npm run build` and `npm start` are unchanged (BE-40).
 - Settings (`/settings`) shows your name, email and role, and changes your own password given the
   current one. You stay signed in, and every other session of yours is signed out. A wrong current
   password is pointed out on its field (FE-13).
