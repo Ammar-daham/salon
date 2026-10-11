@@ -403,8 +403,18 @@ new users to the caller's business; `application.yml` is not tracked in git.
   Every other actuator endpoint stays unexposed and denied. A passing check is logged at DEBUG, so a
   probe every few seconds doesn't bury the request log. Guarded by `HealthCheckTest` and
   `RequestLoggingTest.passingHealthChecksStayOutOfTheLog`.)*
-- <a id="be-40"></a>**BE-40 — No Dockerfile/compose, no README** (only `RUNNING_AND_API_GUIDE.md`).
+- <a id="be-40"></a>✅ **BE-40 — No Dockerfile/compose, no README** (only `RUNNING_AND_API_GUIDE.md`).
   **→ [`chore/repo-docker-compose`](../VERSION_CONTROL_GUIDE.md#br-3-6)**
+  *(fixed: each app has a `Dockerfile`, and `docker compose up` at the repository root runs PostgreSQL
+  16, the API on :8081, the admin panel on :3000 and Mailpit on :8025, which catches every email, so
+  a password reset can be followed without a mail server. The API runs as in development there; the
+  same image runs the `prod` profile from the `SALON_*` variables. `--profile demo` loads
+  `db/seed_data.sql` once into an empty database, so there's a super admin to sign in as. The backend
+  image is built from the repository, so a developer's `application.yml` and its password never end up
+  in it, as they did in a war built on their machine. A backend README and a root README say how to
+  run it all, with Docker or without, and how to create the first super admin in production. CI builds
+  both images, brings the stack up, loads the demo data and signs in as its super admin on every pull
+  request, which also catches a migration the seed no longer fits.)*
 - <a id="be-42"></a>✅ **BE-42 — No record of what the API was asked or what it answered.** Only failures were
   logged (BE-34), and only to the console: in production nothing says who called which endpoint, what
   status came back or why a request was refused, there's no way to tie a user's error report to server
