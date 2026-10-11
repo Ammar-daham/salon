@@ -52,7 +52,7 @@ public class BusinessService
         return business;
     }
 
-    /** Admins see every salon; anyone else the approved ones and their own (FE-11), counted in SQL so pages add up. */
+    /** Admins see every salon; anyone else the approved ones and their own, counted in SQL so pages add up. */
     public Page<Business> getBusinesses(String search, Status status, Sort<BusinessDao.SortBy> sort, PageQuery page,
             AuthenticatedUser caller)
     {
