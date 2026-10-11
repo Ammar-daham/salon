@@ -3,7 +3,7 @@ package com.example.salon.paging;
 import com.example.salon.exception.BaseException;
 import com.example.salon.exception.ErrorCode;
 
-/** Which page of a list to answer with (BE-15): page counts from 1, size is 1 to 100 rows. */
+/** Which page of a list to answer with: page counts from 1, size is 1 to 100 rows. */
 public record PageQuery(int page, int size)
 {
 	public static final int DEFAULT_SIZE = 20;
