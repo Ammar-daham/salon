@@ -14,7 +14,7 @@ import java.util.stream.Stream;
 /**
  * A list query's WHERE clause, run as one page: a count, then that page's rows. Every piece of
  * SQL handed to it is a constant written in a DAO; what a client sent only ever travels as a
- * parameter (BE-26).
+ * parameter.
  */
 final class ListQuery
 {
