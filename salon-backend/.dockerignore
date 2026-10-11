@@ -1,0 +1,10 @@
+# Only what the image is built from. In particular a developer's application.yml, which holds their
+# database password, never reaches an image (BE-40): an image is configured by its environment.
+*
+!gradlew
+!gradle/
+!build.gradle
+!settings.gradle
+!gradle.properties
+!src/main/
+src/main/resources/application.yml
