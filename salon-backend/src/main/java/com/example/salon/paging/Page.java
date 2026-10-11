@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.List;
 
-/** One page of a list, and how long the whole list is (BE-15). A page past the end has no items. */
+/** One page of a list, and how long the whole list is. A page past the end has no items. */
 public record Page<T>(
 		List<T> items,
 		int page,
