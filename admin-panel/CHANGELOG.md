@@ -109,6 +109,11 @@ lists, `GET /customers` and named staff records (BE-15).
   it loaded nothing; and TailAdmin's logos and file-type icons, which nothing showed (FE-14).
 - The mock data generators in `lib/mock/`, now unused.
 
+### Fixed
+- A service's duration takes any whole number of minutes. The field stepped in fives from 1, so the
+  browser only accepted 1, 6, 11 and so on, and refused to save a new service at the default 60
+  minutes or any service of 30, 45 or 120.
+
 ## [0.1.0] - 2026-09-28
 
 Requires salon-backend ≥ 0.1.0.
