@@ -8,7 +8,7 @@ import { normalizeError } from "./errors";
  * default) with allowCredentials, so this base URL has to match it.
  */
 export const apiClient = axios.create({
-	baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080",
+	baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:8081",
 	withCredentials: true,
 });
 

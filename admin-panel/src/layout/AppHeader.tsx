@@ -1,6 +1,5 @@
 "use client";
 import { ThemeToggleButton } from "@/components/common/ThemeToggleButton";
-import NotificationDropdown from "@/components/header/NotificationDropdown";
 import UserDropdown from "@/components/header/UserDropdown";
 import { useSidebar } from "@/context/SidebarContext";
 import Link from "next/link";
@@ -83,7 +82,6 @@ const AppHeader: React.FC = () => {
         >
           <div className="flex items-center gap-2 min-[375px]:gap-3">
             <ThemeToggleButton />
-            <NotificationDropdown />
           </div>
           <UserDropdown />
         </div>
