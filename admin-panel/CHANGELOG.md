@@ -15,6 +15,11 @@ migration V12 (DB-13, DB-14), the password endpoints with migration V13 (FE-13),
 lists, `GET /customers` and named staff records (BE-15).
 
 ### Changed
+- Signed-out pages and browser tabs no longer show TailAdmin. The sign-in page's title is "Sign in ·
+  Salon Admin", not the template's, and the tab icon is the panel's "S" mark instead of TailAdmin's
+  logo (FE-14).
+- The not-found page says the page wasn't found and links back to the dashboard, without
+  TailAdmin's footer or the two pictures it could no longer load (FE-14).
 - The Businesses, Users and Customers pages are searched, filtered, sorted and paged by the server
   instead of downloading every row first (BE-15). A search is sent once typing pauses. Salons are
   searched by name, description or city, users by name or email, and clients by name, email or
@@ -86,6 +91,9 @@ lists, `GET /customers` and named staff records (BE-15).
   the Notes tab and delete clients from the list; employees can add and view clients (FE-03).
 
 ### Removed
+- The template's `/error-404` demo page; an unknown address shows the not-found page (FE-14).
+- The grid pattern behind the sign-in and not-found pages, whose image had already been deleted, so
+  it loaded nothing; and TailAdmin's logos and file-type icons, which nothing showed (FE-14).
 - The header's notification bell, which showed TailAdmin's demo notifications from made-up people,
   and the template's sample profile photos it used. The bell comes back with real notifications
   (FE-14).
