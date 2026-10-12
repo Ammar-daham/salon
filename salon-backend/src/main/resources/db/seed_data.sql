@@ -13,8 +13,10 @@
 --
 --   psql -h localhost -U postgres -d salondb -f src/main/resources/db/seed_data.sql
 --
--- It expects an EMPTY database (just the schema from V1-V3). Running it twice
--- will fail on unique constraints (business names, contact values, user
+-- or have Docker Compose load it, from the repository root: docker compose --profile demo up
+--
+-- It expects an EMPTY database with every migration applied, which the backend does as it starts.
+-- Running it twice will fail on unique constraints (business names, contact values, user
 -- emails). To reset first, uncomment the TRUNCATE block below.
 --
 -- Every login-capable user (SUPER_ADMIN, ADMIN, EMPLOYEE) shares one password

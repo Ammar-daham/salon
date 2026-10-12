@@ -1,0 +1,11 @@
+# The image installs its own dependencies for Linux and makes its own build; a developer's
+# node_modules and .next hold another platform's binaries. .env files would override the
+# NEXT_PUBLIC_API_URL the image is built with.
+node_modules
+.next
+.env*
+coverage
+*.tsbuildinfo
+next-env.d.ts
+Dockerfile
+.dockerignore

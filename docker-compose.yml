@@ -1,0 +1,96 @@
+# The whole app on one machine, for development and demos (BE-40):
+#
+#   docker compose up --build               the admin panel on http://localhost:3000
+#   docker compose --profile demo up        the same, plus sample salons and a super admin
+#
+# The API answers on http://localhost:8081, and every email the app sends, such as a password reset
+# link, lands in Mailpit on http://localhost:8025 instead of a real inbox. The data is kept in a
+# volume between runs; `docker compose down --volumes` deletes it.
+#
+# The backend runs as on a developer's machine: plain HTTP, no prod profile. Production runs the same
+# images with SPRING_PROFILES_ACTIVE=prod and the SALON_* variables (salon-backend/README.md).
+
+name: salon
+
+services:
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: salondb
+      POSTGRES_USER: salon
+      POSTGRES_PASSWORD: salon
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    ports:
+      # For psql or an IDE on this machine; 5433 so it doesn't clash with a Postgres already on 5432.
+      - "5433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U salon -d salondb"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  mailpit:
+    image: axllent/mailpit:v1.31.5
+    ports:
+      # Its web inbox. The backend sends to its SMTP port, 1025, inside the Compose network.
+      - "8025:8025"
+
+  salon-backend:
+    build: ./salon-backend
+    depends_on:
+      postgres:
+        condition: service_healthy
+      mailpit:
+        condition: service_started
+    environment:
+      # Spring Boot's environment names for app.datasource.*, which application.yml holds outside Docker.
+      APP_DATASOURCE_JDBCURL: jdbc:postgresql://postgres:5432/salondb
+      APP_DATASOURCE_USERNAME: salon
+      APP_DATASOURCE_PASSWORD: salon
+      SERVER_SERVLET_SESSION_COOKIE_SAMESITE: lax
+      SPRING_MAIL_HOST: mailpit
+      SPRING_MAIL_PORT: 1025
+    ports:
+      - "8081:8081"
+
+  admin-panel:
+    build:
+      context: ./admin-panel
+      args:
+        # Where the browser, on this machine, reaches the API; copied into the panel when it's built.
+        NEXT_PUBLIC_API_URL: http://localhost:8081
+    depends_on:
+      salon-backend:
+        condition: service_healthy
+    ports:
+      - "3000:3000"
+
+  # Only with --profile demo: loads salon-backend/src/main/resources/db/seed_data.sql once Flyway has
+  # created the tables, and only into a database with no users yet, so running it again changes nothing.
+  # Every account it creates signs in with Password123!; the super admin is superadmin@salon.example.com.
+  demo-data:
+    profiles: [demo]
+    image: postgres:16
+    depends_on:
+      salon-backend:
+        condition: service_healthy
+    environment:
+      PGHOST: postgres
+      PGUSER: salon
+      PGPASSWORD: salon
+      PGDATABASE: salondb
+    volumes:
+      - ./salon-backend/src/main/resources/db/seed_data.sql:/seed_data.sql:ro
+    command:
+      - sh
+      - -c
+      - |
+        if [ "$$(psql -tAc 'SELECT count(*) FROM users')" = "0" ]; then
+          psql -v ON_ERROR_STOP=1 -q -f /seed_data.sql && echo "Demo data loaded."
+        else
+          echo "The database already has users: no demo data loaded."
+        fi
+
+volumes:
+  postgres-data:

@@ -50,6 +50,9 @@ version. The version lives in [`gradle.properties`](gradle.properties); each rel
   an hour (FE-13).
 
 ### Added
+- A `Dockerfile`: the API built with the Gradle wrapper on JDK 21 and run on a Java 21 runtime, as
+  a non-root user, on port 8081, with a health check on `/actuator/health`. It's configured from the
+  environment; a developer's `application.yml` is never copied into the image (BE-40).
 - The paged lists take `q`, a search that ignores case, and `sort`, a key or `-key` for the other
   way round. Salons: `q` matches the name, description or a city; `status` narrows to one status;
   `sort` is `name` (the default), `status` or `created_at`. Users: `q` matches the name or email;

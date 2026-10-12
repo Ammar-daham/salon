@@ -87,3 +87,34 @@ jobs:
 
       - name: Build
         run: npm run build
+
+  docker-compose:
+    name: docker compose (both images)
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+
+      # BE-40: both images build, the stack comes up healthy, the demo data still fits the schema, and
+      # its super admin can sign in. The seed stops at its first error, so a migration it no longer
+      # fits fails here rather than on someone's first `docker compose --profile demo up`.
+      - name: Build the images and start the stack
+        run: docker compose up --build --detach --wait --wait-timeout 300
+
+      - name: Load the demo data
+        run: docker compose --profile demo run --rm demo-data
+
+      - name: The panel answers, and the demo super admin signs in
+        run: |
+          curl -fsS -o /dev/null http://localhost:3000/signin
+          curl -fsS -o /dev/null -H 'Content-Type: application/json' \
+            -d '{"email": "superadmin@salon.example.com", "password": "Password123!"}' \
+            http://localhost:8081/api/v1/auth/login
+
+      - name: Show the logs
+        if: failure()
+        run: docker compose logs
+
+      - name: Stop the stack
+        if: always()
+        run: docker compose --profile demo down --volumes
