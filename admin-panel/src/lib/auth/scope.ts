@@ -21,13 +21,6 @@ export function resolveBusinessScope(user: AuthUser | null | undefined): Busines
 	if (!user) return { kind: "unresolved" };
 	if (user.role === "SUPER_ADMIN") return { kind: "platform" };
 	if (user.businessId != null) return { kind: "business", businessId: user.businessId };
-
-	// Local development escape hatch for a user row that predates business linkage.
-	const devOverride = process.env.NEXT_PUBLIC_DEV_BUSINESS_ID;
-	if (devOverride && !Number.isNaN(Number(devOverride))) {
-		return { kind: "business", businessId: Number(devOverride) };
-	}
-
 	return { kind: "unresolved" };
 }
 

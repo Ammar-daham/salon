@@ -10,7 +10,7 @@ frontend-specific findings only.
 
 A ✅ next to a finding's ID means its fix has landed; the parenthetical *(fixed: …)* note on that
 finding says what changed. So far: ✅ FE-01, ✅ FE-02, ✅ FE-03, ✅ FE-05, ✅ FE-06, ✅ FE-09, ✅ FE-11,
-✅ FE-13, ✅ FE-15.
+✅ FE-13, ✅ FE-15, ✅ FE-16.
 
 ## 0. Honest summary
 
@@ -209,9 +209,14 @@ findings it depends on are linked by their `BE-xx` / `DB-xx` IDs.
   `apexcharts`, `react-apexcharts` and `flatpickr` are uninstalled. `date-picker.tsx`, the flatpickr
   stylesheet in `app/layout.tsx` and the apexcharts and flatpickr overrides in `globals.css` are gone,
   as is the `.eslintrc.json` that ESLint 9 no longer reads. FullCalendar stays: the Calendar page uses it.)*
-- <a id="fe-16"></a>**FE-16 — `NEXT_PUBLIC_DEV_BUSINESS_ID` escape hatch** in `lib/auth/scope.ts` — make sure
+- <a id="fe-16"></a>✅ **FE-16 — `NEXT_PUBLIC_DEV_BUSINESS_ID` escape hatch** in `lib/auth/scope.ts` — make sure
   it's never set in production (document it, or remove it once every seeded user has a business).
   **→ [`chore/admin-panel-remove-template-leftovers`](../VERSION_CONTROL_GUIDE.md#br-3-7)**
+  *(fixed: on [`chore/admin-panel-remove-template-leftovers`](../VERSION_CONTROL_GUIDE.md#br-3-7), the
+  override is removed. Every ADMIN and EMPLOYEE in `db/seed_data.sql` has a salon, and the backend
+  puts each new one in the salon a super admin names or in the creating admin's own, so the override
+  had nothing left to cover. An account without a salon now always shows "Your account isn't linked
+  to a salon yet". Guarded by `scope.test.ts`.)*
 - <a id="fe-17"></a>**FE-17 — No `.env.example`** documenting `NEXT_PUBLIC_API_URL`.
   **→ [`chore/admin-panel-remove-template-leftovers`](../VERSION_CONTROL_GUIDE.md#br-3-7)**
 

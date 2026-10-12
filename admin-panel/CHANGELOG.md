@@ -91,6 +91,9 @@ lists, `GET /customers` and named staff records (BE-15).
   the Notes tab and delete clients from the list; employees can add and view clients (FE-03).
 
 ### Removed
+- The `NEXT_PUBLIC_DEV_BUSINESS_ID` override. An admin or employee whose account has no salon always
+  sees "Your account isn't linked to a salon yet", rather than the salon that variable named
+  (FE-16).
 - The `apexcharts`, `react-apexcharts` and `flatpickr` packages, which no page used; the template's
   date picker, which nothing rendered; and the flatpickr stylesheet every page loaded for it (FE-15).
 - The template's `/error-404` demo page; an unknown address shows the not-found page (FE-14).
