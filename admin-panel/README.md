@@ -1,196 +1,99 @@
-# TailAdmin Next.js - Free Next.js Tailwind Admin Dashboard Template
+# admin-panel
 
-TailAdmin is a free and open-source admin dashboard template built on **Next.js and Tailwind CSS** providing developers with everything they need to create a feature-rich and data-driven: back-end, dashboard, or admin panel solution for any sort of web project.
+The web app salon staff and platform admins use: salons, staff and their schedules, services,
+opening hours, clients, appointments and a calendar. Next.js 16 (App Router) with React 19,
+TanStack Query and Tailwind CSS 4, on top of the [salon-backend](../salon-backend) REST API.
 
-![TailAdmin - Next.js Dashboard Preview](./banner.png)
+What changed in each version is in [CHANGELOG.md](CHANGELOG.md); each release says which backend
+version it needs.
 
-With TailAdmin Next.js, you get access to all the necessary dashboard UI components, elements, and pages required to build a high-quality and complete dashboard or admin panel. Whether you're building a dashboard or admin panel for a complex web application or a simple website.
+## Run it with Docker
 
-TailAdmin utilizes the powerful features of **Next.js 16** and common features of Next.js such as server-side rendering (SSR), static site generation (SSG), and seamless API route integration. Combined with the advancements of **React 19** and the robustness of **TypeScript**, TailAdmin is the perfect solution to help get your project up and running quickly.
-
-## Overview
-
-TailAdmin provides essential UI components and layouts for building feature-rich, data-driven admin dashboards and control panels. It's built on:
-
-* Next.js 16.x
-* React 19
-* TypeScript
-* Tailwind CSS V4
-
-### Quick Links
-
-* [✨ Visit Website](https://tailadmin.com)
-* [📄 Documentation](https://tailadmin.com/docs)
-* [⬇️ Download](https://tailadmin.com/download)
-* [🖌️ Figma Design File (Community Edition)](https://www.figma.com/community/file/1463141366275764364)
-* [⚡ Get PRO Version](https://tailadmin.com/pricing)
-
-### Demos
-
-* [Free Version](https://nextjs-free-demo.tailadmin.com)
-* [Pro Version](https://nextjs-demo.tailadmin.com)
-
-### Other Versions
-
-- [Next.js Version](https://github.com/TailAdmin/free-nextjs-admin-dashboard)
-- [React.js Version](https://github.com/TailAdmin/free-react-tailwind-admin-dashboard)
-- [Vue.js Version](https://github.com/TailAdmin/vue-tailwind-admin-dashboard)
-- [Angular Version](https://github.com/TailAdmin/free-angular-tailwind-dashboard)
-- [Laravel Version](https://github.com/TailAdmin/tailadmin-laravel)
-
-## Installation
-
-### Prerequisites
-
-To get started with TailAdmin, ensure you have the following prerequisites installed and set up:
-
-* Node.js 18.x or later (recommended to use Node.js 20.x or later)
-
-### Cloning the Repository
-
-Clone the repository using the following command:
+From the repository root:
 
 ```bash
-git clone https://github.com/TailAdmin/free-nextjs-admin-dashboard.git
+docker compose --profile demo up --build
 ```
 
-> Windows Users: place the repository near the root of your drive if you face issues while cloning.
+This starts the panel on http://localhost:3000 with the API, a database and sample data. Sign in as
+`superadmin@salon.example.com` with `Password123!`. The [root README](../README.md) has the details.
 
-1. Install dependencies:
+## Run it without Docker
 
-   ```bash
-   npm install
-   # or
-   yarn install
-   ```
+You need Node 20 or later, and the API running on http://localhost:8081 (see the
+[salon-backend README](../salon-backend/README.md)).
 
-   > Use `--legacy-peer-deps` flag if you face peer-dependency error during installation.
+```bash
+npm install
+npm run dev
+```
 
-2. Start the development server:
+Then open http://localhost:3000. Keep it on port 3000: in development the API only accepts requests
+from http://localhost:3000. If the API isn't on http://localhost:8081, copy
+[`.env.example`](.env.example) to `.env.local` and change the address there.
 
-   ```bash
-   npm run dev
-   # or
-   yarn dev
-   ```
+There's no sign-up. Sign in with an account the backend already has: one from its demo data, or the
+first super admin that the backend README shows how to create.
 
-## Components
+## Scripts
 
-TailAdmin is a pre-designed starting point for building a web-based dashboard using Next.js and Tailwind CSS. The template includes:
+| Command | What it does |
+|---|---|
+| `npm run dev` | The development server on http://localhost:3000 |
+| `npm run build`, `npm start` | A production build, and serving it |
+| `npm run lint` | ESLint |
+| `npm run typecheck` | Generates Next's route types, then runs `tsc --noEmit` |
+| `npm test` | The Vitest unit tests; `npm run test:watch` reruns them on every change |
 
-* Sophisticated and accessible sidebar
-* Data visualization components
-* Profile management and custom 404 page
-* Tables and Charts(Line and Bar)
-* Authentication forms and input elements
-* Alerts, Dropdowns, Modals, Buttons and more
-* Can't forget Dark Mode 🕶️
+CI runs lint, the type check, the tests and the build on every pull request.
 
-All components are built with React and styled using Tailwind CSS for easy customization.
+## Configuration
 
-## Feature Comparison
+| Variable | What it's for |
+|---|---|
+| `NEXT_PUBLIC_API_URL` | Where the browser reaches the API. Defaults to `http://localhost:8081`. |
+| `NEXT_OUTPUT` | `standalone` builds Next's self-contained server. Only the Dockerfile sets it. |
 
-### Free Version
+Next copies `NEXT_PUBLIC_API_URL` into the browser code when it builds the panel, so it's read by
+`npm run dev` and `npm run build`, not when the server starts. Restart `npm run dev` after changing
+it, and give each environment its own build. The API has to allow the panel's address too: under
+the backend's prod profile that's `SALON_ALLOWED_ORIGINS`
+([backend configuration](../salon-backend/README.md#configuration)).
 
-* 1 Unique Dashboard
-* 30+ dashboard components
-* 50+ UI elements
-* Basic Figma design files
-* Community support
+The Docker image is built from [`Dockerfile`](Dockerfile), with the API's address as a build
+argument:
 
-### Pro Version
+```bash
+docker build --build-arg NEXT_PUBLIC_API_URL=https://api.example.com -t salon-admin-panel .
+docker run -p 3000:3000 salon-admin-panel
+```
 
-* 7 Unique Dashboards: Analytics, Ecommerce, Marketing, CRM, SaaS, Stocks, Logistics (more coming soon)
-* 500+ dashboard components and UI elements
-* Complete Figma design file
-* Email support
+## How it works
 
-To learn more about pro version features and pricing, visit our [pricing page](https://tailadmin.com/pricing).
+- Signing in starts a session on the backend. The browser keeps it in the `JSESSIONID` cookie and
+  sends it with every request. A 401 on any request, apart from signing in and the check for an
+  existing session, signs the panel out.
+- What each role may see and do is in `src/lib/auth/permissions.ts`, which the sidebar and the route
+  guard both read. The backend enforces the same rules: the panel only hides what it would refuse.
+- An ADMIN or EMPLOYEE works in their own salon (`src/lib/auth/scope.ts`). A SUPER_ADMIN sees every
+  salon, and picks one first where a page works on a single salon.
+- The API speaks `snake_case`. Each resource's mappers turn it into the `camelCase` types the rest of
+  the panel uses, and back.
 
-## Changelog
+## Code layout
 
-### Version 2.2.2 - [December 30, 2025]
+| Folder | What's in it |
+|---|---|
+| `src/app` | The routes: `(admin)` for the signed-in pages, `(full-width-pages)` for sign-in and password reset |
+| `src/features` | The screens of each area: salons, staff, clients, appointments, the calendar and so on |
+| `src/lib/resources` | One folder per API resource: requests (`*.api.ts`), mappers, TanStack Query hooks and types |
+| `src/lib/api`, `src/lib/auth` | The HTTP client, endpoints and paging; permissions, route access and salon scope |
+| `src/components`, `src/layout`, `src/context` | Shared UI; the sidebar and header; sign-in, theme and sidebar state |
+| `src/test` | The unit tests, in the same layout as `src/` |
 
-* Fixed date picker positioning and functionality in Statistics Chart.
+Known problems and their fixes are tracked in [AUDIT_FINDINGS.md](AUDIT_FINDINGS.md).
 
+## Credits
 
-### Version 2.1.0 - [November 15, 2025]
-
-* Updated to Next.js 16.x
-* Fixed all reported minor bugs
-
-### Version 2.0.2 - [March 25, 2025]
-
-* Upgraded to Next.js 16.x for [CVE-2025-29927](https://nextjs.org/blog/cve-2025-29927) concerns
-* Included overrides vectormap for packages to prevent peer dependency errors during installation.
-* Migrated from react-flatpickr to flatpickr package for React 19 support
-
-### Version 2.0.1 - [February 27, 2025]
-
-#### Update Overview
-
-* Upgraded to Tailwind CSS v4 for better performance and efficiency.
-* Updated class usage to match the latest syntax and features.
-* Replaced deprecated class and optimized styles.
-
-#### Next Steps
-
-* Run npm install or yarn install to update dependencies.
-* Check for any style changes or compatibility issues.
-* Refer to the Tailwind CSS v4 [Migration Guide](https://tailwindcss.com/docs/upgrade-guide) on this release. if needed.
-* This update keeps the project up to date with the latest Tailwind improvements. 🚀
-
-### v2.0.0 (February 2025)
-
-A major update focused on Next.js 16 implementation and comprehensive redesign.
-
-#### Major Improvements
-
-* Complete redesign using Next.js 16 App Router and React Server Components
-* Enhanced user interface with Next.js-optimized components
-* Improved responsiveness and accessibility
-* New features including collapsible sidebar, chat screens, and calendar
-* Redesigned authentication using Next.js App Router and server actions
-* Updated data visualization using ApexCharts for React
-
-#### Breaking Changes
-
-* Migrated from Next.js 14 to Next.js 16
-* Chart components now use ApexCharts for React
-* Authentication flow updated to use Server Actions and middleware
-
-[Read more](https://tailadmin.com/docs/update-logs/nextjs) on this release.
-
-### v1.3.4 (July 01, 2024)
-
-* Fixed JSvectormap rendering issues
-
-### v1.3.3 (June 20, 2024)
-
-* Fixed build error related to Loader component
-
-### v1.3.2 (June 19, 2024)
-
-* Added ClickOutside component for dropdown menus
-* Refactored sidebar components
-* Updated Jsvectormap package
-
-### v1.3.1 (Feb 12, 2024)
-
-* Fixed layout naming consistency
-* Updated styles
-
-### v1.3.0 (Feb 05, 2024)
-
-* Upgraded to Next.js 14
-* Added Flatpickr integration
-* Improved form elements
-* Enhanced multiselect functionality
-* Added default layout component
-
-## License
-
-TailAdmin Next.js Free Version is released under the MIT License.
-
-## Support
-If you find this project helpful, please consider giving it a star on GitHub. Your support helps us continue developing and maintaining this template.
+The layout and many of the UI components started from [TailAdmin](https://tailadmin.com)'s free
+Next.js template, used under the MIT license in [TAILADMIN-LICENSE](TAILADMIN-LICENSE).

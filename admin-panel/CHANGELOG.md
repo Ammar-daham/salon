@@ -15,6 +15,10 @@ migration V12 (DB-13, DB-14), the password endpoints with migration V13 (FE-13),
 lists, `GET /customers` and named staff records (BE-15).
 
 ### Changed
+- Without `NEXT_PUBLIC_API_URL`, the panel calls the API on http://localhost:8081, where the backend
+  runs, instead of 8080 (FE-17).
+- TailAdmin's MIT license moves from `LICENSE` to `TAILADMIN-LICENSE`, which the README's credits
+  link to. It covers the code that came from the template, not the panel as a whole (FE-14).
 - Signed-out pages and browser tabs no longer show TailAdmin. The sign-in page's title is "Sign in ·
   Salon Admin", not the template's, and the tab icon is the panel's "S" mark instead of TailAdmin's
   logo (FE-14).
@@ -44,6 +48,9 @@ lists, `GET /customers` and named staff records (BE-15).
   password field has its own show/hide toggle (FE-13).
 
 ### Added
+- A README of the panel's own in place of TailAdmin's: running it with or without Docker, its
+  scripts and configuration, and how the code is laid out (FE-14).
+- `.env.example`, documenting `NEXT_PUBLIC_API_URL` (FE-17).
 - A `Dockerfile`: the panel built into Next.js's standalone server and run with Node 20 as a non-root
   user on port 3000. The API address is the `NEXT_PUBLIC_API_URL` build argument, as Next.js copies
   it into the browser code while building. `NEXT_OUTPUT=standalone` switches the build to that
@@ -91,6 +98,7 @@ lists, `GET /customers` and named staff records (BE-15).
   the Notes tab and delete clients from the list; employees can add and view clients (FE-03).
 
 ### Removed
+- `banner.png`, the template's screenshot (FE-14).
 - The `NEXT_PUBLIC_DEV_BUSINESS_ID` override. An admin or employee whose account has no salon always
   sees "Your account isn't linked to a salon yet", rather than the salon that variable named
   (FE-16).

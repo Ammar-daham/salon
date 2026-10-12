@@ -10,7 +10,7 @@ frontend-specific findings only.
 
 A ✅ next to a finding's ID means its fix has landed; the parenthetical *(fixed: …)* note on that
 finding says what changed. So far: ✅ FE-01, ✅ FE-02, ✅ FE-03, ✅ FE-05, ✅ FE-06, ✅ FE-09, ✅ FE-11,
-✅ FE-13, ✅ FE-15, ✅ FE-16.
+✅ FE-13, ✅ FE-14, ✅ FE-15, ✅ FE-16, ✅ FE-17.
 
 ## 0. Honest summary
 
@@ -198,9 +198,16 @@ findings it depends on are linked by their `BE-xx` / `DB-xx` IDs.
   sending. Guarded by `auth.validation.test.ts` and `auth.mappers.test.ts`.)*
 
 ### Low
-- <a id="fe-14"></a>**FE-14 — TailAdmin leftovers.** `README.md` is the template's README,
+- <a id="fe-14"></a>✅ **FE-14 — TailAdmin leftovers.** `README.md` is the template's README,
   `banner.png`/`LICENSE` are template files, and `NotificationDropdown.tsx` (384 lines) renders
   hard-coded demo notifications. **→ [`chore/admin-panel-remove-template-leftovers`](../VERSION_CONTROL_GUIDE.md#br-3-7)**
+  *(fixed: on [`chore/admin-panel-remove-template-leftovers`](../VERSION_CONTROL_GUIDE.md#br-3-7),
+  the README is the panel's own: running it with or without Docker, its scripts, configuration and
+  code layout. `banner.png`, `NotificationDropdown.tsx` and the sample photos it showed are gone. `LICENSE` is kept as `TAILADMIN-LICENSE`, which the README's credits link to: the
+  panel still builds on the template's layout and components, and the MIT terms ask for its notice to
+  stay with them. Other traces found on the way are gone too: the sign-in page's template title,
+  TailAdmin's favicon and logos, the `/error-404` demo route, and the not-found page's TailAdmin footer
+  and pictures that no longer existed.)*
 - <a id="fe-15"></a>✅ **FE-15 — Unused dependencies.** `apexcharts`/`react-apexcharts` are imported nowhere;
   `flatpickr` is only used by `components/form/date-picker.tsx`, which nothing renders, yet its CSS is
   loaded globally in `app/layout.tsx`. FullCalendar is also unused today but is legitimately needed for
@@ -217,8 +224,12 @@ findings it depends on are linked by their `BE-xx` / `DB-xx` IDs.
   puts each new one in the salon a super admin names or in the creating admin's own, so the override
   had nothing left to cover. An account without a salon now always shows "Your account isn't linked
   to a salon yet". Guarded by `scope.test.ts`.)*
-- <a id="fe-17"></a>**FE-17 — No `.env.example`** documenting `NEXT_PUBLIC_API_URL`.
+- <a id="fe-17"></a>✅ **FE-17 — No `.env.example`** documenting `NEXT_PUBLIC_API_URL`.
   **→ [`chore/admin-panel-remove-template-leftovers`](../VERSION_CONTROL_GUIDE.md#br-3-7)**
+  *(fixed: on [`chore/admin-panel-remove-template-leftovers`](../VERSION_CONTROL_GUIDE.md#br-3-7),
+  `.env.example` documents `NEXT_PUBLIC_API_URL`, and the README explains that it's fixed when the
+  panel is built. Without it the panel now calls http://localhost:8081, where the
+  backend runs, instead of 8080.)*
 
 ### Fixed since the previous audit
 - Dead "Forgot password?" link removed from the sign-in form.
