@@ -107,9 +107,6 @@ lists, `GET /customers` and named staff records (BE-15).
 - The template's `/error-404` demo page; an unknown address shows the not-found page (FE-14).
 - The grid pattern behind the sign-in and not-found pages, whose image had already been deleted, so
   it loaded nothing; and TailAdmin's logos and file-type icons, which nothing showed (FE-14).
-- The header's notification bell, which showed TailAdmin's demo notifications from made-up people,
-  and the template's sample profile photos it used. The bell comes back with real notifications
-  (FE-14).
 - The mock data generators in `lib/mock/`, now unused.
 
 ## [0.1.0] - 2026-09-28
