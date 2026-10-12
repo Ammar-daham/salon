@@ -9,8 +9,8 @@ behaviour it depends on.
 frontend-specific findings only.
 
 A ✅ next to a finding's ID means its fix has landed; the parenthetical *(fixed: …)* note on that
-finding says what changed. So far: ✅ FE-01, ✅ FE-02, ✅ FE-03, ✅ FE-05, ✅ FE-06, ✅ FE-09, ✅ FE-11,
-✅ FE-13, ✅ FE-14, ✅ FE-15, ✅ FE-16, ✅ FE-17.
+finding says what changed. So far: ✅ FE-01, ✅ FE-02, ✅ FE-03, ✅ FE-05, ✅ FE-06, ✅ FE-08, ✅ FE-09,
+✅ FE-11, ✅ FE-13, ✅ FE-14, ✅ FE-15, ✅ FE-16, ✅ FE-17.
 
 ## 0. Honest summary
 
@@ -149,13 +149,15 @@ findings it depends on are linked by their `BE-xx` / `DB-xx` IDs.
   panel's own origin in the backend's `SALON_ALLOWED_ORIGINS`. Over plain HTTP the API answers 403.)*
 
 ### Medium
-- <a id="fe-08"></a>**FE-08 — No frontend tests.** No unit tests for `permissions.ts` / `routeAccess.ts` /
+- <a id="fe-08"></a>✅ **FE-08 — No frontend tests.** No unit tests for `permissions.ts` / `routeAccess.ts` /
   the mappers, and no e2e (Playwright) for sign-in and CRUD flows. The permission matrix and wire
   mappers are exactly where regressions will hide.
   **→ [`test/admin-panel-permission-matrix`](../VERSION_CONTROL_GUIDE.md#br-0-12), [`test/admin-panel-e2e-smoke`](../VERSION_CONTROL_GUIDE.md#br-3-8)**
   *(unit tests done: Vitest (`npm test`) now covers `permissions.ts`, `routeAccess.ts` and the auth, user and
-  business mappers. The Playwright e2e half stays open under
-  [`test/admin-panel-e2e-smoke`](../VERSION_CONTROL_GUIDE.md#br-3-8).)*
+  business mappers. The e2e half is done on [`test/admin-panel-e2e-smoke`](../VERSION_CONTROL_GUIDE.md#br-3-8): Playwright
+  (`npm run test:e2e`) signs in and out, and creates, changes and removes a salon as the super admin,
+  and a service and an appointment as a salon admin, against the Docker Compose stack in CI. Its first
+  run found the service form refusing every duration but 1, 6, 11 and so on.)*
 - <a id="fe-09"></a>✅ **FE-09 — Deletes echo the whole record in the DELETE body.** `businesses.api.ts` and
   `users.api.ts` re-fetch the record and send it back so the backend can cascade children
   ([BE-10](../salon-backend/AUDIT_FINDINGS.md#be-10)). **→ [`refactor/admin-panel-drop-delete-bodies`](../VERSION_CONTROL_GUIDE.md#br-0-8)** (after

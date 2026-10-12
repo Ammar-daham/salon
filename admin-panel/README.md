@@ -44,8 +44,28 @@ first super admin that the backend README shows how to create.
 | `npm run lint` | ESLint |
 | `npm run typecheck` | Generates Next's route types, then runs `tsc --noEmit` |
 | `npm test` | The Vitest unit tests; `npm run test:watch` reruns them on every change |
+| `npm run test:e2e` | The Playwright end-to-end tests, against a running panel and API (below) |
 
-CI runs lint, the type check, the tests and the build on every pull request.
+CI runs lint, the type check, the unit tests and the build on every pull request, then the
+end-to-end tests against the Docker Compose stack.
+
+## End-to-end tests
+
+`e2e/` holds Playwright smoke tests: signing in and out, and creating, changing and removing a salon
+as the super admin, and a service and an appointment as Glow Beauty Studio's admin. They drive
+Chromium against a running panel, API and database with the demo data, and start none of it
+themselves. From the repository root, then this folder:
+
+```bash
+docker compose --profile demo up --build --detach
+npx playwright install chromium    # once
+npm run test:e2e
+```
+
+`npm run dev` against a backend with the demo data works too. `E2E_BASE_URL` points the tests at a
+panel somewhere other than http://localhost:3000. Each run creates its own uniquely named records
+and removes them again, apart from the appointment, which it cancels: appointments are never
+deleted. A failed test leaves a trace in `test-results/` that `npx playwright show-trace` opens.
 
 ## Configuration
 

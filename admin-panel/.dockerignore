@@ -9,3 +9,8 @@ coverage
 next-env.d.ts
 Dockerfile
 .dockerignore
+# The end-to-end tests run against the image from outside it.
+e2e
+playwright.config.ts
+test-results
+playwright-report
