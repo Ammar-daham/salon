@@ -86,6 +86,9 @@ lists, `GET /customers` and named staff records (BE-15).
   the Notes tab and delete clients from the list; employees can add and view clients (FE-03).
 
 ### Removed
+- The header's notification bell, which showed TailAdmin's demo notifications from made-up people,
+  and the template's sample profile photos it used. The bell comes back with real notifications
+  (FE-14).
 - The mock data generators in `lib/mock/`, now unused.
 
 ## [0.1.0] - 2026-09-28
