@@ -91,7 +91,7 @@ jobs:
   docker-compose:
     name: docker compose (both images)
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
 
@@ -110,6 +110,32 @@ jobs:
           curl -fsS -o /dev/null -H 'Content-Type: application/json' \
             -d '{"email": "superadmin@salon.example.com", "password": "Password123!"}' \
             http://localhost:8081/api/v1/auth/login
+
+      # FE-08: the panel's end-to-end smoke tests, in Chromium, against this stack and its demo data.
+      - name: Set up Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: admin-panel/package-lock.json
+
+      - name: Install the end-to-end tests and Chromium
+        working-directory: admin-panel
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
+
+      - name: End-to-end smoke tests
+        working-directory: admin-panel
+        run: npm run test:e2e
+
+      - name: Upload the end-to-end report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: admin-panel-e2e-report
+          path: admin-panel/playwright-report
+          if-no-files-found: ignore
 
       - name: Show the logs
         if: failure()
