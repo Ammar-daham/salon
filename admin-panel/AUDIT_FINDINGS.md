@@ -10,7 +10,7 @@ frontend-specific findings only.
 
 A ✅ next to a finding's ID means its fix has landed; the parenthetical *(fixed: …)* note on that
 finding says what changed. So far: ✅ FE-01, ✅ FE-02, ✅ FE-03, ✅ FE-05, ✅ FE-06, ✅ FE-09, ✅ FE-11,
-✅ FE-13.
+✅ FE-13, ✅ FE-15.
 
 ## 0. Honest summary
 
@@ -201,10 +201,14 @@ findings it depends on are linked by their `BE-xx` / `DB-xx` IDs.
 - <a id="fe-14"></a>**FE-14 — TailAdmin leftovers.** `README.md` is the template's README,
   `banner.png`/`LICENSE` are template files, and `NotificationDropdown.tsx` (384 lines) renders
   hard-coded demo notifications. **→ [`chore/admin-panel-remove-template-leftovers`](../VERSION_CONTROL_GUIDE.md#br-3-7)**
-- <a id="fe-15"></a>**FE-15 — Unused dependencies.** `apexcharts`/`react-apexcharts` are imported nowhere;
+- <a id="fe-15"></a>✅ **FE-15 — Unused dependencies.** `apexcharts`/`react-apexcharts` are imported nowhere;
   `flatpickr` is only used by `components/form/date-picker.tsx`, which nothing renders, yet its CSS is
   loaded globally in `app/layout.tsx`. FullCalendar is also unused today but is legitimately needed for
   Phase 2. **→ [`chore/admin-panel-remove-template-leftovers`](../VERSION_CONTROL_GUIDE.md#br-3-7)**
+  *(fixed: on [`chore/admin-panel-remove-template-leftovers`](../VERSION_CONTROL_GUIDE.md#br-3-7),
+  `apexcharts`, `react-apexcharts` and `flatpickr` are uninstalled. `date-picker.tsx`, the flatpickr
+  stylesheet in `app/layout.tsx` and the apexcharts and flatpickr overrides in `globals.css` are gone,
+  as is the `.eslintrc.json` that ESLint 9 no longer reads. FullCalendar stays: the Calendar page uses it.)*
 - <a id="fe-16"></a>**FE-16 — `NEXT_PUBLIC_DEV_BUSINESS_ID` escape hatch** in `lib/auth/scope.ts` — make sure
   it's never set in production (document it, or remove it once every seeded user has a business).
   **→ [`chore/admin-panel-remove-template-leftovers`](../VERSION_CONTROL_GUIDE.md#br-3-7)**

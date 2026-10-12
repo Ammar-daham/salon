@@ -91,6 +91,8 @@ lists, `GET /customers` and named staff records (BE-15).
   the Notes tab and delete clients from the list; employees can add and view clients (FE-03).
 
 ### Removed
+- The `apexcharts`, `react-apexcharts` and `flatpickr` packages, which no page used; the template's
+  date picker, which nothing rendered; and the flatpickr stylesheet every page loaded for it (FE-15).
 - The template's `/error-404` demo page; an unknown address shows the not-found page (FE-14).
 - The grid pattern behind the sign-in and not-found pages, whose image had already been deleted, so
   it loaded nothing; and TailAdmin's logos and file-type icons, which nothing showed (FE-14).
