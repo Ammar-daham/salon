@@ -5,7 +5,7 @@ Each app keeps its own changelog and version, and is tagged `<app>/v<version>`:
 - [salon-backend](salon-backend/CHANGELOG.md)
 - [admin-panel](admin-panel/CHANGELOG.md)
 
-This file records only the platform milestones from the roadmap in `VERSION_CONTROL_GUIDE.md`.
+This file records only the platform milestones.
 A milestone is a `v<version>` tag on `main` and names the app versions it is made of.
 
 ## v0.1.0 - 2026-09-28

@@ -111,8 +111,6 @@ docker run -p 3000:3000 salon-admin-panel
 | `src/components`, `src/layout`, `src/context` | Shared UI; the sidebar and header; sign-in, theme and sidebar state |
 | `src/test` | The unit tests, in the same layout as `src/` |
 
-Known problems and their fixes are tracked in [AUDIT_FINDINGS.md](AUDIT_FINDINGS.md).
-
 ## Credits
 
 The layout and many of the UI components started from [TailAdmin](https://tailadmin.com)'s free
