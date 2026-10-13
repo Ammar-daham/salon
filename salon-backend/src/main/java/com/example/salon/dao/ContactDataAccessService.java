@@ -78,7 +78,7 @@ public class ContactDataAccessService implements ContactDao
 		return byOwner(SELECT + "WHERE user_id = ANY(?) ORDER BY id", "user_id", userIds);
 	}
 
-	/** One query for every owner's contacts (BE-15), grouped by the owner in ownerColumn. */
+	/** One query for every owner's contacts, grouped by the owner in ownerColumn. */
 	private Map<Long, List<Contact>> byOwner(String sql, String ownerColumn, Collection<Long> ownerIds)
 	{
 		Map<Long, List<Contact>> byOwner = new HashMap<>();

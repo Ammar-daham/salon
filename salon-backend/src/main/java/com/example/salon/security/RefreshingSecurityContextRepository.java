@@ -20,7 +20,7 @@ import java.util.Optional;
  * trusted for its id. On every request the user is re-read from the database: a changed role or
  * business takes effect immediately, and a deleted user (or one whose login was removed) has their
  * session invalidated instead of keeping their old access until it expires. So does every session
- * that signed in before the password was changed (FE-13).
+ * that signed in before the password was changed.
  */
 public class RefreshingSecurityContextRepository implements SecurityContextRepository
 {

@@ -10,7 +10,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-/** A load balancer can ask whether the app is up, without signing in, and learn nothing else (BE-39). */
+/** A load balancer can ask whether the app is up, without signing in, and learn nothing else. */
 class HealthCheckTest extends IntegrationTest
 {
 	@Autowired

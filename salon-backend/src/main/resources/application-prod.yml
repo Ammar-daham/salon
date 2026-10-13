@@ -1,7 +1,7 @@
 # The production profile: run the app with SPRING_PROFILES_ACTIVE=prod.
 #
 # What differs per deployment, and every secret, comes from an environment variable with no default,
-# so a missing one stops startup instead of quietly using a development value (BE-30):
+# so a missing one stops startup instead of quietly using a development value:
 #
 #   SALON_DB_URL               jdbc:postgresql://<host>:5432/<database>
 #   SALON_DB_USERNAME
@@ -39,14 +39,14 @@ app:
     link: ${SALON_PASSWORD_RESET_LINK}
   mail:
     from: ${SALON_MAIL_FROM}
-  # Plain HTTP gets a 403 (BE-25).
+  # Plain HTTP gets a 403.
   require-https: true
-  # Whatever a developer's application.yml says (BE-38).
+  # Whatever a developer's application.yml says.
   flyway:
     baseline-on-migrate: false
 
 spring:
-  # Reset links have to reach people, so production needs a mail server (FE-13).
+  # Reset links have to reach people, so production needs a mail server.
   mail:
     host: ${SALON_SMTP_HOST}
     port: ${SALON_SMTP_PORT:587}
@@ -65,13 +65,13 @@ spring:
 server:
   port: 8081
   # Believe the proxy's X-Forwarded-* headers (from a private address only, see above): HTTPS is then
-  # recognised, and sign-in limits count each client's address rather than the proxy's (BE-22).
+  # recognised, and sign-in limits count each client's address rather than the proxy's.
   forward-headers-strategy: native
   servlet:
     session:
       timeout: ${SALON_SESSION_TIMEOUT:30m}
       cookie:
-        # Sent only over HTTPS (BE-25), unreadable to scripts, and left off other sites' requests (BE-28).
+        # Sent only over HTTPS, unreadable to scripts, and left off other sites' requests.
         secure: true
         http-only: true
         same-site: lax

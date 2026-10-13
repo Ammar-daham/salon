@@ -10,7 +10,7 @@ import org.springframework.context.annotation.Configuration;
 public class FlywayConfig {
 
     /**
-     * Migrates an empty database, or one whose flyway_schema_history says what it already has (BE-38).
+     * Migrates an empty database, or one whose flyway_schema_history says what it already has.
      * A database with tables but no history is refused: it's the wrong database, or a restore that lost
      * the history, and baselining it would mark it as already at V1 and run the rest on top. Adopting a
      * database that predates Flyway is a one-off, opted into with app.flyway.baseline-on-migrate.

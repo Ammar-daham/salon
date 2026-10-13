@@ -61,7 +61,7 @@ public class CustomerService
     }
 
     /**
-     * Customers across salons (BE-15): every salon's for a super admin, or one salon's with businessId.
+     * Customers across salons: every salon's for a super admin, or one salon's with businessId.
      * Anyone else only ever gets their own salon's, whether they name it or not.
      */
     public Page<Customer> getCustomers(Long businessId, String search, Sort<CustomerDao.SortBy> sort, PageQuery page,

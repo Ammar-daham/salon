@@ -94,7 +94,7 @@ class ProductionProfileTest extends IntegrationTest
 				.header("X-Forwarded-Proto", "https")
 				.header("X-Forwarded-For", "203.0.113.7"));
 
-		// What the request log and the sign-in limits see (BE-22), rather than the proxy's 127.0.0.1.
+		// What the request log and the sign-in limits see, rather than the proxy's 127.0.0.1.
 		assertThat(output).containsPattern("GET /api/v1/auth/me -> 401 .*ip=203\\.0\\.113\\.7\\)");
 	}
 

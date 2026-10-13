@@ -15,7 +15,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-/** DB-03: a salon's customers are their own records, scoped to that salon. */
+/** A salon's customers are their own records, scoped to that salon. */
 class CustomerControllerTest extends IntegrationTest
 {
 	private static final String NEW_CUSTOMER = """

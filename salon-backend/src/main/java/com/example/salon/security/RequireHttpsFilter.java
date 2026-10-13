@@ -14,7 +14,7 @@ import java.io.IOException;
 import static org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher.pathPattern;
 
 /**
- * Refuses a request that didn't come over HTTPS (BE-25), when app.require-https is on, as under the
+ * Refuses a request that didn't come over HTTPS, when app.require-https is on, as under the
  * prod profile. Behind the proxy that terminates TLS, server.forward-headers-strategy makes a request
  * that reached the proxy over HTTPS a secure one here. One that isn't means a sign-in's password or the
  * session cookie may have crossed the network in the clear, or the proxy isn't sending, or isn't

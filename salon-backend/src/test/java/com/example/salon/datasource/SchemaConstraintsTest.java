@@ -20,7 +20,6 @@ class SchemaConstraintsTest extends IntegrationTest
 	@Test
 	void addressesAndContactsNeedExactlyOneOwner()
 	{
-		// DB-06
 		assertThatThrownBy(() -> jdbcTemplate.update(
 				"INSERT INTO contacts (type, value) VALUES ('phone', '+49 30 0000000')"))
 				.isInstanceOf(DataIntegrityViolationException.class)
@@ -45,7 +44,7 @@ class SchemaConstraintsTest extends IntegrationTest
 	@Test
 	void deletingASalonDeletesItsCustomers()
 	{
-		// DB-03: a salon's customer list goes with it. Urban has staff (BE-17), so unlink them first.
+		// A salon's customer list goes with it. Urban has staff, so unlink them first.
 		jdbcTemplate.update("DELETE FROM staff WHERE business_id = ?", Fixture.URBAN);
 		jdbcTemplate.update("DELETE FROM users WHERE business_id = ?", Fixture.URBAN);
 		jdbcTemplate.update("DELETE FROM businesses WHERE id = ?", Fixture.URBAN);
@@ -57,7 +56,7 @@ class SchemaConstraintsTest extends IntegrationTest
 	@Test
 	void everyTimestampColumnCarriesATimeZone()
 	{
-		// DB-09: no "timestamp without time zone" left anywhere in the schema.
+		// No "timestamp without time zone" left anywhere in the schema.
 		List<String> naive = jdbcTemplate.queryForList("""
 				SELECT table_name || '.' || column_name FROM information_schema.columns
 				WHERE table_schema = 'public' AND data_type = 'timestamp without time zone'
@@ -69,7 +68,7 @@ class SchemaConstraintsTest extends IntegrationTest
 	@Test
 	void theDatabaseRejectsBadMoneyAndCoordinates()
 	{
-		// DB-07 / DB-08: the CHECKs hold even for writes that skip the API's validation.
+		// The CHECKs hold even for writes that skip the API's validation.
 		assertThatThrownBy(() -> jdbcTemplate.update("UPDATE services SET price = -1 WHERE id = ?", Fixture.GLOW_HAIRCUT))
 				.isInstanceOf(DataIntegrityViolationException.class)
 				.hasMessageContaining("services_price_non_negative_check");
@@ -84,7 +83,7 @@ class SchemaConstraintsTest extends IntegrationTest
 	@Test
 	void theDatabaseRejectsBackwardsOrOverlappingOpeningHours()
 	{
-		// DB-14: seed.sql opens Glow on Tuesday (2) 09:00-18:00.
+		// seed.sql opens Glow on Tuesday (2) 09:00-18:00.
 		String insert = "INSERT INTO business_hours (business_id, day_of_week, opens_at, closes_at) VALUES (?, ?, ?::time, ?::time)";
 
 		assertThatThrownBy(() -> jdbcTemplate.update(insert, Fixture.GLOW, 1, "18:00", "09:00"))
@@ -105,7 +104,7 @@ class SchemaConstraintsTest extends IntegrationTest
 	@Test
 	void deletingASalonDeletesItsOpeningHours()
 	{
-		// Serenity has no staff, so it can be deleted (BE-17).
+		// Serenity has no staff, so it can be deleted.
 		jdbcTemplate.update("INSERT INTO business_hours VALUES (?, 1, '09:00', '17:00')", Fixture.SERENITY_PENDING);
 		jdbcTemplate.update("DELETE FROM businesses WHERE id = ?", Fixture.SERENITY_PENDING);
 
@@ -116,7 +115,7 @@ class SchemaConstraintsTest extends IntegrationTest
 	@Test
 	void aStaffMemberCanOnlyBeLinkedToTheirOwnSalonsServices()
 	{
-		// DB-14: business_id is part of both foreign keys. Mia is Glow's; the fade is Urban's.
+		// business_id is part of both foreign keys. Mia is Glow's; the fade is Urban's.
 		String link = "INSERT INTO staff_services (business_id, staff_id, service_id) VALUES (?, ?, ?)";
 
 		assertThatThrownBy(() -> jdbcTemplate.update(link, Fixture.GLOW, Fixture.GLOW_STAFF, Fixture.URBAN_FADE))
@@ -171,7 +170,7 @@ class SchemaConstraintsTest extends IntegrationTest
 	@Test
 	void theDatabaseRefusesToDoubleBookAStaffMember()
 	{
-		// DB-14: Mia has a haircut 10:00-10:45.
+		// Mia has a haircut 10:00-10:45.
 		jdbcTemplate.update(APPOINTMENT, Fixture.GLOW, Fixture.GLOW_CUSTOMER, Fixture.GLOW_STAFF, Fixture.GLOW_HAIRCUT,
 				"2027-03-02 10:00+01", "2027-03-02 10:45+01", "BOOKED");
 
@@ -200,7 +199,7 @@ class SchemaConstraintsTest extends IntegrationTest
 	@Test
 	void anAppointmentCanOnlyPointAtItsOwnSalonsCustomerStaffAndService()
 	{
-		// DB-14: business_id is part of every foreign key. The customer, staff member and fade are Urban's.
+		// business_id is part of every foreign key. The customer, staff member and fade are Urban's.
 		String at = "2027-03-02 10:00+01";
 		String until = "2027-03-02 10:45+01";
 
@@ -221,7 +220,7 @@ class SchemaConstraintsTest extends IntegrationTest
 	@Test
 	void whatAnAppointmentPointsAtCanOnlyBeSoftDeleted()
 	{
-		// DB-13: the API stamps deleted_at; deleting the row outright is refused while an appointment needs it.
+		// The API stamps deleted_at; deleting the row outright is refused while an appointment needs it.
 		jdbcTemplate.update(APPOINTMENT, Fixture.GLOW, Fixture.GLOW_CUSTOMER, Fixture.GLOW_STAFF, Fixture.GLOW_HAIRCUT,
 				"2025-03-04 10:00+01", "2025-03-04 10:45+01", "COMPLETED");
 
@@ -239,7 +238,7 @@ class SchemaConstraintsTest extends IntegrationTest
 	@Test
 	void deletingASalonDeletesItsAppointments()
 	{
-		// Serenity has no staff of its own (BE-17), so Glow's admin works there for this test.
+		// Serenity has no staff of its own, so Glow's admin works there for this test.
 		long service = jdbcTemplate.queryForObject("""
 				INSERT INTO services (business_id, name, duration_minutes, price) VALUES (?, 'Massage', 60, 80.00)
 				RETURNING id""", Long.class, Fixture.SERENITY_PENDING);

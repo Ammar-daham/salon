@@ -23,7 +23,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-/** FE-13: a forgotten password is reset through a link sent by email. */
+/** A forgotten password is reset through a link sent by email. */
 class PasswordResetTest extends IntegrationTest
 {
 	private static final String NEW_PASSWORD = "NewPassword456!";

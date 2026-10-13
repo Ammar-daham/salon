@@ -16,7 +16,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-/** FE-13: a signed-in user changes their own password. */
+/** A signed-in user changes their own password. */
 class PasswordChangeTest extends IntegrationTest
 {
 	private static final String NEW_PASSWORD = "NewPassword456!";

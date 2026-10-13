@@ -14,7 +14,7 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-/** The counting and timing behind BE-22, on a clock the test moves. LoginRateLimitingTest covers the endpoint. */
+/** The counting and timing behind the sign-in limits, on a clock the test moves. LoginRateLimitingTest covers the endpoint. */
 class LoginThrottleTest
 {
 	private static final String ANNA = "anna@glow.test";

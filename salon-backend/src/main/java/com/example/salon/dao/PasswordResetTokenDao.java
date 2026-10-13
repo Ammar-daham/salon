@@ -3,7 +3,7 @@ package com.example.salon.dao;
 import java.time.Instant;
 import java.util.Optional;
 
-/** Password reset links, by the SHA-256 of their token (FE-13). */
+/** Password reset links, by the SHA-256 of their token. */
 public interface PasswordResetTokenDao
 {
 	int countIssuedSince(long userId, Instant since);

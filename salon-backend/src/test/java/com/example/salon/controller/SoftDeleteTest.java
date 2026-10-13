@@ -17,7 +17,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-/** DB-13: a removed service, staff member or customer is gone from the API but stays in the database. */
+/** A removed service, staff member or customer is gone from the API but stays in the database. */
 class SoftDeleteTest extends IntegrationTest
 {
 	private static final String GLOW = "/api/v1/businesses/" + Fixture.GLOW;

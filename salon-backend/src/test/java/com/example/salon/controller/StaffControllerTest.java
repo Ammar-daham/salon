@@ -17,7 +17,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
- * BE-08 / BE-35 / DB-04: staff is now a real, reachable employment record instead of a stubbed
+ * Staff is now a real, reachable employment record instead of a stubbed
  * DAO with a constructor that dropped every field.
  */
 class StaffControllerTest extends IntegrationTest
@@ -248,7 +248,7 @@ class StaffControllerTest extends IntegrationTest
 	@Test
 	void anyoneSignedInCanSeeWhichServicesAStaffMemberPerforms() throws Exception
 	{
-		// DB-14: public like the salon's service list, so the booking flow can offer the right people.
+		// Public like the salon's service list, so the booking flow can offer the right people.
 		mvc.perform(get(MIAS_SERVICES).session(loginAs(Fixture.URBAN_EMPLOYEE)))
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$", hasSize(1)))

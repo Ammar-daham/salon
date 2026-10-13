@@ -29,7 +29,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-/** DB-14: booking, reading and changing appointments, on the salon's clock. */
+/** Booking, reading and changing appointments, on the salon's clock. */
 class AppointmentControllerTest extends IntegrationTest
 {
 	private static final String GLOW = "/api/v1/businesses/" + Fixture.GLOW;

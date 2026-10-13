@@ -19,7 +19,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * Flyway, as the app configures it, run against a scratch schema of the test database: it migrates a
- * database it keeps the history of, or an empty one, and refuses anything it can't account for (BE-38).
+ * database it keeps the history of, or an empty one, and refuses anything it can't account for.
  */
 class FlywayConfigTest extends IntegrationTest
 {

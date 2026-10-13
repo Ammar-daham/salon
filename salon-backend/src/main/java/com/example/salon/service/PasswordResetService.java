@@ -27,7 +27,7 @@ import java.util.HexFormat;
 import java.util.Optional;
 
 /**
- * Resets a forgotten password through a link sent by email (FE-13). The link carries a random token,
+ * Resets a forgotten password through a link sent by email. The link carries a random token,
  * of which only a SHA-256 is stored; it works once, until it expires, and asking again retires the
  * earlier links. A user is sent at most a few an hour, so the form can't be used to flood a mailbox.
  */
