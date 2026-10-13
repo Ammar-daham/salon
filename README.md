@@ -1,12 +1,13 @@
-# Salon
+# Salonat
 
 A platform for running hair and beauty salons: their staff, services, opening hours, clients and
-appointments.
+appointments. Salons run on **Salonat Pro**, the admin panel. **Salonat** is also the name for the app
+clients will book with, which isn't built yet.
 
 | App | What it is |
 |---|---|
 | [salon-backend](salon-backend) | The REST API: Spring Boot 4, Java 21, PostgreSQL |
-| [admin-panel](admin-panel) | The web app salon staff and platform admins use: Next.js |
+| [admin-panel](admin-panel) | Salonat Pro, the web app salon staff and platform admins use: Next.js |
 
 ## Try it
 
