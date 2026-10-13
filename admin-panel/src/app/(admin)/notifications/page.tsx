@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import PagePlaceholder from "@/components/ui/PagePlaceholder";
 
 export const metadata: Metadata = {
-	title: "Notifications · Salon Admin",
+	title: "Notifications · Salonat Pro",
 };
 
 export default function NotificationsPage() {

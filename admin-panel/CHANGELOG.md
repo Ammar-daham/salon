@@ -15,12 +15,14 @@ migration V12 (DB-13, DB-14), the password endpoints with migration V13 (FE-13),
 lists, `GET /customers` and named staff records (BE-15).
 
 ### Changed
+- The panel is called Salonat Pro. Every page title ends in "· Salonat Pro" instead of "· Salon
+  Admin", and the sidebar, the header and the sign-in page say Salonat Pro instead of Salon.
 - Without `NEXT_PUBLIC_API_URL`, the panel calls the API on http://localhost:8081, where the backend
   runs, instead of 8080 (FE-17).
 - TailAdmin's MIT license moves from `LICENSE` to `TAILADMIN-LICENSE`, which the README's credits
   link to. It covers the code that came from the template, not the panel as a whole (FE-14).
 - Signed-out pages and browser tabs no longer show TailAdmin. The sign-in page's title is "Sign in ·
-  Salon Admin", not the template's, and the tab icon is the panel's "S" mark instead of TailAdmin's
+  Salonat Pro", not the template's, and the tab icon is the panel's "S" mark instead of TailAdmin's
   logo (FE-14).
 - The not-found page says the page wasn't found and links back to the dashboard, without
   TailAdmin's footer or the two pictures it could no longer load (FE-14).

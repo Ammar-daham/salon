@@ -17,7 +17,7 @@ public class MailConfig
 	/** Spring Boot only makes a JavaMailSender once spring.mail.host is set. */
 	@Bean
 	public Mailer mailer(ObjectProvider<JavaMailSender> smtp, Environment environment,
-			@Value("${app.mail.from:Salon Admin <no-reply@localhost>}") String from)
+			@Value("${app.mail.from:Salonat Pro <no-reply@localhost>}") String from)
 	{
 		JavaMailSender sender = smtp.getIfAvailable();
 		return sender != null ? new SmtpMailer(sender, from) : new LogMailer(!environment.matchesProfiles("prod"));

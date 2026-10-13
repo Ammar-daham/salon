@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import AppointmentDetailView from "@/features/appointments/AppointmentDetailView";
 import { idParam } from "@/features/appointments/appointmentLinks";
 
-export const metadata: Metadata = { title: "Appointment · Salon Admin" };
+export const metadata: Metadata = { title: "Appointment · Salonat Pro" };
 
 // `params` and `searchParams` are Promises in this version of Next and must be awaited.
 export default async function AppointmentPage({

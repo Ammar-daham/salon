@@ -1,10 +1,10 @@
 # salon-backend
 
-The REST API behind the salon platform: salons, their staff, services, opening hours, clients and
+The REST API behind Salonat, the salon platform: salons, their staff, services, opening hours, clients and
 appointments, with accounts for platform admins, salon admins and staff. Spring Boot 4 on Java 21,
 PostgreSQL 16, plain JDBC (`JdbcTemplate`) and Flyway migrations.
 
-The [admin panel](../admin-panel) is its main client. What changed in each version, field by field,
+The [admin panel](../admin-panel), Salonat Pro, is its main client. What changed in each version, field by field,
 is in [CHANGELOG.md](CHANGELOG.md).
 
 ## Run it with Docker

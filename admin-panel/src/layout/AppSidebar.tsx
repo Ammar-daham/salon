@@ -11,13 +11,13 @@ import { cn } from "@/lib/utils/cn";
 
 function Wordmark({ compact }: { compact: boolean }) {
 	return (
-		<Link href="/" className="flex items-center gap-3" aria-label="Salon — dashboard">
+		<Link href="/" className="flex items-center gap-3" aria-label="Salonat Pro — dashboard">
 			<span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary-solid font-semibold text-white">
 				S
 			</span>
 			{!compact && (
 				<span className="flex flex-col leading-tight">
-					<span className="text-base font-semibold tracking-tight text-ink">Salon</span>
+					<span className="text-base font-semibold tracking-tight text-ink">Salonat Pro</span>
 					<span className="text-xs text-ink-subtle">Beauty &amp; wellness</span>
 				</span>
 			)}

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import UserCreateView from "@/features/users/UserCreateView";
 
-export const metadata: Metadata = { title: "New user · Salon Admin" };
+export const metadata: Metadata = { title: "New user · Salonat Pro" };
 
 export default function NewUserPage() {
 	return (

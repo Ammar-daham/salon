@@ -25,11 +25,11 @@ class MailersTest
 	{
 		JavaMailSender sender = mock(JavaMailSender.class);
 
-		new SmtpMailer(sender, "Salon Admin <no-reply@salon.test>").send("mia@glow.test", "Reset", LINK);
+		new SmtpMailer(sender, "Salonat Pro <no-reply@salon.test>").send("mia@glow.test", "Reset", LINK);
 
 		ArgumentCaptor<SimpleMailMessage> sent = ArgumentCaptor.forClass(SimpleMailMessage.class);
 		verify(sender).send(sent.capture());
-		assertThat(sent.getValue().getFrom()).isEqualTo("Salon Admin <no-reply@salon.test>");
+		assertThat(sent.getValue().getFrom()).isEqualTo("Salonat Pro <no-reply@salon.test>");
 		assertThat(sent.getValue().getTo()).containsExactly("mia@glow.test");
 		assertThat(sent.getValue().getSubject()).isEqualTo("Reset");
 		assertThat(sent.getValue().getText()).isEqualTo(LINK);
