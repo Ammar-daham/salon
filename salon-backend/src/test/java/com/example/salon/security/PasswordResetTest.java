@@ -40,7 +40,7 @@ class PasswordResetTest extends IntegrationTest
 
 		Mail mail = onlyMail();
 		assertThat(mail.to()).isEqualTo(Fixture.GLOW_EMPLOYEE);
-		assertThat(mail.subject()).isEqualTo("Reset your Salon Admin password");
+		assertThat(mail.subject()).isEqualTo("Reset your Salonat Pro password");
 		assertThat(mail.text()).startsWith("Hi Mia,").contains("within 60 minutes");
 
 		reset(tokenIn(mail), NEW_PASSWORD).andExpect(status().isNoContent());

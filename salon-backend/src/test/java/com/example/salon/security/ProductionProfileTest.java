@@ -30,7 +30,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, properties = {
 		"SALON_ALLOWED_ORIGINS=https://admin.salon.test",
 		"SALON_PASSWORD_RESET_LINK=https://admin.salon.test/reset-password",
-		"SALON_MAIL_FROM=Salon Admin <no-reply@salon.test>",
+		"SALON_MAIL_FROM=Salonat Pro <no-reply@salon.test>",
 		"SALON_SMTP_HOST=smtp.salon.test",
 		"SALON_SMTP_USERNAME=salon",
 		"SALON_SMTP_PASSWORD=not-used",

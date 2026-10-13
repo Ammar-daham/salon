@@ -9,7 +9,7 @@
 #   SALON_ALLOWED_ORIGINS      The admin panel's origin, or several comma-separated: https://admin.example.com
 #   SALON_PASSWORD_RESET_LINK  The admin panel's reset page: https://admin.example.com/reset-password
 #   SALON_MAIL_FROM            Who emails are from, an address the SMTP server may send as:
-#                              Salon Admin <no-reply@example.com>
+#                              Salonat Pro <no-reply@example.com>
 #   SALON_SMTP_HOST            An SMTP server that takes STARTTLS, usually on port 587
 #   SALON_SMTP_USERNAME
 #   SALON_SMTP_PASSWORD

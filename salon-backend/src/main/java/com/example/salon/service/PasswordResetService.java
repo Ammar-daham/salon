@@ -121,7 +121,7 @@ public class PasswordResetService
 		tokenDao.deleteIssuedBefore(now.minus(KEPT_FOR));
 		String token = newToken();
 		tokenDao.issue(user.getId(), hash(token), now, now.plus(linkValidFor));
-		mailer.send(user.getEmail(), "Reset your Salon Admin password", emailText(user, link + "?token=" + token));
+		mailer.send(user.getEmail(), "Reset your Salonat Pro password", emailText(user, link + "?token=" + token));
 		log.info("Password reset link sent to user {}", user.getId());
 	}
 
@@ -130,7 +130,7 @@ public class PasswordResetService
 		return """
 				Hi %s,
 
-				Someone asked to reset the password for your Salon Admin account. To choose a new one, open this \
+				Someone asked to reset the password for your Salonat Pro account. To choose a new one, open this \
 				link within %d minutes:
 
 				%s
