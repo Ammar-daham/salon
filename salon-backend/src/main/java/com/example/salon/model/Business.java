@@ -6,6 +6,15 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.Instant;
 import java.util.List;
 
+/**
+ * A salon, as {@code GET /api/v1/businesses} and {@code GET /api/v1/businesses/{id}} return it and
+ * {@code POST /api/v1/businesses} answers with.
+ *
+ * <p>{@code status} is where the salon stands with the platform (see {@link Status}). {@code currency} is
+ * what its prices are in, and {@code timezone} the clock its hours, shifts, time off and appointments are
+ * on. {@code updated_at} is null until the salon is first changed. On a read, {@code addresses},
+ * {@code contacts} and {@code services} come along; the services are the current ones, active or not.
+ */
 public class Business {
     public Long id;
     public String name;
@@ -16,9 +25,9 @@ public class Business {
     public Instant updatedAt;
     public String image;
     public Status status;
-    /** ISO 4217 code every price at this salon is in (DB-08). */
+    /** ISO 4217 code every price at this salon is in. */
     public String currency;
-    /** IANA time zone ID the salon's opening hours are in, e.g. "Europe/Berlin" (DB-09). */
+    /** IANA time zone ID the salon's opening hours are in, e.g. "Europe/Berlin". */
     public String timezone;
     public List<Address> addresses;
     public List<Contact> contacts;

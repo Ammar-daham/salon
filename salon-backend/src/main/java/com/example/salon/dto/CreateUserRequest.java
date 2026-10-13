@@ -12,11 +12,13 @@ import jakarta.validation.constraints.Size;
 import java.util.List;
 
 /**
- * email/password aren't @NotBlank here: UserService.addUser only requires them for a role that can
- * log in (everyone but CUSTOMER), a decision this shape can't make without the role. What this DOES
- * enforce up front, for whichever value is actually supplied: a well-formed email, and a password
- * long enough to be worth hashing. 72 is BCryptPasswordEncoder's input limit - bytes beyond it are
- * silently ignored, so a longer password would be misleadingly "accepted" without adding any strength.
+ * A new user, as {@code POST /api/v1/users} takes it. {@code first_name} and {@code last_name}, up to 100
+ * characters each, and {@code role} are required. {@code email} and {@code password} are required for
+ * every role but CUSTOMER; UserService.addUser checks that, since it depends on the role. Whichever is
+ * sent must be well formed: {@code email} an email address, {@code password} 8 to 72 characters, 72 being
+ * BCrypt's input limit. {@code business_id} is the user's salon: required when a SUPER_ADMIN creates the
+ * user, and ignored for an ADMIN, whose own salon is used. {@code addresses} ({@link AddressRequest}) and
+ * {@code contacts} ({@link ContactRequest}) are optional, and created with the user.
  */
 public record CreateUserRequest(
 		@NotBlank @Size(max = 100) @JsonProperty("first_name") String firstName,

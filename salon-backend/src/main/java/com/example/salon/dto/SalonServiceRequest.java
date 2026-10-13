@@ -11,7 +11,15 @@ import jakarta.validation.constraints.Size;
 
 import java.math.BigDecimal;
 
-/** price is in the salon's currency (businesses.currency) and must fit services.price NUMERIC(10,2). */
+/**
+ * The body of {@code POST /api/v1/businesses/{businessId}/services} and of {@code PUT} on one service: a
+ * service on the salon's menu.
+ *
+ * <p>{@code name} is required, at most 100 characters; {@code description} is optional.
+ * {@code duration_minutes} is required, a whole number of at least 1. {@code price} is required, in the
+ * salon's {@code currency}: 0 or more, with at most 8 digits before the point and 2 after.
+ * {@code is_active} says whether the service can be booked. A {@code PUT} replaces every field.
+ */
 public record SalonServiceRequest(
 		@NotBlank @Size(max = 100) String name,
 		String description,

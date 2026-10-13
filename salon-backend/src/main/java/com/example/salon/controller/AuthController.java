@@ -37,6 +37,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * Signing in and out, and passwords, under {@code /api/v1/auth}.
+ *
+ * <p>{@code /login}, {@code /forgot-password} and {@code /reset-password} need no session; the rest are
+ * for any signed-in user, about themselves. Failed sign-ins are counted per email and per client address,
+ * and a wrong current password on {@code /change-password} counts as one.
+ */
 @RequestMapping("api/v1/auth")
 @RestController
 public class AuthController
@@ -63,6 +70,23 @@ public class AuthController
 		this.passwordResetService = passwordResetService;
 	}
 
+	/**
+	 * Signs a user in with their email and password, and starts their session.
+	 *
+	 * <p>{@code POST /api/v1/auth/login}. Needs no session. The email's case doesn't matter, and an
+	 * account with no password set can't sign in. The session is kept in the {@code JSESSIONID} cookie;
+	 * a session the client already had gets a new id.
+	 *
+	 * <p>Errors: 401 if the email and password don't match an account that can sign in, the same answer
+	 * whether or not the email has one; 429, with {@code Retry-After} in seconds, after too many failed
+	 * sign-ins, by default 5 for one email or 20 from one address within 15 minutes. While locked, even
+	 * the right password gets 429.
+	 *
+	 * @param request the email and password, a {@link LoginRequest}
+	 * @param servletRequest the HTTP request
+	 * @param servletResponse the HTTP response
+	 * @return 200 with the signed-in user
+	 */
 	@PostMapping("/login")
 	public AuthUserResponse login(@RequestBody LoginRequest request, HttpServletRequest servletRequest, HttpServletResponse servletResponse)
 	{
@@ -91,8 +115,21 @@ public class AuthController
 	}
 
 	/**
-	 * The signed-in user's own password (FE-13). Every other session of theirs is signed out; this
-	 * one stays signed in, under a new id.
+	 * Changes the signed-in user's own password.
+	 *
+	 * <p>{@code POST /api/v1/auth/change-password}. Any signed-in user, for themselves.
+	 * {@code current_password} must be their password now, and {@code new_password} 8 to 72 characters.
+	 * A wrong current password counts as a failed sign-in for their email and the client's address. Every
+	 * other session of theirs is signed out; this one stays signed in, under a new session id. Answers 204.
+	 *
+	 * <p>Errors: 400 if {@code current_password} is wrong (a 400, not a 401: the session stays signed in)
+	 * or {@code new_password} breaks the rule; 429, with {@code Retry-After}, after too many failed
+	 * sign-ins, as for {@code /login}.
+	 *
+	 * @param request the current and the new password, a {@link ChangePasswordRequest}
+	 * @param principal the signed-in caller
+	 * @param servletRequest the HTTP request
+	 * @param servletResponse the HTTP response
 	 */
 	@PostMapping("/change-password")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
@@ -117,8 +154,18 @@ public class AuthController
 	}
 
 	/**
-	 * Emails a reset link if the email has an account that can sign in (FE-13). The answer is the same
-	 * either way, and comes before the email is looked up.
+	 * Emails a password reset link, if the email has an account that can sign in.
+	 *
+	 * <p>{@code POST /api/v1/auth/forgot-password}. Needs no session. The email's case doesn't matter. The
+	 * answer is the same whether or not the email has an account, and comes before it is looked up; the
+	 * link is sent in the background. It opens the admin panel's reset page with a {@code token}
+	 * parameter, works once, and expires after an hour by default. Asking again retires the earlier links,
+	 * and a user is sent at most 3 links an hour by default; past that nothing is sent, with the same
+	 * answer. Answers 202 with no body.
+	 *
+	 * <p>Errors: 400 if {@code email} is missing or isn't an email address.
+	 *
+	 * @param request the email to send the link to, a {@link ForgotPasswordRequest}
 	 */
 	@PostMapping("/forgot-password")
 	@ResponseStatus(HttpStatus.ACCEPTED)
@@ -127,7 +174,19 @@ public class AuthController
 		passwordResetService.requestReset(request.email());
 	}
 
-	/** Sets a new password with the token from a reset link. Every session of the user is signed out. */
+	/**
+	 * Sets a new password with the token from a reset link.
+	 *
+	 * <p>{@code POST /api/v1/auth/reset-password}. Needs no session. {@code token} is the link's
+	 * {@code token} parameter, and {@code password} the new password, 8 to 72 characters. The link is used
+	 * up, along with any other the user still has. Every session of the user is signed out, and the failed
+	 * sign-ins counted against their email are forgotten. Answers 204.
+	 *
+	 * <p>Errors: 400 if {@code password} breaks the rule (the link still works), or if the link is unknown,
+	 * used, replaced by a newer one, expired, or for an account that can no longer sign in.
+	 *
+	 * @param request the token and the new password, a {@link ResetPasswordRequest}
+	 */
 	@PostMapping("/reset-password")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	public void resetPassword(@Valid @RequestBody ResetPasswordRequest request)
@@ -135,6 +194,15 @@ public class AuthController
 		passwordResetService.resetPassword(request.token(), request.password());
 	}
 
+	/**
+	 * Signs the caller out, ending this session.
+	 *
+	 * <p>{@code POST /api/v1/auth/logout}. Any signed-in user. Only this session ends; the user's other
+	 * sessions stay signed in. Answers 200 with no body.
+	 *
+	 * @param request the HTTP request
+	 * @param principal the signed-in caller
+	 */
 	@PostMapping("/logout")
 	public void logout(HttpServletRequest request, @AuthenticationPrincipal AuthenticatedUser principal)
 	{
@@ -147,6 +215,16 @@ public class AuthController
 		}
 	}
 
+	/**
+	 * Returns the signed-in user.
+	 *
+	 * <p>{@code GET /api/v1/auth/me}. Any signed-in user. The user is read afresh on every request, so a
+	 * changed name or role shows at once. Like the answer to {@code /login}, it carries the user's
+	 * {@code business_id}, which user records leave out.
+	 *
+	 * @param principal the signed-in caller
+	 * @return 200 with the signed-in user
+	 */
 	@GetMapping("/me")
 	public AuthUserResponse me(@AuthenticationPrincipal AuthenticatedUser principal)
 	{

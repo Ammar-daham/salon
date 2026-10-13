@@ -8,6 +8,16 @@ import jakarta.validation.constraints.Size;
 
 import java.util.List;
 
+/**
+ * The body of {@code POST /api/v1/businesses}: a new salon.
+ *
+ * <p>{@code name} is required, at most 100 characters, and no other salon may have it. {@code image} is
+ * required; {@code description} is optional. {@code currency} is three capital letters, an ISO 4217 code
+ * such as {@code EUR}, and {@code EUR} if left out. {@code timezone} is an IANA time zone ID (see
+ * {@link TimeZoneId}), {@code Europe/Berlin} if left out. {@code addresses} and {@code contacts} are
+ * optional lists, each entry under the rules of {@link AddressRequest} or {@link ContactRequest}; a
+ * contact value may appear only once. There is no {@code status}: a new salon is always {@code PENDING}.
+ */
 public record CreateBusinessRequest(
 		@NotBlank @Size(max = 100) String name,
 		String description,

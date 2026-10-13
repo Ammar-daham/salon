@@ -49,6 +49,15 @@ dependencies {
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
+// ./gradlew javadoc writes the API reference to build/docs/javadoc; start at the controller package.
+tasks.named('javadoc') {
+    options.encoding = 'UTF-8'
+    options.windowTitle = "Salonat API ${version}"
+    options.docTitle = "Salonat API ${version}"
+    // Every check but one: the classes that aren't part of the API needn't all have a comment.
+    options.addBooleanOption('Xdoclint:all,-missing', true)
+}
+
 tasks.named('test') {
     useJUnitPlatform()
     // ./gradlew test -PrunKnownIssues also runs the @Disabled KnownIssuesTest cases, to check they still fail.

@@ -6,6 +6,12 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.Instant;
 import java.util.List;
 
+/**
+ * A user account, as the {@code /api/v1/users} endpoints answer it: {@code id}, {@code first_name},
+ * {@code last_name}, {@code role}, {@code email}, {@code addresses} ({@link Address}), {@code contacts}
+ * ({@link Contact}), {@code created_at} and {@code updated_at}. {@code password} and {@code business_id}
+ * are never in an answer; {@code GET /api/v1/auth/me} gives the signed-in user's {@code business_id}.
+ */
 public class User
 {
 	public Long id;

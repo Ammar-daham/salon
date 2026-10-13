@@ -2,7 +2,7 @@ package com.example.salon.exception;
 
 import org.springframework.http.HttpStatus;
 
-
+/** The errors the API answers with: each one's HTTP status, and the {@code errorCode} its body carries. */
 public enum ErrorCode
 {
 	NOT_FOUND(HttpStatus.NOT_FOUND, "NOT_FOUND"),

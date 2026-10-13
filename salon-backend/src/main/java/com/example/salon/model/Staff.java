@@ -6,6 +6,15 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.Instant;
 import java.time.LocalDate;
 
+/**
+ * A staff record: one of a salon's users working there, as the endpoints under
+ * {@code /api/v1/businesses/{businessId}/staff} return it.
+ *
+ * <p>{@code user_id} is the person's user account, and {@code first_name}, {@code last_name} and
+ * {@code email} are read from it; {@code email} is null unless the caller is an ADMIN of the salon or a
+ * SUPER_ADMIN. {@code is_active} says whether the person can be booked. {@code calendar_colour} is null or
+ * a colour such as {@code #FF5733}. {@code updated_at} is null until the record is first changed.
+ */
 public class Staff
 {
     public Long id;

@@ -11,6 +11,14 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+/**
+ * The addresses of salons and users, under {@code /api/v1/addresses}.
+ *
+ * <p>An address is created with the salon or user it belongs to ({@code POST /api/v1/businesses},
+ * {@code POST /api/v1/users}) and deleted with them; here it is read, replaced or deleted. A salon's
+ * address may be read by anyone signed in and changed by any ADMIN or SUPER_ADMIN, of whichever salon. A
+ * user's address may be read and changed by that user or by any ADMIN or SUPER_ADMIN.
+ */
 @RestController
 @RequestMapping("api/v1/addresses")
 public class AddressController
@@ -23,24 +31,73 @@ public class AddressController
 		this.addressService = addressService;
 	}
 
+	/**
+	 * Lists every address on the platform.
+	 *
+	 * <p>{@code GET /api/v1/addresses}. ADMIN and SUPER_ADMIN only. The list holds every salon's and every
+	 * user's addresses, other salons' too for an ADMIN, in {@code id} order and not paged. {@code user_id}
+	 * is {@code null} throughout.
+	 *
+	 * <p>Errors: 403 for anyone else.
+	 *
+	 * @return 200 with every address
+	 */
 	@GetMapping
 	public List<Address> getAllAddresses()
 	{
 		return addressService.getAllAddresses();
 	}
 
+	/**
+	 * Returns one address.
+	 *
+	 * <p>{@code GET /api/v1/addresses/{id}}. A salon's address, to anyone signed in; a user's, to that user
+	 * or any ADMIN or SUPER_ADMIN. For a user's address, {@code user_id} names the user.
+	 *
+	 * <p>Errors: 403 if it's another user's address and the caller isn't an ADMIN or SUPER_ADMIN; 404 if
+	 * there's no such address.
+	 *
+	 * @param id the address's id
+	 * @param principal the signed-in caller
+	 * @return 200 with the address
+	 */
 	@GetMapping("/{id}")
 	public Address getAddress(@PathVariable int id, @AuthenticationPrincipal AuthenticatedUser principal)
 	{
 		return addressService.getAddressById(id, principal);
 	}
 
+	/**
+	 * Replaces an address.
+	 *
+	 * <p>{@code PUT /api/v1/addresses/{id}}. A salon's address, by any ADMIN or SUPER_ADMIN; a user's, by
+	 * that user or any ADMIN or SUPER_ADMIN. Every field is replaced, so an optional one left out is
+	 * cleared. Answers 200 with no body.
+	 *
+	 * <p>Errors: 400 if the body breaks {@link AddressRequest}'s rules; 403 if the caller may not change
+	 * the address; 404 if there's no such address.
+	 *
+	 * @param id the address's id
+	 * @param request the new address, an {@link AddressRequest}
+	 * @param principal the signed-in caller
+	 */
 	@PutMapping("/{id}")
 	public void updateAddress(@PathVariable int id, @Valid @RequestBody AddressRequest request, @AuthenticationPrincipal AuthenticatedUser principal)
 	{
 		addressService.updateAddressById(id, request.toAddress(), principal);
 	}
 
+	/**
+	 * Deletes an address.
+	 *
+	 * <p>{@code DELETE /api/v1/addresses/{id}}. The same callers as {@code PUT /api/v1/addresses/{id}}.
+	 * Answers 200 with no body.
+	 *
+	 * <p>Errors: 403 if the caller may not change the address; 404 if there's no such address.
+	 *
+	 * @param id the address's id
+	 * @param principal the signed-in caller
+	 */
 	@DeleteMapping("/{id}")
 	public void deleteAddress(@PathVariable int id, @AuthenticationPrincipal AuthenticatedUser principal)
 	{

@@ -13,6 +13,13 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
 
+/**
+ * A salon's services and prices, under {@code /api/v1/businesses/{businessId}/services}.
+ *
+ * <p>Anyone signed in may read a service; an ADMIN of the salon or a SUPER_ADMIN adds, changes and
+ * removes them. There is no list here: a salon's services come in {@code services} on
+ * {@code GET /api/v1/businesses/{id}}.
+ */
 @RestController
 @RequestMapping("api/v1/businesses")
 public class BusinessServiceController
@@ -26,6 +33,19 @@ public class BusinessServiceController
 		this.businessSalonServiceService = businessSalonServiceService;
 	}
 
+	/**
+	 * Adds a service to a salon's menu.
+	 *
+	 * <p>{@code POST /api/v1/businesses/{businessId}/services}. An ADMIN of the salon, or a SUPER_ADMIN.
+	 * {@code price} is in the salon's {@code currency}, and only an active service can be booked.
+	 *
+	 * <p>Errors: 400 if the body breaks the rules of {@link SalonServiceRequest}; 403 for another salon.
+	 *
+	 * @param businessId the salon's id
+	 * @param request the service, as a {@link SalonServiceRequest}
+	 * @param principal the signed-in caller
+	 * @return 201 Created with the service, and its address in {@code Location}
+	 */
 	@PostMapping("/{businessId}/services")
 	public ResponseEntity<SalonService> createServiceForBusiness(
 			@PathVariable Long businessId,
@@ -45,12 +65,39 @@ public class BusinessServiceController
 		return ResponseEntity.created(location).body(s);
 	}
 
+	/**
+	 * Returns one of a salon's services.
+	 *
+	 * <p>{@code GET /api/v1/businesses/{businessId}/services/{serviceId}}. Anyone signed in, whether or not
+	 * they may see the salon. Inactive services are returned too.
+	 *
+	 * <p>Errors: 404 if the salon has no such service, or it has been removed.
+	 *
+	 * @param businessId the salon's id
+	 * @param serviceId the service's id
+	 * @return 200 with the service
+	 */
 	@GetMapping("/{businessId}/services/{serviceId}")
 	public SalonService getServiceForBusiness(@PathVariable int businessId, @PathVariable int serviceId)
 	{
 		return businessSalonServiceService.getServiceById(businessId, serviceId);
 	}
 
+	/**
+	 * Replaces a service's details.
+	 *
+	 * <p>{@code PUT /api/v1/businesses/{businessId}/services/{serviceId}}. An ADMIN of the salon, or a
+	 * SUPER_ADMIN. Every field is replaced, so leaving {@code description} out clears it. Appointments
+	 * already booked keep the length and price they were booked with. Answers 200 with no body.
+	 *
+	 * <p>Errors: 400 if the body breaks the rules of {@link SalonServiceRequest}; 403 for another salon; 404
+	 * if the salon has no such service, or it has been removed.
+	 *
+	 * @param businessId the salon's id
+	 * @param serviceId the service's id
+	 * @param request the new details, as a {@link SalonServiceRequest}
+	 * @param principal the signed-in caller
+	 */
 	@PutMapping("/{businessId}/services/{serviceId}")
 	public void updateServiceForBusiness(@PathVariable int businessId, @PathVariable int serviceId,
 			@Valid @RequestBody SalonServiceRequest request, @AuthenticationPrincipal AuthenticatedUser principal)
@@ -58,6 +105,21 @@ public class BusinessServiceController
 		businessSalonServiceService.updateServiceForBusiness(businessId, serviceId, request.toSalonService(), principal);
 	}
 
+	/**
+	 * Removes a service from a salon's menu.
+	 *
+	 * <p>{@code DELETE /api/v1/businesses/{businessId}/services/{serviceId}}. An ADMIN of the salon, or a
+	 * SUPER_ADMIN. A soft delete: past appointments keep pointing at the service, but it's gone from the
+	 * salon and from the services its staff perform, and it can't be read, changed or booked any more.
+	 * Answers 200 with no body.
+	 *
+	 * <p>Errors: 403 for another salon; 404 if the salon has no such service, or it was already removed; 409
+	 * while the service has upcoming appointments ({@code BOOKED} or {@code CONFIRMED}, and not over yet).
+	 *
+	 * @param businessId the salon's id
+	 * @param serviceId the service's id
+	 * @param principal the signed-in caller
+	 */
 	@DeleteMapping("/{businessId}/services/{serviceId}")
 	public void deleteServiceForBusiness(@PathVariable int businessId, @PathVariable int serviceId,
 			@AuthenticationPrincipal AuthenticatedUser principal)

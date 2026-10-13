@@ -5,6 +5,11 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.time.Instant;
 
+/**
+ * A phone number, email or other contact of a salon or a user, as {@code /api/v1/contacts} answers it and
+ * inside a salon or user: {@code id}, {@code type}, such as {@code phone}, {@code value}, {@code created_at}
+ * and {@code updated_at}. Who it belongs to is never shown.
+ */
 public class Contact {
 
     public Long id;
