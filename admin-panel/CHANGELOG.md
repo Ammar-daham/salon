@@ -48,6 +48,9 @@ lists, `GET /customers` and named staff records (BE-15).
   password field has its own show/hide toggle (FE-13).
 
 ### Added
+- Playwright end-to-end smoke tests (`npm run test:e2e`): signing in and out, and creating, changing
+  and removing a salon, a service and an appointment, in a browser against a running stack with the
+  demo data. CI runs them against the Docker Compose stack on every pull request (FE-08).
 - A README of the panel's own in place of TailAdmin's: running it with or without Docker, its
   scripts and configuration, and how the code is laid out (FE-14).
 - `.env.example`, documenting `NEXT_PUBLIC_API_URL` (FE-17).
@@ -108,6 +111,11 @@ lists, `GET /customers` and named staff records (BE-15).
 - The grid pattern behind the sign-in and not-found pages, whose image had already been deleted, so
   it loaded nothing; and TailAdmin's logos and file-type icons, which nothing showed (FE-14).
 - The mock data generators in `lib/mock/`, now unused.
+
+### Fixed
+- A service's duration takes any whole number of minutes. The field stepped in fives from 1, so the
+  browser only accepted 1, 6, 11 and so on, and refused to save a new service at the default 60
+  minutes or any service of 30, 45 or 120.
 
 ## [0.1.0] - 2026-09-28
 

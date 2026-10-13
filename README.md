@@ -35,5 +35,5 @@ To work on one app without Docker, see its own README. The
 ## Working on it
 
 - [CHANGELOG.md](CHANGELOG.md): platform milestones; each app has its own changelog
-- CI builds both apps, runs their tests, and checks that `docker compose` comes up with the demo
-  data loaded, on every pull request
+- CI builds both apps, runs their tests, checks that `docker compose` comes up with the demo data
+  loaded, and runs the admin panel's end-to-end tests against it, on every pull request

@@ -172,7 +172,6 @@ export default function ServiceFormModal({
 									{...p}
 									type="number"
 									min={1}
-									step={5}
 									value={duration}
 									onChange={(e) => setDuration(e.target.value)}
 								/>
