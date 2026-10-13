@@ -117,5 +117,3 @@ VALUES ('First', 'Last', 'SUPER_ADMIN', 'admin@example.com', '<the hash>');
 
 Migrations are in `src/main/resources/db/migration`. One that has run anywhere is never edited: a fix
 is a new `V<n>__...sql`.
-
-Known problems and their fixes are tracked in [AUDIT_FINDINGS.md](AUDIT_FINDINGS.md).
