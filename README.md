@@ -1,5 +1,10 @@
 # Salonat
 
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="brand/salonat-lockup-on-dark.svg">
+  <img src="brand/salonat-lockup.svg" alt="Salonat" height="48">
+</picture>
+
 A platform for running hair and beauty salons: their staff, services, opening hours, clients and
 appointments. Salons run on **Salonat Pro**, the admin panel. **Salonat** is also the name for the app
 clients will book with, which isn't built yet.
@@ -36,5 +41,6 @@ To work on one app without Docker, see its own README. The
 ## Working on it
 
 - [CHANGELOG.md](CHANGELOG.md): platform milestones; each app has its own changelog
+- [brand](brand): the logo files, its colours and typefaces
 - CI builds both apps, runs their tests, checks that `docker compose` comes up with the demo data
   loaded, and runs the admin panel's end-to-end tests against it, on every pull request

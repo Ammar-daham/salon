@@ -3,6 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import SalonatMark from "@/components/common/SalonatMark";
 import { useSidebar } from "@/context/SidebarContext";
 import { HorizontaLDots } from "@/icons";
 import { isNavActive } from "@/lib/navigation/isNavActive";
@@ -12,12 +13,12 @@ import { cn } from "@/lib/utils/cn";
 function Wordmark({ compact }: { compact: boolean }) {
 	return (
 		<Link href="/" className="flex items-center gap-3" aria-label="Salonat Pro — dashboard">
-			<span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary-solid font-semibold text-white">
-				S
-			</span>
+			<SalonatMark className="size-9" />
 			{!compact && (
 				<span className="flex flex-col leading-tight">
-					<span className="text-base font-semibold tracking-tight text-ink">Salonat Pro</span>
+					<span className="text-base font-semibold tracking-tight text-ink">
+						salonat <span className="font-normal text-primary-600 dark:text-primary-300">pro</span>
+					</span>
 					<span className="text-xs text-ink-subtle">Beauty &amp; wellness</span>
 				</span>
 			)}

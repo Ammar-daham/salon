@@ -1,0 +1,16 @@
+import { cn } from "@/lib/utils/cn";
+
+// The Arabic letter ص, the first of صالونات, as an outline of Reem Kufi Bold, so it needs no font.
+// The logo files it comes from are in brand/ at the repository root.
+const LETTER =
+	"M33.5 42.93V32.97L41.75 31.14V42.93ZM28.26 68.86Q24.66 68.86 22.42 67.56Q20.18 66.26 19 64.32Q17.83 62.38 17.41 60.4Q17 58.43 17 57.07Q17 54.48 18.09 52.12Q19.18 49.76 20.89 47.91Q22.6 46.05 24.43 44.87Q24.54 45.99 24.31 46.99Q24.07 48 23.25 49.12Q23.89 49.41 24.34 50.27Q24.78 51.12 24.96 52.06Q25.13 53.01 24.96 53.71Q24.01 52.83 23.07 52.8Q22.13 52.77 21.3 53.3Q20.48 53.89 19.95 54.74Q19.42 55.6 19.42 57.13Q19.42 59.43 20.48 61.31Q21.54 63.2 23.31 64.35Q25.07 65.5 27.19 65.5Q29.49 65.5 30.88 64.17Q32.26 62.85 32.88 60.4Q33.5 57.96 33.5 54.71V38.86L41.75 37.04V57.07Q41.75 60.37 40.22 63.05Q38.69 65.73 35.71 67.3Q32.73 68.86 28.26 68.86ZM38.51 57.07V48.82H74.75Q74.81 47.23 73.78 46.26Q72.75 45.29 69.45 45.29H38.51V37.04H69.45Q73.81 37.04 76.46 38.27Q79.11 39.51 80.5 41.57Q81.88 43.64 82.41 46.11Q82.94 48.59 82.97 51.09Q83 53.59 83 55.72Q83 56.42 82.41 56.72Q81.82 57.01 81.23 57.04Q80.64 57.07 80.64 57.07Z";
+
+/** The Salonat mark. "rose" on light backgrounds, "glow" on dark ones; size it with className. */
+export default function SalonatMark({ tone = "rose", className }: { tone?: "rose" | "glow"; className?: string }) {
+	return (
+		<svg viewBox="0 0 100 100" aria-hidden="true" className={cn("shrink-0", className)}>
+			<rect width="100" height="100" rx="24" className={tone === "rose" ? "fill-primary-600" : "fill-primary-300"} />
+			<path d={LETTER} className={tone === "rose" ? "fill-white" : "fill-primary-950"} />
+		</svg>
+	);
+}

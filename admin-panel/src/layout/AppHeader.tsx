@@ -1,4 +1,5 @@
 "use client";
+import SalonatMark from "@/components/common/SalonatMark";
 import { ThemeToggleButton } from "@/components/common/ThemeToggleButton";
 import UserDropdown from "@/components/header/UserDropdown";
 import { useSidebar } from "@/context/SidebarContext";
@@ -52,10 +53,10 @@ const AppHeader: React.FC = () => {
 
           {/* Compact wordmark — only visible when the sidebar is off-canvas. */}
           <Link href="/" className="flex items-center gap-2 lg:hidden" aria-label="Salonat Pro — dashboard">
-            <span className="flex size-8 items-center justify-center rounded-lg bg-primary-solid text-sm font-semibold text-white">
-              S
+            <SalonatMark className="size-8" />
+            <span className="text-base font-semibold tracking-tight text-ink">
+              salonat <span className="font-normal text-primary-600 dark:text-primary-300">pro</span>
             </span>
-            <span className="text-base font-semibold tracking-tight text-ink">Salonat Pro</span>
           </Link>
 
           <button
