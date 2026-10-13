@@ -1,3 +1,4 @@
+import SalonatMark from "@/components/common/SalonatMark";
 import ThemeTogglerTwo from "@/components/common/ThemeTogglerTwo";
 
 import React from "react";
@@ -14,8 +15,9 @@ export default function AuthLayout({
         <div className="lg:w-1/2 w-full h-full bg-primary-900 dark:bg-primary-950 lg:grid items-center hidden">
           <div className="relative items-center justify-center flex z-1">
             <div className="flex flex-col items-center max-w-xs text-center">
+              <SalonatMark tone="glow" className="mb-6 size-20" />
               <span className="mb-3 font-semibold tracking-tight text-white text-display">
-                Salonat Pro
+                salonat <span className="font-normal text-primary-300">pro</span>
               </span>
               <p className="text-primary-100/80">
                 Booking, staff and clients for beauty and wellness businesses.
