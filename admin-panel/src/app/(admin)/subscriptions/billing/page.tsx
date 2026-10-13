@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import PagePlaceholder from "@/components/ui/PagePlaceholder";
 
 export const metadata: Metadata = {
-	title: "Billing · Salon Admin",
+	title: "Billing · Salonat Pro",
 };
 
 export default function SubscriptionsBillingPage() {

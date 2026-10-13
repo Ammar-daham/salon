@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import AppointmentListView from "@/features/appointments/AppointmentListView";
 
 export const metadata: Metadata = {
-	title: "Appointments · Salon Admin",
+	title: "Appointments · Salonat Pro",
 	description: "Every booking, filterable by date, status and staff member.",
 };
 

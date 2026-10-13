@@ -1,6 +1,6 @@
 # admin-panel
 
-The web app salon staff and platform admins use: salons, staff and their schedules, services,
+Salonat Pro, the web app salon staff and platform admins use: salons, staff and their schedules, services,
 opening hours, clients, appointments and a calendar. Next.js 16 (App Router) with React 19,
 TanStack Query and Tailwind CSS 4, on top of the [salon-backend](../salon-backend) REST API.
 

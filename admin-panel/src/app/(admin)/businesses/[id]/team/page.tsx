@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import EmptyState from "@/components/ui/EmptyState";
 import { UserCircleIcon } from "@/icons";
 
-export const metadata: Metadata = { title: "Team · Salon Admin" };
+export const metadata: Metadata = { title: "Team · Salonat Pro" };
 
 export default function BusinessTeamPage() {
 	return (

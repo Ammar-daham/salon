@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import BusinessListView from "@/features/businesses/BusinessListView";
 
 export const metadata: Metadata = {
-	title: "Businesses · Salon Admin",
+	title: "Businesses · Salonat Pro",
 	description: "Every salon on the platform.",
 };
 

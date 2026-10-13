@@ -15,7 +15,7 @@ export default function AuthLayout({
           <div className="relative items-center justify-center flex z-1">
             <div className="flex flex-col items-center max-w-xs text-center">
               <span className="mb-3 font-semibold tracking-tight text-white text-display">
-                Salon
+                Salonat Pro
               </span>
               <p className="text-primary-100/80">
                 Booking, staff and clients for beauty and wellness businesses.

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import DashboardView from "@/features/dashboard/DashboardView";
 
 export const metadata: Metadata = {
-	title: "Dashboard · Salon Admin",
+	title: "Dashboard · Salonat Pro",
 	description: "Overview of your salon and platform activity.",
 };
 

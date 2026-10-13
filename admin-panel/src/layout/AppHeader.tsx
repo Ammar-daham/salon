@@ -51,11 +51,11 @@ const AppHeader: React.FC = () => {
           </button>
 
           {/* Compact wordmark — only visible when the sidebar is off-canvas. */}
-          <Link href="/" className="flex items-center gap-2 lg:hidden" aria-label="Salon — dashboard">
+          <Link href="/" className="flex items-center gap-2 lg:hidden" aria-label="Salonat Pro — dashboard">
             <span className="flex size-8 items-center justify-center rounded-lg bg-primary-solid text-sm font-semibold text-white">
               S
             </span>
-            <span className="text-base font-semibold tracking-tight text-ink">Salon</span>
+            <span className="text-base font-semibold tracking-tight text-ink">Salonat Pro</span>
           </Link>
 
           <button

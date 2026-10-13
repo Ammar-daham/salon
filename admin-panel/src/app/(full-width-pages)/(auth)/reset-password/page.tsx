@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import ResetPasswordForm from "@/components/auth/ResetPasswordForm";
 
 export const metadata: Metadata = {
-	title: "Reset password · Salon Admin",
+	title: "Reset password · Salonat Pro",
 	// The address carries the reset token, so it mustn't travel on in a Referer header.
 	referrer: "no-referrer",
 };

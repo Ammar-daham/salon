@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import ServicesView from "@/features/services/ServicesView";
 
 export const metadata: Metadata = {
-	title: "Services · Salon Admin",
+	title: "Services · Salonat Pro",
 	description: "Treatments, duration and pricing.",
 };
 

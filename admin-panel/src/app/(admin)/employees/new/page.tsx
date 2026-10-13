@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import EmployeeCreateView from "@/features/employees/EmployeeCreateView";
 
-export const metadata: Metadata = { title: "Add employee · Salon Admin" };
+export const metadata: Metadata = { title: "Add employee · Salonat Pro" };
 
 // Replaces the old /signup route. Restricted to staff roles — a salon admin
 // adding team members has no business creating platform administrators.

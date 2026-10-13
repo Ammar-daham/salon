@@ -3,7 +3,7 @@ import CalendarView from "@/features/calendar/CalendarView";
 import { idParam } from "@/features/appointments/appointmentLinks";
 
 export const metadata: Metadata = {
-	title: "Calendar · Salon Admin",
+	title: "Calendar · Salonat Pro",
 };
 
 // `searchParams` is a Promise in this version of Next and must be awaited.
