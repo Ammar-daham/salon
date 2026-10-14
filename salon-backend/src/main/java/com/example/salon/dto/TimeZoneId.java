@@ -13,9 +13,10 @@ import java.time.ZoneId;
 import java.util.Set;
 
 /**
- * An IANA time zone ID such as "Europe/Berlin", as java.time knows it. Fixed offsets like "+01:00" are
- * rejected: they don't follow daylight saving time, so a salon's 09:00 would drift by an hour twice a year.
- * Null is valid; pair with @NotNull where the value is required.
+ * An IANA time zone ID such as {@code Europe/Berlin}, as java.time knows it: the rule for a salon's
+ * {@code timezone} in {@link CreateBusinessRequest} and {@link UpdateBusinessRequest}. Fixed offsets like
+ * {@code +01:00} are rejected: they don't follow daylight saving time, so a salon's 09:00 would drift by an
+ * hour twice a year. Null is valid; pair with {@code @NotNull} where the value is required.
  */
 @Target(ElementType.FIELD)
 @Retention(RetentionPolicy.RUNTIME)

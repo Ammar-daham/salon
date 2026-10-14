@@ -71,7 +71,7 @@ public class SalonServiceDataAccessService implements SalonServiceDao
                 AND deleted_at IS NULL
                 ORDER BY id;
                 """;
-        // One query for every business's services (BE-15).
+        // One query for every business's services.
         jdbcTemplate.query(sql, rs -> {
             byBusiness.computeIfAbsent(rs.getLong("business_id"), business -> new ArrayList<>()).add(mapRow(rs));
         }, (Object) businessIds.toArray(Long[]::new));
@@ -137,7 +137,7 @@ public class SalonServiceDataAccessService implements SalonServiceDao
     @Override
     public int deleteServiceById(long id) 
     {
-        // Soft delete (DB-13): appointments keep pointing at the service.
+        // Soft delete: appointments keep pointing at the service.
         String sql = "UPDATE services SET deleted_at = now() WHERE id = ? AND deleted_at IS NULL";
         return jdbcTemplate.update(sql, id);
     }

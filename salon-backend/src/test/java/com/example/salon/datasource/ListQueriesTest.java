@@ -15,7 +15,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
- * A list's addresses, contacts and services are read in one query each, not one per row (BE-15): the
+ * A list's addresses, contacts and services are read in one query each, not one per row: the
  * number of queries doesn't grow with the number of rows.
  */
 @ExtendWith(OutputCaptureExtension.class)

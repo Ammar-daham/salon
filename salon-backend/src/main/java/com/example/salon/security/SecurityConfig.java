@@ -73,7 +73,7 @@ public class SecurityConfig
 				// Records who the caller is for the request log line (RequestLoggingFilter).
 				.addFilterAfter(new CallerLoggingFilter(), SecurityContextHolderFilter.class)
 				.cors(Customizer.withDefaults())
-				// No CSRF token (BE-28). Another site can't use a signed-in user's session because:
+				// No CSRF token. Another site can't use a signed-in user's session because:
 				// - the browser sends its Origin with every POST, PUT and DELETE, including a form's or a
 				//   fetch() that skips the preflight, and the CORS filter answers 403 to any Origin not in
 				//   app.cors.allowed-origins before a controller runs (CrossOriginTest);
@@ -87,11 +87,11 @@ public class SecurityConfig
 				.sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
 				.authorizeHttpRequests(auth -> auth
 						.requestMatchers("/error").permitAll()
-						// For a load balancer or orchestrator: UP or DOWN and nothing more (BE-39). No other
+						// For a load balancer or orchestrator: UP or DOWN and nothing more. No other
 						// actuator endpoint is exposed, and anyRequest() below would deny it anyway.
 						.requestMatchers(HttpMethod.GET, "/actuator/health/**").permitAll()
 						.requestMatchers(HttpMethod.POST, "/api/v1/auth/login").permitAll()
-						// Forgetting your password means you can't sign in (FE-13).
+						// Forgetting your password means you can't sign in.
 						.requestMatchers(HttpMethod.POST, "/api/v1/auth/forgot-password", "/api/v1/auth/reset-password")
 								.permitAll()
 						.requestMatchers("/api/v1/auth/**").authenticated()
@@ -125,7 +125,7 @@ public class SecurityConfig
 						.accessDeniedHandler(restAccessDeniedHandler)
 				);
 		if (requireHttps) {
-			// Under the prod profile: nothing but the health check over plain HTTP (BE-25).
+			// Under the prod profile: nothing but the health check over plain HTTP.
 			http.addFilterBefore(new RequireHttpsFilter(), SecurityContextHolderFilter.class);
 		}
 		return http.build();
@@ -137,13 +137,13 @@ public class SecurityConfig
 		CorsConfiguration configuration = new CorsConfiguration();
 		configuration.setAllowedOrigins(Arrays.stream(allowedOrigins.split(",")).map(String::trim).toList());
 		configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-		// Only what the panel sends (BE-29): JSON, and a request id to match its error reports to the logs.
+		// Only what the panel sends: JSON, and a request id to match its error reports to the logs.
 		configuration.setAllowedHeaders(List.of(HttpHeaders.CONTENT_TYPE, HttpHeaders.ACCEPT, RequestLog.REQUEST_ID_HEADER));
 		configuration.setAllowCredentials(true);
 		// Fails startup, rather than every request, if allowed-origins is "*": any site could then use the session.
 		configuration.validateAllowCredentials();
 		// Lets the panel read the id to show it alongside an error, so a report can be matched to the logs,
-		// and how long a locked-out sign-in has to wait (BE-22).
+		// and how long a locked-out sign-in has to wait.
 		configuration.setExposedHeaders(List.of(RequestLog.REQUEST_ID_HEADER, HttpHeaders.RETRY_AFTER));
 
 		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

@@ -11,9 +11,13 @@ import java.time.LocalTime;
 import java.util.List;
 
 /**
- * Body of PUT /businesses/{businessId}/hours: the whole week, replacing what is stored. A day that isn't
- * listed is closed, and an empty list closes the salon every day. Times are "HH:mm" on the salon's own clock.
- * BusinessHoursService checks that each interval ends after it starts and that a day's intervals don't overlap.
+ * The body of {@code PUT /api/v1/businesses/{businessId}/hours}: the salon's whole week, replacing what is
+ * stored.
+ *
+ * <p>{@code hours} is required and may be empty: a day that isn't listed is closed, and an empty list
+ * closes the salon every day. Each interval has a {@code day_of_week} ({@code MONDAY} to {@code SUNDAY}),
+ * {@code opens_at} and {@code closes_at}, all required, the times as {@code HH:mm} on the salon's own
+ * clock. An interval must close after it opens, and a day's intervals may touch but not overlap.
  */
 public record BusinessHoursRequest(@NotNull List<@NotNull @Valid Interval> hours)
 {

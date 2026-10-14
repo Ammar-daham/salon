@@ -16,7 +16,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-/** BE-22: repeated failed sign-ins lock the email, and the address they come from. */
+/** Repeated failed sign-ins lock the email, and the address they come from. */
 class LoginRateLimitingTest extends IntegrationTest
 {
 	private static final String HOME = "10.0.0.1";

@@ -95,7 +95,7 @@ public class LoginThrottle
 		return wait.isPositive() ? Optional.of(wait) : Optional.empty();
 	}
 
-	/** Forgets an email's failures, e.g. once its password has been reset by email (FE-13). */
+	/** Forgets an email's failures, e.g. once its password has been reset by email. */
 	public void clear(String email)
 	{
 		String account = accountKey(email);
@@ -221,7 +221,7 @@ public class LoginThrottle
 		return duration.toString().substring(2).toLowerCase(Locale.ROOT);
 	}
 
-	/** Sign-in ignores the email's case (DB-10), so ANNA@x and anna@x share a count. */
+	/** Sign-in ignores the email's case, so ANNA@x and anna@x share a count. */
 	private static String accountKey(String email)
 	{
 		return email == null || email.isBlank() ? null : email.toLowerCase(Locale.ROOT);

@@ -13,7 +13,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 /**
  * The lists that grow come a page at a time, with their total, and are searched, filtered and sorted
- * in the database (BE-15).
+ * in the database.
  */
 class ListEndpointsTest extends IntegrationTest
 {

@@ -14,7 +14,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-/** Rules that hold today. Open findings are in {@link KnownIssuesTest}. */
+/** Who may do what. A known bug that breaks one of these rules goes in {@link KnownIssuesTest}. */
 class AuthorizationRulesTest extends IntegrationTest
 {
 	@Test
@@ -75,7 +75,7 @@ class AuthorizationRulesTest extends IntegrationTest
 	@Test
 	void ownersCanReadTheirOwnAddressAndContact() throws Exception
 	{
-		// BE-41: the owner check used to see a null owner, so this was 403 for everyone but admins.
+		// The owner check used to see a null owner, so this was 403 for everyone but admins.
 		MockHttpSession owner = loginAs(Fixture.GLOW_EMPLOYEE);
 
 		mvc.perform(get("/api/v1/addresses/" + Fixture.GLOW_EMPLOYEE_PERSONAL_ADDRESS).session(owner))
@@ -204,7 +204,7 @@ class AuthorizationRulesTest extends IntegrationTest
 	@Test
 	void emailsDifferingOnlyByCaseAreTheSameAccount() throws Exception
 	{
-		// DB-10: the unique index is on lower(email).
+		// The unique index is on lower(email).
 		mvc.perform(post("/api/v1/users").session(loginAs(Fixture.GLOW_ADMIN))
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(newUserBody(Fixture.GLOW_EMPLOYEE.toUpperCase(), "EMPLOYEE", null)))
@@ -214,7 +214,7 @@ class AuthorizationRulesTest extends IntegrationTest
 	@Test
 	void differentOwnersCanShareAContactValue() throws Exception
 	{
-		// DB-05: Glow's business phone can also be a staff member's personal phone.
+		// Glow's business phone can also be a staff member's personal phone.
 		mvc.perform(post("/api/v1/users").session(loginAs(Fixture.GLOW_ADMIN))
 						.contentType(MediaType.APPLICATION_JSON)
 						.content("""
@@ -439,7 +439,7 @@ class AuthorizationRulesTest extends IntegrationTest
 	@Test
 	void businessUpdateCannotEditAnotherSalonsContactViaNestedId() throws Exception
 	{
-		// BE-06: nesting a foreign child id in the parent update must not touch that child.
+		// Nesting a foreign child id in the parent update must not touch that child.
 		mvc.perform(put("/api/v1/businesses/" + Fixture.GLOW).session(loginAs(Fixture.GLOW_ADMIN))
 						.contentType(MediaType.APPLICATION_JSON)
 						.content("""
@@ -518,7 +518,7 @@ class AuthorizationRulesTest extends IntegrationTest
 	{
 		MockHttpSession superAdmin = loginAs(Fixture.SUPER_ADMIN);
 
-		// BE-17: users.business_id is an FK, so deleting a salon would strand its staff. It's a 409.
+		// users.business_id is an FK, so deleting a salon would strand its staff. It's a 409.
 		mvc.perform(delete("/api/v1/businesses/" + Fixture.GLOW).session(superAdmin))
 				.andExpect(status().isConflict())
 				.andExpect(jsonPath("$.errorCode").value("CONFLICT"));

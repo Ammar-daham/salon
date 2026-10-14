@@ -19,8 +19,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 /**
  * The admin panel calls from its own origin, with the session cookie. CORS lets it, with only the
- * headers it sends (BE-29), and is also what stops a page on any other origin from using a signed-in
- * user's session, since there's no CSRF token (BE-28).
+ * headers it sends, and is also what stops a page on any other origin from using a signed-in
+ * user's session, since there's no CSRF token.
  */
 class CrossOriginTest extends IntegrationTest
 {

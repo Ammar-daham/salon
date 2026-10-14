@@ -82,7 +82,7 @@ public class GlobalControllerExceptionHandler
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ResponseEntity<ErrorResponse> handleTypeMismatch(MethodArgumentTypeMismatchException ex, HttpServletRequest request)
     {
-        // The value isn't echoed: it would end up in the request log, which never records query values (BE-42).
+        // The value isn't echoed: it would end up in the request log, which never records query values.
         return build(ErrorCode.BAD_REQUEST.getStatus(), ErrorCode.BAD_REQUEST.getCode(),
                 ex.getName() + " has an invalid value", request);
     }

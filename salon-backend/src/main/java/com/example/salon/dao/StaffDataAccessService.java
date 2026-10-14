@@ -93,7 +93,7 @@ public class StaffDataAccessService implements StaffDao {
 
     @Override
     public int deleteStaffById(long id) {
-        // Soft delete (DB-13): appointments keep pointing at the staff member.
+        // Soft delete: appointments keep pointing at the staff member.
         String sql = "UPDATE staff SET deleted_at = now() WHERE id = ? AND deleted_at IS NULL";
         return jdbcTemplate.update(sql, id);
     }

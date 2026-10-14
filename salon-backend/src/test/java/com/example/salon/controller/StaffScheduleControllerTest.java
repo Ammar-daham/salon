@@ -24,7 +24,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-/** DB-14: a staff member's weekly hours and time off, on the salon's clock. */
+/** A staff member's weekly hours and time off, on the salon's clock. */
 class StaffScheduleControllerTest extends IntegrationTest
 {
 	private static final String MIA = "/api/v1/businesses/" + Fixture.GLOW + "/staff/" + Fixture.GLOW_STAFF;

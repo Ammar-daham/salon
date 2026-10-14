@@ -7,7 +7,11 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
-/** email and password can't be changed through this endpoint - see UserDataAccessService.updateUserById. */
+/**
+ * A user's new name and role, as {@code PUT /api/v1/users/{id}} takes it: {@code first_name} and
+ * {@code last_name}, up to 100 characters each, and {@code role}, all required. The role only changes
+ * when an ADMIN or SUPER_ADMIN sends it. The email, password and salon can't be changed this way.
+ */
 public record UpdateUserRequest(
 		@NotBlank @Size(max = 100) @JsonProperty("first_name") String firstName,
 		@NotBlank @Size(max = 100) @JsonProperty("last_name") String lastName,

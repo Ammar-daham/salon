@@ -195,7 +195,7 @@ BEGIN
     INSERT INTO staff (user_id, business_id, title, is_active, hired_at) VALUES (serenity_emp2_id, serenity_id, 'Esthetician', false, '2019-09-09');
 
     -- =========================================================================
-    -- Customers - a salon's own records (DB-03), no login.
+    -- Customers - a salon's own records, no login.
     -- =========================================================================
     INSERT INTO customers (business_id, first_name, last_name, email, phone, notes, marketing_consent) VALUES
         (glow_id, 'Olivia', 'Customer', 'olivia@example.com', '+49 30 9990001', 'Prefers morning appointments.', true),
@@ -206,7 +206,7 @@ BEGIN
         (serenity_id, 'Mason', 'Customer', NULL, '+49 30 9990006', NULL, false);
 
     -- =========================================================================
-    -- Staff working weeks (DB-14): everyone performs every service of their
+    -- Staff working weeks: everyone performs every service of their
     -- salon and works its opening hours. Mia is off over Christmas.
     -- =========================================================================
     INSERT INTO staff_services (business_id, staff_id, service_id)
@@ -220,7 +220,7 @@ BEGIN
     FROM staff WHERE user_id = glow_emp1_id;
 
     -- =========================================================================
-    -- Appointments (DB-14) around today, on Glow's clock: Olivia's haircut with
+    -- Appointments around today, on Glow's clock: Olivia's haircut with
     -- Mia last week, Liam's colour with Noah and Olivia's manicure with Mia this
     -- week. Each price is the service's price when it was booked.
     -- =========================================================================

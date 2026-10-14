@@ -25,7 +25,7 @@ public class MailConfig
 
 	/**
 	 * Carries the request id onto the background thread that sends a reset link, so its log lines can
-	 * be found with the request's (BE-42). Spring Boot applies it to its applicationTaskExecutor.
+	 * be found with the request's. Spring Boot applies it to its applicationTaskExecutor.
 	 */
 	@Bean
 	public TaskDecorator requestIdTaskDecorator()

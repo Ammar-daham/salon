@@ -99,10 +99,14 @@ VALUES ('First', 'Last', 'SUPER_ADMIN', 'admin@example.com', '<the hash>');
 - `POST /api/v1/auth/login` with `email` and `password` starts a session; the browser keeps it in the
   `JSESSIONID` cookie and sends it with every request. `GET /api/v1/auth/me` says who's signed in.
 - Roles are `SUPER_ADMIN` (the platform), `ADMIN` and `EMPLOYEE` (one salon), and `CUSTOMER`. Each
-  endpoint's rules are in `security/SecurityConfig.java` and the services.
+  endpoint's Javadoc says who may call it.
 - The lists that grow, salons, users and clients, come a page at a time:
   `{items, page, size, total_items, total_pages}`, with `?page`, `?size` (up to 100), `?q` and `?sort`.
 - An error is `{errorCode, message, status, timestamp, path}`.
+
+Every endpoint is documented in its controller. `./gradlew javadoc` builds that into a reference in
+`build/docs/javadoc`: open `index.html` and start at the `com.example.salon.controller` package,
+whose page covers signing in, roles, lists and errors.
 
 ## Code layout
 

@@ -5,6 +5,14 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.math.BigDecimal;
 import java.time.Instant;
 
+/**
+ * A service on a salon's menu, as {@code GET /api/v1/businesses/{businessId}/services/{serviceId}} and the
+ * staff member's services endpoints return it, and as it appears in a salon's {@code services}.
+ *
+ * <p>{@code duration_minutes} is how long it takes, {@code price} what it costs in the salon's
+ * {@code currency}, and {@code is_active} whether it can be booked. {@code updated_at} is null until the
+ * service is first changed.
+ */
 public class SalonService {
     public Long id;
     public String name;

@@ -89,7 +89,7 @@ public class UserService
 		return user;
 	}
 
-	/** Every user for a super admin; for an admin, their own business's (BE-01), or none without one. */
+	/** Every user for a super admin; for an admin, their own business's, or none without one. */
 	public Page<User> getUsers(String search, Role role, Sort<UserDao.SortBy> sort, PageQuery page,
 			AuthenticatedUser caller)
 	{
@@ -119,7 +119,7 @@ public class UserService
 	@Transactional
 	public void updateUserById(long id, User user, AuthenticatedUser caller)
 	{
-		// getUserById enforces self / own-business / super-admin access (BE-05) and 404s if missing.
+		// getUserById enforces self / own-business / super-admin access and 404s if missing.
 		User existing = getUserById((int) id, caller);
 		if (!AccessControl.isAdmin(caller)) {
 			// Only an admin may change a user's role - a self-update must keep the caller's current one.
@@ -139,7 +139,7 @@ public class UserService
 	@Transactional
 	public void deleteUserById(long id, AuthenticatedUser caller)
 	{
-		// getUserById enforces self / own-business / super-admin access (BE-05) and 404s if missing.
+		// getUserById enforces self / own-business / super-admin access and 404s if missing.
 		getUserById((int) id, caller);
 		long row;
 		try {
@@ -147,7 +147,7 @@ public class UserService
 		} catch (DataIntegrityViolationException ex) {
 			if (ex.getMessage() == null || !ex.getMessage().contains("fk_appointments_staff"))
 				throw ex;
-			// Their staff record would go with the account (fk_staff_user), and appointments point at it (DB-13).
+			// Their staff record would go with the account (fk_staff_user), and appointments point at it.
 			throw new BaseException("User with id " + id + " is the staff member on appointments, "
 					+ "so the account can't be deleted.", ErrorCode.DUPLICATE_RESOURCE);
 		}

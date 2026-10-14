@@ -13,7 +13,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-/** DB-14: a salon's weekly opening hours, on its own clock (DB-09). */
+/** A salon's weekly opening hours, on its own clock. */
 class BusinessHoursControllerTest extends IntegrationTest
 {
 	private static final String SPLIT_MONDAY_AND_SATURDAY = """

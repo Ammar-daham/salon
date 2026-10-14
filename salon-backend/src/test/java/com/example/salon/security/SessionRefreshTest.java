@@ -15,7 +15,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
- * BE-14: a signed-in session must follow changes to the user, not keep the snapshot taken at login.
+ * A signed-in session must follow changes to the user, not keep the snapshot taken at login.
  */
 class SessionRefreshTest extends IntegrationTest
 {

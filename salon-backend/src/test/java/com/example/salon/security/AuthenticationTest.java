@@ -59,7 +59,7 @@ class AuthenticationTest extends IntegrationTest
 	@Test
 	void loginEmailIsCaseInsensitive() throws Exception
 	{
-		// DB-10: Anna@x and anna@x are one account, so either spelling signs in.
+		// Anna@x and anna@x are one account, so either spelling signs in.
 		mvc.perform(post("/api/v1/auth/login")
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(loginBody(Fixture.GLOW_ADMIN.toUpperCase(), Fixture.PASSWORD)))

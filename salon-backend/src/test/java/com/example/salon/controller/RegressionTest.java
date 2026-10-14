@@ -132,9 +132,9 @@ class RegressionTest extends IntegrationTest
 	}
 
 	/**
-	 * BE-13: every create controller built a ResponseEntity.created(location) and then called
-	 * .getBody() on it, discarding the status and the Location header - so every create silently
-	 * returned 200 with no way to locate the new resource except parsing the response body.
+	 * Every create used to build a ResponseEntity.created(location) and then return only its body,
+	 * which dropped the status and the Location header, so it answered 200 with no way to find the
+	 * new resource but its body. Each create now answers 201 with a Location that resolves.
 	 */
 	@Test
 	void creatingAResourceReturns201WithALocationHeaderThatResolves() throws Exception
@@ -144,13 +144,13 @@ class RegressionTest extends IntegrationTest
 		String businessLocation = mvc.perform(post("/api/v1/businesses").session(superAdmin)
 						.contentType(MediaType.APPLICATION_JSON)
 						.content("""
-								{"name": "BE-13 Spa", "description": "x", "image": "x"}
+								{"name": "Location Spa", "description": "x", "image": "x"}
 								"""))
 				.andExpect(status().isCreated())
 				.andReturn().getResponse().getHeader("Location");
 		mvc.perform(get(businessLocation).session(superAdmin))
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.name").value("BE-13 Spa"));
+				.andExpect(jsonPath("$.name").value("Location Spa"));
 
 		MockHttpSession admin = loginAs(Fixture.GLOW_ADMIN);
 
@@ -168,16 +168,16 @@ class RegressionTest extends IntegrationTest
 		String serviceLocation = mvc.perform(post("/api/v1/businesses/" + Fixture.GLOW + "/services").session(admin)
 						.contentType(MediaType.APPLICATION_JSON)
 						.content("""
-								{"name": "BE-13 Trim", "description": "x", "duration_minutes": 15, "price": 10.00, "is_active": true}
+								{"name": "Location Trim", "description": "x", "duration_minutes": 15, "price": 10.00, "is_active": true}
 								"""))
 				.andExpect(status().isCreated())
 				.andReturn().getResponse().getHeader("Location");
 		mvc.perform(get(serviceLocation).session(admin))
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.name").value("BE-13 Trim"));
+				.andExpect(jsonPath("$.name").value("Location Trim"));
 	}
 
-	/** BE-10: deleting a business takes no body and removes its real children - no orphaned rows. */
+	/** Deleting a business takes no body and removes its real children - no orphaned rows. */
 	@Test
 	void deletingABusinessWithoutABodyDeletesItsChildren() throws Exception
 	{
@@ -193,7 +193,7 @@ class RegressionTest extends IntegrationTest
 				.andExpect(status().isNotFound());
 	}
 
-	/** BE-16: services belong to one business now, so deleting it cascades to its services
+	/** Services belong to one business now, so deleting it cascades to its services
 	 *  instead of leaving them behind in what used to be modeled as a shared table. */
 	@Test
 	void deletingABusinessRemovesItsServices() throws Exception
@@ -208,7 +208,7 @@ class RegressionTest extends IntegrationTest
 				.andExpect(status().isNotFound());
 	}
 
-	/** BE-10: the deleted business's contact value is freed, not burned forever by the global UNIQUE. */
+	/** The deleted business's contact value is freed, not burned forever by the global UNIQUE. */
 	@Test
 	void deletingABusinessFreesItsContactValueForReuse() throws Exception
 	{
@@ -227,7 +227,7 @@ class RegressionTest extends IntegrationTest
 				.andExpect(status().isCreated());
 	}
 
-	/** BE-10: deleting a user takes no body and removes the user's own children. */
+	/** Deleting a user takes no body and removes the user's own children. */
 	@Test
 	void deletingAUserWithoutABodyDeletesTheirChildren() throws Exception
 	{
@@ -240,7 +240,7 @@ class RegressionTest extends IntegrationTest
 				.andExpect(status().isNotFound());
 	}
 
-	/** BE-09: a duplicate-key insert must surface as a conflict, not a swallowed false success. */
+	/** A duplicate-key insert must surface as a conflict, not a swallowed false success. */
 	@Test
 	void creatingABusinessWithADuplicateNameIsAConflict() throws Exception
 	{
@@ -252,7 +252,7 @@ class RegressionTest extends IntegrationTest
 				.andExpect(status().isConflict());
 	}
 
-	/** BE-18: errors carry the stable ErrorCode.code on the wire, not an ad-hoc string. */
+	/** Errors carry the stable ErrorCode.code on the wire, not an ad-hoc string. */
 	@Test
 	void notFoundErrorsCarryTheStableNotFoundCode() throws Exception
 	{
@@ -271,12 +271,10 @@ class RegressionTest extends IntegrationTest
 	}
 
 	/**
-	 * BE-27: a server-side NPE is a logged 500, no longer a masked 400. This used to be reproduced
-	 * with an update body missing "role", which unboxed a null Role and crashed. BE-23's
-	 * UpdateUserRequest now rejects that same body with a validation 400 before it can reach the
-	 * code that used to NPE - a deliberate rejection, not the NPE-swallowing BE-27 removed. The
-	 * catch-all in GlobalControllerExceptionHandler that turns a genuinely unexpected exception into
-	 * a logged 500 is untouched.
+	 * A missing required field is a validation 400, not a server crash. An update body without
+	 * "role" used to unbox a null Role into a NullPointerException, which a handler then passed off
+	 * as a 400. UpdateUserRequest now rejects that body before it reaches that code, and any truly
+	 * unexpected exception is a logged 500, from the catch-all in GlobalControllerExceptionHandler.
 	 */
 	@Test
 	void aMissingRequiredFieldIsARejectedRequestNotAServerCrash() throws Exception
@@ -289,7 +287,7 @@ class RegressionTest extends IntegrationTest
 				.andExpect(status().isBadRequest());
 	}
 	
-	/** BE-07: a nested new child (id null) on a business update used to auto-unbox to an NPE / 400. */
+	/** A nested new child (id null) on a business update used to auto-unbox to an NPE / 400. */
 	@Test
 	void updatingABusinessWithANewNestedChildNoLongerCrashes() throws Exception
 	{
@@ -301,7 +299,7 @@ class RegressionTest extends IntegrationTest
 				.andExpect(status().isOk());
 	}
 
-	/** BE-07: same for a user update with a nested new child. */
+	/** Same for a user update with a nested new child. */
 	@Test
 	void updatingAUserWithANewNestedChildNoLongerCrashes() throws Exception
 	{
@@ -313,7 +311,7 @@ class RegressionTest extends IntegrationTest
 				.andExpect(status().isOk());
 	}
 
-	/** BE-12: a user update never set users.updated_at. */
+	/** A user update never set users.updated_at. */
 	@Test
 	void updatingAUserSetsUpdatedAt() throws Exception
 	{
@@ -334,7 +332,7 @@ class RegressionTest extends IntegrationTest
 				.andExpect(jsonPath("$.updated_at").value(notNullValue()));
 	}
 
-	/** A salon can only be deleted once it has no staff (BE-17). */
+	/** A salon can only be deleted once it has no staff. */
 	private void deleteGlowStaff(MockHttpSession superAdmin) throws Exception
 	{
 		for (long userId : new long[] {Fixture.GLOW_ADMIN_ID, Fixture.GLOW_EMPLOYEE_ID}) {

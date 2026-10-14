@@ -20,7 +20,7 @@ import java.util.List;
 public class AppointmentDataAccessService implements AppointmentDao
 {
     // The joins don't skip removed rows: a deleted customer, staff member or service still names the
-    // appointments it was on (DB-13).
+    // appointments it was on.
     private static final String SELECT = """
             SELECT a.id, a.starts_at, a.ends_at, a.status, a.price, a.notes, a.created_at, a.updated_at,
             a.customer_id, c.first_name AS customer_first_name, c.last_name AS customer_last_name,

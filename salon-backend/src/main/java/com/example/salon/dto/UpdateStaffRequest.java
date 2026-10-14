@@ -9,6 +9,12 @@ import jakarta.validation.constraints.Size;
 
 import java.time.LocalDate;
 
+/**
+ * The body of {@code PUT /api/v1/businesses/{businessId}/staff/{staffId}}: a staff record's new details.
+ *
+ * <p>The fields of {@link CreateStaffRequest} but {@code user_id}, under the same rules: who the record is
+ * for can't change. Every field is replaced, so leaving {@code calendar_colour} out clears it.
+ */
 public record UpdateStaffRequest(
 		@NotBlank @Size(max = 50) String title,
 		@JsonProperty("is_active") boolean active,

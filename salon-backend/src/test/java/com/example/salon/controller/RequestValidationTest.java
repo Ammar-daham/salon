@@ -10,7 +10,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
- * BE-23: request bodies are now bound onto per-endpoint DTOs with Bean Validation, instead of
+ * Request bodies are now bound onto per-endpoint DTOs with Bean Validation, instead of
  * straight onto the domain models. One test per rule that DTO is responsible for.
  */
 class RequestValidationTest extends IntegrationTest
@@ -19,7 +19,8 @@ class RequestValidationTest extends IntegrationTest
 	void creatingABusinessCannotSmuggleInAnApprovedStatus() throws Exception
 	{
 		// CreateBusinessRequest has no "status" field; the extra key is ignored, not bound.
-		// Before BE-23, Business.setStatus(...) had a real setter Jackson would happily call here.
+		// When bodies were bound straight onto Business, its setStatus(...) was a setter Jackson would
+		// happily call here.
 		mvc.perform(post("/api/v1/businesses").session(loginAs(Fixture.SUPER_ADMIN))
 						.contentType(MediaType.APPLICATION_JSON)
 						.content("""

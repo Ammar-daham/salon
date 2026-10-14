@@ -7,9 +7,13 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 /**
- * description/image/status/currency/timezone are nullable on purpose: BusinessDataAccessService.updateBusinessById
- * COALESCEs image, status, currency and timezone, so omitting them keeps the stored value. Whether a non-null status is
- * actually honoured is still gated by caller role in BusinessService, not by this shape.
+ * The body of {@code PUT /api/v1/businesses/{id}}: a salon's new details.
+ *
+ * <p>{@code name} is required, at most 100 characters. {@code description} is replaced, so leaving it out
+ * clears it. {@code image}, {@code status}, {@code currency} and {@code timezone} are optional on purpose:
+ * left out, each keeps its stored value; sent, {@code currency} and {@code timezone} follow the rules of
+ * {@link CreateBusinessRequest}. Only a SUPER_ADMIN may send a {@code status} other than the current one;
+ * that is checked against the caller, not here. Addresses and contacts aren't part of it.
  */
 public record UpdateBusinessRequest(
 		@NotBlank @Size(max = 100) String name,

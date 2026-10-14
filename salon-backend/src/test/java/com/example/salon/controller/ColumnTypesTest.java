@@ -13,7 +13,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-/** DB-07 coordinates, DB-08 money and currency, DB-09 time zone, as the API sees them. */
+/** Coordinates, money and currency, and a salon's time zone, as the API sees them. */
 class ColumnTypesTest extends IntegrationTest
 {
 	private static String service(String price)

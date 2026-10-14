@@ -4,6 +4,14 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.time.Instant;
 
+/**
+ * A salon's customer record, as {@code POST /api/v1/businesses/{businessId}/customers}, the customer lists and the
+ * single reads under {@code /api/v1/businesses/{businessId}/customers} and {@code /api/v1/customers} return it.
+ *
+ * <p>{@code business_id} and {@code business_name} say whose client it is. {@code user_id} is the customer's own
+ * account when one is linked, and null otherwise; the API doesn't set it. {@code email}, {@code phone} and
+ * {@code notes} may be null. {@code updated_at} is null until the record is first changed.
+ */
 public class Customer
 {
     public Long id;

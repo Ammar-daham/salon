@@ -24,7 +24,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
- * DB-14: open slots for a service, per staff member. seed.sql opens Glow Tuesday to Friday 09:00-18:00, and Mia,
+ * Open slots for a service, per staff member. seed.sql opens Glow Tuesday to Friday 09:00-18:00, and Mia,
  * its one stylist, does 45-minute haircuts on Tuesdays and Wednesdays 09:00-17:00.
  */
 class AvailabilityControllerTest extends IntegrationTest
