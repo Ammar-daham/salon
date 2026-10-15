@@ -130,7 +130,8 @@ public class BusinessController
      * Answers 200 with no body.
      *
      * <p>Errors: 400 if the body breaks the rules of {@link UpdateBusinessRequest}; 403 for another salon, or
-     * if an ADMIN sends a different {@code status}; 404 if there's no such salon.
+     * if an ADMIN sends a different {@code status}; 404 if there's no such salon; 409 if another salon
+     * already has the name.
      *
      * @param id the salon's id
      * @param request the new details, as an {@link UpdateBusinessRequest}

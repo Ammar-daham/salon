@@ -26,6 +26,9 @@ public class BusinessService
 {
     private static final Logger log = LoggerFactory.getLogger(BusinessService.class);
 
+    /** V1's inline UNIQUE on businesses.name, under the name Postgres gave it. */
+    private static final String NAME_UNIQUE = "businesses_name_key";
+
     private final BusinessDao businessDao;
 
     @Autowired
@@ -41,8 +44,8 @@ public class BusinessService
             businessDao.addBusiness(business);
         } catch (DuplicateKeyException ex) {
             String reason = ex.getMessage();
-            if (reason != null && reason.contains("businesses_name_unique"))
-                throw new BaseException("Business with name " + business.getName() + " already exists.", ErrorCode.DUPLICATE_RESOURCE);
+            if (reason != null && reason.contains(NAME_UNIQUE))
+                throw nameTaken(business);
             if (reason != null && reason.contains("contacts_business_value_unique_idx"))
                 throw new BaseException("Contact already exists.", ErrorCode.DUPLICATE_RESOURCE);
             log.warn("Unmapped duplicate-key creating business '{}'", business.getName(), ex);
@@ -102,7 +105,14 @@ public class BusinessService
             throw new AccessDeniedException("Only a super admin can change a business's status");
         }
 
-        int row = businessDao.updateBusinessById(id, business);
+        int row;
+        try {
+            row = businessDao.updateBusinessById(id, business);
+        } catch (DuplicateKeyException ex) {
+            if (ex.getMessage() == null || !ex.getMessage().contains(NAME_UNIQUE))
+                throw ex;
+            throw nameTaken(business);
+        }
         if (row == 0)
             throw new BaseException("Business with id " + id + " not found.", ErrorCode.NOT_FOUND);
         if (business.getStatus() != null && business.getStatus() != existing.getStatus())
@@ -131,5 +141,11 @@ public class BusinessService
         if (row == 0)
             throw new BaseException("Business with id " + id + " not found.", ErrorCode.NOT_FOUND);
         log.info("Deleted business {} with its services, addresses, contacts and customers", id);
+    }
+
+    private static BaseException nameTaken(Business business)
+    {
+        return new BaseException("Business with name " + business.getName() + " already exists.",
+                ErrorCode.DUPLICATE_RESOURCE);
     }
 }

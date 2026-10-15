@@ -30,6 +30,8 @@ version. The version lives in [`gradle.properties`](gradle.properties); each rel
   `GET`, `PUT` and `DELETE` of `/api/v1/users/{id}`, `/api/v1/addresses/{id}` and
   `/api/v1/contacts/{id}`. A salon's address or contact, which anyone signed in may read, is still a
   403 to someone who may not change it.
+- `PUT /api/v1/businesses/{id}` with a name another salon already has answers 409 `CONFLICT`, as
+  `POST` does, instead of a 400.
 
 ### Security
 - Addresses and contacts are scoped to the caller's salon. A salon's may be changed or deleted only
@@ -207,6 +209,8 @@ version. The version lives in [`gradle.properties`](gradle.properties); each rel
 - Emails are unique regardless of case, and sign-in accepts any casing of the email (DB-10).
 - Two owners can share a contact value, e.g. a salon's phone that is also its owner's; one owner
   still can't list the same value twice (DB-05).
+- A taken salon name is reported as "Business with name … already exists." on create and update.
+  Creating one used to answer the generic "Business could not be created due to a conflict."
 
 ### Changed
 - Which salons a non-admin sees, the approved ones and their own, is decided in the query, so the
