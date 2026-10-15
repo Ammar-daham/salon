@@ -111,15 +111,17 @@ public class UserService
 		} catch (EmptyResultDataAccessException ex) {
 			throw new BaseException("User with id " + id + " not found", ErrorCode.NOT_FOUND);
 		}
-		// enforce ownership against the record we actually loaded, not just the caller's role.
-		AccessControl.requireUserAccess(caller, user);
+		// enforce ownership against the record we actually loaded, not just the caller's role. A user the
+		// caller may not see is a 404, like one that doesn't exist, so ids can't be probed.
+		if (!AccessControl.canAccessUser(caller, user))
+			throw new BaseException("User with id " + id + " not found", ErrorCode.NOT_FOUND);
 		return user;
 	}
 
 	@Transactional
 	public void updateUserById(long id, User user, AuthenticatedUser caller)
 	{
-		// getUserById enforces self / own-business / super-admin access and 404s if missing.
+		// getUserById 404s unless the user exists and the caller may see them: self, own business or super admin.
 		User existing = getUserById((int) id, caller);
 		if (!AccessControl.isAdmin(caller)) {
 			// Only an admin may change a user's role - a self-update must keep the caller's current one.
@@ -139,7 +141,7 @@ public class UserService
 	@Transactional
 	public void deleteUserById(long id, AuthenticatedUser caller)
 	{
-		// getUserById enforces self / own-business / super-admin access and 404s if missing.
+		// getUserById 404s unless the user exists and the caller may see them: self, own business or super admin.
 		getUserById((int) id, caller);
 		long row;
 		try {

@@ -59,8 +59,13 @@ class AuthorizationRulesTest extends IntegrationTest
 		mvc.perform(get("/api/v1/users/" + Fixture.GLOW_EMPLOYEE_ID).session(employee))
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.first_name").value("Mia"));
+		// 404, not 403: a user you can't see is answered as if there were none, so ids can't be probed.
 		mvc.perform(get("/api/v1/users/" + Fixture.GLOW_ADMIN_ID).session(employee))
-				.andExpect(status().isForbidden());
+				.andExpect(status().isNotFound())
+				.andExpect(jsonPath("$.message").value("User with id " + Fixture.GLOW_ADMIN_ID + " not found"));
+		mvc.perform(get("/api/v1/users/999").session(employee))
+				.andExpect(status().isNotFound())
+				.andExpect(jsonPath("$.message").value("User with id 999 not found"));
 	}
 
 	@Test
@@ -68,10 +73,11 @@ class AuthorizationRulesTest extends IntegrationTest
 	{
 		MockHttpSession stranger = loginAs(Fixture.URBAN_EMPLOYEE);
 
+		// 404, not 403, as for a record that doesn't exist.
 		mvc.perform(get("/api/v1/addresses/" + Fixture.GLOW_EMPLOYEE_PERSONAL_ADDRESS).session(stranger))
-				.andExpect(status().isForbidden());
+				.andExpect(status().isNotFound());
 		mvc.perform(get("/api/v1/contacts/" + Fixture.GLOW_EMPLOYEE_PERSONAL_CONTACT).session(stranger))
-				.andExpect(status().isForbidden());
+				.andExpect(status().isNotFound());
 	}
 
 	@Test
@@ -167,25 +173,25 @@ class AuthorizationRulesTest extends IntegrationTest
 		MockHttpSession otherSalonAdmin = loginAs(Fixture.URBAN_ADMIN);
 
 		mvc.perform(get("/api/v1/addresses/" + Fixture.GLOW_EMPLOYEE_PERSONAL_ADDRESS).session(otherSalonAdmin))
-				.andExpect(status().isForbidden());
+				.andExpect(status().isNotFound());
 		mvc.perform(get("/api/v1/contacts/" + Fixture.GLOW_EMPLOYEE_PERSONAL_CONTACT).session(otherSalonAdmin))
-				.andExpect(status().isForbidden());
+				.andExpect(status().isNotFound());
 		mvc.perform(put("/api/v1/addresses/" + Fixture.GLOW_EMPLOYEE_PERSONAL_ADDRESS).session(otherSalonAdmin)
 						.contentType(MediaType.APPLICATION_JSON)
 						.content("""
 								{"street": "1 Hijack Rd", "city": "Berlin", "country": "Germany"}
 								"""))
-				.andExpect(status().isForbidden());
+				.andExpect(status().isNotFound());
 		mvc.perform(put("/api/v1/contacts/" + Fixture.GLOW_EMPLOYEE_PERSONAL_CONTACT).session(otherSalonAdmin)
 						.contentType(MediaType.APPLICATION_JSON)
 						.content("""
 								{"type": "phone", "value": "+49 30 0000000"}
 								"""))
-				.andExpect(status().isForbidden());
+				.andExpect(status().isNotFound());
 		mvc.perform(delete("/api/v1/addresses/" + Fixture.GLOW_EMPLOYEE_PERSONAL_ADDRESS).session(otherSalonAdmin))
-				.andExpect(status().isForbidden());
+				.andExpect(status().isNotFound());
 		mvc.perform(delete("/api/v1/contacts/" + Fixture.GLOW_EMPLOYEE_PERSONAL_CONTACT).session(otherSalonAdmin))
-				.andExpect(status().isForbidden());
+				.andExpect(status().isNotFound());
 
 		MockHttpSession owner = loginAs(Fixture.GLOW_EMPLOYEE);
 		mvc.perform(get("/api/v1/addresses/" + Fixture.GLOW_EMPLOYEE_PERSONAL_ADDRESS).session(owner))
@@ -519,7 +525,7 @@ class AuthorizationRulesTest extends IntegrationTest
 						.content("""
 								{"first_name": "Pwned", "last_name": "Admin", "role": "EMPLOYEE"}
 								"""))
-				.andExpect(status().isForbidden());
+				.andExpect(status().isNotFound());
 
 		mvc.perform(get("/api/v1/users/" + Fixture.URBAN_ADMIN_ID).session(loginAs(Fixture.URBAN_ADMIN)))
 				.andExpect(jsonPath("$.first_name").value("Ben"))
@@ -532,7 +538,7 @@ class AuthorizationRulesTest extends IntegrationTest
 		mvc.perform(delete("/api/v1/users/" + Fixture.URBAN_ADMIN_ID).session(loginAs(Fixture.GLOW_ADMIN))
 						.contentType(MediaType.APPLICATION_JSON)
 						.content("{}"))
-				.andExpect(status().isForbidden());
+				.andExpect(status().isNotFound());
 
 		mvc.perform(get("/api/v1/users/" + Fixture.URBAN_ADMIN_ID).session(loginAs(Fixture.URBAN_ADMIN)))
 				.andExpect(status().isOk())

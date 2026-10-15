@@ -44,9 +44,9 @@ public class AddressService
 	{
 		Address address = fetch(id);
 		// A business's address is part of its public listing (customers can browse every salon);
-		// a personal address is only for those who may see its owner.
-		if (address.getBusinessId() == null) {
-			AccessControl.requireUserAccess(caller, address.getUserId(), userDao);
+		// a personal address is only for those who may see its owner, and a 404 to anyone else.
+		if (address.getBusinessId() == null && !AccessControl.canAccessUser(caller, address.getUserId(), userDao)) {
+			throw notFound(id);
 		}
 		return address;
 	}
@@ -56,7 +56,7 @@ public class AddressService
 		requireWritePermission(id, caller);
 		int row = addressDao.updateAddressById(id, address);
 		if (row == 0)
-			throw new BaseException("Address with id " + id + " not found", ErrorCode.NOT_FOUND);
+			throw notFound(id);
 		log.info("Updated address {}", id);
 	}
 
@@ -65,19 +65,19 @@ public class AddressService
 		requireWritePermission(id, caller);
 		int row = addressDao.deleteAddressById(id);
 		if (row == 0)
-			throw new BaseException("Address with id " + id + " not found", ErrorCode.NOT_FOUND);
+			throw notFound(id);
 		log.info("Deleted address {}", id);
 	}
 
 	private void requireWritePermission(int id, AuthenticatedUser caller)
 	{
 		Address address = fetch(id);
-		// A business's address can only be changed by its admins; a personal address by those who may
-		// change its owner.
+		// A business's address can only be changed by its admins, and is public, so anyone else gets a 403.
+		// A personal address only by those who may change its owner, and anyone else can't see it: a 404.
 		if (address.getBusinessId() != null) {
 			AccessControl.requireAdminOfBusiness(caller, address.getBusinessId());
-		} else {
-			AccessControl.requireUserAccess(caller, address.getUserId(), userDao);
+		} else if (!AccessControl.canAccessUser(caller, address.getUserId(), userDao)) {
+			throw notFound(id);
 		}
 	}
 
@@ -86,7 +86,12 @@ public class AddressService
 		try {
 			return addressDao.getAddressById(id);
 		} catch (EmptyResultDataAccessException e) {
-			throw new BaseException("Address with id " + id + " not found", ErrorCode.NOT_FOUND);
+			throw notFound(id);
 		}
+	}
+
+	private static BaseException notFound(int id)
+	{
+		return new BaseException("Address with id " + id + " not found", ErrorCode.NOT_FOUND);
 	}
 }

@@ -77,28 +77,26 @@ public final class AccessControl
 
 	/**
 	 * Read/modify access to a single user record: a SUPER_ADMIN may touch anyone, a user may touch
-	 * themselves, and an ADMIN may touch other users only within their own business. 
+	 * themselves, and an ADMIN may touch other users only within their own business. Anyone else gets a
+	 * 404 rather than a 403, so they can't probe which ids exist.
 	 */
-	public static void requireUserAccess(AuthenticatedUser caller, User target)
+	public static boolean canAccessUser(AuthenticatedUser caller, User target)
 	{
 		if (isSuperAdmin(caller) || isSelf(caller, target.getId())) {
-			return;
+			return true;
 		}
 		Long callerBusinessId = caller.getUser().getBusinessId();
-		if (isAdmin(caller) && callerBusinessId != null && callerBusinessId.equals(target.getBusinessId())) {
-			return;
-		}
-		throw new AccessDeniedException("You do not have permission to access this resource");
+		return isAdmin(caller) && callerBusinessId != null && callerBusinessId.equals(target.getBusinessId());
 	}
 
 	/**
-	 * {@link #requireUserAccess(AuthenticatedUser, User)} for a record that belongs to a user, such as
+	 * {@link #canAccessUser(AuthenticatedUser, User)} for a record that belongs to a user, such as
 	 * their address or a contact: the same people may reach it as may reach the user.
 	 */
-	public static void requireUserAccess(AuthenticatedUser caller, long ownerId, UserDao userDao)
+	public static boolean canAccessUser(AuthenticatedUser caller, long ownerId, UserDao userDao)
 	{
 		// An owner always exists: the foreign key deletes a user's addresses and contacts with them.
 		User owner = userDao.findById(ownerId).orElseThrow();
-		requireUserAccess(caller, owner);
+		return canAccessUser(caller, owner);
 	}
 }

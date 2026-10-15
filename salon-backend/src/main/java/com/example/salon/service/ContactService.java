@@ -44,9 +44,9 @@ public class ContactService
 	{
 		Contact c = fetch(id);
 		// A business's contact is part of its public listing (customers can browse every salon);
-		// a personal contact is only for those who may see its owner.
-		if (c.getBusinessId() == null) {
-			AccessControl.requireUserAccess(caller, c.getUserId(), userDao);
+		// a personal contact is only for those who may see its owner, and a 404 to anyone else.
+		if (c.getBusinessId() == null && !AccessControl.canAccessUser(caller, c.getUserId(), userDao)) {
+			throw notFound(id);
 		}
 		return c;
 	}
@@ -56,7 +56,7 @@ public class ContactService
 		requireWritePermission(id, caller);
 		int row = contactDao.updateContactById(id, contact);
 		if (row == 0)
-			throw new BaseException("Contact with id " + id + " not found", ErrorCode.NOT_FOUND);
+			throw notFound(id);
 		log.info("Updated contact {}", id);
 	}
 
@@ -65,19 +65,19 @@ public class ContactService
 		requireWritePermission(id, caller);
 		int row = contactDao.deleteContactById(id);
 		if (row == 0)
-			throw new BaseException("Contact with id " + id + " not found", ErrorCode.NOT_FOUND);
+			throw notFound(id);
 		log.info("Deleted contact {}", id);
 	}
 
 	private void requireWritePermission(int id, AuthenticatedUser caller)
 	{
 		Contact c = fetch(id);
-		// A business's contact can only be changed by its admins; a personal contact by those who may
-		// change its owner.
+		// A business's contact can only be changed by its admins, and is public, so anyone else gets a 403.
+		// A personal contact only by those who may change its owner, and anyone else can't see it: a 404.
 		if (c.getBusinessId() != null) {
 			AccessControl.requireAdminOfBusiness(caller, c.getBusinessId());
-		} else {
-			AccessControl.requireUserAccess(caller, c.getUserId(), userDao);
+		} else if (!AccessControl.canAccessUser(caller, c.getUserId(), userDao)) {
+			throw notFound(id);
 		}
 	}
 
@@ -86,7 +86,12 @@ public class ContactService
 		try {
 			return contactDao.getContactById(id);
 		} catch (EmptyResultDataAccessException e) {
-			throw new BaseException("Contact with id " + id + " not found", ErrorCode.NOT_FOUND);
+			throw notFound(id);
 		}
+	}
+
+	private static BaseException notFound(int id)
+	{
+		return new BaseException("Contact with id " + id + " not found", ErrorCode.NOT_FOUND);
 	}
 }

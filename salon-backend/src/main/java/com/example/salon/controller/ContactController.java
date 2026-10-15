@@ -56,8 +56,7 @@ public class ContactController
 	 * <p>{@code GET /api/v1/contacts/{id}}. A salon's contact, to anyone signed in; a user's, to that user,
 	 * an ADMIN of their salon or a SUPER_ADMIN.
 	 *
-	 * <p>Errors: 403 if it's a user's contact and the caller may not see that user; 404 if there's no such
-	 * contact.
+	 * <p>Errors: 404 if there's no such contact, or it's a user's and the caller may not see that user.
 	 *
 	 * @param id the contact's id
 	 * @param principal the signed-in caller
@@ -76,8 +75,8 @@ public class ContactController
 	 * user's, by that user, an ADMIN of their salon or a SUPER_ADMIN. Answers 200 with no body.
 	 *
 	 * <p>Errors: 400 if the body breaks {@link ContactRequest}'s rules, or the owner already has another
-	 * contact with this {@code value}; 403 if the caller may not change the contact; 404 if there's no
-	 * such contact.
+	 * contact with this {@code value}; 403 if it's a salon's contact and the caller may not change it; 404
+	 * if there's no such contact, or it's a user's and the caller may not see that user.
 	 *
 	 * @param id the contact's id
 	 * @param request the new type and value, a {@link ContactRequest}
@@ -95,7 +94,8 @@ public class ContactController
 	 * <p>{@code DELETE /api/v1/contacts/{id}}. The same callers as {@code PUT /api/v1/contacts/{id}}.
 	 * Answers 200 with no body.
 	 *
-	 * <p>Errors: 403 if the caller may not change the contact; 404 if there's no such contact.
+	 * <p>Errors: 403 if it's a salon's contact and the caller may not change it; 404 if there's no such
+	 * contact, or it's a user's and the caller may not see that user.
 	 *
 	 * @param id the contact's id
 	 * @param principal the signed-in caller
