@@ -22,8 +22,15 @@ version. The version lives in [`gradle.properties`](gradle.properties); each rel
   or not at all; input is rounded to 6 decimals (DB-07).
 - A service `price` is required (it used to default to 0 when omitted) and accepts at most 2
   decimals (DB-08).
+- `GET /api/v1/addresses` and `GET /api/v1/contacts` give an ADMIN only their own salon's and its
+  users' records; they used to list every salon's. A SUPER_ADMIN still gets them all.
 
 ### Security
+- Addresses and contacts are scoped to the caller's salon. A salon's may be changed or deleted only
+  by an ADMIN of that salon or a SUPER_ADMIN, and a user's read, changed or deleted only by the
+  people who may see that user on `/users`: the user, an ADMIN of their salon or a SUPER_ADMIN. Any
+  other salon's ADMIN now gets 403; it used to be let through. A salon's address and contacts are
+  still readable by anyone signed in.
 - Under the `prod` profile the session cookie is `Secure`, `HttpOnly` and `SameSite=Lax`, a request
   that didn't come over HTTPS is refused with 403 (all but `/actuator/health`), and HTTPS responses
   carry `Strict-Transport-Security`. A session ends after an explicit 30 minutes without a request,

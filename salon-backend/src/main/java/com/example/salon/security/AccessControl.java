@@ -26,19 +26,16 @@ public final class AccessControl
 		return ownerId != null && ownerId.equals(caller.getUser().getId());
 	}
 
-	public static void requireSelfOrAdmin(AuthenticatedUser caller, Long ownerId)
-	{
-		if (isAdmin(caller) || isSelf(caller, ownerId)) {
-			return;
-		}
-		throw new AccessDeniedException("You do not have permission to access this resource");
-	}
-
-	public static void requireAdmin(AuthenticatedUser caller)
+	/**
+	 * Changing a salon's own records, such as its address and contacts: an ADMIN of that business,
+	 * or a SUPER_ADMIN. An EMPLOYEE of the business doesn't qualify.
+	 */
+	public static void requireAdminOfBusiness(AuthenticatedUser caller, long businessId)
 	{
 		if (!isAdmin(caller)) {
 			throw new AccessDeniedException("You do not have permission to access this resource");
 		}
+		requireBusinessAccess(caller, businessId);
 	}
 
 	/**

@@ -105,6 +105,14 @@ public class AddressDataAccessService implements AddressDao
 	}
 
 	@Override
+	public List<Address> getAddressesForBusinessAndItsUsers(long businessId)
+	{
+		return jdbcTemplate.query(
+				SELECT + "WHERE business_id = ? OR user_id IN (SELECT id FROM users WHERE business_id = ?) ORDER BY id",
+				(rs, i) -> mapRow(rs), businessId, businessId);
+	}
+
+	@Override
 	public Address getAddressById(int id)
 	{
 		return jdbcTemplate.queryForObject(SELECT + "WHERE id = ?", (rs, i) -> {
