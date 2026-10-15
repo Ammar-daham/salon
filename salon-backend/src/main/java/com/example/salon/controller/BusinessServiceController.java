@@ -16,8 +16,8 @@ import java.net.URI;
 /**
  * A salon's services and prices, under {@code /api/v1/businesses/{businessId}/services}.
  *
- * <p>Anyone signed in may read a service; an ADMIN of the salon or a SUPER_ADMIN adds, changes and
- * removes them. There is no list here: a salon's services come in {@code services} on
+ * <p>Anyone who may see the salon may read a service; an ADMIN of the salon or a SUPER_ADMIN adds,
+ * changes and removes them. There is no list here: a salon's services come in {@code services} on
  * {@code GET /api/v1/businesses/{id}}.
  */
 @RestController
@@ -68,19 +68,22 @@ public class BusinessServiceController
 	/**
 	 * Returns one of a salon's services.
 	 *
-	 * <p>{@code GET /api/v1/businesses/{businessId}/services/{serviceId}}. Anyone signed in, whether or not
-	 * they may see the salon. Inactive services are returned too.
+	 * <p>{@code GET /api/v1/businesses/{businessId}/services/{serviceId}}. Anyone signed in who may see the
+	 * salon, as for {@code GET /api/v1/businesses/{id}}. Inactive services are returned too.
 	 *
-	 * <p>Errors: 404 if the salon has no such service, or it has been removed.
+	 * <p>Errors: 404 if there's no such salon or the caller may not see it, or the salon has no such
+	 * service, or it has been removed.
 	 *
 	 * @param businessId the salon's id
 	 * @param serviceId the service's id
+	 * @param principal the signed-in caller
 	 * @return 200 with the service
 	 */
 	@GetMapping("/{businessId}/services/{serviceId}")
-	public SalonService getServiceForBusiness(@PathVariable int businessId, @PathVariable int serviceId)
+	public SalonService getServiceForBusiness(@PathVariable int businessId, @PathVariable int serviceId,
+			@AuthenticationPrincipal AuthenticatedUser principal)
 	{
-		return businessSalonServiceService.getServiceById(businessId, serviceId);
+		return businessSalonServiceService.getServiceById(businessId, serviceId, principal);
 	}
 
 	/**

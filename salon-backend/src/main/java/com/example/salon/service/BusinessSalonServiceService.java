@@ -22,12 +22,15 @@ public class BusinessSalonServiceService
 
     private final SalonServiceDao salonServiceDao;
     private final AppointmentDao appointmentDao;
+    private final BusinessService businessService;
 
     @Autowired
-    public BusinessSalonServiceService(SalonServiceDao salonServiceDao, AppointmentDao appointmentDao)
+    public BusinessSalonServiceService(SalonServiceDao salonServiceDao, AppointmentDao appointmentDao,
+            BusinessService businessService)
     {
         this.salonServiceDao = salonServiceDao;
         this.appointmentDao = appointmentDao;
+        this.businessService = businessService;
     }
 
     @Transactional
@@ -42,6 +45,13 @@ public class BusinessSalonServiceService
         }
         log.info("Created service {} in business {}", salonService.getId(), businessId);
         return salonService;
+    }
+
+    /** One of a salon's services: public like the salon itself, so a 404 for a salon you can't see. */
+    public SalonService getServiceById(int businessId, int serviceId, AuthenticatedUser caller)
+    {
+        businessService.getBusinessById(businessId, caller);
+        return getServiceById(businessId, serviceId);
     }
 
     public SalonService getServiceById(int businessId, int serviceId) 

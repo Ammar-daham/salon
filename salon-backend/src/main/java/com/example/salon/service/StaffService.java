@@ -76,8 +76,10 @@ public class StaffService
         return staffDao.getStaffById(businessId, staff.getId());
     }
 
+    /** A salon's roster: public like the salon itself, so a 404 for a salon you can't see. */
     public List<Staff> getStaffForBusiness(Long businessId, AuthenticatedUser caller)
     {
+        businessService.getBusinessById(businessId.intValue(), caller);
         List<Staff> staff = staffDao.getStaffForBusiness(businessId);
         if (!seesEmails(caller, businessId)) {
             staff.forEach(s -> s.setEmail(null));
@@ -87,6 +89,7 @@ public class StaffService
 
     public Staff getStaffById(long businessId, long staffId, AuthenticatedUser caller)
     {
+        businessService.getBusinessById((int) businessId, caller);
         Staff staff = getStaffById(businessId, staffId);
         if (!seesEmails(caller, businessId)) {
             staff.setEmail(null);
@@ -95,7 +98,7 @@ public class StaffService
     }
 
     /**
-     * Anyone signed in can see a salon's roster, and who is on it, but an email only goes to the
+     * Anyone who can see a salon can see its roster, and who is on it, but an email only goes to the
      * salon's admins and super admins: the same people who can read it on /users.
      */
     private static boolean seesEmails(AuthenticatedUser caller, long businessId)

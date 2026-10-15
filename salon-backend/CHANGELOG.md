@@ -24,6 +24,8 @@ version. The version lives in [`gradle.properties`](gradle.properties); each rel
   decimals (DB-08).
 - `GET /api/v1/addresses` and `GET /api/v1/contacts` give an ADMIN only their own salon's and its
   users' records; they used to list every salon's. A SUPER_ADMIN still gets them all.
+- `GET /api/v1/businesses/{id}/staff` answers 404 for a salon that doesn't exist, instead of an empty
+  list.
 
 ### Security
 - Addresses and contacts are scoped to the caller's salon. A salon's may be changed or deleted only
@@ -31,6 +33,10 @@ version. The version lives in [`gradle.properties`](gradle.properties); each rel
   people who may see that user on `/users`: the user, an ADMIN of their salon or a SUPER_ADMIN. Any
   other salon's ADMIN now gets 403; it used to be let through. A salon's address and contacts are
   still readable by anyone signed in.
+- `GET /api/v1/businesses/{id}/staff`, `GET .../staff/{staffId}` and `GET .../services/{serviceId}`
+  answer only those who may see the salon, as `GET /api/v1/businesses/{id}` does: a salon that isn't
+  APPROVED is a 404 to anyone but admins and the salon's own users. Anyone signed in, customers
+  included, used to be able to read an unapproved salon's staff names and services.
 - Under the `prod` profile the session cookie is `Secure`, `HttpOnly` and `SameSite=Lax`, a request
   that didn't come over HTTPS is refused with 403 (all but `/actuator/health`), and HTTPS responses
   carry `Strict-Transport-Security`. A session ends after an explicit 30 minutes without a request,
