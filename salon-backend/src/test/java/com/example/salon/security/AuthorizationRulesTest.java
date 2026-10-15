@@ -7,6 +7,7 @@ import org.springframework.mock.web.MockHttpSession;
 
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.not;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -621,6 +622,36 @@ class AuthorizationRulesTest extends IntegrationTest
 				.andExpect(status().isOk());
 
 		mvc.perform(get("/api/v1/businesses/" + Fixture.GLOW).session(loginAs(Fixture.URBAN_EMPLOYEE)))
+				.andExpect(status().isNotFound());
+	}
+
+	@Test
+	void aSalonYouCannotSeeHasNoStaffOrServicesYouCanSee() throws Exception
+	{
+		mvc.perform(put("/api/v1/businesses/" + Fixture.URBAN).session(loginAs(Fixture.SUPER_ADMIN))
+						.contentType(MediaType.APPLICATION_JSON)
+						.content("""
+								{"name": "Urban Cuts Barbershop", "status": "SUSPENDED"}
+								"""))
+				.andExpect(status().isOk());
+		String urban = "/api/v1/businesses/" + Fixture.URBAN;
+
+		// Same rule as GET /businesses/{id}: a 404 to non-admins outside the salon.
+		MockHttpSession outsider = loginAs(Fixture.GLOW_EMPLOYEE);
+		mvc.perform(get(urban + "/staff").session(outsider)).andExpect(status().isNotFound());
+		mvc.perform(get(urban + "/staff/" + Fixture.URBAN_STAFF).session(outsider)).andExpect(status().isNotFound());
+		mvc.perform(get(urban + "/services/" + Fixture.URBAN_FADE).session(outsider)).andExpect(status().isNotFound());
+
+		MockHttpSession insider = loginAs(Fixture.URBAN_EMPLOYEE);
+		mvc.perform(get(urban + "/staff").session(insider)).andExpect(jsonPath("$", hasSize(1)));
+		mvc.perform(get(urban + "/staff/" + Fixture.URBAN_STAFF).session(insider)).andExpect(status().isOk());
+		mvc.perform(get(urban + "/services/" + Fixture.URBAN_FADE).session(insider)).andExpect(status().isOk());
+	}
+
+	@Test
+	void aSalonThatDoesNotExistHasNoStaff() throws Exception
+	{
+		mvc.perform(get("/api/v1/businesses/999/staff").session(loginAs(Fixture.SUPER_ADMIN)))
 				.andExpect(status().isNotFound());
 	}
 

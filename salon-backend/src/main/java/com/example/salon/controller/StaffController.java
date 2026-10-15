@@ -20,8 +20,8 @@ import java.util.List;
 /**
  * A salon's staff, and the services each performs, under {@code /api/v1/businesses/{businessId}/staff}.
  *
- * <p>A staff record says that one of the salon's users works there. Anyone signed in may read the staff;
- * only an ADMIN of the salon or a SUPER_ADMIN sees their emails or changes anything.
+ * <p>A staff record says that one of the salon's users works there. Anyone who may see the salon may read
+ * the staff; only an ADMIN of the salon or a SUPER_ADMIN sees their emails or changes anything.
  */
 @RestController
 @RequestMapping("api/v1/businesses")
@@ -73,10 +73,12 @@ public class StaffController
 	/**
 	 * Lists a salon's staff.
 	 *
-	 * <p>{@code GET /api/v1/businesses/{businessId}/staff}. Anyone signed in, whether or not they may see
-	 * the salon. Every current staff record, active or not, in the order they were added, with each
-	 * person's name. {@code email} is filled in only for an ADMIN of the salon or a SUPER_ADMIN, and null
-	 * for anyone else. A salon that doesn't exist has an empty list.
+	 * <p>{@code GET /api/v1/businesses/{businessId}/staff}. Anyone signed in who may see the salon, as for
+	 * {@code GET /api/v1/businesses/{id}}. Every current staff record, active or not, in the order they were
+	 * added, with each person's name. {@code email} is filled in only for an ADMIN of the salon or a
+	 * SUPER_ADMIN, and null for anyone else.
+	 *
+	 * <p>Errors: 404 if there's no such salon or the caller may not see it.
 	 *
 	 * @param businessId the salon's id
 	 * @param principal the signed-in caller
@@ -92,10 +94,12 @@ public class StaffController
 	/**
 	 * Returns one of a salon's staff records.
 	 *
-	 * <p>{@code GET /api/v1/businesses/{businessId}/staff/{staffId}}. Anyone signed in, whether or not they
-	 * may see the salon. {@code email} is filled in only for an ADMIN of the salon or a SUPER_ADMIN.
+	 * <p>{@code GET /api/v1/businesses/{businessId}/staff/{staffId}}. Anyone signed in who may see the
+	 * salon, as for {@code GET /api/v1/businesses/{id}}. {@code email} is filled in only for an ADMIN of the
+	 * salon or a SUPER_ADMIN.
 	 *
-	 * <p>Errors: 404 if the salon has no such staff record, or it has been removed.
+	 * <p>Errors: 404 if there's no such salon or the caller may not see it, or the salon has no such staff
+	 * record, or it has been removed.
 	 *
 	 * @param businessId the salon's id
 	 * @param staffId the staff record's id
