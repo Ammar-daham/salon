@@ -1,5 +1,6 @@
 package com.example.salon.security;
 
+import com.example.salon.dao.UserDao;
 import com.example.salon.model.Role;
 import com.example.salon.model.User;
 import org.springframework.security.access.AccessDeniedException;
@@ -88,5 +89,16 @@ public final class AccessControl
 			return;
 		}
 		throw new AccessDeniedException("You do not have permission to access this resource");
+	}
+
+	/**
+	 * {@link #requireUserAccess(AuthenticatedUser, User)} for a record that belongs to a user, such as
+	 * their address or a contact: the same people may reach it as may reach the user.
+	 */
+	public static void requireUserAccess(AuthenticatedUser caller, long ownerId, UserDao userDao)
+	{
+		// An owner always exists: the foreign key deletes a user's addresses and contacts with them.
+		User owner = userDao.findById(ownerId).orElseThrow();
+		requireUserAccess(caller, owner);
 	}
 }

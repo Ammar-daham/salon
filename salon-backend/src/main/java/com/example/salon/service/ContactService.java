@@ -5,7 +5,6 @@ import com.example.salon.dao.UserDao;
 import com.example.salon.exception.BaseException;
 import com.example.salon.exception.ErrorCode;
 import com.example.salon.model.Contact;
-import com.example.salon.model.User;
 import com.example.salon.security.AccessControl;
 import com.example.salon.security.AuthenticatedUser;
 import org.slf4j.Logger;
@@ -47,7 +46,7 @@ public class ContactService
 		// A business's contact is part of its public listing (customers can browse every salon);
 		// a personal contact is only for those who may see its owner.
 		if (c.getBusinessId() == null) {
-			requireUserAccess(caller, c.getUserId());
+			AccessControl.requireUserAccess(caller, c.getUserId(), userDao);
 		}
 		return c;
 	}
@@ -78,16 +77,8 @@ public class ContactService
 		if (c.getBusinessId() != null) {
 			AccessControl.requireAdminOfBusiness(caller, c.getBusinessId());
 		} else {
-			requireUserAccess(caller, c.getUserId());
+			AccessControl.requireUserAccess(caller, c.getUserId(), userDao);
 		}
-	}
-
-	/** The owner, an admin of the owner's business, or a super admin: the same people as on /users. */
-	private void requireUserAccess(AuthenticatedUser caller, long ownerId)
-	{
-		// An owner always exists: the foreign key deletes a user's contacts with them.
-		User owner = userDao.findById(ownerId).orElseThrow();
-		AccessControl.requireUserAccess(caller, owner);
 	}
 
 	private Contact fetch(int id)
