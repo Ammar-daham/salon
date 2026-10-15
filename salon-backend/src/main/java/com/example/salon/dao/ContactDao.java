@@ -22,6 +22,9 @@ public interface ContactDao
 
 	List<Contact> getAllContacts();
 
+	/** The business's own contacts and those of its users. */
+	List<Contact> getContactsForBusinessAndItsUsers(long businessId);
+
 	Contact getContactById(int id);
 
 	int updateContactById(long id, Contact contact);

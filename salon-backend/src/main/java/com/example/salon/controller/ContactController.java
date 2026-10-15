@@ -16,8 +16,9 @@ import java.util.List;
  *
  * <p>A contact is created with the salon or user it belongs to ({@code POST /api/v1/businesses},
  * {@code POST /api/v1/users}) and deleted with them; here it is read, replaced or deleted. A salon's
- * contact may be read by anyone signed in and changed by any ADMIN or SUPER_ADMIN, of whichever salon. A
- * user's contact may be read and changed by that user or by any ADMIN or SUPER_ADMIN.
+ * contact may be read by anyone signed in and changed by an ADMIN of that salon or a SUPER_ADMIN. A
+ * user's contact may be read and changed by the same people as the user: that user, an ADMIN of their
+ * salon or a SUPER_ADMIN.
  */
 @RestController
 @RequestMapping("api/v1/contacts")
@@ -32,29 +33,31 @@ public class ContactController
 	}
 
 	/**
-	 * Lists every contact on the platform.
+	 * Lists the contacts the caller may see.
 	 *
-	 * <p>{@code GET /api/v1/contacts}. ADMIN and SUPER_ADMIN only. The list holds every salon's and every
-	 * user's contacts, other salons' too for an ADMIN, in {@code id} order and not paged.
+	 * <p>{@code GET /api/v1/contacts}. ADMIN and SUPER_ADMIN only. A SUPER_ADMIN gets every salon's and
+	 * every user's contacts; an ADMIN gets their own salon's and its users'. In {@code id} order and not
+	 * paged.
 	 *
 	 * <p>Errors: 403 for anyone else.
 	 *
-	 * @return 200 with every contact
+	 * @param principal the signed-in caller
+	 * @return 200 with the contacts
 	 */
 	@GetMapping
-	public List<Contact> getAllContacts()
+	public List<Contact> getAllContacts(@AuthenticationPrincipal AuthenticatedUser principal)
 	{
-		return contactService.getAllContacts();
+		return contactService.getAllContacts(principal);
 	}
 
 	/**
 	 * Returns one contact.
 	 *
-	 * <p>{@code GET /api/v1/contacts/{id}}. A salon's contact, to anyone signed in; a user's, to that user
-	 * or any ADMIN or SUPER_ADMIN.
+	 * <p>{@code GET /api/v1/contacts/{id}}. A salon's contact, to anyone signed in; a user's, to that user,
+	 * an ADMIN of their salon or a SUPER_ADMIN.
 	 *
-	 * <p>Errors: 403 if it's another user's contact and the caller isn't an ADMIN or SUPER_ADMIN; 404 if
-	 * there's no such contact.
+	 * <p>Errors: 403 if it's a user's contact and the caller may not see that user; 404 if there's no such
+	 * contact.
 	 *
 	 * @param id the contact's id
 	 * @param principal the signed-in caller
@@ -69,8 +72,8 @@ public class ContactController
 	/**
 	 * Replaces a contact's type and value.
 	 *
-	 * <p>{@code PUT /api/v1/contacts/{id}}. A salon's contact, by any ADMIN or SUPER_ADMIN; a user's, by
-	 * that user or any ADMIN or SUPER_ADMIN. Answers 200 with no body.
+	 * <p>{@code PUT /api/v1/contacts/{id}}. A salon's contact, by an ADMIN of that salon or a SUPER_ADMIN; a
+	 * user's, by that user, an ADMIN of their salon or a SUPER_ADMIN. Answers 200 with no body.
 	 *
 	 * <p>Errors: 400 if the body breaks {@link ContactRequest}'s rules, or the owner already has another
 	 * contact with this {@code value}; 403 if the caller may not change the contact; 404 if there's no

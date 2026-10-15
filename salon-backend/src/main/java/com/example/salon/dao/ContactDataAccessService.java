@@ -98,6 +98,14 @@ public class ContactDataAccessService implements ContactDao
 	}
 
 	@Override
+	public List<Contact> getContactsForBusinessAndItsUsers(long businessId)
+	{
+		return jdbcTemplate.query(
+				SELECT + "WHERE business_id = ? OR user_id IN (SELECT id FROM users WHERE business_id = ?) ORDER BY id",
+				(rs, i) -> mapRow(rs), businessId, businessId);
+	}
+
+	@Override
 	public Contact getContactById(int id)
 	{
 		return jdbcTemplate.queryForObject(SELECT + "WHERE id = ?", (rs, i) -> {

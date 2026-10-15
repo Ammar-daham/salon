@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpSession;
 
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.not;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -128,6 +129,123 @@ class AuthorizationRulesTest extends IntegrationTest
 				.andExpect(status().is2xxSuccessful());
 		mvc.perform(get("/api/v1/contacts/" + Fixture.GLOW_EMPLOYEE_PERSONAL_CONTACT).session(owner))
 				.andExpect(jsonPath("$.value").value("+49 30 9990099"));
+	}
+
+	@Test
+	void adminsCannotChangeAnotherSalonsAddressOrContact() throws Exception
+	{
+		MockHttpSession otherSalonAdmin = loginAs(Fixture.URBAN_ADMIN);
+
+		mvc.perform(put("/api/v1/addresses/" + Fixture.GLOW_ADDRESS).session(otherSalonAdmin)
+						.contentType(MediaType.APPLICATION_JSON)
+						.content("""
+								{"street": "1 Hijack Rd", "city": "Berlin", "country": "Germany", "postal_code": "10119"}
+								"""))
+				.andExpect(status().isForbidden());
+		mvc.perform(put("/api/v1/contacts/" + Fixture.GLOW_CONTACT).session(otherSalonAdmin)
+						.contentType(MediaType.APPLICATION_JSON)
+						.content("""
+								{"type": "phone", "value": "+49 30 0000000"}
+								"""))
+				.andExpect(status().isForbidden());
+		mvc.perform(delete("/api/v1/addresses/" + Fixture.GLOW_ADDRESS).session(otherSalonAdmin))
+				.andExpect(status().isForbidden());
+		mvc.perform(delete("/api/v1/contacts/" + Fixture.GLOW_CONTACT).session(otherSalonAdmin))
+				.andExpect(status().isForbidden());
+
+		// Still readable, as part of the salon's public listing, and unchanged.
+		mvc.perform(get("/api/v1/addresses/" + Fixture.GLOW_ADDRESS).session(otherSalonAdmin))
+				.andExpect(jsonPath("$.street").value("12 Rosenthaler Str."));
+		mvc.perform(get("/api/v1/contacts/" + Fixture.GLOW_CONTACT).session(otherSalonAdmin))
+				.andExpect(jsonPath("$.value").value("+49 30 1234501"));
+	}
+
+	@Test
+	void adminsCannotReachAnotherSalonsUsersAddressesOrContacts() throws Exception
+	{
+		MockHttpSession otherSalonAdmin = loginAs(Fixture.URBAN_ADMIN);
+
+		mvc.perform(get("/api/v1/addresses/" + Fixture.GLOW_EMPLOYEE_PERSONAL_ADDRESS).session(otherSalonAdmin))
+				.andExpect(status().isForbidden());
+		mvc.perform(get("/api/v1/contacts/" + Fixture.GLOW_EMPLOYEE_PERSONAL_CONTACT).session(otherSalonAdmin))
+				.andExpect(status().isForbidden());
+		mvc.perform(put("/api/v1/addresses/" + Fixture.GLOW_EMPLOYEE_PERSONAL_ADDRESS).session(otherSalonAdmin)
+						.contentType(MediaType.APPLICATION_JSON)
+						.content("""
+								{"street": "1 Hijack Rd", "city": "Berlin", "country": "Germany"}
+								"""))
+				.andExpect(status().isForbidden());
+		mvc.perform(put("/api/v1/contacts/" + Fixture.GLOW_EMPLOYEE_PERSONAL_CONTACT).session(otherSalonAdmin)
+						.contentType(MediaType.APPLICATION_JSON)
+						.content("""
+								{"type": "phone", "value": "+49 30 0000000"}
+								"""))
+				.andExpect(status().isForbidden());
+		mvc.perform(delete("/api/v1/addresses/" + Fixture.GLOW_EMPLOYEE_PERSONAL_ADDRESS).session(otherSalonAdmin))
+				.andExpect(status().isForbidden());
+		mvc.perform(delete("/api/v1/contacts/" + Fixture.GLOW_EMPLOYEE_PERSONAL_CONTACT).session(otherSalonAdmin))
+				.andExpect(status().isForbidden());
+
+		MockHttpSession owner = loginAs(Fixture.GLOW_EMPLOYEE);
+		mvc.perform(get("/api/v1/addresses/" + Fixture.GLOW_EMPLOYEE_PERSONAL_ADDRESS).session(owner))
+				.andExpect(jsonPath("$.street").value("3 Private Lane"));
+		mvc.perform(get("/api/v1/contacts/" + Fixture.GLOW_EMPLOYEE_PERSONAL_CONTACT).session(owner))
+				.andExpect(jsonPath("$.value").value("+49 30 9990004"));
+	}
+
+	@Test
+	void adminsCanChangeTheirOwnUsersAddressesAndContacts() throws Exception
+	{
+		MockHttpSession admin = loginAs(Fixture.GLOW_ADMIN);
+
+		mvc.perform(put("/api/v1/addresses/" + Fixture.GLOW_EMPLOYEE_PERSONAL_ADDRESS).session(admin)
+						.contentType(MediaType.APPLICATION_JSON)
+						.content("""
+								{"street": "4 Moved Lane", "city": "Berlin", "country": "Germany"}
+								"""))
+				.andExpect(status().isOk());
+		mvc.perform(get("/api/v1/addresses/" + Fixture.GLOW_EMPLOYEE_PERSONAL_ADDRESS).session(admin))
+				.andExpect(jsonPath("$.street").value("4 Moved Lane"));
+		mvc.perform(delete("/api/v1/contacts/" + Fixture.GLOW_EMPLOYEE_PERSONAL_CONTACT).session(admin))
+				.andExpect(status().isOk());
+	}
+
+	@Test
+	void superAdminsCanChangeAnySalonsContact() throws Exception
+	{
+		MockHttpSession superAdmin = loginAs(Fixture.SUPER_ADMIN);
+
+		mvc.perform(put("/api/v1/contacts/" + Fixture.URBAN_CONTACT).session(superAdmin)
+						.contentType(MediaType.APPLICATION_JSON)
+						.content("""
+								{"type": "email", "value": "bookings@urban.test"}
+								"""))
+				.andExpect(status().isOk());
+		mvc.perform(get("/api/v1/contacts/" + Fixture.URBAN_CONTACT).session(superAdmin))
+				.andExpect(jsonPath("$.value").value("bookings@urban.test"));
+	}
+
+	@Test
+	void adminsListOnlyTheirOwnSalonsAddressesAndContacts() throws Exception
+	{
+		// Glow has its address and contact plus Mia's; Urban only its own contact.
+		MockHttpSession glowAdmin = loginAs(Fixture.GLOW_ADMIN);
+		mvc.perform(get("/api/v1/addresses").session(glowAdmin))
+				.andExpect(jsonPath("$[*].id").value(contains(
+						(int) Fixture.GLOW_ADDRESS, (int) Fixture.GLOW_EMPLOYEE_PERSONAL_ADDRESS)));
+		mvc.perform(get("/api/v1/contacts").session(glowAdmin))
+				.andExpect(jsonPath("$[*].id").value(contains(
+						(int) Fixture.GLOW_CONTACT, (int) Fixture.GLOW_EMPLOYEE_PERSONAL_CONTACT)));
+
+		MockHttpSession urbanAdmin = loginAs(Fixture.URBAN_ADMIN);
+		mvc.perform(get("/api/v1/addresses").session(urbanAdmin))
+				.andExpect(jsonPath("$").isEmpty());
+		mvc.perform(get("/api/v1/contacts").session(urbanAdmin))
+				.andExpect(jsonPath("$[*].id").value(contains((int) Fixture.URBAN_CONTACT)));
+
+		mvc.perform(get("/api/v1/contacts").session(loginAs(Fixture.SUPER_ADMIN)))
+				.andExpect(jsonPath("$[*].id").value(contains(
+						(int) Fixture.GLOW_CONTACT, (int) Fixture.URBAN_CONTACT, (int) Fixture.GLOW_EMPLOYEE_PERSONAL_CONTACT)));
 	}
 
 	@Test

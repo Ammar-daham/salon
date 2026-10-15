@@ -1,6 +1,7 @@
 package com.example.salon.service;
 
 import com.example.salon.dao.AddressDao;
+import com.example.salon.dao.UserDao;
 import com.example.salon.exception.BaseException;
 import com.example.salon.exception.ErrorCode;
 import com.example.salon.model.Address;
@@ -20,25 +21,32 @@ public class AddressService
 	private static final Logger log = LoggerFactory.getLogger(AddressService.class);
 
 	private final AddressDao addressDao;
+	private final UserDao userDao;
 
 	@Autowired
-	public AddressService(AddressDao addressDao)
+	public AddressService(AddressDao addressDao, UserDao userDao)
 	{
 		this.addressDao = addressDao;
+		this.userDao = userDao;
 	}
 
-	public List<Address> getAllAddresses()
+	/** Every address for a super admin; for an admin, their own business's and its users', or none without one. */
+	public List<Address> getAllAddresses(AuthenticatedUser caller)
 	{
-		return addressDao.getAllAddresses();
+		if (AccessControl.isSuperAdmin(caller)) {
+			return addressDao.getAllAddresses();
+		}
+		Long businessId = caller.getUser().getBusinessId();
+		return businessId == null ? List.of() : addressDao.getAddressesForBusinessAndItsUsers(businessId);
 	}
 
 	public Address getAddressById(int id, AuthenticatedUser caller)
 	{
 		Address address = fetch(id);
 		// A business's address is part of its public listing (customers can browse every salon);
-		// a personal address is only visible to its owner or an admin.
+		// a personal address is only for those who may see its owner.
 		if (address.getBusinessId() == null) {
-			AccessControl.requireSelfOrAdmin(caller, address.getUserId());
+			AccessControl.requireUserAccess(caller, address.getUserId(), userDao);
 		}
 		return address;
 	}
@@ -64,11 +72,12 @@ public class AddressService
 	private void requireWritePermission(int id, AuthenticatedUser caller)
 	{
 		Address address = fetch(id);
-		// A business's address can only be changed by an admin; a personal address by its owner or an admin.
+		// A business's address can only be changed by its admins; a personal address by those who may
+		// change its owner.
 		if (address.getBusinessId() != null) {
-			AccessControl.requireAdmin(caller);
+			AccessControl.requireAdminOfBusiness(caller, address.getBusinessId());
 		} else {
-			AccessControl.requireSelfOrAdmin(caller, address.getUserId());
+			AccessControl.requireUserAccess(caller, address.getUserId(), userDao);
 		}
 	}
 

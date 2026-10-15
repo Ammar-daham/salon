@@ -1,6 +1,7 @@
 package com.example.salon.service;
 
 import com.example.salon.dao.ContactDao;
+import com.example.salon.dao.UserDao;
 import com.example.salon.exception.BaseException;
 import com.example.salon.exception.ErrorCode;
 import com.example.salon.model.Contact;
@@ -20,25 +21,32 @@ public class ContactService
 	private static final Logger log = LoggerFactory.getLogger(ContactService.class);
 
 	private final ContactDao contactDao;
+	private final UserDao userDao;
 
 	@Autowired
-	public ContactService(ContactDao contactDao)
+	public ContactService(ContactDao contactDao, UserDao userDao)
 	{
 		this.contactDao = contactDao;
+		this.userDao = userDao;
 	}
 
-	public List<Contact> getAllContacts()
+	/** Every contact for a super admin; for an admin, their own business's and its users', or none without one. */
+	public List<Contact> getAllContacts(AuthenticatedUser caller)
 	{
-		return contactDao.getAllContacts();
+		if (AccessControl.isSuperAdmin(caller)) {
+			return contactDao.getAllContacts();
+		}
+		Long businessId = caller.getUser().getBusinessId();
+		return businessId == null ? List.of() : contactDao.getContactsForBusinessAndItsUsers(businessId);
 	}
 
 	public Contact getContactById(int id, AuthenticatedUser caller)
 	{
 		Contact c = fetch(id);
 		// A business's contact is part of its public listing (customers can browse every salon);
-		// a personal contact is only visible to its owner or an admin.
+		// a personal contact is only for those who may see its owner.
 		if (c.getBusinessId() == null) {
-			AccessControl.requireSelfOrAdmin(caller, c.getUserId());
+			AccessControl.requireUserAccess(caller, c.getUserId(), userDao);
 		}
 		return c;
 	}
@@ -64,11 +72,12 @@ public class ContactService
 	private void requireWritePermission(int id, AuthenticatedUser caller)
 	{
 		Contact c = fetch(id);
-		// A business's contact can only be changed by an admin; a personal contact by its owner or an admin.
+		// A business's contact can only be changed by its admins; a personal contact by those who may
+		// change its owner.
 		if (c.getBusinessId() != null) {
-			AccessControl.requireAdmin(caller);
+			AccessControl.requireAdminOfBusiness(caller, c.getBusinessId());
 		} else {
-			AccessControl.requireSelfOrAdmin(caller, c.getUserId());
+			AccessControl.requireUserAccess(caller, c.getUserId(), userDao);
 		}
 	}
 
