@@ -57,7 +57,7 @@ class SessionRefreshTest extends IntegrationTest
 						.content("""
 								{"first_name": "Mia", "last_name": "Stylist", "role": "EMPLOYEE"}
 								"""))
-				.andExpect(status().isForbidden());
+				.andExpect(status().isNotFound());
 	}
 
 	@Test

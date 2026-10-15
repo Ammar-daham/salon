@@ -56,8 +56,7 @@ public class AddressController
 	 * <p>{@code GET /api/v1/addresses/{id}}. A salon's address, to anyone signed in; a user's, to that user,
 	 * an ADMIN of their salon or a SUPER_ADMIN. For a user's address, {@code user_id} names the user.
 	 *
-	 * <p>Errors: 403 if it's a user's address and the caller may not see that user; 404 if there's no such
-	 * address.
+	 * <p>Errors: 404 if there's no such address, or it's a user's and the caller may not see that user.
 	 *
 	 * @param id the address's id
 	 * @param principal the signed-in caller
@@ -76,8 +75,9 @@ public class AddressController
 	 * a user's, by that user, an ADMIN of their salon or a SUPER_ADMIN. Every field is replaced, so an
 	 * optional one left out is cleared. Answers 200 with no body.
 	 *
-	 * <p>Errors: 400 if the body breaks {@link AddressRequest}'s rules; 403 if the caller may not change
-	 * the address; 404 if there's no such address.
+	 * <p>Errors: 400 if the body breaks {@link AddressRequest}'s rules; 403 if it's a salon's address and
+	 * the caller may not change it; 404 if there's no such address, or it's a user's and the caller may
+	 * not see that user.
 	 *
 	 * @param id the address's id
 	 * @param request the new address, an {@link AddressRequest}
@@ -95,7 +95,8 @@ public class AddressController
 	 * <p>{@code DELETE /api/v1/addresses/{id}}. The same callers as {@code PUT /api/v1/addresses/{id}}.
 	 * Answers 200 with no body.
 	 *
-	 * <p>Errors: 403 if the caller may not change the address; 404 if there's no such address.
+	 * <p>Errors: 403 if it's a salon's address and the caller may not change it; 404 if there's no such
+	 * address, or it's a user's and the caller may not see that user.
 	 *
 	 * @param id the address's id
 	 * @param principal the signed-in caller

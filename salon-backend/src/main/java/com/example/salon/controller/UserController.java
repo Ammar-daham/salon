@@ -108,7 +108,7 @@ public class UserController
 	 * <p>{@code GET /api/v1/users/{id}}. A SUPER_ADMIN may read anyone, an ADMIN the users of their own
 	 * salon, and anyone themselves.
 	 *
-	 * <p>Errors: 403 if the caller may not see the user; 404 if there's no such user.
+	 * <p>Errors: 404 if there's no such user, or the caller may not see them.
 	 *
 	 * @param id the user's id
 	 * @param principal the signed-in caller
@@ -128,8 +128,8 @@ public class UserController
 	 * SUPER_ADMIN may grant SUPER_ADMIN. The email, password and salon stay as they are. A new role takes
 	 * effect from the user's next request, in sessions they already have too. Answers 200 with no body.
 	 *
-	 * <p>Errors: 400 if the body breaks {@link UpdateUserRequest}'s rules; 403 if the caller may not change
-	 * the user, or if an ADMIN grants SUPER_ADMIN; 404 if there's no such user.
+	 * <p>Errors: 400 if the body breaks {@link UpdateUserRequest}'s rules; 403 if an ADMIN grants
+	 * SUPER_ADMIN; 404 if there's no such user, or the caller may not see them.
 	 *
 	 * @param id the user's id
 	 * @param request the new name and role, an {@link UpdateUserRequest}
@@ -148,8 +148,8 @@ public class UserController
 	 * may delete their own account. Their staff records go too, and every session of theirs is signed out.
 	 * Answers 200 with no body.
 	 *
-	 * <p>Errors: 403 if the caller may not delete the user; 404 if there's no such user; 409 if they are
-	 * the staff member on any appointment.
+	 * <p>Errors: 404 if there's no such user, or the caller may not see them; 409 if they are the staff
+	 * member on any appointment.
 	 *
 	 * @param id the user's id
 	 * @param principal the signed-in caller
