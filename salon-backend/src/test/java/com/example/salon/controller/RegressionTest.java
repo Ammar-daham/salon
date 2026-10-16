@@ -1,6 +1,7 @@
 package com.example.salon.controller;
 
 import com.example.salon.support.IntegrationTest;
+import com.jayway.jsonpath.JsonPath;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpSession;
@@ -252,6 +253,54 @@ class RegressionTest extends IntegrationTest
 				.andExpect(status().isConflict())
 				.andExpect(jsonPath("$.errorCode").value("CONFLICT"))
 				.andExpect(jsonPath("$.message").value("Business with name Glow Beauty Studio already exists."));
+	}
+
+	/** Changing a user's contact to a value they already have was a 400, as POST /users answers 409. */
+	@Test
+	void changingAUsersContactToOneTheyHaveIsAConflict() throws Exception
+	{
+		MockHttpSession admin = loginAs(Fixture.GLOW_ADMIN);
+		String created = mvc.perform(post("/api/v1/users").session(admin)
+						.contentType(MediaType.APPLICATION_JSON)
+						.content("""
+								{"first_name":"New","last_name":"Hire","email":"newhire@glow.test","password":"Password123!","role":"EMPLOYEE","contacts":[{"type":"phone","value":"+49 30 5550001"},{"type":"phone","value":"+49 30 5550002"}]}
+								"""))
+				.andExpect(status().isCreated())
+				.andReturn().getResponse().getContentAsString();
+		long second = ((Number) JsonPath.read(created, "$.contacts[1].id")).longValue();
+
+		mvc.perform(put("/api/v1/contacts/" + second).session(admin)
+						.contentType(MediaType.APPLICATION_JSON)
+						.content("""
+								{"type": "phone", "value": "+49 30 5550001"}
+								"""))
+				.andExpect(status().isConflict())
+				.andExpect(jsonPath("$.errorCode").value("CONFLICT"))
+				.andExpect(jsonPath("$.message").value("Contact already exists."));
+	}
+
+	/** Same for a salon's contact, as POST /businesses answers 409. */
+	@Test
+	void changingASalonsContactToOneItHasIsAConflict() throws Exception
+	{
+		MockHttpSession superAdmin = loginAs(Fixture.SUPER_ADMIN);
+		String created = mvc.perform(post("/api/v1/businesses").session(superAdmin)
+						.contentType(MediaType.APPLICATION_JSON)
+						.content("""
+								{"name": "Two Phones Salon", "description": "x", "image": "https://example.com/x.png", "contacts": [{"type": "phone", "value": "+49 30 5550001"}, {"type": "phone", "value": "+49 30 5550002"}]}
+								"""))
+				.andExpect(status().isCreated())
+				.andReturn().getResponse().getContentAsString();
+		long second = ((Number) JsonPath.read(created, "$.contacts[1].id")).longValue();
+
+		mvc.perform(put("/api/v1/contacts/" + second).session(superAdmin)
+						.contentType(MediaType.APPLICATION_JSON)
+						.content("""
+								{"type": "phone", "value": "+49 30 5550001"}
+								"""))
+				.andExpect(status().isConflict())
+				.andExpect(jsonPath("$.errorCode").value("CONFLICT"))
+				.andExpect(jsonPath("$.message").value("Contact already exists."));
 	}
 
 	/** Renaming a salon to a taken name was a 400, from the uncaught DuplicateKeyException, not a 409. */

@@ -74,9 +74,9 @@ public class ContactController
 	 * <p>{@code PUT /api/v1/contacts/{id}}. A salon's contact, by an ADMIN of that salon or a SUPER_ADMIN; a
 	 * user's, by that user, an ADMIN of their salon or a SUPER_ADMIN. Answers 200 with no body.
 	 *
-	 * <p>Errors: 400 if the body breaks {@link ContactRequest}'s rules, or the owner already has another
-	 * contact with this {@code value}; 403 if it's a salon's contact and the caller may not change it; 404
-	 * if there's no such contact, or it's a user's and the caller may not see that user.
+	 * <p>Errors: 400 if the body breaks {@link ContactRequest}'s rules; 403 if it's a salon's contact and the
+	 * caller may not change it; 404 if there's no such contact, or it's a user's and the caller may not see
+	 * that user; 409 if the owner already has another contact with this {@code value}.
 	 *
 	 * @param id the contact's id
 	 * @param request the new type and value, a {@link ContactRequest}

@@ -10,6 +10,7 @@ import com.example.salon.security.AuthenticatedUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 
@@ -19,6 +20,10 @@ import java.util.List;
 public class ContactService
 {
 	private static final Logger log = LoggerFactory.getLogger(ContactService.class);
+
+	/** V5's unique indexes on (business_id, value) and (user_id, value): one owner can't list a value twice. */
+	private static final List<String> VALUE_UNIQUE = List.of(
+			"contacts_business_value_unique_idx", "contacts_user_value_unique_idx");
 
 	private final ContactDao contactDao;
 	private final UserDao userDao;
@@ -54,7 +59,15 @@ public class ContactService
 	public void updateContactById(int id, Contact contact, AuthenticatedUser caller)
 	{
 		requireWritePermission(id, caller);
-		int row = contactDao.updateContactById(id, contact);
+		int row;
+		try {
+			row = contactDao.updateContactById(id, contact);
+		} catch (DuplicateKeyException ex) {
+			String reason = ex.getMessage();
+			if (reason == null || VALUE_UNIQUE.stream().noneMatch(reason::contains))
+				throw ex;
+			throw new BaseException("Contact already exists.", ErrorCode.DUPLICATE_RESOURCE);
+		}
 		if (row == 0)
 			throw notFound(id);
 		log.info("Updated contact {}", id);
