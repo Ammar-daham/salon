@@ -318,6 +318,19 @@ class RegressionTest extends IntegrationTest
 				.andExpect(jsonPath("$.message").value("Business with id 9999 not found"));
 	}
 
+	/** Adding a service to a salon that doesn't exist was a 400, from the foreign key, not a 404. */
+	@Test
+	void addingAServiceToASalonThatDoesntExistIsNotFound() throws Exception
+	{
+		mvc.perform(post("/api/v1/businesses/9999/services").session(loginAs(Fixture.SUPER_ADMIN))
+						.contentType(MediaType.APPLICATION_JSON)
+						.content("""
+								{"name": "Blow Dry", "description": "Wash and blow dry.", "duration_minutes": 25, "price": 20.00, "is_active": true}
+								"""))
+				.andExpect(status().isNotFound())
+				.andExpect(jsonPath("$.message").value("Business with id 9999 not found"));
+	}
+
 	/** Renaming a salon to a taken name was a 400, from the uncaught DuplicateKeyException, not a 409. */
 	@Test
 	void renamingABusinessToATakenNameIsAConflict() throws Exception

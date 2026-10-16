@@ -37,6 +37,8 @@ version. The version lives in [`gradle.properties`](gradle.properties); each rel
   do, instead of a 400.
 - `GET /api/v1/customers?business_id=<id>` answers 404 for a salon that doesn't exist, as
   `GET /api/v1/businesses/{id}/customers` does, instead of 200 with an empty page.
+- `POST /api/v1/businesses/{id}/services` answers 404 for a salon that doesn't exist, instead of a 400
+  from the foreign key.
 
 ### Security
 - Addresses and contacts are scoped to the caller's salon. A salon's may be changed or deleted only

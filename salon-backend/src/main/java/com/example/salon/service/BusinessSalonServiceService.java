@@ -37,6 +37,8 @@ public class BusinessSalonServiceService
     public SalonService createServiceForBusiness(Long businessId, SalonService salonService, AuthenticatedUser caller)
     {
         AccessControl.requireBusinessAccess(caller, businessId);
+        // A 404, rather than the 400 the fk_services_business foreign key would give.
+        businessService.getBusinessById(businessId.intValue());
         try {
             Long serviceId = salonServiceDao.addService(businessId, salonService);
             salonService.setId(serviceId);
