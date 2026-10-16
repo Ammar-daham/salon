@@ -303,6 +303,21 @@ class RegressionTest extends IntegrationTest
 				.andExpect(jsonPath("$.message").value("Contact already exists."));
 	}
 
+	/** GET /customers?business_id= for a salon that doesn't exist was a 200 with an empty page, not a 404. */
+	@Test
+	void listingCustomersOfASalonThatDoesntExistIsNotFound() throws Exception
+	{
+		MockHttpSession superAdmin = loginAs(Fixture.SUPER_ADMIN);
+
+		mvc.perform(get("/api/v1/customers?business_id=9999").session(superAdmin))
+				.andExpect(status().isNotFound())
+				.andExpect(jsonPath("$.message").value("Business with id 9999 not found"));
+
+		mvc.perform(get("/api/v1/businesses/9999/customers").session(superAdmin))
+				.andExpect(status().isNotFound())
+				.andExpect(jsonPath("$.message").value("Business with id 9999 not found"));
+	}
+
 	/** Renaming a salon to a taken name was a 400, from the uncaught DuplicateKeyException, not a 409. */
 	@Test
 	void renamingABusinessToATakenNameIsAConflict() throws Exception

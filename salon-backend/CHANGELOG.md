@@ -35,6 +35,8 @@ version. The version lives in [`gradle.properties`](gradle.properties); each rel
 - `PUT /api/v1/contacts/{id}` with a value the owner already has on another contact answers 409
   `CONFLICT` with "Contact already exists.", as `POST /api/v1/users` and `POST /api/v1/businesses`
   do, instead of a 400.
+- `GET /api/v1/customers?business_id=<id>` answers 404 for a salon that doesn't exist, as
+  `GET /api/v1/businesses/{id}/customers` does, instead of 200 with an empty page.
 
 ### Security
 - Addresses and contacts are scoped to the caller's salon. A salon's may be changed or deleted only

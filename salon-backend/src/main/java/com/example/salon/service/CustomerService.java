@@ -62,7 +62,8 @@ public class CustomerService
 
     /**
      * Customers across salons: every salon's for a super admin, or one salon's with businessId.
-     * Anyone else only ever gets their own salon's, whether they name it or not.
+     * Anyone else only ever gets their own salon's, whether they name it or not. A named salon that
+     * doesn't exist is a 404, as on the salon's own list.
      */
     public Page<Customer> getCustomers(Long businessId, String search, Sort<CustomerDao.SortBy> sort, PageQuery page,
             AuthenticatedUser caller)
@@ -74,6 +75,8 @@ public class CustomerService
                 throw new AccessDeniedException("You can only access your own business");
             AccessControl.requireStaffOfBusiness(caller, scope);
         }
+        if (businessId != null)
+            businessService.getBusinessById(businessId.intValue());
         return customerDao.getCustomers(new CustomerDao.Filter(scope, search), sort, page);
     }
 
