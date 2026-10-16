@@ -100,8 +100,9 @@ VALUES ('First', 'Last', 'SUPER_ADMIN', 'admin@example.com', '<the hash>');
   `JSESSIONID` cookie and sends it with every request. `GET /api/v1/auth/me` says who's signed in.
 - Roles are `SUPER_ADMIN` (the platform), `ADMIN` and `EMPLOYEE` (one salon), and `CUSTOMER`. Each
   endpoint's Javadoc says who may call it.
-- The lists that grow, salons, users and clients, come a page at a time:
-  `{items, page, size, total_items, total_pages}`, with `?page`, `?size` (up to 100), `?q` and `?sort`.
+- The lists that grow, salons, users, clients and appointments, come a page at a time:
+  `{items, page, size, total_items, total_pages}`, with `?page`, `?size` (up to 100) and `?sort`, and
+  all but appointments with `?q`.
 - An error is `{errorCode, message, status, timestamp, path}`.
 
 Every endpoint is documented in its controller. `./gradlew javadoc` builds that into a reference in

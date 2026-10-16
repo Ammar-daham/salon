@@ -11,6 +11,9 @@ import com.example.salon.model.AppointmentStatus;
 import com.example.salon.model.Booking;
 import com.example.salon.model.SalonService;
 import com.example.salon.model.Staff;
+import com.example.salon.paging.Page;
+import com.example.salon.paging.PageQuery;
+import com.example.salon.paging.Sort;
 import com.example.salon.security.AccessControl;
 import com.example.salon.security.AuthenticatedUser;
 import org.slf4j.Logger;
@@ -25,7 +28,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
-import java.util.List;
 
 /**
  * A salon's appointment book. Its ADMINs and EMPLOYEEs (and a SUPER_ADMIN) can see, book and change any of its
@@ -78,8 +80,9 @@ public class AppointmentService
     }
 
     /** from and to are dates on the salon's clock, both included. */
-    public List<Appointment> getAppointments(long businessId, LocalDate from, LocalDate to, Long staffId,
-            Long customerId, AuthenticatedUser caller)
+    public Page<Appointment> getAppointments(long businessId, LocalDate from, LocalDate to, Long staffId,
+            Long customerId, AppointmentStatus status, Sort<AppointmentDao.SortBy> sort, PageQuery page,
+            AuthenticatedUser caller)
     {
         AccessControl.requireStaffOfBusiness(caller, businessId);
         ZoneId zone = zoneOf(businessId);
@@ -87,7 +90,8 @@ public class AppointmentService
             throw new BaseException("to must not be before from.", ErrorCode.BAD_REQUEST);
         OffsetDateTime start = from == null ? null : from.atStartOfDay(zone).toOffsetDateTime();
         OffsetDateTime end = to == null ? null : to.plusDays(1).atStartOfDay(zone).toOffsetDateTime();
-        return appointmentDao.getAppointments(businessId, start, end, staffId, customerId, zone);
+        return appointmentDao.getAppointments(
+                new AppointmentDao.Filter(businessId, start, end, staffId, customerId, status), sort, page, zone);
     }
 
     public Appointment getAppointmentById(long businessId, long appointmentId, AuthenticatedUser caller)

@@ -39,6 +39,10 @@ version. The version lives in [`gradle.properties`](gradle.properties); each rel
   `GET /api/v1/businesses/{id}/customers` does, instead of 200 with an empty page.
 - `POST /api/v1/businesses/{id}/services` answers 404 for a salon that doesn't exist, instead of a 400
   from the foreign key.
+- `GET /api/v1/businesses/{id}/appointments` answers one page, like the other lists, instead of an
+  array of every match: without `from` and `to` that was the salon's whole history. It takes `page`
+  and `size`, `sort=starts_at` (the default) or `-starts_at` for latest first, and a new `status`
+  filter.
 
 ### Security
 - Addresses and contacts are scoped to the caller's salon. A salon's may be changed or deleted only

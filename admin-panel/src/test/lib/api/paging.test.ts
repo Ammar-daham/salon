@@ -1,5 +1,8 @@
-import { describe, expect, it } from "vitest";
-import { pageParams, toPage, type PageDto } from "@/lib/api/paging";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { apiClient } from "@/lib/api/client";
+import { fetchAllPages, MAX_PAGE_SIZE, pageParams, toPage, type PageDto } from "@/lib/api/paging";
+
+vi.mock("@/lib/api/client", () => ({ apiClient: { get: vi.fn() } }));
 
 describe("toPage", () => {
 	it("maps each row and carries the totals over in camelCase", () => {
@@ -40,5 +43,32 @@ describe("pageParams", () => {
 			business_id: 2,
 			status: "APPROVED",
 		});
+	});
+});
+
+describe("fetchAllPages", () => {
+	const get = vi.mocked(apiClient.get);
+	const page = (items: number[], n: number, totalPages: number) => ({
+		data: { items, page: n, size: MAX_PAGE_SIZE, total_items: 3, total_pages: totalPages } satisfies PageDto<number>,
+	});
+
+	beforeEach(() => get.mockReset());
+
+	it("asks for full pages, with the filters, until the last one", async () => {
+		get.mockResolvedValueOnce(page([1, 2], 1, 2)).mockResolvedValueOnce(page([3], 2, 2));
+
+		await expect(fetchAllPages<number>("/rows", { from: "2026-10-16" })).resolves.toEqual([1, 2, 3]);
+		expect(get).toHaveBeenCalledTimes(2);
+		expect(get).toHaveBeenLastCalledWith("/rows", {
+			params: { from: "2026-10-16", page: 2, size: MAX_PAGE_SIZE },
+			signal: undefined,
+		});
+	});
+
+	it("stops after the first request when the list is empty", async () => {
+		get.mockResolvedValueOnce(page([], 1, 0));
+
+		await expect(fetchAllPages<number>("/rows")).resolves.toEqual([]);
+		expect(get).toHaveBeenCalledTimes(1);
 	});
 });
