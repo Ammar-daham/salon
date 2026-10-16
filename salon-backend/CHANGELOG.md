@@ -32,6 +32,9 @@ version. The version lives in [`gradle.properties`](gradle.properties); each rel
   403 to someone who may not change it.
 - `PUT /api/v1/businesses/{id}` with a name another salon already has answers 409 `CONFLICT`, as
   `POST` does, instead of a 400.
+- `PUT /api/v1/contacts/{id}` with a value the owner already has on another contact answers 409
+  `CONFLICT` with "Contact already exists.", as `POST /api/v1/users` and `POST /api/v1/businesses`
+  do, instead of a 400.
 
 ### Security
 - Addresses and contacts are scoped to the caller's salon. A salon's may be changed or deleted only
