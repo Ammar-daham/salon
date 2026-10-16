@@ -249,7 +249,23 @@ class RegressionTest extends IntegrationTest
 						.content("""
 								{"name": "Glow Beauty Studio", "description": "dup", "image": "https://example.com/x.png"}
 								"""))
-				.andExpect(status().isConflict());
+				.andExpect(status().isConflict())
+				.andExpect(jsonPath("$.errorCode").value("CONFLICT"))
+				.andExpect(jsonPath("$.message").value("Business with name Glow Beauty Studio already exists."));
+	}
+
+	/** Renaming a salon to a taken name was a 400, from the uncaught DuplicateKeyException, not a 409. */
+	@Test
+	void renamingABusinessToATakenNameIsAConflict() throws Exception
+	{
+		mvc.perform(put("/api/v1/businesses/" + Fixture.GLOW).session(loginAs(Fixture.GLOW_ADMIN))
+						.contentType(MediaType.APPLICATION_JSON)
+						.content("""
+								{"name": "Urban Cuts Barbershop"}
+								"""))
+				.andExpect(status().isConflict())
+				.andExpect(jsonPath("$.errorCode").value("CONFLICT"))
+				.andExpect(jsonPath("$.message").value("Business with name Urban Cuts Barbershop already exists."));
 	}
 
 	/** Errors carry the stable ErrorCode.code on the wire, not an ad-hoc string. */
