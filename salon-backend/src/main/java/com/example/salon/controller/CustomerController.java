@@ -105,7 +105,7 @@ public class CustomerController
 	 * be {@code business_name} (then by customer name).
 	 *
 	 * <p>Errors: 400 for a bad {@code business_id}, {@code page}, {@code size} or {@code sort}; 403 for a CUSTOMER,
-	 * or for another salon's {@code business_id}.
+	 * or for another salon's {@code business_id}; 404 if the {@code business_id} salon doesn't exist.
 	 *
 	 * @param businessId only this salon's customers, or nothing for every salon the caller may see
 	 * @param q text to search for, or nothing for every customer
