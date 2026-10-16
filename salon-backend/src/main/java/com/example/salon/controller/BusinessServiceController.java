@@ -39,7 +39,8 @@ public class BusinessServiceController
 	 * <p>{@code POST /api/v1/businesses/{businessId}/services}. An ADMIN of the salon, or a SUPER_ADMIN.
 	 * {@code price} is in the salon's {@code currency}, and only an active service can be booked.
 	 *
-	 * <p>Errors: 400 if the body breaks the rules of {@link SalonServiceRequest}; 403 for another salon.
+	 * <p>Errors: 400 if the body breaks the rules of {@link SalonServiceRequest}; 403 for another salon; 404 if
+	 * the salon doesn't exist.
 	 *
 	 * @param businessId the salon's id
 	 * @param request the service, as a {@link SalonServiceRequest}
