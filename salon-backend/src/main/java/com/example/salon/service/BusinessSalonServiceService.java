@@ -39,14 +39,14 @@ public class BusinessSalonServiceService
         AccessControl.requireBusinessAccess(caller, businessId);
         // A 404, rather than the 400 the fk_services_business foreign key would give.
         businessService.getBusinessById(businessId.intValue());
+        Long serviceId;
         try {
-            Long serviceId = salonServiceDao.addService(businessId, salonService);
-            salonService.setId(serviceId);
+            serviceId = salonServiceDao.addService(businessId, salonService);
         } catch (DuplicateKeyException ex) {
             throw new BaseException("Service could not be created due to a conflict.", ErrorCode.DUPLICATE_RESOURCE);
         }
-        log.info("Created service {} in business {}", salonService.getId(), businessId);
-        return salonService;
+        log.info("Created service {} in business {}", serviceId, businessId);
+        return getServiceById(businessId.intValue(), serviceId.intValue());
     }
 
     /** One of a salon's services: public like the salon itself, so a 404 for a salon you can't see. */

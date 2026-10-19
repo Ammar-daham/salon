@@ -52,7 +52,7 @@ public class BusinessController
      * already has the name, or the body lists the same contact value twice.
      *
      * @param request the salon to create, as a {@link CreateBusinessRequest}
-     * @return 201 Created with the salon, and its address in {@code Location}
+     * @return 201 Created with the salon as stored, and its address in {@code Location}
      */
     @PostMapping
     public ResponseEntity<Business> addBusiness(@Valid @RequestBody CreateBusinessRequest request)
@@ -62,7 +62,7 @@ public class BusinessController
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest()
                 .path("/{id}")
-                .buildAndExpand(business.getId())
+                .buildAndExpand(b.getId())
                 .toUri();
 
         return ResponseEntity.created(location).body(b);

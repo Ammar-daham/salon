@@ -100,7 +100,7 @@ public class StaffScheduleController
 	 * @param staffId the staff record's id
 	 * @param request the absence, as a {@link TimeOffRequest}
 	 * @param principal the signed-in caller
-	 * @return 201 Created with the time off, and its address in {@code Location}
+	 * @return 201 Created with the time off as stored, and its address in {@code Location}
 	 */
 	@PostMapping("/time-off")
 	public ResponseEntity<TimeOff> addTimeOff(@PathVariable long businessId, @PathVariable long staffId,

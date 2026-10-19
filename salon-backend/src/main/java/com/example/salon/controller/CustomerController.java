@@ -50,7 +50,7 @@ public class CustomerController
 	 * @param businessId the salon
 	 * @param request the name, email, phone, notes and marketing consent: see {@link CustomerRequest}
 	 * @param principal the signed-in caller
-	 * @return 201 Created with the customer, and its address in {@code Location}
+	 * @return 201 Created with the customer as stored, and its address in {@code Location}
 	 */
 	@PostMapping("/businesses/{businessId}/customers")
 	public ResponseEntity<Customer> addCustomer(@PathVariable long businessId,

@@ -46,7 +46,7 @@ public class BusinessServiceController
 	 * @param businessId the salon's id
 	 * @param request the service, as a {@link SalonServiceRequest}
 	 * @param principal the signed-in caller
-	 * @return 201 Created with the service, and its address in {@code Location}
+	 * @return 201 Created with the service as stored, and its address in {@code Location}
 	 */
 	@PostMapping("/{businessId}/services")
 	public ResponseEntity<SalonService> createServiceForBusiness(
@@ -61,7 +61,7 @@ public class BusinessServiceController
 		URI location = ServletUriComponentsBuilder
 				.fromCurrentRequest()
 				.path("/{id}")
-				.buildAndExpand(salonService.getId())
+				.buildAndExpand(s.getId())
 				.toUri();
 
 		return ResponseEntity.created(location).body(s);

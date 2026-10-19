@@ -40,8 +40,9 @@ public class BusinessService
     @Transactional
     public Business addBusiness(Business business) 
     {
+        Long id;
         try {
-            businessDao.addBusiness(business);
+            id = businessDao.addBusiness(business);
         } catch (DuplicateKeyException ex) {
             String reason = ex.getMessage();
             if (reason != null && reason.contains(NAME_UNIQUE))
@@ -51,8 +52,8 @@ public class BusinessService
             log.warn("Unmapped duplicate-key creating business '{}'", business.getName(), ex);
             throw new BaseException("Business could not be created due to a conflict.", ErrorCode.DUPLICATE_RESOURCE);
         }
-        log.info("Created business {} with status {}", business.getId(), business.getStatus());
-        return business;
+        log.info("Created business {} with status {}", id, business.getStatus());
+        return getBusinessById(id.intValue());
     }
 
     /** Admins see every salon; anyone else the approved ones and their own, counted in SQL so pages add up. */

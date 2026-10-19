@@ -56,7 +56,7 @@ public class AppointmentController
 	 * @param businessId the salon
 	 * @param request the customer, staff member, service, start and notes: see {@link AppointmentRequest}
 	 * @param principal the signed-in caller
-	 * @return 201 Created with the appointment, and its address in {@code Location}
+	 * @return 201 Created with the appointment as stored, and its address in {@code Location}
 	 */
 	@PostMapping
 	public ResponseEntity<Appointment> book(@PathVariable long businessId,
