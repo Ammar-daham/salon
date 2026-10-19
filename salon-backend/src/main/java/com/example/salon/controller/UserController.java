@@ -3,6 +3,7 @@ package com.example.salon.controller;
 import com.example.salon.dao.UserDao;
 import com.example.salon.dto.CreateUserRequest;
 import com.example.salon.dto.UpdateUserRequest;
+import com.example.salon.dto.UserRoleRequest;
 import com.example.salon.model.Role;
 import com.example.salon.model.User;
 import com.example.salon.paging.Page;
@@ -122,18 +123,17 @@ public class UserController
 	}
 
 	/**
-	 * Changes a user's name and role.
+	 * Changes a user's name.
 	 *
-	 * <p>{@code PUT /api/v1/users/{id}}. The same callers as {@code GET /api/v1/users/{id}}. Only an ADMIN
-	 * or SUPER_ADMIN changes the role; anyone else must still send one, but keeps their own. Only a
-	 * SUPER_ADMIN may grant SUPER_ADMIN. The email, password and salon stay as they are. A new role takes
-	 * effect from the user's next request, in sessions they already have too.
+	 * <p>{@code PUT /api/v1/users/{id}}. The same callers as {@code GET /api/v1/users/{id}}, so a user may
+	 * rename themselves. The role changes with {@code PUT /api/v1/users/{id}/role}, and a {@code role} in the
+	 * body is ignored. The email, password and salon stay as they are.
 	 *
-	 * <p>Errors: 400 if the body breaks {@link UpdateUserRequest}'s rules; 403 if an ADMIN grants
-	 * SUPER_ADMIN; 404 if there's no such user, or the caller may not see them.
+	 * <p>Errors: 400 if the body breaks {@link UpdateUserRequest}'s rules; 404 if there's no such user, or
+	 * the caller may not see them.
 	 *
 	 * @param id the user's id
-	 * @param request the new name and role, an {@link UpdateUserRequest}
+	 * @param request the new name, an {@link UpdateUserRequest}
 	 * @param principal the signed-in caller
 	 * @return 200 with the user as stored
 	 */
@@ -141,6 +141,30 @@ public class UserController
 	public User updateUserById(@PathVariable long id, @Valid @RequestBody UpdateUserRequest request, @AuthenticationPrincipal AuthenticatedUser principal)
 	{
 		return userService.updateUserById(id, request.toUser(), principal);
+	}
+
+	/**
+	 * Gives a user another role.
+	 *
+	 * <p>{@code PUT /api/v1/users/{id}/role}. ADMIN and SUPER_ADMIN only, for a user they may see: an
+	 * ADMIN, their own salon's users, themselves included. Only a SUPER_ADMIN may grant SUPER_ADMIN, or
+	 * change the role of someone who has it. Asking for the role the user already has changes nothing. The
+	 * new role takes effect from the user's next request, in sessions they already have too.
+	 *
+	 * <p>Errors: 400 if {@code role} is missing or isn't one of the {@link Role} names; 403 for anyone else,
+	 * or if an ADMIN grants SUPER_ADMIN or changes a SUPER_ADMIN's role; 404 if there's no such user, or the
+	 * caller may not see them.
+	 *
+	 * @param id the user's id
+	 * @param request the new {@code role}: see {@link UserRoleRequest}
+	 * @param principal the signed-in caller
+	 * @return 200 with the user as stored
+	 */
+	@PutMapping("/{id}/role")
+	public User changeRole(@PathVariable long id, @Valid @RequestBody UserRoleRequest request,
+			@AuthenticationPrincipal AuthenticatedUser principal)
+	{
+		return userService.changeRole(id, request.role(), principal);
 	}
 
 	/**

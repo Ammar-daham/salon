@@ -158,8 +158,14 @@ public class UserDataAccessService implements UserDao
 	@Override
 	public long updateUserById(long id, User user)
 	{
-		String sql = "UPDATE users SET first_name = ?, last_name = ?, role = ? WHERE id = ?";
-		return (long) jdbcTemplate.update(sql, user.getFirstName(), user.getLastName(), user.getRole().name(), id);
+		String sql = "UPDATE users SET first_name = ?, last_name = ? WHERE id = ?";
+		return (long) jdbcTemplate.update(sql, user.getFirstName(), user.getLastName(), id);
+	}
+
+	@Override
+	public long updateUserRole(long id, Role role)
+	{
+		return jdbcTemplate.update("UPDATE users SET role = ? WHERE id = ?", role.name(), id);
 	}
 
 	@Override

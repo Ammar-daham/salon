@@ -104,6 +104,7 @@ public class SecurityConfig
 						// ownership before returning or mutating the record.
 						.requestMatchers(HttpMethod.GET, "/api/v1/users/**", "/api/v1/addresses/**", "/api/v1/contacts/**")
 								.authenticated()
+						.requestMatchers(HttpMethod.PUT, "/api/v1/users/*/role").hasAnyRole("ADMIN", "SUPER_ADMIN")
 						.requestMatchers(HttpMethod.PUT, "/api/v1/users/**", "/api/v1/addresses/**", "/api/v1/contacts/**")
 								.authenticated()
 						.requestMatchers(HttpMethod.DELETE, "/api/v1/users/**", "/api/v1/addresses/**", "/api/v1/contacts/**")

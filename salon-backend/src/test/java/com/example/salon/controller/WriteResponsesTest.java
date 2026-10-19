@@ -132,7 +132,7 @@ class WriteResponsesTest extends IntegrationTest
 				.andExpect(jsonPath("$.business_name").value("Glow Beauty Studio"))
 				.andExpect(jsonPath("$.updated_at").value(notNullValue()));
 		replace("/api/v1/users/" + Fixture.GLOW_EMPLOYEE_ID, superAdmin, """
-				{"first_name": "Mia", "last_name": "Senior-Stylist", "role": "EMPLOYEE"}
+				{"first_name": "Mia", "last_name": "Senior-Stylist"}
 				""")
 				.andExpect(jsonPath("$.id").value(Fixture.GLOW_EMPLOYEE_ID))
 				.andExpect(jsonPath("$.last_name").value("Senior-Stylist"))

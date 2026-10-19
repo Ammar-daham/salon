@@ -123,20 +123,33 @@ public class UserService
 	public User updateUserById(long id, User user, AuthenticatedUser caller)
 	{
 		// getUserById 404s unless the user exists and the caller may see them: self, own business or super admin.
-		User existing = getUserById((int) id, caller);
-		if (!AccessControl.isAdmin(caller)) {
-			// Only an admin may change a user's role - a self-update must keep the caller's current one.
-			user.setRole(existing.getRole());
-		} else if (user.getRole() == Role.SUPER_ADMIN && caller.getUser().getRole() != Role.SUPER_ADMIN) {
-			// a caller can never grant a role higher than their own.
-			throw new AccessDeniedException("Only a super admin can grant the super admin role");
-		}
+		getUserById((int) id, caller);
 		long row = userDao.updateUserById(id, user);
 		if (row == 0)
 			throw new BaseException("User with id " + id + " not found", ErrorCode.NOT_FOUND);
-		if (user.getRole() != existing.getRole())
-			log.info("User {} role changed from {} to {}", id, existing.getRole(), user.getRole());
 		log.info("Updated user {}", id);
+		return getUserById((int) id, caller);
+	}
+
+	/**
+	 * Only an admin changes a role, and only of a user they may see. A caller can never grant a role higher
+	 * than their own, nor take it from someone who has it. Asking for the role the user already has changes
+	 * nothing.
+	 */
+	@Transactional
+	public User changeRole(long id, Role role, AuthenticatedUser caller)
+	{
+		if (!AccessControl.isAdmin(caller))
+			throw new AccessDeniedException("Only an admin can change a user's role");
+		// getUserById 404s unless the user exists and the caller may see them: own business or super admin.
+		User existing = getUserById((int) id, caller);
+		boolean touchesSuperAdmin = role == Role.SUPER_ADMIN || existing.getRole() == Role.SUPER_ADMIN;
+		if (touchesSuperAdmin && !AccessControl.isSuperAdmin(caller))
+			throw new AccessDeniedException("Only a super admin can grant or take away the super admin role");
+		if (role != existing.getRole()) {
+			userDao.updateUserRole(id, role);
+			log.info("User {} role changed from {} to {}", id, existing.getRole(), role);
+		}
 		return getUserById((int) id, caller);
 	}
 

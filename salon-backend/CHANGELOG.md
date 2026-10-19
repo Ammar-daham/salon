@@ -49,12 +49,19 @@ version. The version lives in [`gradle.properties`](gradle.properties); each rel
   SUPER_ADMIN changes it with the new `PUT /api/v1/businesses/{id}/status`, `{"status": "APPROVED"}`,
   which answers with the salon, and anyone else gets 403 there. A `status` in the details is ignored,
   so it no longer earns an ADMIN a 403.
+- `PUT /api/v1/users/{id}` changes only the name and no longer takes a `role`. It used to require
+  one from every caller, then ignore it unless an ADMIN or SUPER_ADMIN sent it. An ADMIN or
+  SUPER_ADMIN changes a role with the new `PUT /api/v1/users/{id}/role`, `{"role": "EMPLOYEE"}`, which
+  answers with the user, and anyone else gets 403 there. A `role` sent to `PUT /api/v1/users/{id}` is
+  ignored.
 - Every `DELETE` answers 204 instead of 200, still with no body: `/api/v1/businesses/{id}`, and its
   `services/{serviceId}`, `staff/{staffId}`, `staff/{staffId}/time-off/{timeOffId}` and
   `customers/{customerId}`, and `/api/v1/users/{id}`, `/api/v1/addresses/{id}` and
   `/api/v1/contacts/{id}`.
 
 ### Security
+- An ADMIN can't change the role of a SUPER_ADMIN who belongs to their salon: only a SUPER_ADMIN may
+  grant SUPER_ADMIN or take it away. An ADMIN used to be stopped only from granting it.
 - Addresses and contacts are scoped to the caller's salon. A salon's may be changed or deleted only
   by an ADMIN of that salon or a SUPER_ADMIN, and a user's read, changed or deleted only by the
   people who may see that user on `/users`: the user, an ADMIN of their salon or a SUPER_ADMIN. Any

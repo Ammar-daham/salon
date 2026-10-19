@@ -73,6 +73,7 @@ public abstract class IntegrationTest
 		public static final String GLOW_EMPLOYEE = "mia.stylist@glow.test";
 		public static final String URBAN_EMPLOYEE = "leo.barber@urban.test";
 
+		public static final long SUPER_ADMIN_ID = 1;
 		public static final long GLOW_ADMIN_ID = 2;
 		public static final long URBAN_ADMIN_ID = 3;
 		public static final long GLOW_EMPLOYEE_ID = 4;
