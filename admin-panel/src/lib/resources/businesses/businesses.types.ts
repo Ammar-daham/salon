@@ -85,11 +85,10 @@ export interface BusinessInput {
 	name: string;
 	description: string | null;
 	image: string;
-	/** Only meaningful on create. `addBusiness` defaults null to PENDING, and
-	 *  that is the one moment status is writable from a plain create form. */
+	/** Not sent: a new salon is PENDING, and only PUT /businesses/{id}/status moves it. */
 	status?: BusinessStatus;
-	/** Omitted on create means EUR; omitted on update keeps the stored one. */
-	currency?: string;
-	/** Omitted on create means Europe/Berlin; omitted on update keeps the stored one. */
-	timezone?: string;
+	/** Required: the update replaces it, like every other field. */
+	currency: string;
+	/** Required: the update replaces it, like every other field. */
+	timezone: string;
 }

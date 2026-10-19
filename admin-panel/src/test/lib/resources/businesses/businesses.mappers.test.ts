@@ -101,27 +101,19 @@ describe("toSalonService", () => {
 });
 
 describe("toBusinessRequest", () => {
-	const input = { name: "Glow", description: null, image: "https://example.test/glow.png" };
+	const input = {
+		name: "Glow",
+		description: null,
+		image: "https://example.test/glow.png",
+		currency: "SEK",
+		timezone: "Europe/London",
+	};
 
-	it("omits status when not given, so the stored status is preserved", () => {
+	it("sends every field, as the update replaces them all", () => {
 		expect(toBusinessRequest(input)).toEqual(input);
-		expect(toBusinessRequest(input)).not.toHaveProperty("status");
 	});
 
-	it("sends status when given", () => {
-		expect(toBusinessRequest({ ...input, status: "PENDING" })).toEqual({ ...input, status: "PENDING" });
-	});
-
-	it("omits currency when not given, so the stored currency is preserved", () => {
-		expect(toBusinessRequest(input)).not.toHaveProperty("currency");
-		expect(toBusinessRequest({ ...input, currency: "SEK" })).toEqual({ ...input, currency: "SEK" });
-	});
-
-	it("omits the time zone when not given, so the stored one is preserved", () => {
-		expect(toBusinessRequest(input)).not.toHaveProperty("timezone");
-		expect(toBusinessRequest({ ...input, timezone: "Europe/London" })).toEqual({
-			...input,
-			timezone: "Europe/London",
-		});
+	it("never sends a status, which only its own endpoint changes", () => {
+		expect(toBusinessRequest({ ...input, status: "APPROVED" })).toEqual(input);
 	});
 });
