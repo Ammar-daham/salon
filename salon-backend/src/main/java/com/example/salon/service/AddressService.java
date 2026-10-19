@@ -51,13 +51,14 @@ public class AddressService
 		return address;
 	}
 
-	public void updateAddressById(int id, Address address, AuthenticatedUser caller)
+	public Address updateAddressById(int id, Address address, AuthenticatedUser caller)
 	{
 		requireWritePermission(id, caller);
 		int row = addressDao.updateAddressById(id, address);
 		if (row == 0)
 			throw notFound(id);
 		log.info("Updated address {}", id);
+		return fetch(id);
 	}
 
 	public void deleteAddressById(int id, AuthenticatedUser caller)

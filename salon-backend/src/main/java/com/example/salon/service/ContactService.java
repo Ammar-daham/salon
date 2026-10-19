@@ -56,7 +56,7 @@ public class ContactService
 		return c;
 	}
 
-	public void updateContactById(int id, Contact contact, AuthenticatedUser caller)
+	public Contact updateContactById(int id, Contact contact, AuthenticatedUser caller)
 	{
 		requireWritePermission(id, caller);
 		int row;
@@ -71,6 +71,7 @@ public class ContactService
 		if (row == 0)
 			throw notFound(id);
 		log.info("Updated contact {}", id);
+		return fetch(id);
 	}
 
 	public void delectContactById(int id, AuthenticatedUser caller)

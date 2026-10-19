@@ -164,8 +164,7 @@ public class StaffScheduleController
 	 * Replaces an absence's times and note.
 	 *
 	 * <p>{@code PUT /api/v1/businesses/{businessId}/staff/{staffId}/time-off/{timeOffId}}. An ADMIN of the
-	 * salon, or a SUPER_ADMIN. Every field is replaced, so leaving {@code note} out clears it. Answers 200
-	 * with no body.
+	 * salon, or a SUPER_ADMIN. Every field is replaced, so leaving {@code note} out clears it.
 	 *
 	 * <p>Errors: 400 if the body breaks the rules of {@link TimeOffRequest}, or {@code ends_at} isn't after
 	 * {@code starts_at}; 403 for another salon; 404 if there's no such salon or staff member, or the staff
@@ -176,12 +175,13 @@ public class StaffScheduleController
 	 * @param timeOffId the absence's id
 	 * @param request the new times and note, as a {@link TimeOffRequest}
 	 * @param principal the signed-in caller
+	 * @return 200 with the time off as stored
 	 */
 	@PutMapping("/time-off/{timeOffId}")
-	public void updateTimeOff(@PathVariable long businessId, @PathVariable long staffId, @PathVariable long timeOffId,
+	public TimeOff updateTimeOff(@PathVariable long businessId, @PathVariable long staffId, @PathVariable long timeOffId,
 			@Valid @RequestBody TimeOffRequest request, @AuthenticationPrincipal AuthenticatedUser principal)
 	{
-		staffScheduleService.updateTimeOff(businessId, staffId, timeOffId, request.toTimeOff(), principal);
+		return staffScheduleService.updateTimeOff(businessId, staffId, timeOffId, request.toTimeOff(), principal);
 	}
 
 	/**

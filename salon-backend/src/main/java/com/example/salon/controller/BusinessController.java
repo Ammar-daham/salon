@@ -128,7 +128,6 @@ public class BusinessController
      * SUPER_ADMIN may change {@code status}; an ADMIN may send it unchanged. Addresses and contacts in the
      * body are ignored. A new {@code timezone} keeps time off and appointments at the same moments, so
      * they read differently on the new clock, while opening hours and shifts keep their wall-clock times.
-     * Answers 200 with no body.
      *
      * <p>Errors: 400 if the body breaks the rules of {@link UpdateBusinessRequest}; 403 for another salon, or
      * if an ADMIN sends a different {@code status}; 404 if there's no such salon; 409 if another salon
@@ -137,11 +136,12 @@ public class BusinessController
      * @param id the salon's id
      * @param request the new details, as an {@link UpdateBusinessRequest}
      * @param principal the signed-in caller
+     * @return 200 with the salon as stored
      */
     @PutMapping("/{id}")
-    public void updateBusiness(@PathVariable int id, @Valid @RequestBody UpdateBusinessRequest request, @AuthenticationPrincipal AuthenticatedUser principal)
+    public Business updateBusiness(@PathVariable int id, @Valid @RequestBody UpdateBusinessRequest request, @AuthenticationPrincipal AuthenticatedUser principal)
     {
-        businessService.updateBusinessById(id, request.toBusiness(), principal);
+        return businessService.updateBusinessById(id, request.toBusiness(), principal);
     }
 
     /**

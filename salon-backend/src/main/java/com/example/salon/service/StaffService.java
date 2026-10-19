@@ -118,7 +118,7 @@ public class StaffService
     }
 
     @Transactional
-    public void updateStaffById(long businessId, long staffId, Staff staff, AuthenticatedUser caller)
+    public Staff updateStaffById(long businessId, long staffId, Staff staff, AuthenticatedUser caller)
     {
         AccessControl.requireBusinessAccess(caller, businessId);
         getStaffById(businessId, staffId);
@@ -126,6 +126,7 @@ public class StaffService
         if (row == 0)
             throw new BaseException("Staff with id " + staffId + " not found.", ErrorCode.NOT_FOUND);
         log.info("Updated staff {} in business {}", staffId, businessId);
+        return getStaffById(businessId, staffId, caller);
     }
 
     @Transactional

@@ -93,7 +93,7 @@ public class BusinessServiceController
 	 *
 	 * <p>{@code PUT /api/v1/businesses/{businessId}/services/{serviceId}}. An ADMIN of the salon, or a
 	 * SUPER_ADMIN. Every field is replaced, so leaving {@code description} out clears it. Appointments
-	 * already booked keep the length and price they were booked with. Answers 200 with no body.
+	 * already booked keep the length and price they were booked with.
 	 *
 	 * <p>Errors: 400 if the body breaks the rules of {@link SalonServiceRequest}; 403 for another salon; 404
 	 * if the salon has no such service, or it has been removed.
@@ -102,12 +102,13 @@ public class BusinessServiceController
 	 * @param serviceId the service's id
 	 * @param request the new details, as a {@link SalonServiceRequest}
 	 * @param principal the signed-in caller
+	 * @return 200 with the service as stored
 	 */
 	@PutMapping("/{businessId}/services/{serviceId}")
-	public void updateServiceForBusiness(@PathVariable int businessId, @PathVariable int serviceId,
+	public SalonService updateServiceForBusiness(@PathVariable int businessId, @PathVariable int serviceId,
 			@Valid @RequestBody SalonServiceRequest request, @AuthenticationPrincipal AuthenticatedUser principal)
 	{
-		businessSalonServiceService.updateServiceForBusiness(businessId, serviceId, request.toSalonService(), principal);
+		return businessSalonServiceService.updateServiceForBusiness(businessId, serviceId, request.toSalonService(), principal);
 	}
 
 	/**

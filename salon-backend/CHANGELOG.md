@@ -212,6 +212,11 @@ version. The version lives in [`gradle.properties`](gradle.properties); each rel
   with range checks, and stored values that aren't a valid pair are cleared (DB-07); prices can't
   be negative and salons get a `currency` column (DB-08). V9 stops with an error if a service
   already has a negative price.
+- Every `PUT` answers 200 with the record as stored, as `PUT` on an appointment already did, instead
+  of with no body: `/api/v1/businesses/{id}`, and its `services/{serviceId}`, `staff/{staffId}`,
+  `staff/{staffId}/time-off/{timeOffId}` and `customers/{customerId}`, and `/api/v1/users/{id}`,
+  `/api/v1/addresses/{id}` and `/api/v1/contacts/{id}`. It's the same body as a `GET` of the record
+  answers, so a client needn't read it again.
 
 ### Fixed
 - `app.datasource.pool-size` in the template never did anything, so the pool always had Hikari's

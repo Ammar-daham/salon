@@ -120,7 +120,7 @@ public class StaffController
 	 * <p>{@code PUT /api/v1/businesses/{businessId}/staff/{staffId}}. An ADMIN of the salon, or a
 	 * SUPER_ADMIN. {@code title}, {@code is_active}, {@code hired_at} and {@code calendar_colour} are all
 	 * replaced, so leaving {@code calendar_colour} out clears it; who the record is for can't change. An
-	 * inactive staff member can't be booked. Answers 200 with no body.
+	 * inactive staff member can't be booked.
 	 *
 	 * <p>Errors: 400 if the body breaks the rules of {@link UpdateStaffRequest}; 403 for another salon; 404 if
 	 * the salon has no such staff record, or it has been removed.
@@ -129,12 +129,13 @@ public class StaffController
 	 * @param staffId the staff record's id
 	 * @param request the new details, as an {@link UpdateStaffRequest}
 	 * @param principal the signed-in caller
+	 * @return 200 with the staff record as stored
 	 */
 	@PutMapping("/{businessId}/staff/{staffId}")
-	public void updateStaffForBusiness(@PathVariable long businessId, @PathVariable long staffId,
+	public Staff updateStaffForBusiness(@PathVariable long businessId, @PathVariable long staffId,
 			@Valid @RequestBody UpdateStaffRequest request, @AuthenticationPrincipal AuthenticatedUser principal)
 	{
-		staffService.updateStaffById(businessId, staffId, request.toStaff(), principal);
+		return staffService.updateStaffById(businessId, staffId, request.toStaff(), principal);
 	}
 
 	/**

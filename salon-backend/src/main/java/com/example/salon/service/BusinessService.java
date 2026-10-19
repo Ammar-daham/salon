@@ -93,7 +93,7 @@ public class BusinessService
     }
 
     @Transactional
-    public void updateBusinessById(int id, Business business, AuthenticatedUser caller) 
+    public Business updateBusinessById(int id, Business business, AuthenticatedUser caller) 
     {
         Business existing = getBusinessById(id);
 
@@ -118,6 +118,7 @@ public class BusinessService
         if (business.getStatus() != null && business.getStatus() != existing.getStatus())
             log.info("Business {} status changed from {} to {}", id, existing.getStatus(), business.getStatus());
         log.info("Updated business {}", id);
+        return getBusinessById(id);
     }
 
     @Transactional

@@ -73,7 +73,7 @@ public class ContactController
 	 * Replaces a contact's type and value.
 	 *
 	 * <p>{@code PUT /api/v1/contacts/{id}}. A salon's contact, by an ADMIN of that salon or a SUPER_ADMIN; a
-	 * user's, by that user, an ADMIN of their salon or a SUPER_ADMIN. Answers 200 with no body.
+	 * user's, by that user, an ADMIN of their salon or a SUPER_ADMIN.
 	 *
 	 * <p>Errors: 400 if the body breaks {@link ContactRequest}'s rules; 403 if it's a salon's contact and the
 	 * caller may not change it; 404 if there's no such contact, or it's a user's and the caller may not see
@@ -82,11 +82,12 @@ public class ContactController
 	 * @param id the contact's id
 	 * @param request the new type and value, a {@link ContactRequest}
 	 * @param principal the signed-in caller
+	 * @return 200 with the contact as stored
 	 */
 	@PutMapping("/{id}")
-	public void updateContactById(@PathVariable int id, @Valid @RequestBody ContactRequest request, @AuthenticationPrincipal AuthenticatedUser principal)
+	public Contact updateContactById(@PathVariable int id, @Valid @RequestBody ContactRequest request, @AuthenticationPrincipal AuthenticatedUser principal)
 	{
-		contactService.updateContactById(id, request.toContact(), principal);
+		return contactService.updateContactById(id, request.toContact(), principal);
 	}
 
 	/**

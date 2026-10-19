@@ -74,7 +74,7 @@ public class AddressController
 	 *
 	 * <p>{@code PUT /api/v1/addresses/{id}}. A salon's address, by an ADMIN of that salon or a SUPER_ADMIN;
 	 * a user's, by that user, an ADMIN of their salon or a SUPER_ADMIN. Every field is replaced, so an
-	 * optional one left out is cleared. Answers 200 with no body.
+	 * optional one left out is cleared.
 	 *
 	 * <p>Errors: 400 if the body breaks {@link AddressRequest}'s rules; 403 if it's a salon's address and
 	 * the caller may not change it; 404 if there's no such address, or it's a user's and the caller may
@@ -83,11 +83,12 @@ public class AddressController
 	 * @param id the address's id
 	 * @param request the new address, an {@link AddressRequest}
 	 * @param principal the signed-in caller
+	 * @return 200 with the address as stored
 	 */
 	@PutMapping("/{id}")
-	public void updateAddress(@PathVariable int id, @Valid @RequestBody AddressRequest request, @AuthenticationPrincipal AuthenticatedUser principal)
+	public Address updateAddress(@PathVariable int id, @Valid @RequestBody AddressRequest request, @AuthenticationPrincipal AuthenticatedUser principal)
 	{
-		addressService.updateAddressById(id, request.toAddress(), principal);
+		return addressService.updateAddressById(id, request.toAddress(), principal);
 	}
 
 	/**

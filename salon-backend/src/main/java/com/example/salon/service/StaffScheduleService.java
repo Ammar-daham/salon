@@ -103,7 +103,7 @@ public class StaffScheduleService
     }
 
     @Transactional
-    public void updateTimeOff(long businessId, long staffId, long timeOffId, TimeOff timeOff, AuthenticatedUser caller)
+    public TimeOff updateTimeOff(long businessId, long staffId, long timeOffId, TimeOff timeOff, AuthenticatedUser caller)
     {
         ZoneId zone = requireTimeOffWriter(caller, businessId, staffId, timeOff);
         int row;
@@ -115,6 +115,7 @@ public class StaffScheduleService
         if (row == 0)
             throw new BaseException("Time off with id " + timeOffId + " not found.", ErrorCode.NOT_FOUND);
         log.info("Updated time off {} for staff {} in business {}", timeOffId, staffId, businessId);
+        return findTimeOff(staffId, timeOffId, zone);
     }
 
     @Transactional
