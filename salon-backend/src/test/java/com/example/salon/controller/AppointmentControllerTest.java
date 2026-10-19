@@ -217,9 +217,9 @@ class AppointmentControllerTest extends IntegrationTest
 		String location = book(loginAs(Fixture.GLOW_ADMIN), haircut(nextWeek(10, 0)));
 
 		MockHttpSession mia = loginAs(Fixture.GLOW_EMPLOYEE);
-		mvc.perform(get(APPOINTMENTS).session(mia)).andExpect(jsonPath("$", hasSize(1)));
+		mvc.perform(get(APPOINTMENTS).session(mia)).andExpect(jsonPath("$.items", hasSize(1)));
 		send(put(location), mia, haircut(nextWeek(11, 0))).andExpect(status().isOk());
-		mvc.perform(get(APPOINTMENTS).session(loginAs(Fixture.SUPER_ADMIN))).andExpect(jsonPath("$", hasSize(1)));
+		mvc.perform(get(APPOINTMENTS).session(loginAs(Fixture.SUPER_ADMIN))).andExpect(jsonPath("$.items", hasSize(1)));
 
 		for (String outsider : new String[] {Fixture.URBAN_ADMIN, Fixture.URBAN_EMPLOYEE}) {
 			MockHttpSession session = loginAs(outsider);
@@ -249,7 +249,7 @@ class AppointmentControllerTest extends IntegrationTest
 		mvc.perform(get(APPOINTMENTS + "/" + urbanAppointment).session(superAdmin)).andExpect(status().isNotFound());
 		send(put(APPOINTMENTS + "/" + urbanAppointment), superAdmin, haircut(nextWeek(10, 0)))
 				.andExpect(status().isNotFound());
-		mvc.perform(get(APPOINTMENTS).session(superAdmin)).andExpect(jsonPath("$", hasSize(0)));
+		mvc.perform(get(APPOINTMENTS).session(superAdmin)).andExpect(jsonPath("$.items", hasSize(0)));
 	}
 
 	@Test
@@ -275,22 +275,22 @@ class AppointmentControllerTest extends IntegrationTest
 		long oliviaNextDay = idOf(book(admin, haircut(nextDay.atTime(10, 0).format(MINUTES))));
 
 		mvc.perform(get(APPOINTMENTS).session(admin))
-				.andExpect(jsonPath("$", hasSize(3)))
-				.andExpect(jsonPath("$[0].id").value(ellaWithAnna))
-				.andExpect(jsonPath("$[1].id").value(oliviaWithMia))
-				.andExpect(jsonPath("$[2].id").value(oliviaNextDay));
+				.andExpect(jsonPath("$.items", hasSize(3)))
+				.andExpect(jsonPath("$.items[0].id").value(ellaWithAnna))
+				.andExpect(jsonPath("$.items[1].id").value(oliviaWithMia))
+				.andExpect(jsonPath("$.items[2].id").value(oliviaNextDay));
 		mvc.perform(get(APPOINTMENTS).session(admin).param("from", day.toString()).param("to", day.toString()))
-				.andExpect(jsonPath("$", hasSize(2)));
+				.andExpect(jsonPath("$.items", hasSize(2)));
 		mvc.perform(get(APPOINTMENTS).session(admin).param("from", nextDay.toString()))
-				.andExpect(jsonPath("$", hasSize(1)))
-				.andExpect(jsonPath("$[0].id").value(oliviaNextDay));
+				.andExpect(jsonPath("$.items", hasSize(1)))
+				.andExpect(jsonPath("$.items[0].id").value(oliviaNextDay));
 		mvc.perform(get(APPOINTMENTS).session(admin).param("staff_id", String.valueOf(annaId)))
-				.andExpect(jsonPath("$", hasSize(1)))
-				.andExpect(jsonPath("$[0].staff.first_name").value("Anna"));
+				.andExpect(jsonPath("$.items", hasSize(1)))
+				.andExpect(jsonPath("$.items[0].staff.first_name").value("Anna"));
 		mvc.perform(get(APPOINTMENTS).session(admin).param("customer_id", String.valueOf(Fixture.GLOW_CUSTOMER))
 						.param("to", day.toString()))
-				.andExpect(jsonPath("$", hasSize(1)))
-				.andExpect(jsonPath("$[0].id").value(oliviaWithMia));
+				.andExpect(jsonPath("$.items", hasSize(1)))
+				.andExpect(jsonPath("$.items[0].id").value(oliviaWithMia));
 
 		mvc.perform(get(APPOINTMENTS).session(admin).param("from", nextDay.toString()).param("to", day.toString()))
 				.andExpect(status().isBadRequest())
@@ -299,6 +299,44 @@ class AppointmentControllerTest extends IntegrationTest
 				.andExpect(status().isBadRequest())
 				.andExpect(jsonPath("$.message").value("from has an invalid value"));
 		mvc.perform(get(APPOINTMENTS).session(admin).param("staff_id", "Mia")).andExpect(status().isBadRequest());
+	}
+
+	@Test
+	void theListComesAPageAtATimeAndCanBeNarrowedByStatusAndSortedLatestFirst() throws Exception
+	{
+		MockHttpSession admin = loginAs(Fixture.GLOW_ADMIN);
+		long nine = idOf(book(admin, haircut(nextWeek(9, 0))));
+		long ten = idOf(book(admin, haircut(nextWeek(10, 0))));
+		String elevenLocation = book(admin, haircut(nextWeek(11, 0)));
+		long eleven = idOf(elevenLocation);
+		setStatus(elevenLocation, admin, "CANCELLED").andExpect(status().isOk());
+
+		mvc.perform(get(APPOINTMENTS).session(admin).param("size", "2"))
+				.andExpect(jsonPath("$.items", hasSize(2)))
+				.andExpect(jsonPath("$.items[0].id").value(nine))
+				.andExpect(jsonPath("$.items[1].id").value(ten))
+				.andExpect(jsonPath("$.page").value(1))
+				.andExpect(jsonPath("$.size").value(2))
+				.andExpect(jsonPath("$.total_items").value(3))
+				.andExpect(jsonPath("$.total_pages").value(2));
+		mvc.perform(get(APPOINTMENTS).session(admin).param("size", "2").param("page", "2"))
+				.andExpect(jsonPath("$.items", hasSize(1)))
+				.andExpect(jsonPath("$.items[0].id").value(eleven));
+
+		mvc.perform(get(APPOINTMENTS).session(admin).param("sort", "-starts_at"))
+				.andExpect(jsonPath("$.items[0].id").value(eleven))
+				.andExpect(jsonPath("$.items[1].id").value(ten))
+				.andExpect(jsonPath("$.items[2].id").value(nine));
+
+		mvc.perform(get(APPOINTMENTS).session(admin).param("status", "CANCELLED"))
+				.andExpect(jsonPath("$.items", hasSize(1)))
+				.andExpect(jsonPath("$.items[0].id").value(eleven));
+
+		mvc.perform(get(APPOINTMENTS).session(admin).param("status", "LATE")).andExpect(status().isBadRequest());
+		mvc.perform(get(APPOINTMENTS).session(admin).param("sort", "price"))
+				.andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$.message").value("sort must be one of starts_at, -starts_at"));
+		mvc.perform(get(APPOINTMENTS).session(admin).param("size", "101")).andExpect(status().isBadRequest());
 	}
 
 	@Test
@@ -387,7 +425,7 @@ class AppointmentControllerTest extends IntegrationTest
 		setStatus(missed, admin, "NO_SHOW").andExpect(status().isOk());
 		book(admin, haircut("2025-03-04T10:15"));
 
-		mvc.perform(get(APPOINTMENTS).session(admin)).andExpect(jsonPath("$", hasSize(4)));
+		mvc.perform(get(APPOINTMENTS).session(admin)).andExpect(jsonPath("$.items", hasSize(4)));
 	}
 
 	@Test

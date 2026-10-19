@@ -1,8 +1,13 @@
 package com.example.salon.controller;
 
 import com.example.salon.dto.AppointmentRequest;
+import com.example.salon.dao.AppointmentDao;
 import com.example.salon.dto.AppointmentStatusRequest;
 import com.example.salon.model.Appointment;
+import com.example.salon.model.AppointmentStatus;
+import com.example.salon.paging.Page;
+import com.example.salon.paging.PageQuery;
+import com.example.salon.paging.Sort;
 import com.example.salon.security.AuthenticatedUser;
 import com.example.salon.service.AppointmentService;
 import jakarta.validation.Valid;
@@ -15,7 +20,6 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
 import java.time.LocalDate;
-import java.util.List;
 
 /**
  * Appointments at one salon, under {@code /api/v1/businesses/{businessId}/appointments}.
@@ -69,33 +73,44 @@ public class AppointmentController
 	}
 
 	/**
-	 * Lists a salon's appointments in order of start time.
+	 * Lists a salon's appointments, a page at a time.
 	 *
 	 * <p>{@code GET /api/v1/businesses/{businessId}/appointments}. ADMIN and EMPLOYEE of the salon, or a
 	 * SUPER_ADMIN. Every filter is optional: {@code from} and {@code to} keep the appointments that start on those
-	 * days of the salon's clock, both included, and {@code staff_id} and {@code customer_id} keep one staff
-	 * member's or one customer's. Every status is included, and the list isn't paged.
+	 * days of the salon's clock, both included; {@code staff_id} and {@code customer_id} keep one staff member's
+	 * or one customer's; and {@code status} keeps those with that status, where leaving it out includes every
+	 * status. {@code sort} is {@code starts_at} (the default, soonest first) or {@code -starts_at} (latest first).
 	 *
-	 * <p>Errors: 400 for a malformed filter, or {@code to} before {@code from}; 403 for another salon; 404 if the
-	 * salon doesn't exist.
+	 * <p>Errors: 400 for a malformed filter, {@code to} before {@code from}, or a bad {@code page}, {@code size}
+	 * or {@code sort}; 403 for another salon; 404 if the salon doesn't exist.
 	 *
 	 * @param businessId the salon
 	 * @param from the first day, {@code yyyy-MM-dd}, or nothing for no first day
 	 * @param to the last day, {@code yyyy-MM-dd}, or nothing for no last day
 	 * @param staffId only this staff member's appointments, or nothing for everyone's
 	 * @param customerId only this customer's appointments, or nothing for everyone's
+	 * @param status only appointments with this status: {@code BOOKED}, {@code CONFIRMED}, {@code COMPLETED},
+	 *        {@code CANCELLED} or {@code NO_SHOW}
+	 * @param sort the order: {@code starts_at}, or {@code -starts_at} for latest first
+	 * @param page the page, counting from 1 (default 1)
+	 * @param size appointments per page, 1 to 100 (default 20)
 	 * @param principal the signed-in caller
-	 * @return 200 with a JSON array of the appointments
+	 * @return 200 with a page of appointments
 	 */
 	@GetMapping
-	public List<Appointment> getAppointments(@PathVariable long businessId,
+	public Page<Appointment> getAppointments(@PathVariable long businessId,
 			@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
 			@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
 			@RequestParam(name = "staff_id", required = false) Long staffId,
 			@RequestParam(name = "customer_id", required = false) Long customerId,
+			@RequestParam(required = false) AppointmentStatus status,
+			@RequestParam(defaultValue = "starts_at") String sort,
+			@RequestParam(required = false) Integer page,
+			@RequestParam(required = false) Integer size,
 			@AuthenticationPrincipal AuthenticatedUser principal)
 	{
-		return appointmentService.getAppointments(businessId, from, to, staffId, customerId, principal);
+		return appointmentService.getAppointments(businessId, from, to, staffId, customerId, status,
+				Sort.parse(sort, AppointmentDao.SortBy.class), PageQuery.of(page, size), principal);
 	}
 
 	/**

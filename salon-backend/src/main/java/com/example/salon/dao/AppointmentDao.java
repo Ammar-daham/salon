@@ -3,20 +3,26 @@ package com.example.salon.dao;
 import com.example.salon.model.Appointment;
 import com.example.salon.model.AppointmentStatus;
 import com.example.salon.model.Booking;
+import com.example.salon.paging.Page;
+import com.example.salon.paging.PageQuery;
+import com.example.salon.paging.Sort;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
-import java.util.List;
 
 /** zone is the salon's time zone: Appointment's date-times are on its clock, the table stores instants. */
 public interface AppointmentDao {
+    enum SortBy { STARTS_AT }
+
+    /** Appointments starting in [from, to); a null bound, staffId, customerId or status doesn't narrow. */
+    record Filter(long businessId, OffsetDateTime from, OffsetDateTime to, Long staffId, Long customerId,
+            AppointmentStatus status) {}
+
     /** durationMinutes and price are the booked service's. */
     Long addAppointment(long businessId, Booking booking, int durationMinutes, BigDecimal price, ZoneId zone);
 
-    /** Ordered by start. Appointments starting in [from, to); a null bound, staffId or customerId doesn't narrow. */
-    List<Appointment> getAppointments(long businessId, OffsetDateTime from, OffsetDateTime to, Long staffId,
-            Long customerId, ZoneId zone);
+    Page<Appointment> getAppointments(Filter filter, Sort<SortBy> sort, PageQuery page, ZoneId zone);
 
     Appointment getAppointmentById(long businessId, long appointmentId, ZoneId zone);
 

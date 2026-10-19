@@ -1,5 +1,6 @@
 import { apiClient } from "@/lib/api/client";
 import { endpoints } from "@/lib/api/endpoints";
+import { fetchAllPages } from "@/lib/api/paging";
 import type { Id, ListParams } from "@/lib/api/types";
 import type { BusinessDto } from "@/lib/resources/businesses/businesses.mappers";
 import { listAllBusinesses } from "@/lib/resources/businesses/businesses.api";
@@ -33,6 +34,10 @@ const toSalonRef = (salon: Pick<BusinessDto, "id" | "name" | "currency" | "timez
  * caller reads one salon. A platform caller (businessId == null) reads every salon's, in parallel:
  * there is no cross-salon appointments endpoint, and a date range keeps each one short. Each salon's
  * come in start order.
+ *
+ * The API pages the list, and this reads every page, because the calendar, the table's own
+ * filters and a client's visit totals all need the whole of it. A date range keeps that short; a
+ * client's or staff member's history isn't, until the table pages on the server too.
  */
 export async function listAppointments(
 	businessId: Id | null,
@@ -47,11 +52,12 @@ export async function listAppointments(
 
 	const perSalon = await Promise.all(
 		salons.map(async (salon) => {
-			const { data } = await apiClient.get<AppointmentDto[]>(endpoints.businesses.appointments(salon.id), {
-				params: toAppointmentQuery(filter),
+			const rows = await fetchAllPages<AppointmentDto>(
+				endpoints.businesses.appointments(salon.id),
+				toAppointmentQuery(filter),
 				signal,
-			});
-			return data.map((dto) => toAppointment(dto, salon));
+			);
+			return rows.map((dto) => toAppointment(dto, salon));
 		}),
 	);
 	return perSalon.flat();

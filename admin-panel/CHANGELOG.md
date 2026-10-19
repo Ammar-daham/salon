@@ -11,10 +11,13 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 
 Requires salon-backend with the customers API (DB-03), migration V9 (DB-07, DB-08), the opening
 hours API with migration V10 (DB-09, DB-14), the appointments and availability APIs with
-migration V12 (DB-13, DB-14), the password endpoints with migration V13 (FE-13), and the paged
-lists, `GET /customers` and named staff records (BE-15).
+migration V12 (DB-13, DB-14), the password endpoints with migration V13 (FE-13), the paged
+lists, `GET /customers` and named staff records (BE-15), and the paged appointment list.
 
 ### Changed
+- The calendar, the appointment tables and a client's profile read the paged appointment list a
+  full page at a time until they have every appointment they show, as they had before from the
+  unpaged one. They look and work as before.
 - The panel is called Salonat Pro, with a new logo: the Arabic letter ص, the first of صالونات, on a
   rose tile, beside "salonat pro". It replaces the "S" mark and the name Salon in the sidebar, the
   header and the sign-in page, and is the icon in the browser tab and on a phone's home screen. Every

@@ -41,11 +41,12 @@
  * the record isn't theirs to see.
  *
  * <h2>Lists</h2>
- * <p>Salons, users and customers come a page at a time:
+ * <p>Salons, users, customers and appointments come a page at a time:
  * {@code {"items": [...], "page": 1, "size": 20, "total_items": 57, "total_pages": 3}}. {@code ?page}
  * counts from 1 and {@code ?size} is 1 to 100, 20 if left out; a page past the end has no items.
- * {@code ?q} searches and {@code ?sort} is one of the list's keys, or {@code -key} for the other way
- * round. Other lists, which a salon or a date range keeps short, come whole.
+ * {@code ?sort} is one of the list's keys, or {@code -key} for the other way round, and {@code ?q}
+ * searches every list but appointments. Other lists, which a salon or a date range keeps short, come
+ * whole.
  *
  * <h2>Errors</h2>
  * <p>An error has a status and a body such as

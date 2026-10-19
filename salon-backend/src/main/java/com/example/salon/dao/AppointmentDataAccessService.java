@@ -3,6 +3,9 @@ package com.example.salon.dao;
 import com.example.salon.model.Appointment;
 import com.example.salon.model.AppointmentStatus;
 import com.example.salon.model.Booking;
+import com.example.salon.paging.Page;
+import com.example.salon.paging.PageQuery;
+import com.example.salon.paging.Sort;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -21,17 +24,20 @@ public class AppointmentDataAccessService implements AppointmentDao
 {
     // The joins don't skip removed rows: a deleted customer, staff member or service still names the
     // appointments it was on.
-    private static final String SELECT = """
-            SELECT a.id, a.starts_at, a.ends_at, a.status, a.price, a.notes, a.created_at, a.updated_at,
+    private static final String COLUMNS = """
+            a.id, a.starts_at, a.ends_at, a.status, a.price, a.notes, a.created_at, a.updated_at,
             a.customer_id, c.first_name AS customer_first_name, c.last_name AS customer_last_name,
             a.staff_id, u.first_name AS staff_first_name, u.last_name AS staff_last_name,
             a.service_id, sv.name AS service_name
-            FROM appointments a
+            """;
+    private static final String FROM = """
+            appointments a
             JOIN customers c ON c.id = a.customer_id
             JOIN staff st ON st.id = a.staff_id
             JOIN users u ON u.id = st.user_id
             JOIN services sv ON sv.id = a.service_id
             """;
+    private static final String SELECT = "SELECT " + COLUMNS + "FROM " + FROM;
 
     private static final String UPCOMING = " AND status IN ('BOOKED', 'CONFIRMED') AND ends_at > now()";
 
@@ -69,18 +75,24 @@ public class AppointmentDataAccessService implements AppointmentDao
     }
 
     @Override
-    public List<Appointment> getAppointments(long businessId, OffsetDateTime from, OffsetDateTime to, Long staffId,
-            Long customerId, ZoneId zone)
+    public Page<Appointment> getAppointments(Filter filter, Sort<SortBy> sort, PageQuery page, ZoneId zone)
     {
-        String sql = SELECT + """
-                WHERE a.business_id = ?
-                AND a.starts_at >= COALESCE(?::timestamptz, '-infinity')
-                AND a.starts_at < COALESCE(?::timestamptz, 'infinity')
-                AND a.staff_id = COALESCE(?::bigint, a.staff_id)
-                AND a.customer_id = COALESCE(?::bigint, a.customer_id)
-                ORDER BY a.starts_at, a.id
-                """;
-        return jdbcTemplate.query(sql, (rs, i) -> mapRow(rs, zone), businessId, from, to, staffId, customerId);
+        ListQuery query = new ListQuery().where("a.business_id = ?", filter.businessId());
+        if (filter.from() != null)
+            query.where("a.starts_at >= ?", filter.from());
+        if (filter.to() != null)
+            query.where("a.starts_at < ?", filter.to());
+        if (filter.staffId() != null)
+            query.where("a.staff_id = ?", filter.staffId());
+        if (filter.customerId() != null)
+            query.where("a.customer_id = ?", filter.customerId());
+        if (filter.status() != null)
+            query.where("a.status = ?", filter.status().name());
+        List<String> columns = switch (sort.key()) {
+            case STARTS_AT -> List.of("a.starts_at");
+        };
+        return query.page(jdbcTemplate, COLUMNS, FROM, ListQuery.orderBy(columns, sort.descending(), "a.id"), page,
+                (rs, i) -> mapRow(rs, zone));
     }
 
     @Override
