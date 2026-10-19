@@ -97,20 +97,19 @@ export function toBusiness(dto: BusinessDto): Business {
 }
 
 /**
- * Create/update body. Only these six fields are read by the backend.
+ * Create/update body. The update replaces every one of these fields, so each is always sent.
  *
- * `status` is sent only when provided: the update SQL uses COALESCE, so omitting
- * it preserves the stored value instead of silently resetting the salon.
- * Children cannot be created through this endpoint — there is no POST for
- * addresses or contacts, and a nested address with a null id no-ops.
+ * `status` isn't: neither endpoint reads it. A new salon is PENDING, and only
+ * PUT /businesses/{id}/status moves it. Children cannot be created through this
+ * endpoint — there is no POST for addresses or contacts, and a nested address
+ * with a null id no-ops.
  */
 export function toBusinessRequest(input: BusinessInput) {
 	return {
 		name: input.name,
 		description: input.description,
 		image: input.image,
-		...(input.status ? { status: input.status } : {}),
-		...(input.currency ? { currency: input.currency } : {}),
-		...(input.timezone ? { timezone: input.timezone } : {}),
+		currency: input.currency,
+		timezone: input.timezone,
 	};
 }

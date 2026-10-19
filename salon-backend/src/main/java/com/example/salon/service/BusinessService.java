@@ -96,15 +96,10 @@ public class BusinessService
     @Transactional
     public Business updateBusinessById(int id, Business business, AuthenticatedUser caller) 
     {
-        Business existing = getBusinessById(id);
+        getBusinessById(id);
 
         // ADMIN may only edit their own salon; SUPER_ADMIN may edit any.
         AccessControl.requireBusinessAccess(caller, id);
-        // Approving/rejecting/suspending a salon is platform moderation, reserved for SUPER_ADMIN.
-        if (!AccessControl.isSuperAdmin(caller)
-                && business.getStatus() != null && business.getStatus() != existing.getStatus()) {
-            throw new AccessDeniedException("Only a super admin can change a business's status");
-        }
 
         int row;
         try {
@@ -116,9 +111,25 @@ public class BusinessService
         }
         if (row == 0)
             throw new BaseException("Business with id " + id + " not found.", ErrorCode.NOT_FOUND);
-        if (business.getStatus() != null && business.getStatus() != existing.getStatus())
-            log.info("Business {} status changed from {} to {}", id, existing.getStatus(), business.getStatus());
         log.info("Updated business {}", id);
+        return getBusinessById(id);
+    }
+
+    /**
+     * Approving, rejecting and suspending a salon is platform moderation, reserved for SUPER_ADMIN, and kept
+     * apart from its details so a settings form can't undo it. Asking for the status it already has changes
+     * nothing.
+     */
+    @Transactional
+    public Business changeStatus(int id, Status status, AuthenticatedUser caller)
+    {
+        if (!AccessControl.isSuperAdmin(caller))
+            throw new AccessDeniedException("Only a super admin can change a business's status");
+        Business existing = getBusinessById(id);
+        if (status != existing.getStatus()) {
+            businessDao.updateBusinessStatus(id, status);
+            log.info("Business {} status changed from {} to {}", id, existing.getStatus(), status);
+        }
         return getBusinessById(id);
     }
 

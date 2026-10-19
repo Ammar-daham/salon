@@ -112,24 +112,80 @@ class RegressionTest extends IntegrationTest
 				.andExpect(jsonPath("$.services[0].id").value(Fixture.GLOW_HAIRCUT));
 	}
 
-	/** updateBusinessById COALESCE: omitting status/image used to reset status and violate image NOT NULL. */
+	/**
+	 * PUT /businesses/{id} cleared a description left out, but kept the image, currency and timezone, and
+	 * took an image of "", although creating a salon requires one.
+	 */
 	@Test
-	void updatingABusinessWithoutImageOrStatusKeepsBoth() throws Exception
+	void updatingABusinessReplacesEveryDetail() throws Exception
 	{
 		MockHttpSession admin = loginAs(Fixture.GLOW_ADMIN);
+		String glow = "/api/v1/businesses/" + Fixture.GLOW;
 
-		mvc.perform(put("/api/v1/businesses/" + Fixture.GLOW).session(admin)
+		for (String body : new String[] {
+				"{\"name\": \"Glow\", \"currency\": \"EUR\", \"timezone\": \"Europe/Berlin\"}",
+				"{\"name\": \"Glow\", \"image\": \"\", \"currency\": \"EUR\", \"timezone\": \"Europe/Berlin\"}",
+				"{\"name\": \"Glow\", \"image\": \"https://example.com/glow.png\", \"timezone\": \"Europe/Berlin\"}",
+				"{\"name\": \"Glow\", \"image\": \"https://example.com/glow.png\", \"currency\": \"EUR\"}"}) {
+			mvc.perform(put(glow).session(admin).contentType(MediaType.APPLICATION_JSON).content(body))
+					.andExpect(status().isBadRequest());
+		}
+
+		mvc.perform(put(glow).session(admin)
 						.contentType(MediaType.APPLICATION_JSON)
 						.content("""
-								{"name": "Glow Beauty Studio", "description": "Now with brows."}
+								{"name": "Glow", "image": "https://example.com/glow-2.png", "currency": "GBP",
+								 "timezone": "Europe/London"}
 								"""))
-				.andExpect(status().isOk());
-
-		mvc.perform(get("/api/v1/businesses/" + Fixture.GLOW).session(admin))
-				.andExpect(jsonPath("$.description").value("Now with brows."))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.name").value("Glow"))
+				.andExpect(jsonPath("$.description").value(nullValue()))
+				.andExpect(jsonPath("$.image").value("https://example.com/glow-2.png"))
+				.andExpect(jsonPath("$.currency").value("GBP"))
+				.andExpect(jsonPath("$.timezone").value("Europe/London"))
 				.andExpect(jsonPath("$.status").value("APPROVED"))
-				.andExpect(jsonPath("$.image").value("https://example.com/glow.png"))
 				.andExpect(jsonPath("$.updated_at").value(notNullValue()));
+	}
+
+	/**
+	 * A salon's status changed through PUT /businesses/{id}, with its details, so a settings form loaded
+	 * before a suspension could undo it. It now has its own endpoint, and a status in the details is ignored.
+	 */
+	@Test
+	void aSalonsStatusChangesOnlyThroughItsOwnEndpoint() throws Exception
+	{
+		MockHttpSession superAdmin = loginAs(Fixture.SUPER_ADMIN);
+		String glow = "/api/v1/businesses/" + Fixture.GLOW;
+
+		mvc.perform(put(glow).session(superAdmin)
+						.contentType(MediaType.APPLICATION_JSON)
+						.content("""
+								{"name": "Glow Beauty Studio", "image": "https://example.com/glow.png", "currency": "EUR",
+								 "timezone": "Europe/Berlin", "status": "SUSPENDED"}
+								"""))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.status").value("APPROVED"));
+
+		// The status it already has changes nothing, not even updated_at.
+		mvc.perform(put("/api/v1/businesses/" + Fixture.URBAN + "/status").session(superAdmin)
+						.contentType(MediaType.APPLICATION_JSON).content("{\"status\": \"APPROVED\"}"))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.status").value("APPROVED"))
+				.andExpect(jsonPath("$.updated_at").value(nullValue()));
+		mvc.perform(put(glow + "/status").session(superAdmin)
+						.contentType(MediaType.APPLICATION_JSON).content("{\"status\": \"SUSPENDED\"}"))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.status").value("SUSPENDED"))
+				.andExpect(jsonPath("$.name").value("Glow Beauty Studio"));
+
+		mvc.perform(put(glow + "/status").session(superAdmin).contentType(MediaType.APPLICATION_JSON).content("{}"))
+				.andExpect(status().isBadRequest());
+		mvc.perform(put(glow + "/status").session(superAdmin)
+						.contentType(MediaType.APPLICATION_JSON).content("{\"status\": \"OPEN\"}"))
+				.andExpect(status().isBadRequest());
+		mvc.perform(put("/api/v1/businesses/9999/status").session(superAdmin)
+						.contentType(MediaType.APPLICATION_JSON).content("{\"status\": \"APPROVED\"}"))
+				.andExpect(status().isNotFound());
 	}
 
 	/** Pins the snake_case wire contract the admin panel's mappers depend on. */
@@ -359,7 +415,8 @@ class RegressionTest extends IntegrationTest
 		mvc.perform(put("/api/v1/businesses/" + Fixture.GLOW).session(loginAs(Fixture.GLOW_ADMIN))
 						.contentType(MediaType.APPLICATION_JSON)
 						.content("""
-								{"name": "Urban Cuts Barbershop"}
+								{"name": "Urban Cuts Barbershop", "image": "https://example.com/glow.png", "currency": "EUR",
+								 "timezone": "Europe/Berlin"}
 								"""))
 				.andExpect(status().isConflict())
 				.andExpect(jsonPath("$.errorCode").value("CONFLICT"))
@@ -408,7 +465,8 @@ class RegressionTest extends IntegrationTest
 		mvc.perform(put("/api/v1/businesses/" + Fixture.GLOW).session(loginAs(Fixture.GLOW_ADMIN))
 						.contentType(MediaType.APPLICATION_JSON)
 						.content("""
-								{"name": "Glow Beauty Studio", "contacts": [{"type": "email", "value": "brand-new@glow.test"}]}
+								{"name": "Glow Beauty Studio", "image": "https://example.com/glow.png", "currency": "EUR",
+								 "timezone": "Europe/Berlin", "contacts": [{"type": "email", "value": "brand-new@glow.test"}]}
 								"""))
 				.andExpect(status().isOk());
 	}

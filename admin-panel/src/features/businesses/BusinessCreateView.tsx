@@ -16,8 +16,7 @@ export default function BusinessCreateView() {
 	const { toast } = useToast();
 	const create = useCreateBusiness();
 
-	// Status is writable exactly once, at creation: addBusiness defaults a null
-	// status to PENDING, and the update path can't change it afterwards.
+	// The API doesn't read a status on create (a new salon is PENDING), so this picker has no effect.
 	const allowStatus = can(user, "business:create");
 
 	async function handleSubmit(input: BusinessInput) {

@@ -86,21 +86,16 @@ class ColumnTypesTest extends IntegrationTest
 	}
 
 	@Test
-	void updatingABusinessKeepsItsCurrencyUnlessOneIsSent() throws Exception
+	void updatingABusinessSetsTheCurrencySent() throws Exception
 	{
 		MockHttpSession admin = loginAs(Fixture.GLOW_ADMIN);
 		String glow = "/api/v1/businesses/" + Fixture.GLOW;
 
-		mvc.perform(put(glow).session(admin).contentType(MediaType.APPLICATION_JSON)
-						.content("""
-								{"name": "Glow Beauty Studio", "description": "Colour and precision cuts."}
-								"""))
-				.andExpect(status().isOk());
 		mvc.perform(get(glow).session(admin)).andExpect(jsonPath("$.currency").value("EUR"));
-
 		mvc.perform(put(glow).session(admin).contentType(MediaType.APPLICATION_JSON)
 						.content("""
-								{"name": "Glow Beauty Studio", "description": "Colour and precision cuts.", "currency": "SEK"}
+								{"name": "Glow Beauty Studio", "description": "Colour and precision cuts.",
+								 "image": "https://example.com/glow.png", "currency": "SEK", "timezone": "Europe/Berlin"}
 								"""))
 				.andExpect(status().isOk());
 		mvc.perform(get(glow).session(admin)).andExpect(jsonPath("$.currency").value("SEK"));
@@ -139,23 +134,12 @@ class ColumnTypesTest extends IntegrationTest
 		// A fixed offset ignores daylight saving time: 09:00 would be off by an hour half the year.
 		for (String zone : new String[] {"+01:00", "CET+1", "Mars/Olympus_Mons", "europe/berlin"}) {
 			mvc.perform(put(glow).session(admin).contentType(MediaType.APPLICATION_JSON)
-							.content("""
-									{"name": "Glow Beauty Studio", "timezone": "%s"}
-									""".formatted(zone)))
+							.content(glowWithZone(zone)))
 					.andExpect(status().isBadRequest())
 					.andExpect(jsonPath("$.message").value("timezone must be an IANA time zone ID, e.g. Europe/Berlin"));
 		}
 
-		// Omitted keeps the stored zone, like currency.
-		mvc.perform(put(glow).session(admin).contentType(MediaType.APPLICATION_JSON)
-						.content("""
-								{"name": "Glow Beauty Studio", "timezone": "Europe/Vienna"}
-								"""))
-				.andExpect(status().isOk());
-		mvc.perform(put(glow).session(admin).contentType(MediaType.APPLICATION_JSON)
-						.content("""
-								{"name": "Glow Beauty Studio"}
-								"""))
+		mvc.perform(put(glow).session(admin).contentType(MediaType.APPLICATION_JSON).content(glowWithZone("Europe/Vienna")))
 				.andExpect(status().isOk());
 		mvc.perform(get(glow + "/hours").session(admin)).andExpect(jsonPath("$.timezone").value("Europe/Vienna"));
 	}
@@ -187,5 +171,12 @@ class ColumnTypesTest extends IntegrationTest
 		mvc.perform(put(glowAddress).session(admin).contentType(MediaType.APPLICATION_JSON)
 						.content(address(", \"latitude\": 52.5")))
 				.andExpect(status().isBadRequest());
+	}
+
+	private static String glowWithZone(String zone)
+	{
+		return """
+				{"name": "Glow Beauty Studio", "image": "https://example.com/glow.png", "currency": "EUR", "timezone": "%s"}
+				""".formatted(zone);
 	}
 }

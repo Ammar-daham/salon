@@ -144,7 +144,8 @@ class StaffScheduleControllerTest extends IntegrationTest
 
 		// Moving the salon to London keeps the instant, so the same absence reads an hour earlier.
 		send(put("/api/v1/businesses/" + Fixture.GLOW), admin, """
-				{"name": "Glow Beauty Studio", "timezone": "Europe/London"}
+				{"name": "Glow Beauty Studio", "image": "https://example.com/glow.png", "currency": "EUR",
+				 "timezone": "Europe/London"}
 				""").andExpect(status().isOk());
 		mvc.perform(get(location).session(admin)).andExpect(jsonPath("$.starts_at").value("2026-07-01T08:00"));
 	}

@@ -24,5 +24,7 @@ public interface BusinessDao
 
     int updateBusinessById(int id, Business business);
 
+    int updateBusinessStatus(int id, Status status);
+
     int deleteBusiness(int id);
 }

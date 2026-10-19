@@ -93,11 +93,12 @@ class WriteResponsesTest extends IntegrationTest
 		String mia = GLOW + "/staff/" + Fixture.GLOW_STAFF;
 
 		replace(GLOW, superAdmin, """
-				{"name": "Glow Beauty Studio", "description": "Now with brows."}
+				{"name": "Glow Beauty Studio", "description": "Now with brows.", "image": "https://example.com/glow.png",
+				 "currency": "EUR", "timezone": "Europe/Berlin"}
 				""")
 				.andExpect(jsonPath("$.id").value(Fixture.GLOW))
 				.andExpect(jsonPath("$.description").value("Now with brows."))
-				.andExpect(jsonPath("$.image").value("https://example.com/glow.png"))
+				.andExpect(jsonPath("$.status").value("APPROVED"))
 				.andExpect(jsonPath("$.updated_at").value(notNullValue()));
 		replace(GLOW + "/services/" + Fixture.GLOW_MANICURE, superAdmin, """
 				{"name": "Gel Manicure", "duration_minutes": 40, "price": 30.00, "is_active": true}

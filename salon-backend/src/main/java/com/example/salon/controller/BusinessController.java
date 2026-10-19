@@ -1,6 +1,7 @@
 package com.example.salon.controller;
 
 import com.example.salon.dao.BusinessDao;
+import com.example.salon.dto.BusinessStatusRequest;
 import com.example.salon.dto.CreateBusinessRequest;
 import com.example.salon.dto.UpdateBusinessRequest;
 import com.example.salon.model.Business;
@@ -120,18 +121,17 @@ public class BusinessController
     }
 
     /**
-     * Changes a salon's details, or its status.
+     * Replaces a salon's details.
      *
-     * <p>{@code PUT /api/v1/businesses/{id}}. An ADMIN of the salon, or a SUPER_ADMIN. {@code name} and
-     * {@code description} are replaced, so leaving {@code description} out clears it; {@code image},
-     * {@code status}, {@code currency} and {@code timezone} keep their stored value when left out. Only a
-     * SUPER_ADMIN may change {@code status}; an ADMIN may send it unchanged. Addresses and contacts in the
-     * body are ignored. A new {@code timezone} keeps time off and appointments at the same moments, so
-     * they read differently on the new clock, while opening hours and shifts keep their wall-clock times.
+     * <p>{@code PUT /api/v1/businesses/{id}}. An ADMIN of the salon, or a SUPER_ADMIN. Every field is
+     * replaced: {@code name}, {@code image}, {@code currency} and {@code timezone} are required, and leaving
+     * {@code description} out clears it. A {@code status}, addresses and contacts in the body are ignored;
+     * the status changes with {@code PUT /api/v1/businesses/{id}/status}. A new {@code timezone} keeps time
+     * off and appointments at the same moments, so they read differently on the new clock, while opening
+     * hours and shifts keep their wall-clock times.
      *
-     * <p>Errors: 400 if the body breaks the rules of {@link UpdateBusinessRequest}; 403 for another salon, or
-     * if an ADMIN sends a different {@code status}; 404 if there's no such salon; 409 if another salon
-     * already has the name.
+     * <p>Errors: 400 if the body breaks the rules of {@link UpdateBusinessRequest}; 403 for another salon;
+     * 404 if there's no such salon; 409 if another salon already has the name.
      *
      * @param id the salon's id
      * @param request the new details, as an {@link UpdateBusinessRequest}
@@ -142,6 +142,28 @@ public class BusinessController
     public Business updateBusiness(@PathVariable int id, @Valid @RequestBody UpdateBusinessRequest request, @AuthenticationPrincipal AuthenticatedUser principal)
     {
         return businessService.updateBusinessById(id, request.toBusiness(), principal);
+    }
+
+    /**
+     * Moves a salon to another status: approves, rejects or suspends it, or puts it back to pending.
+     *
+     * <p>{@code PUT /api/v1/businesses/{id}/status}. SUPER_ADMIN only. Any status may follow any other, and
+     * asking for the status it already has changes nothing. A salon that isn't {@code APPROVED} is hidden
+     * from everyone but ADMIN and SUPER_ADMIN users and the salon's own users.
+     *
+     * <p>Errors: 400 if {@code status} is missing or isn't one of the four {@link Status} names; 403 for
+     * anyone but a SUPER_ADMIN; 404 if there's no such salon.
+     *
+     * @param id the salon's id
+     * @param request the new {@code status}: see {@link BusinessStatusRequest}
+     * @param principal the signed-in caller
+     * @return 200 with the salon as stored
+     */
+    @PutMapping("/{id}/status")
+    public Business changeStatus(@PathVariable int id, @Valid @RequestBody BusinessStatusRequest request,
+            @AuthenticationPrincipal AuthenticatedUser principal)
+    {
+        return businessService.changeStatus(id, request.status(), principal);
     }
 
     /**

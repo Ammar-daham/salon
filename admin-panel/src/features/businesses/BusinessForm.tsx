@@ -78,8 +78,7 @@ export default function BusinessForm({
 			name: values.name.trim(),
 			description: values.description.trim() || null,
 			image: values.image.trim(),
-			// Omitted on edit: the update SQL COALESCEs status, and the control
-			// isn't offered there anyway.
+			// Not sent to the API either way: see toBusinessRequest.
 			...(allowStatus ? { status: values.status } : {}),
 			currency: values.currency,
 			timezone: values.timezone,

@@ -36,10 +36,9 @@ export default function BusinessSettingsView() {
 			<BusinessForm
 				mode="edit"
 				initial={business}
-				/* Status is deliberately not offered here. The update SQL can write it
-				   now, but approve/reject/suspend is a platform decision that deserves
-				   its own reviewed action rather than a quiet dropdown on a settings
-				   form. */
+				/* Status is deliberately not offered here: approve/reject/suspend is a
+				   platform decision with its own endpoint, PUT /businesses/{id}/status,
+				   rather than a quiet dropdown on a settings form. */
 				allowStatus={false}
 				submitting={update.isPending}
 				onSubmit={handleSubmit}
