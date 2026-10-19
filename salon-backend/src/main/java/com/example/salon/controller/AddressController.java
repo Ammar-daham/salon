@@ -38,7 +38,7 @@ public class AddressController
 	 *
 	 * <p>{@code GET /api/v1/addresses}. ADMIN and SUPER_ADMIN only. A SUPER_ADMIN gets every salon's and
 	 * every user's addresses; an ADMIN gets their own salon's and its users'. In {@code id} order and not
-	 * paged. {@code user_id} is {@code null} throughout.
+	 * paged. {@code user_id} names the user a user's address belongs to, and is {@code null} for a salon's.
 	 *
 	 * <p>Errors: 403 for anyone else.
 	 *
@@ -55,7 +55,7 @@ public class AddressController
 	 * Returns one address.
 	 *
 	 * <p>{@code GET /api/v1/addresses/{id}}. A salon's address, to anyone signed in; a user's, to that user,
-	 * an ADMIN of their salon or a SUPER_ADMIN. For a user's address, {@code user_id} names the user.
+	 * an ADMIN of their salon or a SUPER_ADMIN.
 	 *
 	 * <p>Errors: 404 if there's no such address, or it's a user's and the caller may not see that user.
 	 *
