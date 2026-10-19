@@ -33,10 +33,10 @@ export function toCreateUserRequest(input: CreateUserInput) {
 	};
 }
 
+/** The name only: the role has its own endpoint, PUT /users/{id}/role. */
 export function toUpdateUserRequest(input: UpdateUserInput) {
 	return {
 		first_name: input.firstName,
 		last_name: input.lastName,
-		role: input.role,
 	};
 }

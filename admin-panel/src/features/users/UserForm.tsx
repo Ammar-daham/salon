@@ -40,10 +40,10 @@ interface UserFormProps {
  *  - any other caller has their own businessId substituted server-side
  *  - email + password are required for every role except CUSTOMER
  *
- * On edit the backend only writes first_name, last_name and role — email can't
- * be changed at all, and only the account holder can change their password, in
- * Settings or by a reset link. The form shows email as read-only rather than
- * pretending otherwise.
+ * On edit the backend only writes first_name, last_name and, through its own
+ * endpoint, role — email can't be changed at all, and only the account holder
+ * can change their password, in Settings or by a reset link. The form shows
+ * email as read-only rather than pretending otherwise.
  */
 export default function UserForm({
 	mode,
@@ -116,7 +116,7 @@ export default function UserForm({
 			await onSubmitUpdate?.({
 				firstName: firstName.trim(),
 				lastName: lastName.trim(),
-				// Always sent: UserDataAccessService NPEs into a 400 when role is null.
+				// Saved separately, and only if it changed: see useUpdateUser.
 				role,
 			});
 		}

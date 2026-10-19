@@ -59,11 +59,10 @@ describe("toCreateUserRequest", () => {
 });
 
 describe("toUpdateUserRequest", () => {
-	it("sends only the columns the backend updates, always including role", () => {
+	it("sends the name only, as the role has its own endpoint", () => {
 		expect(toUpdateUserRequest({ firstName: "Mia", lastName: "Stylist", role: "ADMIN" })).toEqual({
 			first_name: "Mia",
 			last_name: "Stylist",
-			role: "ADMIN",
 		});
 	});
 });

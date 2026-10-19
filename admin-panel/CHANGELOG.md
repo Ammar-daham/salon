@@ -12,10 +12,13 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 Requires salon-backend with the customers API (DB-03), migration V9 (DB-07, DB-08), the opening
 hours API with migration V10 (DB-09, DB-14), the appointments and availability APIs with
 migration V12 (DB-13, DB-14), the password endpoints with migration V13 (FE-13), the paged
-lists, `GET /customers` and named staff records (BE-15), the paged appointment list, and a `PUT`
-that answers with the record as stored.
+lists, `GET /customers` and named staff records (BE-15), the paged appointment list, a `PUT`
+that answers with the record as stored, and `PUT /users/{id}/role`.
 
 ### Changed
+- Saving a user writes their name, then their role with `PUT /users/{id}/role` if it changed, as the
+  API now takes the role on its own. If the role is refused, the name is still saved, and the page
+  shows both as stored.
 - Saving a salon, a user or a client shows the record as the server stored it, from the answer to
   the save, instead of loading it again. Lists that show it are still reloaded.
 - The calendar, the appointment tables and a client's profile read the paged appointment list a

@@ -13,8 +13,8 @@ export interface UserPageQuery extends PageQuery {
 
 /**
  * The list is every user for a SUPER_ADMIN and the caller's own salon's for an ADMIN, decided by
- * the server. PUT only writes first_name, last_name and role; email can never be edited, and a
- * password only by its owner, through auth.api.
+ * the server. update writes only first_name and last_name, and changeUserRole the role; email can
+ * never be edited, and a password only by its owner, through auth.api.
  */
 export const usersRepository: Repository<User, CreateUserInput, UpdateUserInput, UserPageQuery> = {
 	source: "live",
@@ -48,6 +48,12 @@ export const usersRepository: Repository<User, CreateUserInput, UpdateUserInput,
 		await apiClient.delete(endpoints.users.byId(id));
 	},
 };
+
+/** ADMIN and SUPER_ADMIN only. Answers with the user as stored. */
+export async function changeUserRole(id: Id, role: Role): Promise<User> {
+	const { data } = await apiClient.put<UserDto>(endpoints.users.role(id), { role });
+	return toUser(data);
+}
 
 /** Convenience wrapper kept for the staff-creation form. */
 export async function createUser(input: CreateUserInput): Promise<User> {

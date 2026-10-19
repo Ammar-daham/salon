@@ -16,6 +16,7 @@ export const endpoints = {
 	users: {
 		root: "/api/v1/users",
 		byId: (id: number) => `/api/v1/users/${id}`,
+		role: (id: number) => `/api/v1/users/${id}/role`,
 	},
 	businesses: {
 		root: "/api/v1/businesses",
