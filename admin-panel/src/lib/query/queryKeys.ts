@@ -52,8 +52,9 @@ export const queryKeys = {
 	},
 	customers: {
 		all: ["customers"] as const,
+		lists: () => [...queryKeys.customers.all, "list"] as const,
 		// The query names the salon, or none for every salon (platform scope).
-		page: (query: CustomerPageQuery) => [...queryKeys.customers.all, "list", query] as const,
+		page: (query: CustomerPageQuery) => [...queryKeys.customers.lists(), query] as const,
 		detail: (id: Id) => [...queryKeys.customers.all, "detail", id] as const,
 	},
 	employees: {

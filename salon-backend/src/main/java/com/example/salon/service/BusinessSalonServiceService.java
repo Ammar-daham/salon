@@ -68,7 +68,7 @@ public class BusinessSalonServiceService
     }
 
     @Transactional
-    public void updateServiceForBusiness(int businessId, int serviceId, SalonService salonService, AuthenticatedUser caller) 
+    public SalonService updateServiceForBusiness(int businessId, int serviceId, SalonService salonService, AuthenticatedUser caller) 
     {
         AccessControl.requireBusinessAccess(caller, businessId);
         getServiceById(businessId, serviceId);
@@ -76,6 +76,7 @@ public class BusinessSalonServiceService
         if (row == 0)
             throw new BaseException("Service with id " + serviceId + " not found.", ErrorCode.NOT_FOUND);
         log.info("Updated service {} in business {}", serviceId, businessId);
+        return getServiceById(businessId, serviceId);
     }
 
     @Transactional

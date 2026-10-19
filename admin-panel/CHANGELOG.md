@@ -12,9 +12,12 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 Requires salon-backend with the customers API (DB-03), migration V9 (DB-07, DB-08), the opening
 hours API with migration V10 (DB-09, DB-14), the appointments and availability APIs with
 migration V12 (DB-13, DB-14), the password endpoints with migration V13 (FE-13), the paged
-lists, `GET /customers` and named staff records (BE-15), and the paged appointment list.
+lists, `GET /customers` and named staff records (BE-15), the paged appointment list, and a `PUT`
+that answers with the record as stored.
 
 ### Changed
+- Saving a salon, a user or a client shows the record as the server stored it, from the answer to
+  the save, instead of loading it again. Lists that show it are still reloaded.
 - The calendar, the appointment tables and a client's profile read the paged appointment list a
   full page at a time until they have every appointment they show, as they had before from the
   unpaged one. They look and work as before.

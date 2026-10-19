@@ -6,6 +6,7 @@ import com.example.salon.security.AuthenticatedUser;
 import com.example.salon.service.AddressService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -73,7 +74,7 @@ public class AddressController
 	 *
 	 * <p>{@code PUT /api/v1/addresses/{id}}. A salon's address, by an ADMIN of that salon or a SUPER_ADMIN;
 	 * a user's, by that user, an ADMIN of their salon or a SUPER_ADMIN. Every field is replaced, so an
-	 * optional one left out is cleared. Answers 200 with no body.
+	 * optional one left out is cleared.
 	 *
 	 * <p>Errors: 400 if the body breaks {@link AddressRequest}'s rules; 403 if it's a salon's address and
 	 * the caller may not change it; 404 if there's no such address, or it's a user's and the caller may
@@ -82,18 +83,19 @@ public class AddressController
 	 * @param id the address's id
 	 * @param request the new address, an {@link AddressRequest}
 	 * @param principal the signed-in caller
+	 * @return 200 with the address as stored
 	 */
 	@PutMapping("/{id}")
-	public void updateAddress(@PathVariable int id, @Valid @RequestBody AddressRequest request, @AuthenticationPrincipal AuthenticatedUser principal)
+	public Address updateAddress(@PathVariable int id, @Valid @RequestBody AddressRequest request, @AuthenticationPrincipal AuthenticatedUser principal)
 	{
-		addressService.updateAddressById(id, request.toAddress(), principal);
+		return addressService.updateAddressById(id, request.toAddress(), principal);
 	}
 
 	/**
 	 * Deletes an address.
 	 *
 	 * <p>{@code DELETE /api/v1/addresses/{id}}. The same callers as {@code PUT /api/v1/addresses/{id}}.
-	 * Answers 200 with no body.
+	 * Answers 204.
 	 *
 	 * <p>Errors: 403 if it's a salon's address and the caller may not change it; 404 if there's no such
 	 * address, or it's a user's and the caller may not see that user.
@@ -102,6 +104,7 @@ public class AddressController
 	 * @param principal the signed-in caller
 	 */
 	@DeleteMapping("/{id}")
+	@ResponseStatus(HttpStatus.NO_CONTENT)
 	public void deleteAddress(@PathVariable int id, @AuthenticationPrincipal AuthenticatedUser principal)
 	{
 		addressService.deleteAddressById(id, principal);

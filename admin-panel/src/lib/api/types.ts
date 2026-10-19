@@ -33,13 +33,14 @@ export interface PageQuery {
  * mock store. Swapping a mock for the real thing is a one-line change in
  * `src/lib/resources/index.ts` and nothing at the call sites moves.
  *
- * A list comes a page at a time, searched, filtered and sorted on the server (BE-15).
+ * A list comes a page at a time, searched, filtered and sorted on the server (BE-15). An update
+ * answers with the record as stored.
  */
 export interface Repository<TEntity, TCreate = unknown, TUpdate = TCreate, TQuery extends PageQuery = PageQuery> {
 	readonly source: DataSource;
 	list(query: TQuery, params?: ListParams): Promise<Page<TEntity>>;
 	get(id: Id, params?: ListParams): Promise<TEntity>;
 	create(input: TCreate): Promise<TEntity>;
-	update(id: Id, input: TUpdate): Promise<void>;
+	update(id: Id, input: TUpdate): Promise<TEntity>;
 	remove(id: Id): Promise<void>;
 }

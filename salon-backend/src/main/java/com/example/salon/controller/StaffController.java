@@ -9,6 +9,7 @@ import com.example.salon.security.AuthenticatedUser;
 import com.example.salon.service.StaffService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -119,7 +120,7 @@ public class StaffController
 	 * <p>{@code PUT /api/v1/businesses/{businessId}/staff/{staffId}}. An ADMIN of the salon, or a
 	 * SUPER_ADMIN. {@code title}, {@code is_active}, {@code hired_at} and {@code calendar_colour} are all
 	 * replaced, so leaving {@code calendar_colour} out clears it; who the record is for can't change. An
-	 * inactive staff member can't be booked. Answers 200 with no body.
+	 * inactive staff member can't be booked.
 	 *
 	 * <p>Errors: 400 if the body breaks the rules of {@link UpdateStaffRequest}; 403 for another salon; 404 if
 	 * the salon has no such staff record, or it has been removed.
@@ -128,12 +129,13 @@ public class StaffController
 	 * @param staffId the staff record's id
 	 * @param request the new details, as an {@link UpdateStaffRequest}
 	 * @param principal the signed-in caller
+	 * @return 200 with the staff record as stored
 	 */
 	@PutMapping("/{businessId}/staff/{staffId}")
-	public void updateStaffForBusiness(@PathVariable long businessId, @PathVariable long staffId,
+	public Staff updateStaffForBusiness(@PathVariable long businessId, @PathVariable long staffId,
 			@Valid @RequestBody UpdateStaffRequest request, @AuthenticationPrincipal AuthenticatedUser principal)
 	{
-		staffService.updateStaffById(businessId, staffId, request.toStaff(), principal);
+		return staffService.updateStaffById(businessId, staffId, request.toStaff(), principal);
 	}
 
 	/**
@@ -142,7 +144,7 @@ public class StaffController
 	 * <p>{@code DELETE /api/v1/businesses/{businessId}/staff/{staffId}}. An ADMIN of the salon, or a
 	 * SUPER_ADMIN. A soft delete: past appointments keep pointing at the record, but it, and its services,
 	 * week and time off, can't be read or changed any more. The user account stays, and the person can be
-	 * taken on again as a new staff record. Answers 200 with no body.
+	 * taken on again as a new staff record. Answers 204.
 	 *
 	 * <p>Errors: 403 for another salon; 404 if the salon has no such staff record, or it was already removed;
 	 * 409 while the staff member has upcoming appointments ({@code BOOKED} or {@code CONFIRMED}, and not over
@@ -153,6 +155,7 @@ public class StaffController
 	 * @param principal the signed-in caller
 	 */
 	@DeleteMapping("/{businessId}/staff/{staffId}")
+	@ResponseStatus(HttpStatus.NO_CONTENT)
 	public void deleteStaffForBusiness(@PathVariable long businessId, @PathVariable long staffId,
 			@AuthenticationPrincipal AuthenticatedUser principal)
 	{

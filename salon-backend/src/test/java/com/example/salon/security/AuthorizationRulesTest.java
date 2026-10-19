@@ -214,7 +214,7 @@ class AuthorizationRulesTest extends IntegrationTest
 		mvc.perform(get("/api/v1/addresses/" + Fixture.GLOW_EMPLOYEE_PERSONAL_ADDRESS).session(admin))
 				.andExpect(jsonPath("$.street").value("4 Moved Lane"));
 		mvc.perform(delete("/api/v1/contacts/" + Fixture.GLOW_EMPLOYEE_PERSONAL_CONTACT).session(admin))
-				.andExpect(status().isOk());
+				.andExpect(status().isNoContent());
 	}
 
 	@Test
@@ -691,7 +691,7 @@ class AuthorizationRulesTest extends IntegrationTest
 	void aSalonWithoutStaffCanBeDeleted() throws Exception
 	{
 		mvc.perform(delete("/api/v1/businesses/" + Fixture.SERENITY_PENDING).session(loginAs(Fixture.SUPER_ADMIN)))
-				.andExpect(status().isOk());
+				.andExpect(status().isNoContent());
 	}
 
 	static String serviceBody(String name)

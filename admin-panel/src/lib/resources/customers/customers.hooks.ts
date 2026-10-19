@@ -60,10 +60,16 @@ export function useCreateCustomer() {
 }
 
 export function useUpdateCustomer() {
-	return useCustomerMutation(
-		({ businessId, id, input }: { businessId: Id; id: Id; input: CustomerInput }) =>
+	const qc = useQueryClient();
+	return useMutation({
+		mutationFn: ({ businessId, id, input }: { businessId: Id; id: Id; input: CustomerInput }) =>
 			updateCustomer(businessId, id, input),
-	);
+		// The PUT answers with the customer as stored, so their detail needs no refetch; the lists do.
+		onSuccess: (customer, { id }) => {
+			qc.setQueryData(queryKeys.customers.detail(id), customer);
+			qc.invalidateQueries({ queryKey: queryKeys.customers.lists() });
+		},
+	});
 }
 
 export function useDeleteCustomer() {

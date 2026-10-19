@@ -41,9 +41,13 @@ export async function createCustomer(businessId: Id, input: CustomerInput): Prom
 	return toCustomer(data);
 }
 
-/** A full replace: every field in `input` is written, and a null clears it. */
-export async function updateCustomer(businessId: Id, customerId: Id, input: CustomerInput): Promise<void> {
-	await apiClient.put(endpoints.businesses.customerById(businessId, customerId), toCustomerRequest(input));
+/** A full replace: every field in `input` is written, and a null clears it. Answers with the customer as stored. */
+export async function updateCustomer(businessId: Id, customerId: Id, input: CustomerInput): Promise<Customer> {
+	const { data } = await apiClient.put<CustomerDto>(
+		endpoints.businesses.customerById(businessId, customerId),
+		toCustomerRequest(input),
+	);
+	return toCustomer(data);
 }
 
 export async function removeCustomer(businessId: Id, customerId: Id): Promise<void> {

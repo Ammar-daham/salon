@@ -229,7 +229,7 @@ class StaffControllerTest extends IntegrationTest
 		MockHttpSession admin = loginAs(Fixture.GLOW_ADMIN);
 
 		mvc.perform(delete("/api/v1/businesses/" + Fixture.GLOW + "/staff/" + Fixture.GLOW_STAFF).session(admin))
-				.andExpect(status().isOk());
+				.andExpect(status().isNoContent());
 
 		mvc.perform(get("/api/v1/businesses/" + Fixture.GLOW + "/staff/" + Fixture.GLOW_STAFF).session(admin))
 				.andExpect(status().isNotFound());

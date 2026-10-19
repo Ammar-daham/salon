@@ -84,7 +84,7 @@ class RegressionTest extends IntegrationTest
 		MockHttpSession admin = loginAs(Fixture.GLOW_ADMIN);
 
 		mvc.perform(delete("/api/v1/businesses/" + Fixture.GLOW + "/services/" + Fixture.GLOW_MANICURE).session(admin))
-				.andExpect(status().isOk());
+				.andExpect(status().isNoContent());
 
 		mvc.perform(get("/api/v1/businesses/" + Fixture.GLOW).session(admin))
 				.andExpect(jsonPath("$.services", hasSize(1)))
@@ -186,7 +186,7 @@ class RegressionTest extends IntegrationTest
 		deleteGlowStaff(superAdmin);
 
 		mvc.perform(delete("/api/v1/businesses/" + Fixture.GLOW).session(superAdmin))
-				.andExpect(status().isOk());
+				.andExpect(status().isNoContent());
 
 		mvc.perform(get("/api/v1/contacts/" + Fixture.GLOW_CONTACT).session(superAdmin))
 				.andExpect(status().isNotFound());
@@ -203,7 +203,7 @@ class RegressionTest extends IntegrationTest
 		deleteGlowStaff(superAdmin);
 
 		mvc.perform(delete("/api/v1/businesses/" + Fixture.GLOW).session(superAdmin))
-				.andExpect(status().isOk());
+				.andExpect(status().isNoContent());
 
 		mvc.perform(get("/api/v1/businesses/" + Fixture.GLOW + "/services/" + Fixture.GLOW_HAIRCUT).session(superAdmin))
 				.andExpect(status().isNotFound());
@@ -217,7 +217,7 @@ class RegressionTest extends IntegrationTest
 		deleteGlowStaff(superAdmin);
 
 		mvc.perform(delete("/api/v1/businesses/" + Fixture.GLOW).session(superAdmin))
-				.andExpect(status().isOk());
+				.andExpect(status().isNoContent());
 
 		// The phone number that belonged to the deleted business can be registered again.
 		mvc.perform(post("/api/v1/users").session(superAdmin)
@@ -235,7 +235,7 @@ class RegressionTest extends IntegrationTest
 		MockHttpSession superAdmin = loginAs(Fixture.SUPER_ADMIN);
 
 		mvc.perform(delete("/api/v1/users/" + Fixture.GLOW_EMPLOYEE_ID).session(superAdmin))
-				.andExpect(status().isOk());
+				.andExpect(status().isNoContent());
 
 		mvc.perform(get("/api/v1/contacts/" + Fixture.GLOW_EMPLOYEE_PERSONAL_CONTACT).session(superAdmin))
 				.andExpect(status().isNotFound());
@@ -430,7 +430,7 @@ class RegressionTest extends IntegrationTest
 	{
 		for (long userId : new long[] {Fixture.GLOW_ADMIN_ID, Fixture.GLOW_EMPLOYEE_ID}) {
 			mvc.perform(delete("/api/v1/users/" + userId).session(superAdmin))
-					.andExpect(status().isOk());
+					.andExpect(status().isNoContent());
 		}
 	}
 }

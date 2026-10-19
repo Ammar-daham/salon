@@ -31,7 +31,7 @@ class SoftDeleteTest extends IntegrationTest
 		MockHttpSession admin = loginAs(Fixture.GLOW_ADMIN);
 		String haircut = GLOW + "/services/" + Fixture.GLOW_HAIRCUT;
 
-		mvc.perform(delete(haircut).session(admin)).andExpect(status().isOk());
+		mvc.perform(delete(haircut).session(admin)).andExpect(status().isNoContent());
 
 		mvc.perform(get(haircut).session(admin)).andExpect(status().isNotFound());
 		mvc.perform(put(haircut).session(admin).contentType(MediaType.APPLICATION_JSON).content("""
@@ -65,7 +65,7 @@ class SoftDeleteTest extends IntegrationTest
 		mvc.perform(post(GLOW + "/staff").session(admin).contentType(MediaType.APPLICATION_JSON).content(hireMia))
 				.andExpect(status().isConflict());
 
-		mvc.perform(delete(mia).session(admin)).andExpect(status().isOk());
+		mvc.perform(delete(mia).session(admin)).andExpect(status().isNoContent());
 
 		mvc.perform(get(mia).session(admin)).andExpect(status().isNotFound());
 		mvc.perform(get(mia + "/schedule").session(admin)).andExpect(status().isNotFound());
@@ -86,7 +86,7 @@ class SoftDeleteTest extends IntegrationTest
 		MockHttpSession admin = loginAs(Fixture.GLOW_ADMIN);
 		String olivia = GLOW + "/customers/" + Fixture.GLOW_CUSTOMER;
 
-		mvc.perform(delete(olivia).session(admin)).andExpect(status().isOk());
+		mvc.perform(delete(olivia).session(admin)).andExpect(status().isNoContent());
 
 		mvc.perform(get(GLOW + "/customers").session(admin))
 				.andExpect(jsonPath("$.items", hasSize(0)))

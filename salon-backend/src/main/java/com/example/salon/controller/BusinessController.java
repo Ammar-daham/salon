@@ -12,6 +12,7 @@ import com.example.salon.security.AuthenticatedUser;
 import com.example.salon.service.BusinessService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -127,7 +128,6 @@ public class BusinessController
      * SUPER_ADMIN may change {@code status}; an ADMIN may send it unchanged. Addresses and contacts in the
      * body are ignored. A new {@code timezone} keeps time off and appointments at the same moments, so
      * they read differently on the new clock, while opening hours and shifts keep their wall-clock times.
-     * Answers 200 with no body.
      *
      * <p>Errors: 400 if the body breaks the rules of {@link UpdateBusinessRequest}; 403 for another salon, or
      * if an ADMIN sends a different {@code status}; 404 if there's no such salon; 409 if another salon
@@ -136,11 +136,12 @@ public class BusinessController
      * @param id the salon's id
      * @param request the new details, as an {@link UpdateBusinessRequest}
      * @param principal the signed-in caller
+     * @return 200 with the salon as stored
      */
     @PutMapping("/{id}")
-    public void updateBusiness(@PathVariable int id, @Valid @RequestBody UpdateBusinessRequest request, @AuthenticationPrincipal AuthenticatedUser principal)
+    public Business updateBusiness(@PathVariable int id, @Valid @RequestBody UpdateBusinessRequest request, @AuthenticationPrincipal AuthenticatedUser principal)
     {
-        businessService.updateBusinessById(id, request.toBusiness(), principal);
+        return businessService.updateBusinessById(id, request.toBusiness(), principal);
     }
 
     /**
@@ -150,7 +151,7 @@ public class BusinessController
      * it takes the salon's addresses, contacts, services, opening hours, staff records, customers and
      * appointments with it. It's refused while any user account still belongs to the salon (its
      * {@code business_id} is the salon), so delete those users or move them first. An ADMIN belongs to
-     * their salon, so in practice only a SUPER_ADMIN can delete one. Answers 200 with no body.
+     * their salon, so in practice only a SUPER_ADMIN can delete one. Answers 204.
      *
      * <p>Errors: 403 for another salon; 404 if there's no such salon; 409 while users still belong to it.
      *
@@ -158,6 +159,7 @@ public class BusinessController
      * @param principal the signed-in caller
      */
     @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteBusiness(@PathVariable int id, @AuthenticationPrincipal AuthenticatedUser principal)
     {
         businessService.deleteBusiness(id, principal);

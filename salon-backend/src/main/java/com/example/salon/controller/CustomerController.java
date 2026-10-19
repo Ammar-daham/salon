@@ -10,6 +10,7 @@ import com.example.salon.security.AuthenticatedUser;
 import com.example.salon.service.CustomerService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -171,7 +172,7 @@ public class CustomerController
 	 *
 	 * <p>{@code PUT /api/v1/businesses/{businessId}/customers/{customerId}}. An ADMIN of the salon or a
 	 * SUPER_ADMIN; an EMPLOYEE is refused. Every field is replaced: an email, phone or notes left out is cleared,
-	 * and a missing {@code marketing_consent} means no. Answers 200 with no body.
+	 * and a missing {@code marketing_consent} means no.
 	 *
 	 * <p>Errors: 400 if the body fails validation; 403 for an EMPLOYEE or another salon; 404 if the customer isn't
 	 * a current customer of this salon.
@@ -180,12 +181,13 @@ public class CustomerController
 	 * @param customerId the customer
 	 * @param request the name, email, phone, notes and marketing consent: see {@link CustomerRequest}
 	 * @param principal the signed-in caller
+	 * @return 200 with the customer as stored
 	 */
 	@PutMapping("/businesses/{businessId}/customers/{customerId}")
-	public void updateCustomer(@PathVariable long businessId, @PathVariable long customerId,
+	public Customer updateCustomer(@PathVariable long businessId, @PathVariable long customerId,
 			@Valid @RequestBody CustomerRequest request, @AuthenticationPrincipal AuthenticatedUser principal)
 	{
-		customerService.updateCustomerById(businessId, customerId, request.toCustomer(), principal);
+		return customerService.updateCustomerById(businessId, customerId, request.toCustomer(), principal);
 	}
 
 	/**
@@ -193,7 +195,7 @@ public class CustomerController
 	 *
 	 * <p>{@code DELETE /api/v1/businesses/{businessId}/customers/{customerId}}. An ADMIN of the salon or a
 	 * SUPER_ADMIN; an EMPLOYEE is refused. The record is kept, so the customer's appointments still name them,
-	 * but every customer read leaves it out and it can't be booked any more. Answers 200 with no body.
+	 * but every customer read leaves it out and it can't be booked any more. Answers 204.
 	 *
 	 * <p>Errors: 403 for an EMPLOYEE or another salon; 404 if the customer isn't a current customer of this salon;
 	 * 409 while they have an upcoming appointment (booked or confirmed, and not over yet).
@@ -203,6 +205,7 @@ public class CustomerController
 	 * @param principal the signed-in caller
 	 */
 	@DeleteMapping("/businesses/{businessId}/customers/{customerId}")
+	@ResponseStatus(HttpStatus.NO_CONTENT)
 	public void deleteCustomer(@PathVariable long businessId, @PathVariable long customerId,
 			@AuthenticationPrincipal AuthenticatedUser principal)
 	{

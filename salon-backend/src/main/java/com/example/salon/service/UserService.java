@@ -119,7 +119,7 @@ public class UserService
 	}
 
 	@Transactional
-	public void updateUserById(long id, User user, AuthenticatedUser caller)
+	public User updateUserById(long id, User user, AuthenticatedUser caller)
 	{
 		// getUserById 404s unless the user exists and the caller may see them: self, own business or super admin.
 		User existing = getUserById((int) id, caller);
@@ -136,6 +136,7 @@ public class UserService
 		if (user.getRole() != existing.getRole())
 			log.info("User {} role changed from {} to {}", id, existing.getRole(), user.getRole());
 		log.info("Updated user {}", id);
+		return getUserById((int) id, caller);
 	}
 
 	@Transactional

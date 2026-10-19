@@ -67,7 +67,7 @@ class SessionRefreshTest extends IntegrationTest
 		mvc.perform(get("/api/v1/auth/me").session(employee)).andExpect(status().isOk());
 
 		mvc.perform(delete("/api/v1/users/" + Fixture.GLOW_EMPLOYEE_ID).session(loginAs(Fixture.SUPER_ADMIN)))
-				.andExpect(status().isOk());
+				.andExpect(status().isNoContent());
 
 		mvc.perform(get("/api/v1/auth/me").session(employee))
 				.andExpect(status().isUnauthorized())

@@ -100,13 +100,14 @@ public class CustomerService
     }
 
     @Transactional
-    public void updateCustomerById(long businessId, long customerId, Customer customer, AuthenticatedUser caller)
+    public Customer updateCustomerById(long businessId, long customerId, Customer customer, AuthenticatedUser caller)
     {
         requireAdminOfBusiness(caller, businessId);
         int row = customerDao.updateCustomerById(businessId, customerId, customer);
         if (row == 0)
             throw new BaseException("Customer with id " + customerId + " not found.", ErrorCode.NOT_FOUND);
         log.info("Updated customer {} in business {}", customerId, businessId);
+        return getCustomerById(businessId, customerId, caller);
     }
 
     @Transactional

@@ -12,6 +12,7 @@ import com.example.salon.security.AuthenticatedUser;
 import com.example.salon.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -126,7 +127,7 @@ public class UserController
 	 * <p>{@code PUT /api/v1/users/{id}}. The same callers as {@code GET /api/v1/users/{id}}. Only an ADMIN
 	 * or SUPER_ADMIN changes the role; anyone else must still send one, but keeps their own. Only a
 	 * SUPER_ADMIN may grant SUPER_ADMIN. The email, password and salon stay as they are. A new role takes
-	 * effect from the user's next request, in sessions they already have too. Answers 200 with no body.
+	 * effect from the user's next request, in sessions they already have too.
 	 *
 	 * <p>Errors: 400 if the body breaks {@link UpdateUserRequest}'s rules; 403 if an ADMIN grants
 	 * SUPER_ADMIN; 404 if there's no such user, or the caller may not see them.
@@ -134,11 +135,12 @@ public class UserController
 	 * @param id the user's id
 	 * @param request the new name and role, an {@link UpdateUserRequest}
 	 * @param principal the signed-in caller
+	 * @return 200 with the user as stored
 	 */
 	@PutMapping("/{id}")
-	public void updateUserById(@PathVariable long id, @Valid @RequestBody UpdateUserRequest request, @AuthenticationPrincipal AuthenticatedUser principal)
+	public User updateUserById(@PathVariable long id, @Valid @RequestBody UpdateUserRequest request, @AuthenticationPrincipal AuthenticatedUser principal)
 	{
-		userService.updateUserById(id, request.toUser(), principal);
+		return userService.updateUserById(id, request.toUser(), principal);
 	}
 
 	/**
@@ -146,7 +148,7 @@ public class UserController
 	 *
 	 * <p>{@code DELETE /api/v1/users/{id}}. The same callers as {@code GET /api/v1/users/{id}}, so a user
 	 * may delete their own account. Their staff records go too, and every session of theirs is signed out.
-	 * Answers 200 with no body.
+	 * Answers 204.
 	 *
 	 * <p>Errors: 404 if there's no such user, or the caller may not see them; 409 if they are the staff
 	 * member on any appointment.
@@ -155,6 +157,7 @@ public class UserController
 	 * @param principal the signed-in caller
 	 */
 	@DeleteMapping("/{id}")
+	@ResponseStatus(HttpStatus.NO_CONTENT)
 	public void deleteUserById(@PathVariable int id, @AuthenticationPrincipal AuthenticatedUser principal)
 	{
 		userService.deleteUserById(id, principal);
