@@ -11,14 +11,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
-import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.time.Instant;
-import java.util.Comparator;
 import java.util.stream.Collectors;
 
 @RestControllerAdvice
@@ -72,9 +70,15 @@ public class GlobalControllerExceptionHandler
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleValidation(MethodArgumentNotValidException ex, HttpServletRequest request)
     {
+        // Each field by the name the client sent, e.g. first_name, not the Java name firstName.
+        Object target = ex.getBindingResult().getTarget();
+        Class<?> body = target != null ? target.getClass() : ex.getParameter().getParameterType();
         String message = ex.getBindingResult().getFieldErrors().stream()
-                .sorted(Comparator.comparing(FieldError::getField))
-                .map(error -> error.getField() + " " + error.getDefaultMessage())
+                .map(error -> {
+                    String field = JsonPropertyPath.of(body, error.getField());
+                    return field.isEmpty() ? error.getDefaultMessage() : field + " " + error.getDefaultMessage();
+                })
+                .sorted()
                 .collect(Collectors.joining("; "));
         return build(ErrorCode.BAD_REQUEST.getStatus(), ErrorCode.BAD_REQUEST.getCode(), message, request);
     }
