@@ -239,6 +239,9 @@ version. The version lives in [`gradle.properties`](gradle.properties); each rel
 - A user's address names the user in `user_id` wherever it's read: in `GET /api/v1/addresses` and in
   the `addresses` of a user. It used to be filled only on `GET /api/v1/addresses/{id}` and in the
   answer to `PUT` on it, and was null everywhere else. A salon's address still has a null `user_id`.
+- A customer's `first_name` and `last_name` are trimmed, as `email`, `phone` and `notes` already were,
+  and every field is trimmed before it's checked. A padded email such as `" ella@example.test "` used
+  to be refused as not an email address, and a padded name or note could fail its length limit.
 
 ### Changed
 - Which salons a non-admin sees, the approved ones and their own, is decided in the query, so the
