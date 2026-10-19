@@ -43,6 +43,12 @@ version. The version lives in [`gradle.properties`](gradle.properties); each rel
   array of every match: without `from` and `to` that was the salon's whole history. It takes `page`
   and `size`, `sort=starts_at` (the default) or `-starts_at` for latest first, and a new `status`
   filter.
+- `PUT /api/v1/businesses/{id}` replaces every detail, as the other `PUT`s do: `image`, `currency` and
+  `timezone` are required, and `image` can't be blank, as on create. Left out, they used to keep their
+  stored value. Leaving `description` out still clears it. The status is no longer changed here: a
+  SUPER_ADMIN changes it with the new `PUT /api/v1/businesses/{id}/status`, `{"status": "APPROVED"}`,
+  which answers with the salon, and anyone else gets 403 there. A `status` in the details is ignored,
+  so it no longer earns an ADMIN a 403.
 - Every `DELETE` answers 204 instead of 200, still with no body: `/api/v1/businesses/{id}`, and its
   `services/{serviceId}`, `staff/{staffId}`, `staff/{staffId}/time-off/{timeOffId}` and
   `customers/{customerId}`, and `/api/v1/users/{id}`, `/api/v1/addresses/{id}` and

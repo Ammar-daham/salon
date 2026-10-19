@@ -368,10 +368,17 @@ class AuthorizationRulesTest extends IntegrationTest
 	@Test
 	void adminCannotApproveAnotherSalon() throws Exception
 	{
-		mvc.perform(put("/api/v1/businesses/" + Fixture.SERENITY_PENDING).session(loginAs(Fixture.GLOW_ADMIN))
+		MockHttpSession admin = loginAs(Fixture.GLOW_ADMIN);
+		String serenity = "/api/v1/businesses/" + Fixture.SERENITY_PENDING;
+
+		mvc.perform(put(serenity + "/status").session(admin)
+						.contentType(MediaType.APPLICATION_JSON).content("{\"status\": \"APPROVED\"}"))
+				.andExpect(status().isForbidden());
+		mvc.perform(put(serenity).session(admin)
 						.contentType(MediaType.APPLICATION_JSON)
 						.content("""
-								{"name": "Serenity Day Spa", "description": "pwned", "status": "APPROVED"}
+								{"name": "Serenity Day Spa", "description": "pwned", "image": "x", "currency": "EUR",
+								 "timezone": "Europe/Berlin"}
 								"""))
 				.andExpect(status().isForbidden());
 
@@ -385,11 +392,8 @@ class AuthorizationRulesTest extends IntegrationTest
 	{
 		MockHttpSession admin = loginAs(Fixture.GLOW_ADMIN);
 
-		mvc.perform(put("/api/v1/businesses/" + Fixture.GLOW).session(admin)
-						.contentType(MediaType.APPLICATION_JSON)
-						.content("""
-								{"name": "Glow Beauty Studio", "status": "SUSPENDED"}
-								"""))
+		mvc.perform(put("/api/v1/businesses/" + Fixture.GLOW + "/status").session(admin)
+						.contentType(MediaType.APPLICATION_JSON).content("{\"status\": \"SUSPENDED\"}"))
 				.andExpect(status().isForbidden());
 
 		mvc.perform(get("/api/v1/businesses/" + Fixture.GLOW).session(admin))
@@ -397,21 +401,21 @@ class AuthorizationRulesTest extends IntegrationTest
 	}
 
 	@Test
-	void adminCanEditTheirOwnBusinessWhenResendingItsCurrentStatus() throws Exception
+	void adminCanEditTheirOwnBusinessWhateverStatusTheBodyNames() throws Exception
 	{
 		MockHttpSession admin = loginAs(Fixture.GLOW_ADMIN);
 
-		// The admin panel echoes the whole record back, including the unchanged status. That must
-		// still succeed - only an actual status transition is reserved for SUPER_ADMIN.
+		// A status in the details is ignored, so it neither refuses the edit nor changes the status.
 		mvc.perform(put("/api/v1/businesses/" + Fixture.GLOW).session(admin)
 						.contentType(MediaType.APPLICATION_JSON)
 						.content("""
-								{"name": "Glow Beauty Studio", "description": "Now with a lash bar.", "status": "APPROVED"}
+								{"name": "Glow Beauty Studio", "description": "Now with a lash bar.",
+								 "image": "https://example.com/glow.png", "currency": "EUR", "timezone": "Europe/Berlin",
+								 "status": "SUSPENDED"}
 								"""))
-				.andExpect(status().isOk());
-
-		mvc.perform(get("/api/v1/businesses/" + Fixture.GLOW).session(admin))
-				.andExpect(jsonPath("$.description").value("Now with a lash bar."));
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.description").value("Now with a lash bar."))
+				.andExpect(jsonPath("$.status").value("APPROVED"));
 	}
 
 	@Test
@@ -433,12 +437,10 @@ class AuthorizationRulesTest extends IntegrationTest
 	{
 		MockHttpSession superAdmin = loginAs(Fixture.SUPER_ADMIN);
 
-		mvc.perform(put("/api/v1/businesses/" + Fixture.SERENITY_PENDING).session(superAdmin)
-						.contentType(MediaType.APPLICATION_JSON)
-						.content("""
-								{"name": "Serenity Day Spa", "description": "Massage and facials.", "status": "APPROVED"}
-								"""))
-				.andExpect(status().isOk());
+		mvc.perform(put("/api/v1/businesses/" + Fixture.SERENITY_PENDING + "/status").session(superAdmin)
+						.contentType(MediaType.APPLICATION_JSON).content("{\"status\": \"APPROVED\"}"))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.status").value("APPROVED"));
 
 		mvc.perform(get("/api/v1/businesses/" + Fixture.SERENITY_PENDING).session(superAdmin))
 				.andExpect(jsonPath("$.status").value("APPROVED"));
@@ -568,7 +570,8 @@ class AuthorizationRulesTest extends IntegrationTest
 		mvc.perform(put("/api/v1/businesses/" + Fixture.GLOW).session(loginAs(Fixture.GLOW_ADMIN))
 						.contentType(MediaType.APPLICATION_JSON)
 						.content("""
-								{"name": "Glow Beauty Studio", "contacts": [{"id": %d, "type": "email", "value": "hijacked@evil.test"}]}
+								{"name": "Glow Beauty Studio", "image": "https://example.com/glow.png", "currency": "EUR",
+								 "timezone": "Europe/Berlin", "contacts": [{"id": %d, "type": "email", "value": "hijacked@evil.test"}]}
 								""".formatted(Fixture.URBAN_CONTACT)))
 				.andExpect(status().isOk());
 
@@ -614,11 +617,8 @@ class AuthorizationRulesTest extends IntegrationTest
 	@Test
 	void staffStillSeeTheirOwnSalonWhenItIsNotApproved() throws Exception
 	{
-		mvc.perform(put("/api/v1/businesses/" + Fixture.GLOW).session(loginAs(Fixture.SUPER_ADMIN))
-						.contentType(MediaType.APPLICATION_JSON)
-						.content("""
-								{"name": "Glow Beauty Studio", "status": "SUSPENDED"}
-								"""))
+		mvc.perform(put("/api/v1/businesses/" + Fixture.GLOW + "/status").session(loginAs(Fixture.SUPER_ADMIN))
+						.contentType(MediaType.APPLICATION_JSON).content("{\"status\": \"SUSPENDED\"}"))
 				.andExpect(status().isOk());
 
 		MockHttpSession glowEmployee = loginAs(Fixture.GLOW_EMPLOYEE);
@@ -634,11 +634,8 @@ class AuthorizationRulesTest extends IntegrationTest
 	@Test
 	void aSalonYouCannotSeeHasNoStaffOrServicesYouCanSee() throws Exception
 	{
-		mvc.perform(put("/api/v1/businesses/" + Fixture.URBAN).session(loginAs(Fixture.SUPER_ADMIN))
-						.contentType(MediaType.APPLICATION_JSON)
-						.content("""
-								{"name": "Urban Cuts Barbershop", "status": "SUSPENDED"}
-								"""))
+		mvc.perform(put("/api/v1/businesses/" + Fixture.URBAN + "/status").session(loginAs(Fixture.SUPER_ADMIN))
+						.contentType(MediaType.APPLICATION_JSON).content("{\"status\": \"SUSPENDED\"}"))
 				.andExpect(status().isOk());
 		String urban = "/api/v1/businesses/" + Fixture.URBAN;
 

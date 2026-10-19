@@ -164,7 +164,8 @@ class AvailabilityControllerTest extends IntegrationTest
 		bookMia(admin, at(tuesday, "10:00"));
 
 		send(put(GLOW), admin, """
-				{"name": "Glow Beauty Studio", "timezone": "Europe/London"}
+				{"name": "Glow Beauty Studio", "image": "https://example.com/glow.png", "currency": "EUR",
+				 "timezone": "Europe/London"}
 				""").andExpect(status().isOk());
 
 		// Still open from 09:00, now in London, where the haircut booked for 10:00 in Berlin is at 09:00.

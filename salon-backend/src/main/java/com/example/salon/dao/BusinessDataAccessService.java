@@ -150,29 +150,32 @@ public class BusinessDataAccessService implements BusinessDao
     @Override
     public int updateBusinessById(int id, Business business) 
     {
-        // status and image use COALESCE so that a PUT which omits them preserves the
-        // stored value. Without it, omitting status made approve/reject/suspend a silent
-        // no-op that still returned 200, and omitting image violated image NOT NULL.
+        // Every detail is replaced; the status has its own update.
         String sql = """
                 UPDATE businesses SET name = ?,
                 description = ?,
-                image = COALESCE(?, image),
-                status = COALESCE(?, status),
-                currency = COALESCE(?, currency),
-                timezone = COALESCE(?, timezone),
-                 updated_at = now() WHERE id = ?
+                image = ?,
+                currency = ?,
+                timezone = ?,
+                updated_at = now() WHERE id = ?
                 """;
-        
+
         return jdbcTemplate.update(
                 sql,
                 business.getName(),
                 business.getDescription(),
                 business.getImage(),
-                business.getStatus() == null ? null : business.getStatus().name(),
                 business.getCurrency(),
                 business.getTimezone(),
                 id
         );
+    }
+
+    @Override
+    public int updateBusinessStatus(int id, Status status)
+    {
+        return jdbcTemplate.update("UPDATE businesses SET status = ?, updated_at = now() WHERE id = ?",
+                status.name(), id);
     }
 
     @Override
