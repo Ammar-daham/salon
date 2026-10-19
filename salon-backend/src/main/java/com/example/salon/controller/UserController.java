@@ -55,7 +55,7 @@ public class UserController
 	 *
 	 * @param request the new user, a {@link CreateUserRequest}
 	 * @param principal the signed-in caller
-	 * @return 201 Created with the user, and its address in {@code Location}
+	 * @return 201 Created with the user as stored, and its address in {@code Location}
 	 */
 	@PostMapping
 	public ResponseEntity<User> addUser(@Valid @RequestBody CreateUserRequest request, @AuthenticationPrincipal AuthenticatedUser principal)
@@ -65,7 +65,7 @@ public class UserController
 		URI location = ServletUriComponentsBuilder
 				.fromCurrentRequest()
 				.path("/{id}")
-				.buildAndExpand(user.getId())
+				.buildAndExpand(u.getId())
 				.toUri();
 
 		return ResponseEntity.created(location).body(u);

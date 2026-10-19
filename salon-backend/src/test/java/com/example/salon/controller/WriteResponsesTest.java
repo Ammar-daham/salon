@@ -1,26 +1,86 @@
 package com.example.salon.controller;
 
 import com.example.salon.support.IntegrationTest;
+import com.jayway.jsonpath.JsonPath;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.test.web.servlet.ResultActions;
 
+import java.sql.Timestamp;
+import java.time.Instant;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.endsWith;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
- * Every endpoint that changes a record answers the same way as the others of its kind: a PUT answers
- * 200 with the record as stored, and a DELETE answers 204 with no body.
+ * Every endpoint that changes a record answers the same way as the others of its kind: a POST answers
+ * 201 with the record as stored and its address in {@code Location}, a PUT answers 200 with the record
+ * as stored, and a DELETE answers 204 with no body.
  */
 class WriteResponsesTest extends IntegrationTest
 {
 	private static final String GLOW = "/api/v1/businesses/" + Fixture.GLOW;
+
+	@Autowired
+	private JdbcTemplate jdbcTemplate;
+
+	/**
+	 * Each answer has the {@code created_at} the database stored, and what the database fills in for a
+	 * field the request didn't send. Booking an appointment is checked in AppointmentControllerTest.
+	 */
+	@Test
+	void everyPostAnswersTheRecordAsStored() throws Exception
+	{
+		MockHttpSession superAdmin = loginAs(Fixture.SUPER_ADMIN);
+		String mia = GLOW + "/staff/" + Fixture.GLOW_STAFF;
+
+		create("/api/v1/businesses", "businesses", superAdmin, """
+				{"name": "Fresh Cuts", "image": "https://example.com/fresh.png",
+				 "addresses": [{"street": "1 New Street", "city": "Berlin", "country": "Germany"}]}
+				""")
+				.andExpect(jsonPath("$.status").value("PENDING"))
+				.andExpect(jsonPath("$.addresses[0].id").value(notNullValue()))
+				.andExpect(jsonPath("$.contacts", hasSize(0)))
+				.andExpect(jsonPath("$.services", hasSize(0)));
+		create(GLOW + "/services", "services", superAdmin, """
+				{"name": "Brow Shape", "duration_minutes": 15, "price": 12.00, "is_active": true}
+				""")
+				.andExpect(jsonPath("$.name").value("Brow Shape"))
+				.andExpect(jsonPath("$.description").value(nullValue()));
+		create("/api/v1/users", "users", superAdmin, """
+				{"first_name": "New", "last_name": "Hire", "email": "newhire@glow.test", "password": "Password123!",
+				 "role": "EMPLOYEE", "business_id": %d}
+				""".formatted(Fixture.GLOW))
+				.andExpect(jsonPath("$.email").value("newhire@glow.test"))
+				.andExpect(jsonPath("$.addresses", hasSize(0)))
+				.andExpect(jsonPath("$.contacts", hasSize(0)));
+		create(GLOW + "/staff", "staff", superAdmin, """
+				{"user_id": %d, "title": "Owner", "is_active": true, "hired_at": "2019-05-01"}
+				""".formatted(Fixture.GLOW_ADMIN_ID))
+				.andExpect(jsonPath("$.first_name").value("Anna"));
+		create(mia + "/time-off", "staff_time_off", superAdmin, """
+				{"starts_at": "2026-11-03T09:00", "ends_at": "2026-11-03T13:00"}
+				""")
+				.andExpect(jsonPath("$.note").value(nullValue()));
+		create(GLOW + "/customers", "customers", superAdmin, """
+				{"first_name": "Ella", "last_name": "Client", "notes": "  Likes tea.  "}
+				""")
+				.andExpect(jsonPath("$.notes").value("Likes tea."))
+				.andExpect(jsonPath("$.business_name").value("Glow Beauty Studio"));
+	}
 
 	/**
 	 * Each answer has a field the request didn't send, and an {@code updated_at}, which is null in the
@@ -115,6 +175,20 @@ class WriteResponsesTest extends IntegrationTest
 					.andExpect(status().isNoContent())
 					.andExpect(content().string(""));
 		}
+	}
+
+	/** POSTs the body, and checks its address and that its created_at is the one in the database. */
+	private ResultActions create(String path, String table, MockHttpSession session, String body) throws Exception
+	{
+		ResultActions result = mvc.perform(post(path).session(session).contentType(MediaType.APPLICATION_JSON).content(body))
+				.andExpect(status().isCreated());
+		String json = result.andReturn().getResponse().getContentAsString();
+		long id = ((Number) JsonPath.read(json, "$.id")).longValue();
+		result.andExpect(header().string("Location", endsWith(path + "/" + id)));
+		Timestamp stored = jdbcTemplate.queryForObject("SELECT created_at FROM " + table + " WHERE id = ?",
+				Timestamp.class, id);
+		assertThat(Instant.parse(JsonPath.read(json, "$.created_at"))).isEqualTo(stored.toInstant());
+		return result;
 	}
 
 	private ResultActions replace(String path, MockHttpSession session, String body) throws Exception

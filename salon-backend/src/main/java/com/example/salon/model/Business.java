@@ -52,7 +52,6 @@ public class Business {
                     @JsonProperty("description") String description) {
         this.name = name;
         this.description = description;
-        this.createdAt = Instant.now();
     }
 
     public Long getId() {

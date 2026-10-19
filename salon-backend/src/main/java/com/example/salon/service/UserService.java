@@ -76,8 +76,9 @@ public class UserService
 		}
 		user.setPassword(null);
 
+		Long id;
 		try {
-			userDao.addUser(user);
+			id = userDao.addUser(user);
 		} catch (DuplicateKeyException ex) {
 			if (ex.getMessage().contains("contacts_user_value_unique_idx"))
 				throw new BaseException("Contact already exists.", ErrorCode.DUPLICATE_RESOURCE);
@@ -85,8 +86,8 @@ public class UserService
 				throw new BaseException("Email already in use.", ErrorCode.DUPLICATE_RESOURCE);
 			throw ex;
 		}
-		log.info("Created user {} with role {} in business {}", user.getId(), user.getRole(), user.getBusinessId());
-		return user;
+		log.info("Created user {} with role {} in business {}", id, user.getRole(), user.getBusinessId());
+		return userDao.getUserById(id.intValue());
 	}
 
 	/** Every user for a super admin; for an admin, their own business's, or none without one. */

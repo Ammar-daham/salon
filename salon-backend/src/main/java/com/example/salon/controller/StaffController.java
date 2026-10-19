@@ -51,7 +51,7 @@ public class StaffController
 	 * @param businessId the salon's id
 	 * @param request the staff record, as a {@link CreateStaffRequest}
 	 * @param principal the signed-in caller
-	 * @return 201 Created with the staff record, and its address in {@code Location}
+	 * @return 201 Created with the staff record as stored, and its address in {@code Location}
 	 */
 	@PostMapping("/{businessId}/staff")
 	public ResponseEntity<Staff> addStaffForBusiness(

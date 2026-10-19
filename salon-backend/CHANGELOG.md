@@ -231,6 +231,12 @@ version. The version lives in [`gradle.properties`](gradle.properties); each rel
   still can't list the same value twice (DB-05).
 - A taken salon name is reported as "Business with name … already exists." on create and update.
   Creating one used to answer the generic "Business could not be created due to a conflict."
+- `POST /api/v1/users`, `POST /api/v1/businesses` and `POST /api/v1/businesses/{id}/services` answer
+  with the record as stored, the same body a `GET` of it answers, as the other creates already did. A
+  new user's `created_at` and a new service's are no longer null, a new salon's is the database's
+  time instead of the server's, a new user's `addresses` and `contacts` are `[]` rather than null when
+  none were sent, and a new salon's `services` is `[]` rather than null. The addresses in a new user's
+  answer have no `user_id`, as on `GET /api/v1/users/{id}`.
 
 ### Changed
 - Which salons a non-admin sees, the approved ones and their own, is decided in the query, so the
