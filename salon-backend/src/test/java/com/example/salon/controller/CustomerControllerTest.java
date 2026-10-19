@@ -177,6 +177,38 @@ class CustomerControllerTest extends IntegrationTest
 	}
 
 	@Test
+	void everyTextFieldIsTrimmedBeforeItIsChecked() throws Exception
+	{
+		MockHttpSession admin = loginAs(Fixture.GLOW_ADMIN);
+		String hundred = "a".repeat(100);
+
+		String location = mvc.perform(post(customers(Fixture.GLOW)).session(admin)
+						.contentType(MediaType.APPLICATION_JSON)
+						.content("""
+								{"first_name": "  Ella ", "last_name": " %s  ", "email": "  ella@example.test ",
+								 "phone": " +49 30 7770009 ", "notes": "  Allergic to latex.  "}
+								""".formatted(hundred)))
+				.andExpect(status().isCreated())
+				.andExpect(jsonPath("$.first_name").value("Ella"))
+				.andExpect(jsonPath("$.last_name").value(hundred))
+				.andExpect(jsonPath("$.email").value("ella@example.test"))
+				.andExpect(jsonPath("$.phone").value("+49 30 7770009"))
+				.andExpect(jsonPath("$.notes").value("Allergic to latex."))
+				.andReturn().getResponse().getHeader("Location");
+
+		// A PUT takes the same body; a blank optional field counts as left out.
+		mvc.perform(put(location).session(admin)
+						.contentType(MediaType.APPLICATION_JSON)
+						.content("""
+								{"first_name": " Ella", "last_name": "Walk-in ", "email": "   "}
+								"""))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.first_name").value("Ella"))
+				.andExpect(jsonPath("$.last_name").value("Walk-in"))
+				.andExpect(jsonPath("$.email").value(nullValue()));
+	}
+
+	@Test
 	void superAdminGetsNotFoundForASalonThatDoesNotExist() throws Exception
 	{
 		MockHttpSession superAdmin = loginAs(Fixture.SUPER_ADMIN);
