@@ -8,6 +8,7 @@ import com.example.salon.security.AuthenticatedUser;
 import com.example.salon.service.StaffScheduleService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -187,7 +188,7 @@ public class StaffScheduleController
 	 * Deletes an absence.
 	 *
 	 * <p>{@code DELETE /api/v1/businesses/{businessId}/staff/{staffId}/time-off/{timeOffId}}. An ADMIN of
-	 * the salon, or a SUPER_ADMIN. A hard delete. Answers 200 with no body.
+	 * the salon, or a SUPER_ADMIN. A hard delete. Answers 204.
 	 *
 	 * <p>Errors: 403 for another salon; 404 if the salon has no such staff member, or the staff member has no
 	 * such time off.
@@ -198,6 +199,7 @@ public class StaffScheduleController
 	 * @param principal the signed-in caller
 	 */
 	@DeleteMapping("/time-off/{timeOffId}")
+	@ResponseStatus(HttpStatus.NO_CONTENT)
 	public void deleteTimeOff(@PathVariable long businessId, @PathVariable long staffId, @PathVariable long timeOffId,
 			@AuthenticationPrincipal AuthenticatedUser principal)
 	{

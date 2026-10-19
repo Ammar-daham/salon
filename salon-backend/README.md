@@ -96,6 +96,7 @@ VALUES ('First', 'Last', 'SUPER_ADMIN', 'admin@example.com', '<the hash>');
 ## The API in short
 
 - Everything is under `/api/v1`, in JSON with `snake_case` fields.
+- A `DELETE` answers 204, with no body.
 - `POST /api/v1/auth/login` with `email` and `password` starts a session; the browser keeps it in the
   `JSESSIONID` cookie and sends it with every request. `GET /api/v1/auth/me` says who's signed in.
 - Roles are `SUPER_ADMIN` (the platform), `ADMIN` and `EMPLOYEE` (one salon), and `CUSTOMER`. Each

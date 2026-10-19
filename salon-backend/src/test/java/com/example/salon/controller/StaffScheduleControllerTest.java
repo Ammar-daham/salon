@@ -168,7 +168,7 @@ class StaffScheduleControllerTest extends IntegrationTest
 				.andExpect(jsonPath("$.note").value(nullValue()))
 				.andExpect(jsonPath("$.updated_at").value(notNullValue()));
 
-		mvc.perform(delete(christmas).session(admin)).andExpect(status().isOk());
+		mvc.perform(delete(christmas).session(admin)).andExpect(status().isNoContent());
 		mvc.perform(get(christmas).session(admin)).andExpect(status().isNotFound());
 	}
 

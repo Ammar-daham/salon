@@ -10,6 +10,7 @@ import com.example.salon.security.AuthenticatedUser;
 import com.example.salon.service.CustomerService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -193,7 +194,7 @@ public class CustomerController
 	 *
 	 * <p>{@code DELETE /api/v1/businesses/{businessId}/customers/{customerId}}. An ADMIN of the salon or a
 	 * SUPER_ADMIN; an EMPLOYEE is refused. The record is kept, so the customer's appointments still name them,
-	 * but every customer read leaves it out and it can't be booked any more. Answers 200 with no body.
+	 * but every customer read leaves it out and it can't be booked any more. Answers 204.
 	 *
 	 * <p>Errors: 403 for an EMPLOYEE or another salon; 404 if the customer isn't a current customer of this salon;
 	 * 409 while they have an upcoming appointment (booked or confirmed, and not over yet).
@@ -203,6 +204,7 @@ public class CustomerController
 	 * @param principal the signed-in caller
 	 */
 	@DeleteMapping("/businesses/{businessId}/customers/{customerId}")
+	@ResponseStatus(HttpStatus.NO_CONTENT)
 	public void deleteCustomer(@PathVariable long businessId, @PathVariable long customerId,
 			@AuthenticationPrincipal AuthenticatedUser principal)
 	{

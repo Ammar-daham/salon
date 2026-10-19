@@ -12,6 +12,7 @@ import com.example.salon.security.AuthenticatedUser;
 import com.example.salon.service.BusinessService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -150,7 +151,7 @@ public class BusinessController
      * it takes the salon's addresses, contacts, services, opening hours, staff records, customers and
      * appointments with it. It's refused while any user account still belongs to the salon (its
      * {@code business_id} is the salon), so delete those users or move them first. An ADMIN belongs to
-     * their salon, so in practice only a SUPER_ADMIN can delete one. Answers 200 with no body.
+     * their salon, so in practice only a SUPER_ADMIN can delete one. Answers 204.
      *
      * <p>Errors: 403 for another salon; 404 if there's no such salon; 409 while users still belong to it.
      *
@@ -158,6 +159,7 @@ public class BusinessController
      * @param principal the signed-in caller
      */
     @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteBusiness(@PathVariable int id, @AuthenticationPrincipal AuthenticatedUser principal)
     {
         businessService.deleteBusiness(id, principal);

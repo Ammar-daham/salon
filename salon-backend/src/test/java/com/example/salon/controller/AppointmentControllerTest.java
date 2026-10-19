@@ -202,7 +202,7 @@ class AppointmentControllerTest extends IntegrationTest
 				.andExpect(status().isBadRequest())
 				.andExpect(jsonPath("$.message").value("Staff with id 1 is not active."));
 
-		mvc.perform(delete(GLOW + "/customers/" + Fixture.GLOW_CUSTOMER).session(admin)).andExpect(status().isOk());
+		mvc.perform(delete(GLOW + "/customers/" + Fixture.GLOW_CUSTOMER).session(admin)).andExpect(status().isNoContent());
 		send(post(APPOINTMENTS), admin, haircut(at))
 				.andExpect(status().isBadRequest())
 				.andExpect(jsonPath("$.message").value("Customer with id 1 is not a customer of this business."));
@@ -356,9 +356,9 @@ class AppointmentControllerTest extends IntegrationTest
 
 		setStatus(location, admin, "CANCELLED").andExpect(status().isOk());
 
-		mvc.perform(delete(GLOW + "/staff/" + Fixture.GLOW_STAFF).session(admin)).andExpect(status().isOk());
-		mvc.perform(delete(GLOW + "/services/" + Fixture.GLOW_HAIRCUT).session(admin)).andExpect(status().isOk());
-		mvc.perform(delete(GLOW + "/customers/" + Fixture.GLOW_CUSTOMER).session(admin)).andExpect(status().isOk());
+		mvc.perform(delete(GLOW + "/staff/" + Fixture.GLOW_STAFF).session(admin)).andExpect(status().isNoContent());
+		mvc.perform(delete(GLOW + "/services/" + Fixture.GLOW_HAIRCUT).session(admin)).andExpect(status().isNoContent());
+		mvc.perform(delete(GLOW + "/customers/" + Fixture.GLOW_CUSTOMER).session(admin)).andExpect(status().isNoContent());
 	}
 
 	@Test
@@ -434,9 +434,9 @@ class AppointmentControllerTest extends IntegrationTest
 		MockHttpSession admin = loginAs(Fixture.GLOW_ADMIN);
 		String location = book(admin, haircut("2025-03-04T10:00"));
 
-		mvc.perform(delete(GLOW + "/customers/" + Fixture.GLOW_CUSTOMER).session(admin)).andExpect(status().isOk());
-		mvc.perform(delete(GLOW + "/services/" + Fixture.GLOW_HAIRCUT).session(admin)).andExpect(status().isOk());
-		mvc.perform(delete(GLOW + "/staff/" + Fixture.GLOW_STAFF).session(admin)).andExpect(status().isOk());
+		mvc.perform(delete(GLOW + "/customers/" + Fixture.GLOW_CUSTOMER).session(admin)).andExpect(status().isNoContent());
+		mvc.perform(delete(GLOW + "/services/" + Fixture.GLOW_HAIRCUT).session(admin)).andExpect(status().isNoContent());
+		mvc.perform(delete(GLOW + "/staff/" + Fixture.GLOW_STAFF).session(admin)).andExpect(status().isNoContent());
 
 		mvc.perform(get(location).session(admin))
 				.andExpect(jsonPath("$.customer.first_name").value("Olivia"))

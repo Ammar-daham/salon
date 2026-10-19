@@ -6,6 +6,7 @@ import com.example.salon.security.AuthenticatedUser;
 import com.example.salon.service.BusinessSalonServiceService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -115,7 +116,7 @@ public class BusinessServiceController
 	 * <p>{@code DELETE /api/v1/businesses/{businessId}/services/{serviceId}}. An ADMIN of the salon, or a
 	 * SUPER_ADMIN. A soft delete: past appointments keep pointing at the service, but it's gone from the
 	 * salon and from the services its staff perform, and it can't be read, changed or booked any more.
-	 * Answers 200 with no body.
+	 * Answers 204.
 	 *
 	 * <p>Errors: 403 for another salon; 404 if the salon has no such service, or it was already removed; 409
 	 * while the service has upcoming appointments ({@code BOOKED} or {@code CONFIRMED}, and not over yet).
@@ -125,6 +126,7 @@ public class BusinessServiceController
 	 * @param principal the signed-in caller
 	 */
 	@DeleteMapping("/{businessId}/services/{serviceId}")
+	@ResponseStatus(HttpStatus.NO_CONTENT)
 	public void deleteServiceForBusiness(@PathVariable int businessId, @PathVariable int serviceId,
 			@AuthenticationPrincipal AuthenticatedUser principal)
 	{

@@ -43,6 +43,10 @@ version. The version lives in [`gradle.properties`](gradle.properties); each rel
   array of every match: without `from` and `to` that was the salon's whole history. It takes `page`
   and `size`, `sort=starts_at` (the default) or `-starts_at` for latest first, and a new `status`
   filter.
+- Every `DELETE` answers 204 instead of 200, still with no body: `/api/v1/businesses/{id}`, and its
+  `services/{serviceId}`, `staff/{staffId}`, `staff/{staffId}/time-off/{timeOffId}` and
+  `customers/{customerId}`, and `/api/v1/users/{id}`, `/api/v1/addresses/{id}` and
+  `/api/v1/contacts/{id}`.
 
 ### Security
 - Addresses and contacts are scoped to the caller's salon. A salon's may be changed or deleted only

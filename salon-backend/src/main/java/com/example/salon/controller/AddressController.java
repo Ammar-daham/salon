@@ -6,6 +6,7 @@ import com.example.salon.security.AuthenticatedUser;
 import com.example.salon.service.AddressService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -93,7 +94,7 @@ public class AddressController
 	 * Deletes an address.
 	 *
 	 * <p>{@code DELETE /api/v1/addresses/{id}}. The same callers as {@code PUT /api/v1/addresses/{id}}.
-	 * Answers 200 with no body.
+	 * Answers 204.
 	 *
 	 * <p>Errors: 403 if it's a salon's address and the caller may not change it; 404 if there's no such
 	 * address, or it's a user's and the caller may not see that user.
@@ -102,6 +103,7 @@ public class AddressController
 	 * @param principal the signed-in caller
 	 */
 	@DeleteMapping("/{id}")
+	@ResponseStatus(HttpStatus.NO_CONTENT)
 	public void deleteAddress(@PathVariable int id, @AuthenticationPrincipal AuthenticatedUser principal)
 	{
 		addressService.deleteAddressById(id, principal);

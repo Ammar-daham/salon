@@ -12,6 +12,7 @@ import com.example.salon.security.AuthenticatedUser;
 import com.example.salon.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -146,7 +147,7 @@ public class UserController
 	 *
 	 * <p>{@code DELETE /api/v1/users/{id}}. The same callers as {@code GET /api/v1/users/{id}}, so a user
 	 * may delete their own account. Their staff records go too, and every session of theirs is signed out.
-	 * Answers 200 with no body.
+	 * Answers 204.
 	 *
 	 * <p>Errors: 404 if there's no such user, or the caller may not see them; 409 if they are the staff
 	 * member on any appointment.
@@ -155,6 +156,7 @@ public class UserController
 	 * @param principal the signed-in caller
 	 */
 	@DeleteMapping("/{id}")
+	@ResponseStatus(HttpStatus.NO_CONTENT)
 	public void deleteUserById(@PathVariable int id, @AuthenticationPrincipal AuthenticatedUser principal)
 	{
 		userService.deleteUserById(id, principal);

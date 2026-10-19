@@ -140,7 +140,7 @@ class CustomerControllerTest extends IntegrationTest
 		MockHttpSession admin = loginAs(Fixture.GLOW_ADMIN);
 		String olivia = customers(Fixture.GLOW) + "/" + Fixture.GLOW_CUSTOMER;
 
-		mvc.perform(delete(olivia).session(admin)).andExpect(status().isOk());
+		mvc.perform(delete(olivia).session(admin)).andExpect(status().isNoContent());
 		mvc.perform(get(olivia).session(admin)).andExpect(status().isNotFound());
 	}
 

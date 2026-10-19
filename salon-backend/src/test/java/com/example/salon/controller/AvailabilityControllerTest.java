@@ -227,7 +227,7 @@ class AvailabilityControllerTest extends IntegrationTest
 		mvc.perform(get(GLOW + "/services/" + Fixture.URBAN_FADE + "/availability").session(admin))
 				.andExpect(status().isNotFound());
 
-		mvc.perform(delete(GLOW + "/services/" + Fixture.GLOW_MANICURE).session(admin)).andExpect(status().isOk());
+		mvc.perform(delete(GLOW + "/services/" + Fixture.GLOW_MANICURE).session(admin)).andExpect(status().isNoContent());
 		mvc.perform(get(GLOW + "/services/" + Fixture.GLOW_MANICURE + "/availability").session(admin))
 				.andExpect(status().isNotFound());
 

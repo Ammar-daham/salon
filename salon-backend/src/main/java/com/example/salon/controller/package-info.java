@@ -7,6 +7,7 @@
  * <ul>
  *   <li>Every path starts with {@code /api/v1}. Bodies are JSON, with snake_case field names such as
  *       {@code first_name}. A field the endpoint doesn't take is ignored.</li>
+ *   <li>A {@code DELETE} answers 204, with no body.</li>
  *   <li>Opening hours, shifts, time off and appointments are on the salon's clock: wall-clock times,
  *       such as {@code 2026-10-14T10:30}, in the salon's {@code timezone}, with no offset. Record
  *       timestamps such as {@code created_at} are instants in UTC, such as {@code 2026-10-14T08:30:00Z}.</li>
