@@ -235,8 +235,10 @@ version. The version lives in [`gradle.properties`](gradle.properties); each rel
   with the record as stored, the same body a `GET` of it answers, as the other creates already did. A
   new user's `created_at` and a new service's are no longer null, a new salon's is the database's
   time instead of the server's, a new user's `addresses` and `contacts` are `[]` rather than null when
-  none were sent, and a new salon's `services` is `[]` rather than null. The addresses in a new user's
-  answer have no `user_id`, as on `GET /api/v1/users/{id}`.
+  none were sent, and a new salon's `services` is `[]` rather than null.
+- A user's address names the user in `user_id` wherever it's read: in `GET /api/v1/addresses` and in
+  the `addresses` of a user. It used to be filled only on `GET /api/v1/addresses/{id}` and in the
+  answer to `PUT` on it, and was null everywhere else. A salon's address still has a null `user_id`.
 
 ### Changed
 - Which salons a non-admin sees, the approved ones and their own, is decided in the query, so the

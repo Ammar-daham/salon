@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpSession;
 
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
@@ -41,6 +42,26 @@ class RegressionTest extends IntegrationTest
 		mvc.perform(get("/api/v1/businesses/" + Fixture.GLOW).session(admin))
 				.andExpect(jsonPath("$.addresses[0].street").value("12 Rosenthaler Str."))
 				.andExpect(jsonPath("$.addresses[0].country").value("Germany"));
+	}
+
+	/** An address's user_id was only filled on GET /addresses/{id}: lists and users had it null. */
+	@Test
+	void anAddressNamesItsUserWhereverItIsRead() throws Exception
+	{
+		MockHttpSession admin = loginAs(Fixture.GLOW_ADMIN);
+		String miasAddress = "$[?(@.id == " + Fixture.GLOW_EMPLOYEE_PERSONAL_ADDRESS + ")].user_id";
+		String salonsAddress = "$[?(@.id == " + Fixture.GLOW_ADDRESS + ")].user_id";
+
+		mvc.perform(get("/api/v1/addresses").session(admin))
+				.andExpect(jsonPath(miasAddress).value(contains((int) Fixture.GLOW_EMPLOYEE_ID)))
+				.andExpect(jsonPath(salonsAddress).value(contains(nullValue())));
+		mvc.perform(get("/api/v1/users/" + Fixture.GLOW_EMPLOYEE_ID).session(admin))
+				.andExpect(jsonPath("$.addresses[0].user_id").value(Fixture.GLOW_EMPLOYEE_ID));
+		mvc.perform(get("/api/v1/users?q=mia").session(admin))
+				.andExpect(jsonPath("$.items[0].addresses[0].user_id").value(Fixture.GLOW_EMPLOYEE_ID));
+		// A salon's address has no user.
+		mvc.perform(get("/api/v1/businesses/" + Fixture.GLOW).session(admin))
+				.andExpect(jsonPath("$.addresses[0].user_id").value(nullValue()));
 	}
 
 	/** 0ef369c: reading a never-updated address (updated_at NULL) crashed with an NPE. */

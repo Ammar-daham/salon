@@ -10,9 +10,8 @@ import java.time.Instant;
  * An address of a salon or a user, as {@code /api/v1/addresses} answers it and inside a salon or user:
  * {@code id}, {@code street}, {@code city}, {@code country}, {@code postal_code}, {@code latitude} and
  * {@code longitude} (both or neither, to 6 decimal places), {@code created_at}, {@code updated_at} and
- * {@code user_id}. {@code user_id} names the user it belongs to only in
- * {@code GET /api/v1/addresses/{id}} and the answer to {@code POST /api/v1/users}; anywhere else, and for a
- * salon's address, it is {@code null}. Which salon owns an address is never shown.
+ * {@code user_id}. {@code user_id} names the user it belongs to, and is {@code null} for a salon's
+ * address. Which salon owns an address is never shown.
  */
 public class Address {
 

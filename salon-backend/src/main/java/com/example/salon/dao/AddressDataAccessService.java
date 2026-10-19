@@ -115,13 +115,7 @@ public class AddressDataAccessService implements AddressDao
 	@Override
 	public Address getAddressById(int id)
 	{
-		return jdbcTemplate.queryForObject(SELECT + "WHERE id = ?", (rs, i) -> {
-			Address address = mapRow(rs);
-			// AddressService's owner-or-admin check needs the owner, so read it here.
-			address.setBusinessId(rs.getObject("business_id", Long.class));
-			address.setUserId(rs.getObject("user_id", Long.class));
-			return address;
-		}, id);
+		return jdbcTemplate.queryForObject(SELECT + "WHERE id = ?", (rs, i) -> mapRow(rs), id);
 	}
 
 	@Override
@@ -152,10 +146,11 @@ public class AddressDataAccessService implements AddressDao
 		return jdbcTemplate.update(sql, id);
 	}
 
+	/** With its owner, a salon or a user, wherever it's read. Only the user is shown, as user_id. */
 	private static Address mapRow(ResultSet rs) throws SQLException
 	{
 		Timestamp updatedAt = rs.getTimestamp("updated_at");
-		return new Address(
+		Address address = new Address(
 				rs.getLong("id"),
 				rs.getString("country"),
 				rs.getString("city"),
@@ -166,5 +161,8 @@ public class AddressDataAccessService implements AddressDao
 				rs.getTimestamp("created_at").toInstant(),
 				updatedAt != null ? updatedAt.toInstant() : null
 		);
+		address.setBusinessId(rs.getObject("business_id", Long.class));
+		address.setUserId(rs.getObject("user_id", Long.class));
+		return address;
 	}
 }
