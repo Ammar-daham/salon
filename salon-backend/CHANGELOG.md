@@ -248,6 +248,10 @@ version. The version lives in [`gradle.properties`](gradle.properties); each rel
 - A customer's `first_name` and `last_name` are trimmed, as `email`, `phone` and `notes` already were,
   and every field is trimmed before it's checked. A padded email such as `" ella@example.test "` used
   to be refused as not an email address, and a padded name or note could fail its length limit.
+- Validation messages name each field as the body does, such as `first_name`,
+  `addresses[0].postal_code` and `hours[0].closes_at`, instead of by its Java name (`firstName`,
+  `addresses[0].postalCode`, `hours[0].closesAt`). A rule over several fields is named by where it
+  is, as in `addresses[0] latitude and longitude must be given together`.
 
 ### Changed
 - Which salons a non-admin sees, the approved ones and their own, is decided in the query, so the

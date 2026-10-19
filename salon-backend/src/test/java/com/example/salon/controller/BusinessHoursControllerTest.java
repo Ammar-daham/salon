@@ -126,7 +126,7 @@ class BusinessHoursControllerTest extends IntegrationTest
 				.andExpect(status().isBadRequest());
 		replace(Fixture.GLOW, admin, week("{\"day_of_week\": \"MONDAY\", \"opens_at\": \"09:00\"}"))
 				.andExpect(status().isBadRequest())
-				.andExpect(jsonPath("$.message").value(containsString("closesAt must not be null")));
+				.andExpect(jsonPath("$.message").value(containsString("hours[0].closes_at must not be null")));
 		replace(Fixture.GLOW, admin, week(interval("MONDAY", "9am", "17:00"))).andExpect(status().isBadRequest());
 		replace(Fixture.GLOW, admin, week(interval("MONDAY", "09:00:30", "17:00"))).andExpect(status().isBadRequest());
 		replace(Fixture.GLOW, admin, week(interval("FUNDAY", "09:00", "17:00"))).andExpect(status().isBadRequest());

@@ -30,6 +30,24 @@ class RequestValidationTest extends IntegrationTest
 				.andExpect(jsonPath("$.status").value("PENDING"));
 	}
 
+	/** Validation messages named fields in Java, such as firstName and addresses[0].postalCode. */
+	@Test
+	void validationMessagesNameFieldsAsTheClientSentThem() throws Exception
+	{
+		mvc.perform(post("/api/v1/users").session(loginAs(Fixture.GLOW_ADMIN))
+						.contentType(MediaType.APPLICATION_JSON)
+						.content("""
+								{"first_name": "", "last_name": "Hire", "role": "EMPLOYEE", "email": "newhire@glow.test",
+								 "password": "Password123!", "addresses": [{"street": "1 New Street", "city": "",
+								 "country": "Germany", "postal_code": "%s", "latitude": 52.5}]}
+								""".formatted("1".repeat(21))))
+				.andExpect(status().isBadRequest())
+				// A rule over several fields, such as the coordinate pair, is named by where it is.
+				.andExpect(jsonPath("$.message").value("addresses[0] latitude and longitude must be given together; "
+						+ "addresses[0].city must not be blank; addresses[0].postal_code size must be between 0 and 20; "
+						+ "first_name must not be blank"));
+	}
+
 	@Test
 	void creatingABusinessRejectsABlankName() throws Exception
 	{

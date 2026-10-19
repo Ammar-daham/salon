@@ -96,7 +96,7 @@ class PasswordChangeTest extends IntegrationTest
 
 		changePassword(session, Fixture.PASSWORD, "short")
 				.andExpect(status().isBadRequest())
-				.andExpect(jsonPath("$.message").value("newPassword must be between 8 and 72 characters"));
+				.andExpect(jsonPath("$.message").value("new_password must be between 8 and 72 characters"));
 		changePassword(session, Fixture.PASSWORD, "x".repeat(73)).andExpect(status().isBadRequest());
 
 		signIn(Fixture.GLOW_EMPLOYEE, Fixture.PASSWORD).andExpect(status().isOk());

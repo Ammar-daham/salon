@@ -61,7 +61,8 @@
  *   <tr><th>Status</th><th>{@code errorCode}</th><th>When</th></tr>
  *   <tr><td>400</td><td>{@code BAD_REQUEST}</td><td>The request can't be done as sent: a field that fails
  *       its rules, a malformed body or parameter, or a value the database refuses. The message says
- *       what's wrong.</td></tr>
+ *       what's wrong, naming each field as the body does, such as
+ *       {@code addresses[0].postal_code size must be between 0 and 20}.</td></tr>
  *   <tr><td>401</td><td>{@code UNAUTHORIZED}</td><td>Not signed in, or the email and password don't
  *       match.</td></tr>
  *   <tr><td>403</td><td>{@code FORBIDDEN}</td><td>Signed in, but not allowed to do this.</td></tr>
