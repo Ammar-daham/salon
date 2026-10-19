@@ -36,9 +36,9 @@ export function useUpdateUser() {
 	return useMutation({
 		mutationFn: ({ id, input }: { id: Id; input: UpdateUserInput }) =>
 			usersRepository.update(id, input),
-		// The PUT returns no body, so refetch rather than merging locally.
-		onSuccess: (_r, { id }) => {
-			qc.invalidateQueries({ queryKey: queryKeys.users.detail(id) });
+		// The PUT answers with the user as stored, so their detail needs no refetch; the lists do.
+		onSuccess: (user, { id }) => {
+			qc.setQueryData(queryKeys.users.detail(id), user);
 			qc.invalidateQueries({ queryKey: queryKeys.users.list() });
 		},
 	});

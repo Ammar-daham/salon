@@ -45,9 +45,9 @@ export function useUpdateBusiness() {
 	return useMutation({
 		mutationFn: ({ id, input }: { id: Id; input: BusinessInput }) =>
 			businessesRepository.update(id, input),
-		// The PUT returns no body, so refetch rather than trusting a local merge.
-		onSuccess: (_result, { id }) => {
-			qc.invalidateQueries({ queryKey: queryKeys.businesses.detail(id) });
+		// The PUT answers with the salon as stored, so its detail needs no refetch; the lists do.
+		onSuccess: (business, { id }) => {
+			qc.setQueryData(queryKeys.businesses.detail(id), business);
 			qc.invalidateQueries({ queryKey: queryKeys.businesses.list() });
 		},
 	});

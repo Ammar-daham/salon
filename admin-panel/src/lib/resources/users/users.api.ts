@@ -40,7 +40,8 @@ export const usersRepository: Repository<User, CreateUserInput, UpdateUserInput,
 	},
 
 	async update(id: Id, input: UpdateUserInput) {
-		await apiClient.put(endpoints.users.byId(id), toUpdateUserRequest(input));
+		const { data } = await apiClient.put<UserDto>(endpoints.users.byId(id), toUpdateUserRequest(input));
+		return toUser(data);
 	},
 
 	async remove(id: Id) {

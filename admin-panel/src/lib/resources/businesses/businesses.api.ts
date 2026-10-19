@@ -37,7 +37,8 @@ export const businessesRepository: Repository<Business, BusinessInput, BusinessI
 	},
 
 	async update(id: Id, input: BusinessInput) {
-		await apiClient.put(endpoints.businesses.byId(id), toBusinessRequest(input));
+		const { data } = await apiClient.put<BusinessDto>(endpoints.businesses.byId(id), toBusinessRequest(input));
+		return toBusiness(data);
 	},
 
 	async remove(id: Id) {
