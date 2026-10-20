@@ -119,7 +119,7 @@ public class UserDataAccessService implements UserDao
 	}
 
 	@Override
-	public User getUserById(int id)
+	public User getUserById(long id)
 	{
 		User user = jdbcTemplate.queryForObject("SELECT * FROM users WHERE id = ?", userRowMapper(), id);
 		loadChildren(List.of(user));

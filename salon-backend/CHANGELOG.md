@@ -259,6 +259,10 @@ version. The version lives in [`gradle.properties`](gradle.properties); each rel
   `addresses[0].postal_code` and `hours[0].closes_at`, instead of by its Java name (`firstName`,
   `addresses[0].postalCode`, `hours[0].closesAt`). A rule over several fields is named by where it
   is, as in `addresses[0] latitude and longitude must be given together`.
+- `GET` and `DELETE /api/v1/users/{id}` take any user id, as `PUT` does: one past 2147483647 is a
+  404 if there's no such user, instead of a 400 "id has an invalid value". `PUT /api/v1/users/{id}`
+  and `PUT /api/v1/users/{id}/role` no longer cut such an id down to an `int`, which looked up a
+  different user: `PUT /api/v1/users/4294967300/role` answered 200 with user 4, unchanged.
 
 ### Changed
 - Which salons a non-admin sees, the approved ones and their own, is decided in the query, so the

@@ -87,7 +87,7 @@ public class UserService
 			throw ex;
 		}
 		log.info("Created user {} with role {} in business {}", id, user.getRole(), user.getBusinessId());
-		return userDao.getUserById(id.intValue());
+		return userDao.getUserById(id);
 	}
 
 	/** Every user for a super admin; for an admin, their own business's, or none without one. */
@@ -104,7 +104,7 @@ public class UserService
 		return userDao.getUsers(new UserDao.Filter(search, role, businessId), sort, page);
 	}
 
-	public User getUserById(int id, AuthenticatedUser caller)
+	public User getUserById(long id, AuthenticatedUser caller)
 	{
 		User user;
 		try {
@@ -123,12 +123,12 @@ public class UserService
 	public User updateUserById(long id, User user, AuthenticatedUser caller)
 	{
 		// getUserById 404s unless the user exists and the caller may see them: self, own business or super admin.
-		getUserById((int) id, caller);
+		getUserById(id, caller);
 		long row = userDao.updateUserById(id, user);
 		if (row == 0)
 			throw new BaseException("User with id " + id + " not found", ErrorCode.NOT_FOUND);
 		log.info("Updated user {}", id);
-		return getUserById((int) id, caller);
+		return getUserById(id, caller);
 	}
 
 	/**
@@ -142,7 +142,7 @@ public class UserService
 		if (!AccessControl.isAdmin(caller))
 			throw new AccessDeniedException("Only an admin can change a user's role");
 		// getUserById 404s unless the user exists and the caller may see them: own business or super admin.
-		User existing = getUserById((int) id, caller);
+		User existing = getUserById(id, caller);
 		boolean touchesSuperAdmin = role == Role.SUPER_ADMIN || existing.getRole() == Role.SUPER_ADMIN;
 		if (touchesSuperAdmin && !AccessControl.isSuperAdmin(caller))
 			throw new AccessDeniedException("Only a super admin can grant or take away the super admin role");
@@ -150,14 +150,14 @@ public class UserService
 			userDao.updateUserRole(id, role);
 			log.info("User {} role changed from {} to {}", id, existing.getRole(), role);
 		}
-		return getUserById((int) id, caller);
+		return getUserById(id, caller);
 	}
 
 	@Transactional
 	public void deleteUserById(long id, AuthenticatedUser caller)
 	{
 		// getUserById 404s unless the user exists and the caller may see them: self, own business or super admin.
-		getUserById((int) id, caller);
+		getUserById(id, caller);
 		long row;
 		try {
 			row = userDao.deleteUserById(id);
