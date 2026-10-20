@@ -12,8 +12,8 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 
 /**
- * An address, as {@code PUT /api/v1/addresses/{id}} takes it, and in {@code addresses} on
- * {@code POST /api/v1/users} and {@code POST /api/v1/businesses}. {@code street}, up to 255 characters,
+ * An address, as {@code POST /api/v1/businesses/{businessId}/addresses} and {@code PUT /api/v1/addresses/{id}}
+ * take it, and in {@code addresses} on {@code POST /api/v1/users} and {@code POST /api/v1/businesses}. {@code street}, up to 255 characters,
  * and {@code city} and {@code country}, up to 100 each, are required; {@code postal_code}, up to 20, is
  * optional. {@code latitude} (-90 to 90) and {@code longitude} (-180 to 180) are optional but come as a
  * pair. They're stored as NUMERIC(9,6), so extra decimals (a phone GPS often sends more) are rounded to 6

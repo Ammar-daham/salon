@@ -173,6 +173,30 @@ class AuthorizationRulesTest extends IntegrationTest
 	}
 
 	@Test
+	void onlyTheSalonsAdminsCanAddToItsAddressesAndContacts() throws Exception
+	{
+		String glow = "/api/v1/businesses/" + Fixture.GLOW;
+
+		// Glow's own employee, and the admin of another salon.
+		for (String caller : new String[] {Fixture.GLOW_EMPLOYEE, Fixture.URBAN_ADMIN}) {
+			MockHttpSession session = loginAs(caller);
+			mvc.perform(post(glow + "/addresses").session(session)
+							.contentType(MediaType.APPLICATION_JSON)
+							.content("""
+									{"street": "1 Hijack Rd", "city": "Berlin", "country": "Germany"}
+									"""))
+					.andExpect(status().isForbidden());
+			mvc.perform(post(glow + "/contacts").session(session)
+							.contentType(MediaType.APPLICATION_JSON).content("{\"type\": \"phone\", \"value\": \"+49 30 0000000\"}"))
+					.andExpect(status().isForbidden());
+		}
+
+		mvc.perform(get(glow).session(loginAs(Fixture.GLOW_ADMIN)))
+				.andExpect(jsonPath("$.addresses", hasSize(1)))
+				.andExpect(jsonPath("$.contacts", hasSize(1)));
+	}
+
+	@Test
 	void adminsCannotReachAnotherSalonsUsersAddressesOrContacts() throws Exception
 	{
 		MockHttpSession otherSalonAdmin = loginAs(Fixture.URBAN_ADMIN);

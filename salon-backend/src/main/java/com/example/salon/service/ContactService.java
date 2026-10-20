@@ -27,12 +27,31 @@ public class ContactService
 
 	private final ContactDao contactDao;
 	private final UserDao userDao;
+	private final BusinessService businessService;
 
 	@Autowired
-	public ContactService(ContactDao contactDao, UserDao userDao)
+	public ContactService(ContactDao contactDao, UserDao userDao, BusinessService businessService)
 	{
 		this.contactDao = contactDao;
 		this.userDao = userDao;
+		this.businessService = businessService;
+	}
+
+	/** A salon's new contact, added by an admin of that salon or a super admin. */
+	public Contact addContactForBusiness(long businessId, Contact contact, AuthenticatedUser caller)
+	{
+		AccessControl.requireAdminOfBusiness(caller, businessId);
+		// A 404, rather than the error the fk_contacts_business foreign key would give.
+		businessService.getBusinessById((int) businessId);
+		contact.setBusinessId(businessId);
+		Long id;
+		try {
+			id = contactDao.addContact(contact);
+		} catch (DuplicateKeyException ex) {
+			throw duplicateValue(ex);
+		}
+		log.info("Created contact {} for business {}", id, businessId);
+		return fetch(id.intValue());
 	}
 
 	/** Every contact for a super admin; for an admin, their own business's and its users', or none without one. */
@@ -63,10 +82,7 @@ public class ContactService
 		try {
 			row = contactDao.updateContactById(id, contact);
 		} catch (DuplicateKeyException ex) {
-			String reason = ex.getMessage();
-			if (reason == null || VALUE_UNIQUE.stream().noneMatch(reason::contains))
-				throw ex;
-			throw new BaseException("Contact already exists.", ErrorCode.DUPLICATE_RESOURCE);
+			throw duplicateValue(ex);
 		}
 		if (row == 0)
 			throw notFound(id);
@@ -93,6 +109,15 @@ public class ContactService
 		} else if (!AccessControl.canAccessUser(caller, c.getUserId(), userDao)) {
 			throw notFound(id);
 		}
+	}
+
+	/** A 409 when the owner already has the value, or the exception itself for any other clash. */
+	private static RuntimeException duplicateValue(DuplicateKeyException ex)
+	{
+		String reason = ex.getMessage();
+		if (reason == null || VALUE_UNIQUE.stream().noneMatch(reason::contains))
+			return ex;
+		return new BaseException("Contact already exists.", ErrorCode.DUPLICATE_RESOURCE);
 	}
 
 	private Contact fetch(int id)

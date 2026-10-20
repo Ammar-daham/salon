@@ -80,6 +80,15 @@ class WriteResponsesTest extends IntegrationTest
 				""")
 				.andExpect(jsonPath("$.notes").value("Likes tea."))
 				.andExpect(jsonPath("$.business_name").value("Glow Beauty Studio"));
+		create(GLOW + "/addresses", "/api/v1/addresses", "addresses", superAdmin, """
+				{"street": "8 Torstr.", "city": "Berlin", "country": "Germany"}
+				""")
+				.andExpect(jsonPath("$.postal_code").value(nullValue()))
+				.andExpect(jsonPath("$.updated_at").value(nullValue()));
+		create(GLOW + "/contacts", "/api/v1/contacts", "contacts", superAdmin, """
+				{"type": "email", "value": "hello@glow.test"}
+				""")
+				.andExpect(jsonPath("$.updated_at").value(nullValue()));
 	}
 
 	/**
@@ -181,11 +190,18 @@ class WriteResponsesTest extends IntegrationTest
 	/** POSTs the body, and checks its address and that its created_at is the one in the database. */
 	private ResultActions create(String path, String table, MockHttpSession session, String body) throws Exception
 	{
+		return create(path, path, table, session, body);
+	}
+
+	/** For a record added under its owner, such as a salon's address, but read at {@code readPath/{id}}. */
+	private ResultActions create(String path, String readPath, String table, MockHttpSession session, String body)
+			throws Exception
+	{
 		ResultActions result = mvc.perform(post(path).session(session).contentType(MediaType.APPLICATION_JSON).content(body))
 				.andExpect(status().isCreated());
 		String json = result.andReturn().getResponse().getContentAsString();
 		long id = ((Number) JsonPath.read(json, "$.id")).longValue();
-		result.andExpect(header().string("Location", endsWith(path + "/" + id)));
+		result.andExpect(header().string("Location", endsWith(readPath + "/" + id)));
 		Timestamp stored = jdbcTemplate.queryForObject("SELECT created_at FROM " + table + " WHERE id = ?",
 				Timestamp.class, id);
 		assertThat(Instant.parse(JsonPath.read(json, "$.created_at"))).isEqualTo(stored.toInstant());

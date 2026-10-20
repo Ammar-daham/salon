@@ -22,12 +22,26 @@ public class AddressService
 
 	private final AddressDao addressDao;
 	private final UserDao userDao;
+	private final BusinessService businessService;
 
 	@Autowired
-	public AddressService(AddressDao addressDao, UserDao userDao)
+	public AddressService(AddressDao addressDao, UserDao userDao, BusinessService businessService)
 	{
 		this.addressDao = addressDao;
 		this.userDao = userDao;
+		this.businessService = businessService;
+	}
+
+	/** A salon's new address, added by an admin of that salon or a super admin. */
+	public Address addAddressForBusiness(long businessId, Address address, AuthenticatedUser caller)
+	{
+		AccessControl.requireAdminOfBusiness(caller, businessId);
+		// A 404, rather than the error the fk_addresses_business foreign key would give.
+		businessService.getBusinessById((int) businessId);
+		address.setBusinessId(businessId);
+		Long id = addressDao.addAddress(address);
+		log.info("Created address {} for business {}", id, businessId);
+		return fetch(id.intValue());
 	}
 
 	/** Every address for a super admin; for an admin, their own business's and its users', or none without one. */

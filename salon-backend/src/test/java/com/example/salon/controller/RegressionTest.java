@@ -423,6 +423,52 @@ class RegressionTest extends IntegrationTest
 				.andExpect(jsonPath("$.message").value("Business with name Urban Cuts Barbershop already exists."));
 	}
 
+	/**
+	 * A salon's addresses and contacts could only be added when it was created: there was no POST for
+	 * them, and PUT /businesses/{id} ignores them.
+	 */
+	@Test
+	void aSalonsAddressesAndContactsCanBeAddedAfterItIsCreated() throws Exception
+	{
+		MockHttpSession admin = loginAs(Fixture.GLOW_ADMIN);
+		String glow = "/api/v1/businesses/" + Fixture.GLOW;
+
+		mvc.perform(post(glow + "/addresses").session(admin)
+						.contentType(MediaType.APPLICATION_JSON)
+						.content("""
+								{"street": "8 Torstr.", "city": "Berlin", "country": "Germany", "postal_code": "10119"}
+								"""))
+				.andExpect(status().isCreated())
+				.andExpect(jsonPath("$.street").value("8 Torstr."))
+				.andExpect(jsonPath("$.user_id").value(nullValue()));
+		mvc.perform(post(glow + "/contacts").session(admin)
+						.contentType(MediaType.APPLICATION_JSON).content("{\"type\": \"email\", \"value\": \"hello@glow.test\"}"))
+				.andExpect(status().isCreated())
+				.andExpect(jsonPath("$.value").value("hello@glow.test"));
+		mvc.perform(get(glow).session(admin))
+				.andExpect(jsonPath("$.addresses[*].street", contains("12 Rosenthaler Str.", "8 Torstr.")))
+				.andExpect(jsonPath("$.contacts[*].value", contains("+49 30 1234501", "hello@glow.test")));
+
+		// The salon already has this phone.
+		mvc.perform(post(glow + "/contacts").session(admin)
+						.contentType(MediaType.APPLICATION_JSON).content("{\"type\": \"phone\", \"value\": \"+49 30 1234501\"}"))
+				.andExpect(status().isConflict())
+				.andExpect(jsonPath("$.message").value("Contact already exists."));
+
+		MockHttpSession superAdmin = loginAs(Fixture.SUPER_ADMIN);
+		mvc.perform(post("/api/v1/businesses/9999/addresses").session(superAdmin)
+						.contentType(MediaType.APPLICATION_JSON)
+						.content("""
+								{"street": "8 Torstr.", "city": "Berlin", "country": "Germany"}
+								"""))
+				.andExpect(status().isNotFound())
+				.andExpect(jsonPath("$.message").value("Business with id 9999 not found"));
+		mvc.perform(post("/api/v1/businesses/9999/contacts").session(superAdmin)
+						.contentType(MediaType.APPLICATION_JSON).content("{\"type\": \"email\", \"value\": \"hello@glow.test\"}"))
+				.andExpect(status().isNotFound())
+				.andExpect(jsonPath("$.message").value("Business with id 9999 not found"));
+	}
+
 	/** Errors carry the stable ErrorCode.code on the wire, not an ad-hoc string. */
 	@Test
 	void notFoundErrorsCarryTheStableNotFoundCode() throws Exception

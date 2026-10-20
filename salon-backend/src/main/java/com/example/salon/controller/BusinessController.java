@@ -45,9 +45,9 @@ public class BusinessController
      *
      * <p>{@code POST /api/v1/businesses}. SUPER_ADMIN only. A new salon is {@code PENDING} until a
      * SUPER_ADMIN approves it; a {@code status} in the body is ignored. {@code currency} is {@code EUR}
-     * and {@code timezone} {@code Europe/Berlin} unless sent. A salon's addresses and contacts can only
-     * be added here: later they are edited one at a time under {@code /api/v1/addresses} and
-     * {@code /api/v1/contacts}.
+     * and {@code timezone} {@code Europe/Berlin} unless sent. More addresses and contacts can be added
+     * later with {@code POST /api/v1/businesses/{id}/addresses} and {@code .../contacts}, and each is
+     * edited under {@code /api/v1/addresses} or {@code /api/v1/contacts}.
      *
      * <p>Errors: 400 if the body breaks the rules of {@link CreateBusinessRequest}; 409 if another salon
      * already has the name, or the body lists the same contact value twice.
@@ -125,10 +125,11 @@ public class BusinessController
      *
      * <p>{@code PUT /api/v1/businesses/{id}}. An ADMIN of the salon, or a SUPER_ADMIN. Every field is
      * replaced: {@code name}, {@code image}, {@code currency} and {@code timezone} are required, and leaving
-     * {@code description} out clears it. A {@code status}, addresses and contacts in the body are ignored;
-     * the status changes with {@code PUT /api/v1/businesses/{id}/status}. A new {@code timezone} keeps time
-     * off and appointments at the same moments, so they read differently on the new clock, while opening
-     * hours and shifts keep their wall-clock times.
+     * {@code description} out clears it. A {@code status}, addresses and contacts in the body are ignored:
+     * the status changes with {@code PUT /api/v1/businesses/{id}/status}, and addresses and contacts are
+     * added with {@code POST /api/v1/businesses/{id}/addresses} and {@code .../contacts}. A new
+     * {@code timezone} keeps time off and appointments at the same moments, so they read differently on the
+     * new clock, while opening hours and shifts keep their wall-clock times.
      *
      * <p>Errors: 400 if the body breaks the rules of {@link UpdateBusinessRequest}; 403 for another salon;
      * 404 if there's no such salon; 409 if another salon already has the name.

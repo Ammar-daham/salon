@@ -5,8 +5,8 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
 /**
- * A contact, as {@code PUT /api/v1/contacts/{id}} takes it, and in {@code contacts} on
- * {@code POST /api/v1/users} and {@code POST /api/v1/businesses}: {@code type}, such as {@code phone}, up
+ * A contact, as {@code POST /api/v1/businesses/{businessId}/contacts} and {@code PUT /api/v1/contacts/{id}}
+ * take it, and in {@code contacts} on {@code POST /api/v1/users} and {@code POST /api/v1/businesses}: {@code type}, such as {@code phone}, up
  * to 20 characters, and {@code value}, up to 255; both required. One owner can't have the same
  * {@code value} twice.
  */
