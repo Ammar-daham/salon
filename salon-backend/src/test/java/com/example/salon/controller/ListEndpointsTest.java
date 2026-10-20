@@ -162,6 +162,10 @@ class ListEndpointsTest extends IntegrationTest
 		mvc.perform(get(USERS + "?sort=password_hash").session(superAdmin))
 				.andExpect(status().isBadRequest())
 				.andExpect(jsonPath("$.message").value(containsString("sort must be one of name, -name, email")));
+		// One salon's customers are all that salon's, so only GET /customers sorts by business_name.
+		mvc.perform(get(BUSINESSES + "/" + Fixture.GLOW + "/customers?sort=business_name").session(superAdmin))
+				.andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$.message").value("sort must be one of name, -name, created_at, -created_at"));
 		mvc.perform(get(BUSINESSES + "?status=OPEN").session(superAdmin))
 				.andExpect(status().isBadRequest())
 				.andExpect(jsonPath("$.message").value("status has an invalid value"));

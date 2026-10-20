@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
+import java.util.EnumSet;
 
 /**
  * A salon's customer records, under {@code /api/v1/businesses/{businessId}/customers}, and across salons under
@@ -93,8 +94,10 @@ public class CustomerController
 			@RequestParam(required = false) Integer size,
 			@AuthenticationPrincipal AuthenticatedUser principal)
 	{
-		return customerService.getCustomersForBusiness(businessId, q, Sort.parse(sort, CustomerDao.SortBy.class),
-				PageQuery.of(page, size), principal);
+		// Every customer here is the one salon's, so there's no business_name order.
+		Sort<CustomerDao.SortBy> order = Sort.parse(sort,
+				EnumSet.of(CustomerDao.SortBy.NAME, CustomerDao.SortBy.CREATED_AT));
+		return customerService.getCustomersForBusiness(businessId, q, order, PageQuery.of(page, size), principal);
 	}
 
 	/**

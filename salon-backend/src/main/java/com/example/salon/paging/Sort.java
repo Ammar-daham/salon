@@ -3,7 +3,7 @@ package com.example.salon.paging;
 import com.example.salon.exception.BaseException;
 import com.example.salon.exception.ErrorCode;
 
-import java.util.Arrays;
+import java.util.EnumSet;
 import java.util.Locale;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -17,14 +17,20 @@ public record Sort<K extends Enum<K>>(K key, boolean descending)
 {
 	public static <K extends Enum<K>> Sort<K> parse(String value, Class<K> keys)
 	{
+		return parse(value, EnumSet.allOf(keys));
+	}
+
+	/** For a list that takes only some of its DAO's keys; anything else is a 400 naming those it takes. */
+	public static <K extends Enum<K>> Sort<K> parse(String value, EnumSet<K> keys)
+	{
 		boolean descending = value.startsWith("-");
 		String name = descending ? value.substring(1) : value;
-		for (K key : keys.getEnumConstants()) {
+		for (K key : keys) {
 			if (paramName(key).equals(name)) {
 				return new Sort<>(key, descending);
 			}
 		}
-		String allowed = Arrays.stream(keys.getEnumConstants())
+		String allowed = keys.stream()
 				.map(Sort::paramName)
 				.flatMap(key -> Stream.of(key, "-" + key))
 				.collect(Collectors.joining(", "));

@@ -58,6 +58,9 @@ version. The version lives in [`gradle.properties`](gradle.properties); each rel
   `services/{serviceId}`, `staff/{staffId}`, `staff/{staffId}/time-off/{timeOffId}` and
   `customers/{customerId}`, and `/api/v1/users/{id}`, `/api/v1/addresses/{id}` and
   `/api/v1/contacts/{id}`.
+- `GET /api/v1/businesses/{id}/customers` answers 400 to `sort=business_name` or `-business_name`,
+  as to any other order it doesn't take. Every customer on it belongs to the one salon, so it was the
+  same as `sort=name`. `GET /api/v1/customers` still sorts by `business_name`.
 
 ### Security
 - An ADMIN can't change the role of a SUPER_ADMIN who belongs to their salon: only a SUPER_ADMIN may
