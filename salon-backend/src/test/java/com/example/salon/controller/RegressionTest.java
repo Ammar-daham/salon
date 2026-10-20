@@ -490,6 +490,30 @@ class RegressionTest extends IntegrationTest
 						.contentType(MediaType.APPLICATION_JSON).content("{\"role\": \"EMPLOYEE\"}"))
 				.andExpect(status().isNotFound());
 	}
+
+	/**
+	 * GET and DELETE /users/{id} took an int, so an id past 2^31 was a 400, and the service cut PUT's long
+	 * id to an int, so 2^32 + 4 checked and answered with user 4: PUT .../role answered 200 with them,
+	 * unchanged.
+	 */
+	@Test
+	void aUserIdPastTheIntRangeIsLookedUpAsItIs() throws Exception
+	{
+		MockHttpSession admin = loginAs(Fixture.GLOW_ADMIN);
+		long wrapsToMia = (1L << 32) + Fixture.GLOW_EMPLOYEE_ID;
+		String user = "/api/v1/users/" + wrapsToMia;
+
+		mvc.perform(get(user).session(admin))
+				.andExpect(status().isNotFound())
+				.andExpect(jsonPath("$.message").value("User with id " + wrapsToMia + " not found"));
+		mvc.perform(put(user + "/role").session(admin)
+						.contentType(MediaType.APPLICATION_JSON).content("{\"role\": \"ADMIN\"}"))
+				.andExpect(status().isNotFound());
+		mvc.perform(delete(user).session(admin))
+				.andExpect(status().isNotFound());
+		mvc.perform(get("/api/v1/users/" + Fixture.GLOW_EMPLOYEE_ID).session(admin))
+				.andExpect(jsonPath("$.role").value("EMPLOYEE"));
+	}
 	
 	/** A nested new child (id null) on a business update used to auto-unbox to an NPE / 400. */
 	@Test

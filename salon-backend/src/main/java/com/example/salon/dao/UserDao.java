@@ -19,7 +19,7 @@ public interface UserDao
 
 	Page<User> getUsers(Filter filter, Sort<SortBy> sort, PageQuery page);
 
-	User getUserById(int id);
+	User getUserById(long id);
 
 	Optional<User> findById(long id);
 

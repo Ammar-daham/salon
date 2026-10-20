@@ -117,7 +117,7 @@ public class UserController
 	 * @return 200 with the user
 	 */
 	@GetMapping("/{id}")
-	public User getUserById(@PathVariable int id, @AuthenticationPrincipal AuthenticatedUser principal)
+	public User getUserById(@PathVariable long id, @AuthenticationPrincipal AuthenticatedUser principal)
 	{
 		return userService.getUserById(id, principal);
 	}
@@ -182,7 +182,7 @@ public class UserController
 	 */
 	@DeleteMapping("/{id}")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
-	public void deleteUserById(@PathVariable int id, @AuthenticationPrincipal AuthenticatedUser principal)
+	public void deleteUserById(@PathVariable long id, @AuthenticationPrincipal AuthenticatedUser principal)
 	{
 		userService.deleteUserById(id, principal);
 	}
