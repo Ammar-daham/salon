@@ -1,0 +1,247 @@
+@import 'tailwindcss';
+
+@custom-variant dark (&:is(.dark *));
+
+/* ============================================================================
+   Design tokens — Salonat, the client app
+   ----------------------------------------------------------------------------
+   `--color-*: initial` deletes Tailwind's default palette on purpose, the same
+   way admin-panel's globals.css does: a stray `bg-gray-100` becomes an UNKNOWN
+   UTILITY and fails visibly instead of quietly looking almost-right.
+
+   This is a different skin from Salonat Pro (admin-panel), not a copy of it.
+   Pro is a warm-sand enterprise dashboard; this is a mobile-first consumer app,
+   so the neutral ramp is a cool, iOS-system-gray scale instead, and type uses
+   the OS's own UI font rather than the brand's Outfit wordmark font (reserved
+   here for the logo only — see `font-brand` below). The single accent colour
+   (rose) is kept identical to Salonat Pro on purpose, for brand continuity.
+   ========================================================================== */
+
+@theme {
+  --font-*: initial;
+  --font-outfit: Outfit, sans-serif;
+
+  --color-*: initial;
+  --color-transparent: transparent;
+  --color-current: currentColor;
+  --color-white: #ffffff;
+  --color-black: #000000;
+
+  /* Primary — the Salonat brand rose (brand/README.md). Identical ramp to
+     Salonat Pro: 500 is identity (logo, active tab, focus ring), 600 is the
+     solid fill used on buttons. */
+  --color-primary-25: #fffbfa;
+  --color-primary-50: #fdf6f4;
+  --color-primary-100: #f9e8e4;
+  --color-primary-200: #f0d3cd;
+  --color-primary-300: #e2b3a9;
+  --color-primary-400: #cd8f8e;
+  --color-primary-500: #b76e79;
+  --color-primary-600: #9c5a65;
+  --color-primary-700: #7d4751;
+  --color-primary-800: #613840;
+  --color-primary-900: #4a2b31;
+  --color-primary-950: #2c191d;
+
+  /* Neutral — cool iOS system gray, not Pro's warm sand. Values track Apple's
+     own systemGray ramp closely (systemGray6 #F2F2F7 ≈ 100, systemGray #8E8E93
+     ≈ 500) so UI chrome reads as native rather than "Tailwind default". */
+  --color-neutral-25: #fbfbfc;
+  --color-neutral-50: #f7f7f9;
+  --color-neutral-100: #f2f2f5;
+  --color-neutral-200: #e5e5ea;
+  --color-neutral-300: #d1d1d6;
+  --color-neutral-400: #aeaeb2;
+  --color-neutral-500: #8e8e93;
+  --color-neutral-600: #6e6e73;
+  --color-neutral-700: #48484a;
+  --color-neutral-800: #3a3a3c;
+  --color-neutral-900: #242426;
+  --color-neutral-950: #18181a;
+
+  /* Status — vivid iOS system colours (green/orange/red/blue), not Pro's
+     desaturated warm-rotated set: a consumer app can afford a livelier
+     success/error than an admin dashboard's chart-safe tints. */
+  --color-success-25: #f3fbf5;
+  --color-success-50: #e6f8eb;
+  --color-success-100: #c3efce;
+  --color-success-200: #96e2ac;
+  --color-success-300: #65d184;
+  --color-success-400: #3fbd63;
+  --color-success-500: #34c759;
+  --color-success-600: #248a3d;
+  --color-success-700: #1d6e31;
+  --color-success-800: #155224;
+  --color-success-900: #0e3718;
+  --color-success-950: #081f0e;
+
+  --color-warning-25: #fffaf2;
+  --color-warning-50: #fff3e0;
+  --color-warning-100: #ffe0b3;
+  --color-warning-200: #ffc980;
+  --color-warning-300: #ffb04d;
+  --color-warning-400: #ffa426;
+  --color-warning-500: #ff9500;
+  --color-warning-600: #cc7700;
+  --color-warning-700: #995900;
+  --color-warning-800: #663c00;
+  --color-warning-900: #331e00;
+  --color-warning-950: #1a0f00;
+
+  --color-error-25: #fff5f4;
+  --color-error-50: #ffe9e7;
+  --color-error-100: #ffc7c2;
+  --color-error-200: #ff9d95;
+  --color-error-300: #ff6f63;
+  --color-error-400: #ff4f41;
+  --color-error-500: #ff3b30;
+  --color-error-600: #d62e24;
+  --color-error-700: #a6241c;
+  --color-error-800: #7a1a15;
+  --color-error-900: #4d110d;
+  --color-error-950: #2b0907;
+
+  --color-info-25: #f2f8ff;
+  --color-info-50: #e5f1ff;
+  --color-info-100: #bfdfff;
+  --color-info-200: #8fc7ff;
+  --color-info-300: #5cadff;
+  --color-info-400: #2e95ff;
+  --color-info-500: #007aff;
+  --color-info-600: #0062cc;
+  --color-info-700: #004b99;
+  --color-info-800: #003566;
+  --color-info-900: #001f3d;
+  --color-info-950: #00111f;
+
+  /* Type scale — iOS Human Interface Guidelines sizes, as token pairs
+     (admin-panel's --text-x / --text-x--line-height convention). Body copy
+     uses Tailwind's own text-sm/base/lg; these are the named iOS roles. */
+  --text-large-title: 34px;
+  --text-large-title--line-height: 41px;
+  --text-title-1: 28px;
+  --text-title-1--line-height: 34px;
+  --text-title-2: 22px;
+  --text-title-2--line-height: 28px;
+  --text-title-3: 20px;
+  --text-title-3--line-height: 25px;
+  --text-headline: 17px;
+  --text-headline--line-height: 22px;
+  --text-callout: 16px;
+  --text-callout--line-height: 21px;
+  --text-subhead: 15px;
+  --text-subhead--line-height: 20px;
+  --text-footnote: 13px;
+  --text-footnote--line-height: 18px;
+  --text-caption-1: 12px;
+  --text-caption-1--line-height: 16px;
+
+  /* Radius — bigger and more varied than Pro's single --radius-card, to match
+     how much more cards/sheets/pills/chips a consumer app shows at once. */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --radius-pill: 9999px;
+
+  /* Shadows — neutral black, soft and diffuse. Pro's shadows are tinted umber
+     on purpose for its palette; this app's surfaces are closer to true white
+     or true black, so a tinted shadow would look muddy instead of soft. */
+  --shadow-xs: 0px 1px 2px 0px rgba(0, 0, 0, 0.04);
+  --shadow-sm: 0px 2px 6px 0px rgba(0, 0, 0, 0.06), 0px 1px 2px 0px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0px 8px 16px -4px rgba(0, 0, 0, 0.08), 0px 2px 4px -2px rgba(0, 0, 0, 0.04);
+  --shadow-lg: 0px 16px 32px -8px rgba(0, 0, 0, 0.10), 0px 4px 8px -4px rgba(0, 0, 0, 0.04);
+  --shadow-xl: 0px 24px 48px -12px rgba(0, 0, 0, 0.12), 0px 8px 16px -8px rgba(0, 0, 0, 0.06);
+
+  --z-index-sticky: 30;
+  --z-index-tabbar: 40;
+  --z-index-backdrop: 50;
+  --z-index-sheet: 60;
+  --z-index-toast: 80;
+}
+
+/* Runtime-switchable tokens. These MUST live in `@theme inline` — without
+   `inline` Tailwind copies the value at build time and dark mode silently
+   stops working (same note as admin-panel's globals.css). */
+@theme inline {
+  --color-surface: var(--surface);
+  --color-surface-raised: var(--surface-raised);
+  --color-surface-sunken: var(--surface-sunken);
+  --color-surface-translucent: var(--surface-translucent);
+  --color-border-default: var(--border-default);
+  --color-border-strong: var(--border-strong);
+  --color-ink: var(--ink);
+  --color-ink-muted: var(--ink-muted);
+  --color-ink-subtle: var(--ink-subtle);
+  --color-primary-solid: var(--primary-solid);
+  --shadow-focus-ring: 0 0 0 4px var(--ring);
+}
+
+:root {
+  --surface: #f7f7f9;
+  --surface-raised: #ffffff;
+  --surface-sunken: #f2f2f5;
+  /* Behind the blurred tab bar / sticky headers — paired with backdrop-blur. */
+  --surface-translucent: rgba(255, 255, 255, 0.72);
+  --border-default: #e5e5ea;
+  --border-strong: #d1d1d6;
+  --ink: #1c1c1e;
+  --ink-muted: #6e6e73;
+  --ink-subtle: #8e8e93;
+  --primary-solid: #9c5a65;
+  --ring: rgba(183, 110, 121, 0.32);
+}
+
+.dark {
+  /* True black background, matching iOS dark mode (not a dark grey) — the
+     frosted tab bar only reads as "glass" against real black behind it. */
+  --surface: #000000;
+  --surface-raised: #1c1c1e;
+  --surface-sunken: #0a0a0b;
+  --surface-translucent: rgba(28, 28, 30, 0.72);
+  --border-default: #3a3a3c;
+  --border-strong: #48484a;
+  --ink: #f2f2f5;
+  --ink-muted: #aeaeb2;
+  --ink-subtle: #8e8e93;
+  --primary-solid: #b76e79;
+  --ring: rgba(226, 179, 169, 0.36);
+}
+
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-border-default, currentColor);
+  }
+  button:not(:disabled),
+  [role='button']:not(:disabled) {
+    cursor: pointer;
+  }
+  html {
+    /* iOS Safari's tap highlight is the wrong colour for this palette and this
+       app styles its own :active states everywhere a tap matters. */
+    -webkit-tap-highlight-color: transparent;
+  }
+  body {
+    @apply relative bg-surface text-ink antialiased;
+    font-family:
+      -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  }
+}
+
+/* The brand wordmark font (Outfit SemiBold, per brand/README.md) — reserved
+   for the "salonat" logo lockup only, never body text or UI chrome. */
+@utility font-brand {
+  font-family: var(--font-outfit);
+}
+
+@utility no-scrollbar {
+  &::-webkit-scrollbar {
+    display: none;
+  }
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
