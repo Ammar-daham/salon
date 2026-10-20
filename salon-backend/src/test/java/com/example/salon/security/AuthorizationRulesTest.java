@@ -2,7 +2,9 @@ package com.example.salon.security;
 
 import com.example.salon.support.IntegrationTest;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.mock.web.MockHttpSession;
 
 import static org.hamcrest.Matchers.contains;
@@ -19,6 +21,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 /** Who may do what. A known bug that breaks one of these rules goes in {@link KnownIssuesTest}. */
 class AuthorizationRulesTest extends IntegrationTest
 {
+	@Autowired
+	private JdbcTemplate jdbcTemplate;
+
 	@Test
 	void anonymousRequestsAreRejected() throws Exception
 	{
@@ -256,19 +261,25 @@ class AuthorizationRulesTest extends IntegrationTest
 	}
 
 	@Test
-	void nonAdminSelfUpdateCannotChangeTheirOwnRole() throws Exception
+	void nonAdminCanRenameThemselvesButNotChangeTheirRole() throws Exception
 	{
 		MockHttpSession employee = loginAs(Fixture.GLOW_EMPLOYEE);
+		String mia = "/api/v1/users/" + Fixture.GLOW_EMPLOYEE_ID;
 
-		mvc.perform(put("/api/v1/users/" + Fixture.GLOW_EMPLOYEE_ID).session(employee)
+		// No role needed to rename yourself, and one in the body changes nothing.
+		mvc.perform(put(mia).session(employee)
 						.contentType(MediaType.APPLICATION_JSON)
 						.content("""
-								{"first_name": "Mia", "last_name": "Stylist", "role": "ADMIN"}
+								{"first_name": "Mia", "last_name": "Stylist-Lee", "role": "ADMIN"}
 								"""))
-				.andExpect(status().isOk());
-
-		mvc.perform(get("/api/v1/users/" + Fixture.GLOW_EMPLOYEE_ID).session(employee))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.last_name").value("Stylist-Lee"))
 				.andExpect(jsonPath("$.role").value("EMPLOYEE"));
+		mvc.perform(put(mia + "/role").session(employee)
+						.contentType(MediaType.APPLICATION_JSON).content("{\"role\": \"ADMIN\"}"))
+				.andExpect(status().isForbidden());
+
+		mvc.perform(get(mia).session(employee)).andExpect(jsonPath("$.role").value("EMPLOYEE"));
 	}
 
 	@Test
@@ -285,15 +296,27 @@ class AuthorizationRulesTest extends IntegrationTest
 	{
 		MockHttpSession admin = loginAs(Fixture.GLOW_ADMIN);
 
-		mvc.perform(put("/api/v1/users/" + Fixture.GLOW_ADMIN_ID).session(admin)
-						.contentType(MediaType.APPLICATION_JSON)
-						.content("""
-								{"first_name": "Anna", "last_name": "Admin", "role": "SUPER_ADMIN"}
-								"""))
+		mvc.perform(put("/api/v1/users/" + Fixture.GLOW_ADMIN_ID + "/role").session(admin)
+						.contentType(MediaType.APPLICATION_JSON).content("{\"role\": \"SUPER_ADMIN\"}"))
 				.andExpect(status().isForbidden());
 
 		mvc.perform(get("/api/v1/users/" + Fixture.GLOW_ADMIN_ID).session(admin))
 				.andExpect(jsonPath("$.role").value("ADMIN"));
+	}
+
+	@Test
+	void adminCannotTakeTheRoleOfASuperAdminInTheirSalon() throws Exception
+	{
+		// A super admin may belong to a salon, whose admin can then see them, but not demote them.
+		jdbcTemplate.update("UPDATE users SET business_id = ? WHERE id = ?", Fixture.GLOW, Fixture.SUPER_ADMIN_ID);
+		MockHttpSession admin = loginAs(Fixture.GLOW_ADMIN);
+		String root = "/api/v1/users/" + Fixture.SUPER_ADMIN_ID;
+
+		mvc.perform(put(root + "/role").session(admin)
+						.contentType(MediaType.APPLICATION_JSON).content("{\"role\": \"EMPLOYEE\"}"))
+				.andExpect(status().isForbidden());
+
+		mvc.perform(get(root).session(admin)).andExpect(jsonPath("$.role").value("SUPER_ADMIN"));
 	}
 
 	@Test
@@ -522,11 +545,15 @@ class AuthorizationRulesTest extends IntegrationTest
 	@Test
 	void adminCannotEditUsersOfAnotherSalon() throws Exception
 	{
-		mvc.perform(put("/api/v1/users/" + Fixture.URBAN_ADMIN_ID).session(loginAs(Fixture.GLOW_ADMIN))
+		MockHttpSession glowAdmin = loginAs(Fixture.GLOW_ADMIN);
+		mvc.perform(put("/api/v1/users/" + Fixture.URBAN_ADMIN_ID).session(glowAdmin)
 						.contentType(MediaType.APPLICATION_JSON)
 						.content("""
-								{"first_name": "Pwned", "last_name": "Admin", "role": "EMPLOYEE"}
+								{"first_name": "Pwned", "last_name": "Admin"}
 								"""))
+				.andExpect(status().isNotFound());
+		mvc.perform(put("/api/v1/users/" + Fixture.URBAN_ADMIN_ID + "/role").session(glowAdmin)
+						.contentType(MediaType.APPLICATION_JSON).content("{\"role\": \"EMPLOYEE\"}"))
 				.andExpect(status().isNotFound());
 
 		mvc.perform(get("/api/v1/users/" + Fixture.URBAN_ADMIN_ID).session(loginAs(Fixture.URBAN_ADMIN)))
@@ -555,7 +582,7 @@ class AuthorizationRulesTest extends IntegrationTest
 		mvc.perform(put("/api/v1/users/" + Fixture.GLOW_EMPLOYEE_ID).session(admin)
 						.contentType(MediaType.APPLICATION_JSON)
 						.content("""
-								{"first_name": "Mia", "last_name": "Renamed", "role": "EMPLOYEE"}
+								{"first_name": "Mia", "last_name": "Renamed"}
 								"""))
 				.andExpect(status().isOk());
 

@@ -442,20 +442,53 @@ class RegressionTest extends IntegrationTest
 	}
 
 	/**
-	 * A missing required field is a validation 400, not a server crash. An update body without
+	 * A missing required field is a validation 400, not a server crash. A user update body without
 	 * "role" used to unbox a null Role into a NullPointerException, which a handler then passed off
-	 * as a 400. UpdateUserRequest now rejects that body before it reaches that code, and any truly
-	 * unexpected exception is a logged 500, from the catch-all in GlobalControllerExceptionHandler.
+	 * as a 400. The role now has its own endpoint, whose body is checked before it reaches that code,
+	 * and any truly unexpected exception is a logged 500, from the catch-all in
+	 * GlobalControllerExceptionHandler.
 	 */
 	@Test
 	void aMissingRequiredFieldIsARejectedRequestNotAServerCrash() throws Exception
 	{
-		mvc.perform(put("/api/v1/users/" + Fixture.GLOW_EMPLOYEE_ID).session(loginAs(Fixture.GLOW_ADMIN))
+		mvc.perform(put("/api/v1/users/" + Fixture.GLOW_EMPLOYEE_ID + "/role").session(loginAs(Fixture.GLOW_ADMIN))
+						.contentType(MediaType.APPLICATION_JSON).content("{}"))
+				.andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$.message").value("role must not be null"));
+	}
+
+	/** PUT /users/{id} required a role from everyone, then ignored it unless an admin sent it. */
+	@Test
+	void aUsersRoleChangesOnlyThroughItsOwnEndpoint() throws Exception
+	{
+		MockHttpSession admin = loginAs(Fixture.GLOW_ADMIN);
+		String mia = "/api/v1/users/" + Fixture.GLOW_EMPLOYEE_ID;
+
+		mvc.perform(put(mia).session(admin)
 						.contentType(MediaType.APPLICATION_JSON)
 						.content("""
-								{"first_name": "Mia", "last_name": "Stylist"}
+								{"first_name": "Mia", "last_name": "Stylist", "role": "ADMIN"}
 								"""))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.role").value("EMPLOYEE"));
+
+		// The role it already has changes nothing, not even updated_at.
+		mvc.perform(put("/api/v1/users/" + Fixture.URBAN_EMPLOYEE_ID + "/role").session(loginAs(Fixture.URBAN_ADMIN))
+						.contentType(MediaType.APPLICATION_JSON).content("{\"role\": \"EMPLOYEE\"}"))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.updated_at").value(nullValue()));
+		mvc.perform(put(mia + "/role").session(admin)
+						.contentType(MediaType.APPLICATION_JSON).content("{\"role\": \"ADMIN\"}"))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.role").value("ADMIN"))
+				.andExpect(jsonPath("$.first_name").value("Mia"));
+
+		mvc.perform(put(mia + "/role").session(admin)
+						.contentType(MediaType.APPLICATION_JSON).content("{\"role\": \"OWNER\"}"))
 				.andExpect(status().isBadRequest());
+		mvc.perform(put("/api/v1/users/9999/role").session(loginAs(Fixture.SUPER_ADMIN))
+						.contentType(MediaType.APPLICATION_JSON).content("{\"role\": \"EMPLOYEE\"}"))
+				.andExpect(status().isNotFound());
 	}
 	
 	/** A nested new child (id null) on a business update used to auto-unbox to an NPE / 400. */
@@ -478,7 +511,7 @@ class RegressionTest extends IntegrationTest
 		mvc.perform(put("/api/v1/users/" + Fixture.GLOW_EMPLOYEE_ID).session(loginAs(Fixture.GLOW_ADMIN))
 						.contentType(MediaType.APPLICATION_JSON)
 						.content("""
-								{"first_name": "Mia", "last_name": "Stylist", "role": "EMPLOYEE", "contacts": [{"type": "phone", "value": "+49 30 0000000"}]}
+								{"first_name": "Mia", "last_name": "Stylist", "contacts": [{"type": "phone", "value": "+49 30 0000000"}]}
 								"""))
 				.andExpect(status().isOk());
 	}
@@ -495,7 +528,7 @@ class RegressionTest extends IntegrationTest
 		mvc.perform(put("/api/v1/users/" + Fixture.GLOW_EMPLOYEE_ID).session(admin)
 						.contentType(MediaType.APPLICATION_JSON)
 						.content("""
-								{"first_name": "Mia", "last_name": "Senior-Stylist", "role": "EMPLOYEE"}
+								{"first_name": "Mia", "last_name": "Senior-Stylist"}
 								"""))
 				.andExpect(status().isOk());
 

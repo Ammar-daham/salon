@@ -27,6 +27,8 @@ public interface UserDao
 
 	long updateUserById(long id, User user);
 
+	long updateUserRole(long id, Role role);
+
 	long updatePasswordHash(long id, String passwordHash);
 
 	long deleteUserById(long id);

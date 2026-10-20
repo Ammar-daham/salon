@@ -34,6 +34,6 @@ export interface CreateUserInput {
 export interface UpdateUserInput {
 	firstName: string;
 	lastName: string;
-	/** Always send it: UpdateUserRequest rejects a missing role with a 400 (BE-23). */
+	/** Saved with PUT /users/{id}/role, and only when it differs from the stored one. */
 	role: Role;
 }

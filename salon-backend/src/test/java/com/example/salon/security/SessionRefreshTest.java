@@ -28,11 +28,8 @@ class SessionRefreshTest extends IntegrationTest
 		MockHttpSession admin = loginAs(Fixture.GLOW_ADMIN);
 		mvc.perform(get("/api/v1/users").session(admin)).andExpect(status().isOk());
 
-		mvc.perform(put("/api/v1/users/" + Fixture.GLOW_ADMIN_ID).session(loginAs(Fixture.SUPER_ADMIN))
-						.contentType(MediaType.APPLICATION_JSON)
-						.content("""
-								{"first_name": "Anna", "last_name": "Admin", "role": "EMPLOYEE"}
-								"""))
+		mvc.perform(put("/api/v1/users/" + Fixture.GLOW_ADMIN_ID + "/role").session(loginAs(Fixture.SUPER_ADMIN))
+						.contentType(MediaType.APPLICATION_JSON).content("{\"role\": \"EMPLOYEE\"}"))
 				.andExpect(status().isOk());
 
 		mvc.perform(get("/api/v1/auth/me").session(admin))
@@ -55,7 +52,7 @@ class SessionRefreshTest extends IntegrationTest
 		mvc.perform(put("/api/v1/users/" + Fixture.GLOW_EMPLOYEE_ID).session(admin)
 						.contentType(MediaType.APPLICATION_JSON)
 						.content("""
-								{"first_name": "Mia", "last_name": "Stylist", "role": "EMPLOYEE"}
+								{"first_name": "Mia", "last_name": "Stylist"}
 								"""))
 				.andExpect(status().isNotFound());
 	}
