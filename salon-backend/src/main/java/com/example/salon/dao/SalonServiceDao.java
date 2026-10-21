@@ -16,7 +16,7 @@ public interface SalonServiceDao {
 
     List<SalonService> getServicesForStaff(long staffId);
 
-    SalonService getServiceById(int businessId, int serviceId);
+    SalonService getServiceById(long businessId, long serviceId);
 
     int updateServiceById(long id, SalonService service);
 

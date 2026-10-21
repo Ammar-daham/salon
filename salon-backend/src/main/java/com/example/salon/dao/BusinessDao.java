@@ -20,11 +20,11 @@ public interface BusinessDao
 
     Page<Business> getBusinesses(Filter filter, Sort<SortBy> sort, PageQuery page);
 
-    Business getBusinessById(int id);
+    Business getBusinessById(long id);
 
-    int updateBusinessById(int id, Business business);
+    int updateBusinessById(long id, Business business);
 
-    int updateBusinessStatus(int id, Status status);
+    int updateBusinessStatus(long id, Status status);
 
-    int deleteBusiness(int id);
+    int deleteBusiness(long id);
 }

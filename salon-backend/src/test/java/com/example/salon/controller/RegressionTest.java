@@ -3,7 +3,9 @@ package com.example.salon.controller;
 import com.example.salon.support.IntegrationTest;
 import com.jayway.jsonpath.JsonPath;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.mock.web.MockHttpSession;
 
 import static org.hamcrest.Matchers.contains;
@@ -23,6 +25,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  */
 class RegressionTest extends IntegrationTest
 {
+	@Autowired
+	private JdbcTemplate jdbcTemplate;
+
 	/** 0ef369c: every address read swapped street and country. */
 	@Test
 	void addressReadsKeepStreetAndCountryInTheRightFields() throws Exception
@@ -560,7 +565,71 @@ class RegressionTest extends IntegrationTest
 		mvc.perform(get("/api/v1/users/" + Fixture.GLOW_EMPLOYEE_ID).session(admin))
 				.andExpect(jsonPath("$.role").value("EMPLOYEE"));
 	}
-	
+
+	/**
+	 * The services cut a salon's and a service's id to an int to look them up, so 2^32 + 1 found Glow: its
+	 * hours answered 200 with Glow's timezone, its customers 200 with an empty page, and a service id of
+	 * 2^32 + 1 gave the availability of Glow's haircut. /businesses/{id} and .../services/{serviceId} took
+	 * an int, so the same ids were a 400 there.
+	 */
+	@Test
+	void salonAndServiceIdsPastTheIntRangeAreLookedUpAsTheyAre() throws Exception
+	{
+		MockHttpSession superAdmin = loginAs(Fixture.SUPER_ADMIN);
+		long wrapsToGlow = (1L << 32) + Fixture.GLOW;
+		long wrapsToHaircut = (1L << 32) + Fixture.GLOW_HAIRCUT;
+		String salon = "/api/v1/businesses/" + wrapsToGlow;
+		String service = "/api/v1/businesses/" + Fixture.GLOW + "/services/" + wrapsToHaircut;
+
+		mvc.perform(get(salon).session(superAdmin))
+				.andExpect(status().isNotFound())
+				.andExpect(jsonPath("$.message").value("Business with id " + wrapsToGlow + " not found"));
+		mvc.perform(get(salon + "/hours").session(superAdmin)).andExpect(status().isNotFound());
+		mvc.perform(get(salon + "/staff").session(superAdmin)).andExpect(status().isNotFound());
+		mvc.perform(get("/api/v1/customers?business_id=" + wrapsToGlow).session(superAdmin))
+				.andExpect(status().isNotFound());
+		mvc.perform(get(service).session(superAdmin))
+				.andExpect(status().isNotFound())
+				.andExpect(jsonPath("$.message").value("Service with id " + wrapsToHaircut + " not found."));
+		mvc.perform(get(service + "/availability").session(superAdmin)).andExpect(status().isNotFound());
+	}
+
+	/**
+	 * A new address or contact was read back by its id cut to an int, so once the ids passed 2^31 the
+	 * answer was another one: with the next id 2^32 + 1, Glow's own address and phone. /addresses/{id} and
+	 * /contacts/{id} took an int, so the new one couldn't be read there either: a 400.
+	 */
+	@Test
+	void addressAndContactIdsPastTheIntRangeAreLookedUpAsTheyAre() throws Exception
+	{
+		MockHttpSession admin = loginAs(Fixture.GLOW_ADMIN);
+		String glow = "/api/v1/businesses/" + Fixture.GLOW;
+		long next = (1L << 32) + 1;
+		jdbcTemplate.queryForObject("SELECT setval(pg_get_serial_sequence('addresses', 'id'), ?, false)", Long.class, next);
+		jdbcTemplate.queryForObject("SELECT setval(pg_get_serial_sequence('contacts', 'id'), ?, false)", Long.class, next);
+
+		mvc.perform(post(glow + "/addresses").session(admin)
+						.contentType(MediaType.APPLICATION_JSON)
+						.content("""
+								{"street": "8 Torstr.", "city": "Berlin", "country": "Germany", "postal_code": "10119"}
+								"""))
+				.andExpect(status().isCreated())
+				.andExpect(jsonPath("$.id").value(next))
+				.andExpect(jsonPath("$.street").value("8 Torstr."));
+		mvc.perform(post(glow + "/contacts").session(admin)
+						.contentType(MediaType.APPLICATION_JSON).content("{\"type\": \"email\", \"value\": \"hello@glow.test\"}"))
+				.andExpect(status().isCreated())
+				.andExpect(jsonPath("$.id").value(next))
+				.andExpect(jsonPath("$.value").value("hello@glow.test"));
+
+		mvc.perform(get("/api/v1/addresses/" + next).session(admin)).andExpect(jsonPath("$.street").value("8 Torstr."));
+		mvc.perform(get("/api/v1/contacts/" + next).session(admin)).andExpect(jsonPath("$.value").value("hello@glow.test"));
+		mvc.perform(delete("/api/v1/addresses/" + (next + 1)).session(admin))
+				.andExpect(status().isNotFound())
+				.andExpect(jsonPath("$.message").value("Address with id " + (next + 1) + " not found"));
+		mvc.perform(delete("/api/v1/contacts/" + (next + 1)).session(admin)).andExpect(status().isNotFound());
+	}
+
 	/** A nested new child (id null) on a business update used to auto-unbox to an NPE / 400. */
 	@Test
 	void updatingABusinessWithANewNestedChildNoLongerCrashes() throws Exception

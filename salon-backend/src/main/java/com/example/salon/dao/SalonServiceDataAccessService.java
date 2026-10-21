@@ -96,7 +96,7 @@ public class SalonServiceDataAccessService implements SalonServiceDao
     }
 
     @Override
-    public SalonService getServiceById(int businessId, int serviceId) 
+    public SalonService getServiceById(long businessId, long serviceId) 
     {
         String sql = """
                 SELECT id, name, description,

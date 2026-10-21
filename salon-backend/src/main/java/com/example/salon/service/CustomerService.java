@@ -44,7 +44,7 @@ public class CustomerService
     public Customer addCustomer(long businessId, Customer customer, AuthenticatedUser caller)
     {
         AccessControl.requireStaffOfBusiness(caller, businessId);
-        businessService.getBusinessById((int) businessId);
+        businessService.getBusinessById(businessId);
 
         customer.setBusinessId(businessId);
         customer.setId(customerDao.addCustomer(customer));
@@ -56,7 +56,7 @@ public class CustomerService
             PageQuery page, AuthenticatedUser caller)
     {
         AccessControl.requireStaffOfBusiness(caller, businessId);
-        businessService.getBusinessById((int) businessId);
+        businessService.getBusinessById(businessId);
         return customerDao.getCustomers(new CustomerDao.Filter(businessId, search), sort, page);
     }
 
@@ -76,7 +76,7 @@ public class CustomerService
             AccessControl.requireStaffOfBusiness(caller, scope);
         }
         if (businessId != null)
-            businessService.getBusinessById(businessId.intValue());
+            businessService.getBusinessById(businessId);
         return customerDao.getCustomers(new CustomerDao.Filter(scope, search), sort, page);
     }
 

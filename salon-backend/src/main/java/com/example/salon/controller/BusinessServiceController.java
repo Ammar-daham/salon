@@ -82,7 +82,7 @@ public class BusinessServiceController
 	 * @return 200 with the service
 	 */
 	@GetMapping("/{businessId}/services/{serviceId}")
-	public SalonService getServiceForBusiness(@PathVariable int businessId, @PathVariable int serviceId,
+	public SalonService getServiceForBusiness(@PathVariable long businessId, @PathVariable long serviceId,
 			@AuthenticationPrincipal AuthenticatedUser principal)
 	{
 		return businessSalonServiceService.getServiceById(businessId, serviceId, principal);
@@ -105,7 +105,7 @@ public class BusinessServiceController
 	 * @return 200 with the service as stored
 	 */
 	@PutMapping("/{businessId}/services/{serviceId}")
-	public SalonService updateServiceForBusiness(@PathVariable int businessId, @PathVariable int serviceId,
+	public SalonService updateServiceForBusiness(@PathVariable long businessId, @PathVariable long serviceId,
 			@Valid @RequestBody SalonServiceRequest request, @AuthenticationPrincipal AuthenticatedUser principal)
 	{
 		return businessSalonServiceService.updateServiceForBusiness(businessId, serviceId, request.toSalonService(), principal);
@@ -128,7 +128,7 @@ public class BusinessServiceController
 	 */
 	@DeleteMapping("/{businessId}/services/{serviceId}")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
-	public void deleteServiceForBusiness(@PathVariable int businessId, @PathVariable int serviceId,
+	public void deleteServiceForBusiness(@PathVariable long businessId, @PathVariable long serviceId,
 			@AuthenticationPrincipal AuthenticatedUser principal)
 	{
 		businessSalonServiceService.deleteServiceForBusiness(businessId, serviceId, principal);

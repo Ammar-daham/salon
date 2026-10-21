@@ -106,7 +106,7 @@ public class ContactDataAccessService implements ContactDao
 	}
 
 	@Override
-	public Contact getContactById(int id)
+	public Contact getContactById(long id)
 	{
 		return jdbcTemplate.queryForObject(SELECT + "WHERE id = ?", (rs, i) -> {
 			Contact contact = mapRow(rs);

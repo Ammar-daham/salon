@@ -113,7 +113,7 @@ public class AddressDataAccessService implements AddressDao
 	}
 
 	@Override
-	public Address getAddressById(int id)
+	public Address getAddressById(long id)
 	{
 		return jdbcTemplate.queryForObject(SELECT + "WHERE id = ?", (rs, i) -> mapRow(rs), id);
 	}

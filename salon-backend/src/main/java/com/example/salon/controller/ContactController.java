@@ -98,7 +98,7 @@ public class ContactController
 	 * @return 200 with the contact
 	 */
 	@GetMapping("/contacts/{id}")
-	public Contact getContactById(@PathVariable int id, @AuthenticationPrincipal AuthenticatedUser principal)
+	public Contact getContactById(@PathVariable long id, @AuthenticationPrincipal AuthenticatedUser principal)
 	{
 		return contactService.getContactById(id, principal);
 	}
@@ -119,7 +119,7 @@ public class ContactController
 	 * @return 200 with the contact as stored
 	 */
 	@PutMapping("/contacts/{id}")
-	public Contact updateContactById(@PathVariable int id, @Valid @RequestBody ContactRequest request, @AuthenticationPrincipal AuthenticatedUser principal)
+	public Contact updateContactById(@PathVariable long id, @Valid @RequestBody ContactRequest request, @AuthenticationPrincipal AuthenticatedUser principal)
 	{
 		return contactService.updateContactById(id, request.toContact(), principal);
 	}
@@ -138,7 +138,7 @@ public class ContactController
 	 */
 	@DeleteMapping("/contacts/{id}")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
-	public void deleteContactById(@PathVariable int id, @AuthenticationPrincipal AuthenticatedUser principal)
+	public void deleteContactById(@PathVariable long id, @AuthenticationPrincipal AuthenticatedUser principal)
 	{
 		contactService.delectContactById(id, principal);
 	}

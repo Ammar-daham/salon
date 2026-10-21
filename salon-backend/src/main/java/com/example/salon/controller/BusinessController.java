@@ -115,7 +115,7 @@ public class BusinessController
      * @return 200 with the salon
      */
     @GetMapping("/{id}")
-    public Business getBusinessById(@PathVariable int id, @AuthenticationPrincipal AuthenticatedUser principal) 
+    public Business getBusinessById(@PathVariable long id, @AuthenticationPrincipal AuthenticatedUser principal) 
     {
         return businessService.getBusinessById(id, principal);
     }
@@ -140,7 +140,7 @@ public class BusinessController
      * @return 200 with the salon as stored
      */
     @PutMapping("/{id}")
-    public Business updateBusiness(@PathVariable int id, @Valid @RequestBody UpdateBusinessRequest request, @AuthenticationPrincipal AuthenticatedUser principal)
+    public Business updateBusiness(@PathVariable long id, @Valid @RequestBody UpdateBusinessRequest request, @AuthenticationPrincipal AuthenticatedUser principal)
     {
         return businessService.updateBusinessById(id, request.toBusiness(), principal);
     }
@@ -161,7 +161,7 @@ public class BusinessController
      * @return 200 with the salon as stored
      */
     @PutMapping("/{id}/status")
-    public Business changeStatus(@PathVariable int id, @Valid @RequestBody BusinessStatusRequest request,
+    public Business changeStatus(@PathVariable long id, @Valid @RequestBody BusinessStatusRequest request,
             @AuthenticationPrincipal AuthenticatedUser principal)
     {
         return businessService.changeStatus(id, request.status(), principal);
@@ -183,7 +183,7 @@ public class BusinessController
      */
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteBusiness(@PathVariable int id, @AuthenticationPrincipal AuthenticatedUser principal)
+    public void deleteBusiness(@PathVariable long id, @AuthenticationPrincipal AuthenticatedUser principal)
     {
         businessService.deleteBusiness(id, principal);
     }

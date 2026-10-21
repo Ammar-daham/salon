@@ -57,7 +57,7 @@ public class UserService
 				throw new BaseException("businessId is required when a super admin creates a user",
 						ErrorCode.BAD_REQUEST);
 			}
-			businessService.getBusinessById(user.getBusinessId().intValue());
+			businessService.getBusinessById(user.getBusinessId());
 		} else {
 			// Any other caller can only ever create users in their own business - the client's
 			// businessId (if any) is ignored so an ADMIN can't attach a user to a business they

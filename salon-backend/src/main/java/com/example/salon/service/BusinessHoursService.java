@@ -42,7 +42,7 @@ public class BusinessHoursService
     public BusinessHours getHours(long businessId, AuthenticatedUser caller)
     {
         // Same visibility as the salon: a 404 for one the caller isn't allowed to see.
-        Business business = businessService.getBusinessById((int) businessId, caller);
+        Business business = businessService.getBusinessById(businessId, caller);
         return new BusinessHours(business.getTimezone(), businessHoursDao.getHoursForBusiness(businessId));
     }
 
@@ -50,7 +50,7 @@ public class BusinessHoursService
     public BusinessHours replaceHours(long businessId, List<OpeningInterval> hours, AuthenticatedUser caller)
     {
         AccessControl.requireBusinessAccess(caller, businessId);
-        Business business = businessService.getBusinessById((int) businessId);
+        Business business = businessService.getBusinessById(businessId);
 
         List<OpeningInterval> week = hours.stream().sorted(BY_DAY_THEN_OPENING).toList();
         requireValidWeek(week);

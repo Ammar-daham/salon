@@ -97,7 +97,7 @@ public class AddressController
 	 * @return 200 with the address
 	 */
 	@GetMapping("/addresses/{id}")
-	public Address getAddress(@PathVariable int id, @AuthenticationPrincipal AuthenticatedUser principal)
+	public Address getAddress(@PathVariable long id, @AuthenticationPrincipal AuthenticatedUser principal)
 	{
 		return addressService.getAddressById(id, principal);
 	}
@@ -119,7 +119,7 @@ public class AddressController
 	 * @return 200 with the address as stored
 	 */
 	@PutMapping("/addresses/{id}")
-	public Address updateAddress(@PathVariable int id, @Valid @RequestBody AddressRequest request, @AuthenticationPrincipal AuthenticatedUser principal)
+	public Address updateAddress(@PathVariable long id, @Valid @RequestBody AddressRequest request, @AuthenticationPrincipal AuthenticatedUser principal)
 	{
 		return addressService.updateAddressById(id, request.toAddress(), principal);
 	}
@@ -138,7 +138,7 @@ public class AddressController
 	 */
 	@DeleteMapping("/addresses/{id}")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
-	public void deleteAddress(@PathVariable int id, @AuthenticationPrincipal AuthenticatedUser principal)
+	public void deleteAddress(@PathVariable long id, @AuthenticationPrincipal AuthenticatedUser principal)
 	{
 		addressService.deleteAddressById(id, principal);
 	}
