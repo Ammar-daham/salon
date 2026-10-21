@@ -126,6 +126,10 @@ that answers with the record as stored, and `PUT /users/{id}/role`.
 - The mock data generators in `lib/mock/`, now unused.
 
 ### Fixed
+- A customer's account can't sign in to the panel. The backend lets a customer with a password sign
+  in, for the customer app, and the panel used to let them through to "Not available for your role"
+  on every page. Now the sign-in page says "Customer accounts can't sign in to the admin panel." and
+  ends the session, and a customer's session found on loading the panel is ended too.
 - A super admin can create another super admin without choosing a salon. The salon is optional for
   that role, "No salon" until one is picked, and still required for every other role. It needs a
   salon-backend that takes a new SUPER_ADMIN without `business_id`; an older one refuses the account
