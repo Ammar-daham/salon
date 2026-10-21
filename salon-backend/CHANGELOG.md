@@ -291,6 +291,11 @@ version. The version lives in [`gradle.properties`](gradle.properties); each rel
   the hour that happens twice when daylight saving time ends, one at 02:30 the first time round was
   refused at 02:10 the second time round, 40 minutes after it started, and one at 02:20 the second
   time round was allowed at 02:40 the first time round, 40 minutes before it started.
+- A SUPER_ADMIN can create another SUPER_ADMIN who belongs to no salon, as the first one doesn't:
+  `POST /api/v1/users` takes a new SUPER_ADMIN without `business_id`. It was a 400 for every new
+  user, and still is for any other role, now saying "business_id is required for role EMPLOYEE"
+  instead of "businessId is required when a super admin creates a user". A `business_id` given for a
+  SUPER_ADMIN must still be a salon.
 
 ### Changed
 - Which salons a non-admin sees, the approved ones and their own, is decided in the query, so the
