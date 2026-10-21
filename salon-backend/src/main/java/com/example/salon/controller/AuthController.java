@@ -118,9 +118,10 @@ public class AuthController
 	 * Changes the signed-in user's own password.
 	 *
 	 * <p>{@code POST /api/v1/auth/change-password}. Any signed-in user, for themselves.
-	 * {@code current_password} must be their password now, and {@code new_password} 8 to 72 characters.
-	 * A wrong current password counts as a failed sign-in for their email and the client's address. Every
-	 * other session of theirs is signed out; this one stays signed in, under a new session id. Answers 204.
+	 * {@code current_password} must be their password now, and {@code new_password} 8 to 72 characters and
+	 * at most 72 bytes in UTF-8. A wrong current password counts as a failed sign-in for their email and the
+	 * client's address. Every other session of theirs is signed out; this one stays signed in, under a new
+	 * session id. Answers 204.
 	 *
 	 * <p>Errors: 400 if {@code current_password} is wrong (a 400, not a 401: the session stays signed in)
 	 * or {@code new_password} breaks the rule; 429, with {@code Retry-After}, after too many failed
@@ -178,9 +179,9 @@ public class AuthController
 	 * Sets a new password with the token from a reset link.
 	 *
 	 * <p>{@code POST /api/v1/auth/reset-password}. Needs no session. {@code token} is the link's
-	 * {@code token} parameter, and {@code password} the new password, 8 to 72 characters. The link is used
-	 * up, along with any other the user still has. Every session of the user is signed out, and the failed
-	 * sign-ins counted against their email are forgotten. Answers 204.
+	 * {@code token} parameter, and {@code password} the new password, 8 to 72 characters and at most 72 bytes
+	 * in UTF-8. The link is used up, along with any other the user still has. Every session of the user is
+	 * signed out, and the failed sign-ins counted against their email are forgotten. Answers 204.
 	 *
 	 * <p>Errors: 400 if {@code password} breaks the rule (the link still works), or if the link is unknown,
 	 * used, replaced by a newer one, expired, or for an account that can no longer sign in.

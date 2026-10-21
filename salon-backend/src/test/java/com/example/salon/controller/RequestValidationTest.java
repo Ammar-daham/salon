@@ -71,6 +71,20 @@ class RequestValidationTest extends IntegrationTest
 	}
 
 	@Test
+	void creatingAUserRejectsAPasswordOverSeventyTwoBytes() throws Exception
+	{
+		// 40 characters, but 80 bytes in UTF-8: past BCrypt's limit.
+		mvc.perform(post("/api/v1/users").session(loginAs(Fixture.GLOW_ADMIN))
+						.contentType(MediaType.APPLICATION_JSON)
+						.content("""
+								{"first_name":"New","last_name":"Hire","email":"long-pw@glow.test","password":"%s","role":"EMPLOYEE"}
+								""".formatted("ä".repeat(40))))
+				.andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$.message").value(
+						"password must be at most 72 bytes in UTF-8, where a letter outside English takes 2 or more"));
+	}
+
+	@Test
 	void creatingAUserRejectsAMalformedEmail() throws Exception
 	{
 		mvc.perform(post("/api/v1/users").session(loginAs(Fixture.GLOW_ADMIN))

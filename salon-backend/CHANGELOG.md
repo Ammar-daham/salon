@@ -272,6 +272,10 @@ version. The version lives in [`gradle.properties`](gradle.properties); each rel
   404 if there's no such user, instead of a 400 "id has an invalid value". `PUT /api/v1/users/{id}`
   and `PUT /api/v1/users/{id}/role` no longer cut such an id down to an `int`, which looked up a
   different user: `PUT /api/v1/users/4294967300/role` answered 200 with user 4, unchanged.
+- A new password over 72 bytes in UTF-8 is a 400, "must be at most 72 bytes in UTF-8, where a letter
+  outside English takes 2 or more", on `POST /api/v1/users`, `POST /api/v1/auth/change-password` and
+  `POST /api/v1/auth/reset-password`, instead of a 500. The limit counted characters, but BCrypt takes
+  at most 72 bytes, so 40 × `ä`, 40 characters and 80 bytes, passed the check and then failed.
 
 ### Changed
 - Which salons a non-admin sees, the approved ones and their own, is decided in the query, so the
