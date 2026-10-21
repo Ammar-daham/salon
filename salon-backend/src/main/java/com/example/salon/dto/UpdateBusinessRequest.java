@@ -12,7 +12,8 @@ import jakarta.validation.constraints.Size;
  * <p>Every field is replaced, under the rules of {@link CreateBusinessRequest}. {@code name}, {@code image},
  * {@code currency} and {@code timezone} are required, and leaving {@code description} out clears it.
  * {@code status}, addresses and contacts aren't part of it: a salon's status changes with
- * {@code PUT /api/v1/businesses/{id}/status}.
+ * {@code PUT /api/v1/businesses/{id}/status}, and addresses and contacts are added with
+ * {@code POST /api/v1/businesses/{id}/addresses} and {@code .../contacts}.
  */
 public record UpdateBusinessRequest(
 		@NotBlank @Size(max = 100) String name,

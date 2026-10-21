@@ -233,6 +233,12 @@ version. The version lives in [`gradle.properties`](gradle.properties); each rel
   `staff/{staffId}/time-off/{timeOffId}` and `customers/{customerId}`, and `/api/v1/users/{id}`,
   `/api/v1/addresses/{id}` and `/api/v1/contacts/{id}`. It's the same body as a `GET` of the record
   answers, so a client needn't read it again.
+- `POST /api/v1/businesses/{id}/addresses` and `POST /api/v1/businesses/{id}/contacts` add an
+  address or contact to a salon that already exists, for an ADMIN of the salon or a SUPER_ADMIN. They
+  take the same body as `PUT /api/v1/addresses/{id}` and `PUT /api/v1/contacts/{id}` and answer 201
+  with the record as stored, and `/api/v1/addresses/{id}` or `/api/v1/contacts/{id}` in `Location`.
+  A salon that doesn't exist is a 404, and a contact value the salon already has is a 409. A salon's
+  addresses and contacts used to be addable only in `POST /api/v1/businesses`.
 
 ### Fixed
 - `app.datasource.pool-size` in the template never did anything, so the pool always had Hikari's

@@ -7,22 +7,26 @@ import com.example.salon.service.AddressService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.net.URI;
 import java.util.List;
 
 /**
  * The addresses of salons and users, under {@code /api/v1/addresses}.
  *
  * <p>An address is created with the salon or user it belongs to ({@code POST /api/v1/businesses},
- * {@code POST /api/v1/users}) and deleted with them; here it is read, replaced or deleted. A salon's
- * address may be read by anyone signed in and changed by an ADMIN of that salon or a SUPER_ADMIN. A
- * user's address may be read and changed by the same people as the user: that user, an ADMIN of their
- * salon or a SUPER_ADMIN.
+ * {@code POST /api/v1/users}) and deleted with them. A salon's can also be added later, with
+ * {@code POST /api/v1/businesses/{businessId}/addresses}. Under {@code /api/v1/addresses} it is read,
+ * replaced or deleted. A salon's address may be read by anyone signed in and added or changed by an
+ * ADMIN of that salon or a SUPER_ADMIN. A user's address may be read and changed by the same people as
+ * the user: that user, an ADMIN of their salon or a SUPER_ADMIN.
  */
 @RestController
-@RequestMapping("api/v1/addresses")
+@RequestMapping("api/v1")
 public class AddressController
 {
 	private final AddressService addressService;
@@ -31,6 +35,35 @@ public class AddressController
 	public AddressController(AddressService addressService)
 	{
 		this.addressService = addressService;
+	}
+
+	/**
+	 * Adds an address to a salon.
+	 *
+	 * <p>{@code POST /api/v1/businesses/{businessId}/addresses}. An ADMIN of the salon, or a SUPER_ADMIN. A
+	 * salon may have any number of addresses. The new one is read, replaced and deleted under
+	 * {@code /api/v1/addresses/{id}}, and comes in the salon's {@code addresses}.
+	 *
+	 * <p>Errors: 400 if the body breaks {@link AddressRequest}'s rules; 403 for anyone else, or another
+	 * salon; 404 if the salon doesn't exist.
+	 *
+	 * @param businessId the salon's id
+	 * @param request the address, an {@link AddressRequest}
+	 * @param principal the signed-in caller
+	 * @return 201 Created with the address as stored, and {@code /api/v1/addresses/{id}} in {@code Location}
+	 */
+	@PostMapping("/businesses/{businessId}/addresses")
+	public ResponseEntity<Address> addBusinessAddress(@PathVariable long businessId,
+			@Valid @RequestBody AddressRequest request, @AuthenticationPrincipal AuthenticatedUser principal)
+	{
+		Address address = addressService.addAddressForBusiness(businessId, request.toAddress(), principal);
+		URI location = ServletUriComponentsBuilder
+				.fromCurrentContextPath()
+				.path("/api/v1/addresses/{id}")
+				.buildAndExpand(address.getId())
+				.toUri();
+
+		return ResponseEntity.created(location).body(address);
 	}
 
 	/**
@@ -45,7 +78,7 @@ public class AddressController
 	 * @param principal the signed-in caller
 	 * @return 200 with the addresses
 	 */
-	@GetMapping
+	@GetMapping("/addresses")
 	public List<Address> getAllAddresses(@AuthenticationPrincipal AuthenticatedUser principal)
 	{
 		return addressService.getAllAddresses(principal);
@@ -63,7 +96,7 @@ public class AddressController
 	 * @param principal the signed-in caller
 	 * @return 200 with the address
 	 */
-	@GetMapping("/{id}")
+	@GetMapping("/addresses/{id}")
 	public Address getAddress(@PathVariable int id, @AuthenticationPrincipal AuthenticatedUser principal)
 	{
 		return addressService.getAddressById(id, principal);
@@ -85,7 +118,7 @@ public class AddressController
 	 * @param principal the signed-in caller
 	 * @return 200 with the address as stored
 	 */
-	@PutMapping("/{id}")
+	@PutMapping("/addresses/{id}")
 	public Address updateAddress(@PathVariable int id, @Valid @RequestBody AddressRequest request, @AuthenticationPrincipal AuthenticatedUser principal)
 	{
 		return addressService.updateAddressById(id, request.toAddress(), principal);
@@ -103,7 +136,7 @@ public class AddressController
 	 * @param id the address's id
 	 * @param principal the signed-in caller
 	 */
-	@DeleteMapping("/{id}")
+	@DeleteMapping("/addresses/{id}")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	public void deleteAddress(@PathVariable int id, @AuthenticationPrincipal AuthenticatedUser principal)
 	{
