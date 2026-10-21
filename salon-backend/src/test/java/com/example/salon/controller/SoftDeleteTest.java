@@ -53,6 +53,9 @@ class SoftDeleteTest extends IntegrationTest
 				.andExpect(status().isBadRequest());
 
 		assertThat(isDeleted("services", Fixture.GLOW_HAIRCUT)).isTrue();
+		// Nor is she still down for it underneath.
+		assertThat(jdbcTemplate.queryForObject("SELECT count(*) FROM staff_services WHERE service_id = ?",
+				Integer.class, Fixture.GLOW_HAIRCUT)).isZero();
 	}
 
 	@Test

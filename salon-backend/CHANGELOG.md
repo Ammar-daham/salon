@@ -300,6 +300,9 @@ version. The version lives in [`gradle.properties`](gradle.properties); each rel
   time off. They stayed in the database, where nothing could reach them again: a staff member taken
   on again is a new staff record. Their appointments still stay, as the salon's history. Migration
   V14 clears what earlier removals left behind.
+- `DELETE /api/v1/businesses/{id}/services/{serviceId}` clears who performs the service, which
+  likewise stayed in the database out of reach. Its appointments stay. Migration V15 clears what
+  earlier removals left behind.
 
 ### Changed
 - Which salons a non-admin sees, the approved ones and their own, is decided in the query, so the

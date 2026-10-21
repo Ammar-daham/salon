@@ -111,6 +111,31 @@ class FlywayConfigTest extends IntegrationTest
 		}
 	}
 
+	/** Who performs a service removed before V15 is forgotten; who performs a current one isn't. */
+	@Test
+	void v15ClearsWhoPerformsAServiceRemovedBefore() throws SQLException
+	{
+		jdbcTemplate.execute("CREATE SCHEMA " + SCRATCH);
+
+		try (HikariDataSource scratch = scratchDataSource()) {
+			Flyway.configure().configuration(flyway.getConfiguration()).dataSource(scratch).target("14").load()
+					.migrate();
+			try (Connection connection = scratch.getConnection()) {
+				ScriptUtils.executeSqlScript(connection, new ClassPathResource("fixtures/seed.sql"));
+			}
+			JdbcTemplate onScratch = new JdbcTemplate(scratch);
+			// Mia does the manicure too, and the haircut is removed as before V15.
+			onScratch.update("INSERT INTO staff_services (business_id, staff_id, service_id) VALUES (?, ?, ?)",
+					Fixture.GLOW, Fixture.GLOW_STAFF, Fixture.GLOW_MANICURE);
+			onScratch.update("UPDATE services SET deleted_at = now() WHERE id = ?", Fixture.GLOW_HAIRCUT);
+
+			Flyway.configure().configuration(flyway.getConfiguration()).dataSource(scratch).load().migrate();
+
+			assertThat(onScratch.queryForList("SELECT service_id FROM staff_services WHERE staff_id = ?",
+					Long.class, Fixture.GLOW_STAFF)).containsExactly(Fixture.GLOW_MANICURE);
+		}
+	}
+
 	/** The test database, with the scratch schema as the one Flyway works in. */
 	private HikariDataSource scratchDataSource()
 	{

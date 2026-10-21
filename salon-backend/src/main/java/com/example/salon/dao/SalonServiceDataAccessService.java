@@ -139,7 +139,11 @@ public class SalonServiceDataAccessService implements SalonServiceDao
     {
         // Soft delete: appointments keep pointing at the service.
         String sql = "UPDATE services SET deleted_at = now() WHERE id = ? AND deleted_at IS NULL";
-        return jdbcTemplate.update(sql, id);
+        int row = jdbcTemplate.update(sql, id);
+        // Who performs it goes: no read reaches a removed service, and it can't be given back to anyone.
+        if (row > 0)
+            jdbcTemplate.update("DELETE FROM staff_services WHERE service_id = ?", id);
+        return row;
     }
 
     private SalonService mapRow(ResultSet rs) throws SQLException 
