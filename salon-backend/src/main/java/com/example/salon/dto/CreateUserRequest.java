@@ -25,7 +25,7 @@ public record CreateUserRequest(
 		@NotBlank @Size(max = 100) @JsonProperty("last_name") String lastName,
 		@NotNull Role role,
 		@Email String email,
-		@Size(min = 8, max = 72, message = "must be at least 8 characters") String password,
+		@Size(min = 8, max = 72, message = "must be between 8 and 72 characters") String password,
 		@JsonProperty("business_id") Long businessId,
 		@Valid List<AddressRequest> addresses,
 		@Valid List<ContactRequest> contacts)
