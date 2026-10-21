@@ -282,6 +282,10 @@ version. The version lives in [`gradle.properties`](gradle.properties); each rel
   salon 1's timezone, and `GET /api/v1/businesses/1/services/4294967297/availability` with the slots
   of service 1. `/api/v1/businesses/{id}` and `.../services/{serviceId}` took an `int`, so there the
   same id was a 400 "id has an invalid value".
+- `POST /api/v1/businesses/{id}/addresses` and `.../contacts` answer with the record they created once
+  ids pass 2147483647. They read it back by its id cut down to an `int`, so with the next id 4294967297
+  they answered with address or contact 1. `/api/v1/addresses/{id}` and `/api/v1/contacts/{id}` take
+  any id: one past 2147483647 is a 404 if there's no such record, instead of a 400.
 
 ### Changed
 - Which salons a non-admin sees, the approved ones and their own, is decided in the query, so the

@@ -25,7 +25,7 @@ public interface AddressDao
 	/** The business's own addresses and those of its users. */
 	List<Address> getAddressesForBusinessAndItsUsers(long businessId);
 
-	Address getAddressById(int id);
+	Address getAddressById(long id);
 
 	int updateAddressById(long id, Address address);
 

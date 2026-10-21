@@ -41,7 +41,7 @@ public class AddressService
 		address.setBusinessId(businessId);
 		Long id = addressDao.addAddress(address);
 		log.info("Created address {} for business {}", id, businessId);
-		return fetch(id.intValue());
+		return fetch(id);
 	}
 
 	/** Every address for a super admin; for an admin, their own business's and its users', or none without one. */
@@ -54,7 +54,7 @@ public class AddressService
 		return businessId == null ? List.of() : addressDao.getAddressesForBusinessAndItsUsers(businessId);
 	}
 
-	public Address getAddressById(int id, AuthenticatedUser caller)
+	public Address getAddressById(long id, AuthenticatedUser caller)
 	{
 		Address address = fetch(id);
 		// A business's address is part of its public listing (customers can browse every salon);
@@ -65,7 +65,7 @@ public class AddressService
 		return address;
 	}
 
-	public Address updateAddressById(int id, Address address, AuthenticatedUser caller)
+	public Address updateAddressById(long id, Address address, AuthenticatedUser caller)
 	{
 		requireWritePermission(id, caller);
 		int row = addressDao.updateAddressById(id, address);
@@ -75,7 +75,7 @@ public class AddressService
 		return fetch(id);
 	}
 
-	public void deleteAddressById(int id, AuthenticatedUser caller)
+	public void deleteAddressById(long id, AuthenticatedUser caller)
 	{
 		requireWritePermission(id, caller);
 		int row = addressDao.deleteAddressById(id);
@@ -84,7 +84,7 @@ public class AddressService
 		log.info("Deleted address {}", id);
 	}
 
-	private void requireWritePermission(int id, AuthenticatedUser caller)
+	private void requireWritePermission(long id, AuthenticatedUser caller)
 	{
 		Address address = fetch(id);
 		// A business's address can only be changed by its admins, and is public, so anyone else gets a 403.
@@ -96,7 +96,7 @@ public class AddressService
 		}
 	}
 
-	private Address fetch(int id)
+	private Address fetch(long id)
 	{
 		try {
 			return addressDao.getAddressById(id);
@@ -105,7 +105,7 @@ public class AddressService
 		}
 	}
 
-	private static BaseException notFound(int id)
+	private static BaseException notFound(long id)
 	{
 		return new BaseException("Address with id " + id + " not found", ErrorCode.NOT_FOUND);
 	}

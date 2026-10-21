@@ -51,7 +51,7 @@ public class ContactService
 			throw duplicateValue(ex);
 		}
 		log.info("Created contact {} for business {}", id, businessId);
-		return fetch(id.intValue());
+		return fetch(id);
 	}
 
 	/** Every contact for a super admin; for an admin, their own business's and its users', or none without one. */
@@ -64,7 +64,7 @@ public class ContactService
 		return businessId == null ? List.of() : contactDao.getContactsForBusinessAndItsUsers(businessId);
 	}
 
-	public Contact getContactById(int id, AuthenticatedUser caller)
+	public Contact getContactById(long id, AuthenticatedUser caller)
 	{
 		Contact c = fetch(id);
 		// A business's contact is part of its public listing (customers can browse every salon);
@@ -75,7 +75,7 @@ public class ContactService
 		return c;
 	}
 
-	public Contact updateContactById(int id, Contact contact, AuthenticatedUser caller)
+	public Contact updateContactById(long id, Contact contact, AuthenticatedUser caller)
 	{
 		requireWritePermission(id, caller);
 		int row;
@@ -90,7 +90,7 @@ public class ContactService
 		return fetch(id);
 	}
 
-	public void delectContactById(int id, AuthenticatedUser caller)
+	public void delectContactById(long id, AuthenticatedUser caller)
 	{
 		requireWritePermission(id, caller);
 		int row = contactDao.deleteContactById(id);
@@ -99,7 +99,7 @@ public class ContactService
 		log.info("Deleted contact {}", id);
 	}
 
-	private void requireWritePermission(int id, AuthenticatedUser caller)
+	private void requireWritePermission(long id, AuthenticatedUser caller)
 	{
 		Contact c = fetch(id);
 		// A business's contact can only be changed by its admins, and is public, so anyone else gets a 403.
@@ -120,7 +120,7 @@ public class ContactService
 		return new BaseException("Contact already exists.", ErrorCode.DUPLICATE_RESOURCE);
 	}
 
-	private Contact fetch(int id)
+	private Contact fetch(long id)
 	{
 		try {
 			return contactDao.getContactById(id);
@@ -129,7 +129,7 @@ public class ContactService
 		}
 	}
 
-	private static BaseException notFound(int id)
+	private static BaseException notFound(long id)
 	{
 		return new BaseException("Contact with id " + id + " not found", ErrorCode.NOT_FOUND);
 	}
