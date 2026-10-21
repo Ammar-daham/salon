@@ -90,8 +90,8 @@ const EMPLOYEE_GRANTS: Permission[] = [
 	"settings:profile",
 ];
 
-/** Customers never reach the admin panel — AppUserDetailsService rejects users
- *  with a null password_hash, so they cannot even sign in. */
+/** Nothing: a customer's account is for the customer app, and the panel signs
+ *  them out again as soon as they sign in (canUseAdminPanel). */
 const CUSTOMER_GRANTS: Permission[] = [];
 
 const ROLE_GRANTS: Record<Role, ReadonlySet<Permission>> = {
@@ -107,6 +107,15 @@ export function can(user: AuthUser | null | undefined, perm: Permission): boolea
 	//   return (user.permissions ?? ROLE_GRANTS[user.role]).has(perm);
 	// Every call site is already correct.
 	return ROLE_GRANTS[user.role].has(perm);
+}
+
+/**
+ * Whether this user may use the admin panel at all: salon staff and platform
+ * admins. The backend lets a CUSTOMER with a password sign in, for the customer
+ * app, so AuthContext ends a customer's session here instead of keeping it.
+ */
+export function canUseAdminPanel(user: AuthUser | null | undefined): boolean {
+	return user != null && user.role !== "CUSTOMER";
 }
 
 export function canAny(

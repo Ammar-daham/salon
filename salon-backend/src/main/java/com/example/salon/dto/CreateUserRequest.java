@@ -14,12 +14,13 @@ import java.util.List;
 /**
  * A new user, as {@code POST /api/v1/users} takes it. {@code first_name} and {@code last_name}, up to 100
  * characters each, and {@code role} are required. {@code email} and {@code password} are required for
- * every role but CUSTOMER; UserService.addUser checks that, since it depends on the role. Whichever is
- * sent must be well formed: {@code email} an email address, {@code password} as {@link Password} says: 8 to
- * 72 characters, and at most 72 bytes in UTF-8, BCrypt's input limit. {@code business_id} is the user's
- * salon: required when a SUPER_ADMIN creates the user, unless the user is a SUPER_ADMIN, who may have none,
- * and ignored for an ADMIN, whose own salon is used. {@code addresses} ({@link AddressRequest}) and
- * {@code contacts} ({@link ContactRequest}) are optional, and created with the user.
+ * every role but CUSTOMER, who can sign in with them if given both; UserService.addUser checks that, since
+ * it depends on the role. Whichever is sent must be well formed: {@code email} an email address,
+ * {@code password} as {@link Password} says: 8 to 72 characters, and at most 72 bytes in UTF-8, BCrypt's
+ * input limit. {@code business_id} is the user's salon: required when a SUPER_ADMIN creates the user,
+ * unless the user is a SUPER_ADMIN, who may have none, and ignored for an ADMIN, whose own salon is used.
+ * {@code addresses} ({@link AddressRequest}) and {@code contacts} ({@link ContactRequest}) are optional,
+ * and created with the user.
  */
 public record CreateUserRequest(
 		@NotBlank @Size(max = 100) @JsonProperty("first_name") String firstName,

@@ -31,6 +31,22 @@ class AuthenticationTest extends IntegrationTest
 				.andExpect(jsonPath("$.password_hash").doesNotExist());
 	}
 
+	/** For the customer app. It's the admin panel that turns a CUSTOMER away. */
+	@Test
+	void aCustomerWithAPasswordCanSignIn() throws Exception
+	{
+		mvc.perform(post("/api/v1/users").session(loginAs(Fixture.GLOW_ADMIN))
+						.contentType(MediaType.APPLICATION_JSON)
+						.content("""
+								{"first_name": "Ella", "last_name": "Client", "role": "CUSTOMER",
+								 "email": "ella@client.test", "password": "%s"}
+								""".formatted(Fixture.PASSWORD)))
+				.andExpect(status().isCreated());
+
+		mvc.perform(get("/api/v1/auth/me").session(loginAs("ella@client.test")))
+				.andExpect(jsonPath("$.role").value("CUSTOMER"));
+	}
+
 	@Test
 	void superAdminHasNoBusiness() throws Exception
 	{

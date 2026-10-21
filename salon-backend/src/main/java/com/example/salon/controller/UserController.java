@@ -48,7 +48,8 @@ public class UserController
 	 * in {@code business_id}, unless the new user is a SUPER_ADMIN too, who may belong to a salon or to
 	 * none; an ADMIN's new user joins the ADMIN's own salon, whatever {@code business_id} says. Only a
 	 * SUPER_ADMIN may create a SUPER_ADMIN. Every role but CUSTOMER needs an {@code email} and
-	 * {@code password}; the password is stored hashed and never sent back.
+	 * {@code password}; a CUSTOMER may have both, and can then sign in, for the customer app. The password
+	 * is stored hashed and never sent back.
 	 *
 	 * <p>Errors: 400 if the body breaks {@link CreateUserRequest}'s rules, or a SUPER_ADMIN leaves out
 	 * {@code business_id} for anyone but a SUPER_ADMIN; 403 for anyone else, or if an ADMIN asks for a

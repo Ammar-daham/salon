@@ -67,8 +67,10 @@ public class UserService
 			user.setBusinessId(caller.getUser().getBusinessId());
 		}
 
-		boolean canLogIn = user.getRole() != Role.CUSTOMER;
-		if (canLogIn && (user.getEmail() == null || user.getEmail().isBlank()
+		// Every other role works in the admin panel, so has to sign in. A CUSTOMER may have both, and then
+		// can sign in too, for the customer app.
+		boolean needsCredentials = user.getRole() != Role.CUSTOMER;
+		if (needsCredentials && (user.getEmail() == null || user.getEmail().isBlank()
 				|| user.getPassword() == null || user.getPassword().isBlank())) {
 			throw new BaseException("Email and password are required for role " + user.getRole(),
 					ErrorCode.BAD_REQUEST);

@@ -1,7 +1,13 @@
 import { describe, expect, it } from "vitest";
 import type { Role } from "@/lib/resources/auth/auth.types";
 import { userWithRole } from "@/test/fixtures";
-import { can, canAny, grantableRoles, type Permission } from "@/lib/auth/permissions";
+import {
+	can,
+	canAny,
+	canUseAdminPanel,
+	grantableRoles,
+	type Permission,
+} from "@/lib/auth/permissions";
 
 const S: Role = "SUPER_ADMIN";
 const A: Role = "ADMIN";
@@ -10,7 +16,7 @@ const E: Role = "EMPLOYEE";
 /**
  * The whole matrix, written out by hand: which roles hold each permission.
  * Keyed by Permission, so adding a permission without deciding who gets it
- * fails `npm run typecheck`. CUSTOMER holds nothing — customers can't sign in.
+ * fails `npm run typecheck`. CUSTOMER holds nothing — the panel signs customers out.
  */
 const MATRIX: Record<Permission, Role[]> = {
 	"dashboard:view": [S, A, E],
@@ -90,6 +96,21 @@ describe("canAny", () => {
 		expect(canAny(userWithRole("EMPLOYEE"), ["user:list", "report:view"])).toBe(false);
 		expect(canAny(userWithRole("SUPER_ADMIN"), [])).toBe(false);
 		expect(canAny(null, ["dashboard:view"])).toBe(false);
+	});
+});
+
+describe("canUseAdminPanel", () => {
+	it.each([S, A, E])("lets %s in", (role) => {
+		expect(canUseAdminPanel(userWithRole(role))).toBe(true);
+	});
+
+	it("keeps a customer out, though the backend lets them sign in", () => {
+		expect(canUseAdminPanel(userWithRole("CUSTOMER"))).toBe(false);
+	});
+
+	it("keeps out anyone signed out", () => {
+		expect(canUseAdminPanel(null)).toBe(false);
+		expect(canUseAdminPanel(undefined)).toBe(false);
 	});
 });
 
