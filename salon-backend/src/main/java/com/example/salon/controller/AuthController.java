@@ -74,8 +74,9 @@ public class AuthController
 	 * Signs a user in with their email and password, and starts their session.
 	 *
 	 * <p>{@code POST /api/v1/auth/login}. Needs no session. The email's case doesn't matter, and an
-	 * account with no password set can't sign in. The session is kept in the {@code JSESSIONID} cookie;
-	 * a session the client already had gets a new id.
+	 * account with no password set can't sign in. Any role may, a CUSTOMER included, for the customer app;
+	 * the admin panel signs a CUSTOMER out again. The session is kept in the {@code JSESSIONID} cookie; a
+	 * session the client already had gets a new id.
 	 *
 	 * <p>Errors: 401 if the email and password don't match an account that can sign in, the same answer
 	 * whether or not the email has one; 429, with {@code Retry-After} in seconds, after too many failed

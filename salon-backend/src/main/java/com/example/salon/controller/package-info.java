@@ -37,7 +37,8 @@
  *       clients and appointments.</td></tr>
  *   <tr><td>{@code EMPLOYEE}</td><td>Works at one salon: sees it, adds its clients, and books and changes
  *       its appointments.</td></tr>
- *   <tr><td>{@code CUSTOMER}</td><td>A salon's client with an account. Does no salon work.</td></tr>
+ *   <tr><td>{@code CUSTOMER}</td><td>A salon's client with an account. Does no salon work. Can sign in if
+ *       the account has an email and password, for the customer app; the admin panel turns them away.</td></tr>
  * </table>
  * <p>Everyone may read and change their own account and password. An {@code ADMIN} or {@code EMPLOYEE}
  * acts only on their own salon. Each endpoint says who may call it; anyone else gets 403, or 404 where
