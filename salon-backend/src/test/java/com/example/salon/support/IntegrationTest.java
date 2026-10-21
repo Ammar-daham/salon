@@ -25,7 +25,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  */
 @SpringBootTest
 @AutoConfigureMockMvc
-@Import(RecordingMailer.Config.class)
+@Import({RecordingMailer.Config.class, TestClock.Config.class})
 @Sql(scripts = {"/fixtures/reset.sql", "/fixtures/seed.sql"})
 public abstract class IntegrationTest
 {
@@ -54,12 +54,22 @@ public abstract class IntegrationTest
 	@Autowired
 	protected RecordingMailer mailer;
 
+	@Autowired
+	protected TestClock clock;
+
 	/** Failed sign-ins and sent emails are kept in memory, across the shared context; each test starts with none. */
 	@BeforeEach
 	void forgetFailedSignInsAndEmails()
 	{
 		loginThrottle.reset();
 		mailer.clear();
+	}
+
+	/** A test that stops the clock stops it only for itself. */
+	@BeforeEach
+	void restartTheClock()
+	{
+		clock.restart();
 	}
 
 	/** Ids and credentials from fixtures/seed.sql. */
