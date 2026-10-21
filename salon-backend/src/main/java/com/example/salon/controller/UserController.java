@@ -45,14 +45,15 @@ public class UserController
 	 * Creates a user, with their addresses and contacts.
 	 *
 	 * <p>{@code POST /api/v1/users}. ADMIN and SUPER_ADMIN only. A SUPER_ADMIN must name the user's salon
-	 * in {@code business_id}; an ADMIN's new user joins the ADMIN's own salon, whatever
-	 * {@code business_id} says. Only a SUPER_ADMIN may create a SUPER_ADMIN. Every role but CUSTOMER needs
-	 * an {@code email} and {@code password}; the password is stored hashed and never sent back.
+	 * in {@code business_id}, unless the new user is a SUPER_ADMIN too, who may belong to a salon or to
+	 * none; an ADMIN's new user joins the ADMIN's own salon, whatever {@code business_id} says. Only a
+	 * SUPER_ADMIN may create a SUPER_ADMIN. Every role but CUSTOMER needs an {@code email} and
+	 * {@code password}; the password is stored hashed and never sent back.
 	 *
 	 * <p>Errors: 400 if the body breaks {@link CreateUserRequest}'s rules, or a SUPER_ADMIN leaves out
-	 * {@code business_id}; 403 for anyone else, or if an ADMIN asks for a SUPER_ADMIN; 404 if
-	 * {@code business_id} is no salon; 409 if the email is already in use, in any case, or the same
-	 * contact value is given twice.
+	 * {@code business_id} for anyone but a SUPER_ADMIN; 403 for anyone else, or if an ADMIN asks for a
+	 * SUPER_ADMIN; 404 if {@code business_id} is no salon; 409 if the email is already in use, in any
+	 * case, or the same contact value is given twice.
 	 *
 	 * @param request the new user, a {@link CreateUserRequest}
 	 * @param principal the signed-in caller

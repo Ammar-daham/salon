@@ -11,6 +11,7 @@ import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.nullValue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -349,7 +350,34 @@ class AuthorizationRulesTest extends IntegrationTest
 		mvc.perform(post("/api/v1/users").session(loginAs(Fixture.SUPER_ADMIN))
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(newUserBody("new.employee@salon.test", "EMPLOYEE", null)))
-				.andExpect(status().isBadRequest());
+				.andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$.message").value("business_id is required for role EMPLOYEE"));
+	}
+
+	@Test
+	void aNewSuperAdminNeedNotBelongToASalon() throws Exception
+	{
+		MockHttpSession superAdmin = loginAs(Fixture.SUPER_ADMIN);
+
+		mvc.perform(post("/api/v1/users").session(superAdmin)
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(newUserBody("root2@salon.test", "SUPER_ADMIN", null)))
+				.andExpect(status().isCreated())
+				.andExpect(jsonPath("$.role").value("SUPER_ADMIN"));
+		mvc.perform(get("/api/v1/auth/me").session(loginAs("root2@salon.test")))
+				.andExpect(jsonPath("$.business_id").value(nullValue()));
+
+		// One may still belong to a salon, as long as it exists.
+		mvc.perform(post("/api/v1/users").session(superAdmin)
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(newUserBody("root3@glow.test", "SUPER_ADMIN", Fixture.GLOW)))
+				.andExpect(status().isCreated());
+		mvc.perform(get("/api/v1/auth/me").session(loginAs("root3@glow.test")))
+				.andExpect(jsonPath("$.business_id").value(Fixture.GLOW));
+		mvc.perform(post("/api/v1/users").session(superAdmin)
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(newUserBody("root4@salon.test", "SUPER_ADMIN", 9999L)))
+				.andExpect(status().isNotFound());
 	}
 
 	@Test

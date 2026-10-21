@@ -126,6 +126,10 @@ that answers with the record as stored, and `PUT /users/{id}/role`.
 - The mock data generators in `lib/mock/`, now unused.
 
 ### Fixed
+- A super admin can create another super admin without choosing a salon. The salon is optional for
+  that role, "No salon" until one is picked, and still required for every other role. It needs a
+  salon-backend that takes a new SUPER_ADMIN without `business_id`; an older one refuses the account
+  with a 400.
 - A service's duration takes any whole number of minutes. The field stepped in fives from 1, so the
   browser only accepted 1, 6, 11 and so on, and refused to save a new service at the default 60
   minutes or any service of 30, 45 or 120.

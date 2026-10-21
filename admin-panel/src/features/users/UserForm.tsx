@@ -36,7 +36,8 @@ interface UserFormProps {
 /**
  * Mirrors the backend's user rules exactly (UserService.addUser):
  *  - an ADMIN creating a SUPER_ADMIN is a 403, so that option is never offered
- *  - a SUPER_ADMIN caller MUST supply businessId or it's a 400
+ *  - a SUPER_ADMIN caller MUST supply businessId or it's a 400, unless the new
+ *    account is a SUPER_ADMIN too, who may belong to a salon or to none
  *  - any other caller has their own businessId substituted server-side
  *  - email + password are required for every role except CUSTOMER
  *
@@ -64,7 +65,7 @@ export default function UserForm({
 	);
 
 	// Only a platform admin picks a salon; everyone else is scoped server-side.
-	const mustPickBusiness = isCreate && scope.kind === "platform";
+	const picksBusiness = isCreate && scope.kind === "platform";
 	const { data: businesses, isPending: businessesPending } = useBusinesses();
 
 	const [firstName, setFirstName] = useState(initial?.firstName ?? "");
@@ -77,6 +78,7 @@ export default function UserForm({
 	const [errors, setErrors] = useState<Errors>({});
 
 	const needsCredentials = role !== "CUSTOMER";
+	const mustPickBusiness = picksBusiness && role !== "SUPER_ADMIN";
 
 	function validate(): Errors {
 		const found: Errors = {};
@@ -91,7 +93,7 @@ export default function UserForm({
 		}
 
 		if (mustPickBusiness && !businessId) {
-			// The backend returns 400 when a SUPER_ADMIN omits businessId.
+			// The backend returns 400 when a SUPER_ADMIN omits businessId for anyone but a SUPER_ADMIN.
 			found.businessId = "Choose which salon this account belongs to.";
 		}
 		return found;
@@ -110,7 +112,7 @@ export default function UserForm({
 				email: email.trim(),
 				password,
 				role,
-				...(mustPickBusiness ? { businessId: Number(businessId) } : {}),
+				...(picksBusiness && businessId ? { businessId: Number(businessId) } : {}),
 			});
 		} else {
 			await onSubmitUpdate?.({
@@ -181,8 +183,13 @@ export default function UserForm({
 						)}
 					</Field>
 
-					{mustPickBusiness && (
-						<Field label="Salon" required error={errors.businessId}>
+					{picksBusiness && (
+						<Field
+							label="Salon"
+							required={mustPickBusiness}
+							error={errors.businessId}
+							hint={!mustPickBusiness ? "A super admin needn't belong to a salon." : undefined}
+						>
 							{(p) => (
 								<SelectInput
 									{...p}
@@ -191,7 +198,11 @@ export default function UserForm({
 									disabled={businessesPending}
 								>
 									<option value="">
-										{businessesPending ? "Loading salons…" : "Select a salon…"}
+										{businessesPending
+											? "Loading salons…"
+											: mustPickBusiness
+												? "Select a salon…"
+												: "No salon"}
 									</option>
 									{(businesses ?? []).map((b) => (
 										<option key={b.id} value={b.id}>

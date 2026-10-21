@@ -51,13 +51,15 @@ public class UserService
 		}
 
 		if (callerRole == Role.SUPER_ADMIN) {
-			// A super admin is a platform-level role, not tied to one business, so they must say
-			// which business the new user belongs to - and that business has to actually exist.
-			if (user.getBusinessId() == null) {
-				throw new BaseException("businessId is required when a super admin creates a user",
+			// A super admin isn't tied to one business, so they must say which business the new user
+			// belongs to, and it has to exist. A new super admin is platform-level too, and needn't
+			// belong to one.
+			if (user.getBusinessId() == null && user.getRole() != Role.SUPER_ADMIN) {
+				throw new BaseException("business_id is required for role " + user.getRole(),
 						ErrorCode.BAD_REQUEST);
 			}
-			businessService.getBusinessById(user.getBusinessId());
+			if (user.getBusinessId() != null)
+				businessService.getBusinessById(user.getBusinessId());
 		} else {
 			// Any other caller can only ever create users in their own business - the client's
 			// businessId (if any) is ignored so an ADMIN can't attach a user to a business they
