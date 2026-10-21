@@ -296,6 +296,10 @@ version. The version lives in [`gradle.properties`](gradle.properties); each rel
   user, and still is for any other role, now saying "business_id is required for role EMPLOYEE"
   instead of "businessId is required when a super admin creates a user". A `business_id` given for a
   SUPER_ADMIN must still be a salon.
+- `DELETE /api/v1/businesses/{id}/staff/{staffId}` clears the staff member's shifts, services and
+  time off. They stayed in the database, where nothing could reach them again: a staff member taken
+  on again is a new staff record. Their appointments still stay, as the salon's history. Migration
+  V14 clears what earlier removals left behind.
 
 ### Changed
 - Which salons a non-admin sees, the approved ones and their own, is decided in the query, so the

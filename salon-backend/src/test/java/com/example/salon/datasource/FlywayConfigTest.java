@@ -8,9 +8,13 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.jdbc.datasource.init.ScriptUtils;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
@@ -72,6 +76,38 @@ class FlywayConfigTest extends IntegrationTest
 			assertThatThrownBy(onScratch::migrate)
 					.isInstanceOf(FlywayException.class)
 					.hasMessageContaining("V14_one_underscore_short.sql");
+		}
+	}
+
+	/** Rows that staff removed before V14 left behind; a current staff member's stay. */
+	@Test
+	void v14ClearsTheShiftsServicesAndTimeOffOfStaffRemovedBefore() throws SQLException
+	{
+		jdbcTemplate.execute("CREATE SCHEMA " + SCRATCH);
+
+		try (HikariDataSource scratch = scratchDataSource()) {
+			Flyway.configure().configuration(flyway.getConfiguration()).dataSource(scratch).target("13").load()
+					.migrate();
+			try (Connection connection = scratch.getConnection()) {
+				ScriptUtils.executeSqlScript(connection, new ClassPathResource("fixtures/seed.sql"));
+			}
+			JdbcTemplate onScratch = new JdbcTemplate(scratch);
+			// Mia removed as before V14, and Leo with a shift of his own.
+			onScratch.update("UPDATE staff SET deleted_at = now() WHERE id = ?", Fixture.GLOW_STAFF);
+			onScratch.update("""
+					INSERT INTO staff_schedules (staff_id, day_of_week, starts_at, ends_at) VALUES (?, 1, '09:00', '12:00')
+					""", Fixture.URBAN_STAFF);
+
+			Flyway.configure().configuration(flyway.getConfiguration()).dataSource(scratch).load().migrate();
+
+			for (String table : new String[] {"staff_schedules", "staff_services", "staff_time_off"}) {
+				assertThat(onScratch.queryForObject("SELECT count(*) FROM " + table + " WHERE staff_id = ?",
+						Integer.class, Fixture.GLOW_STAFF)).as(table).isZero();
+			}
+			assertThat(onScratch.queryForObject("SELECT count(*) FROM staff_schedules WHERE staff_id = ?",
+					Integer.class, Fixture.URBAN_STAFF)).isEqualTo(1);
+			assertThat(onScratch.queryForObject("SELECT count(*) FROM staff WHERE id = ?", Integer.class,
+					Fixture.GLOW_STAFF)).isEqualTo(1);
 		}
 	}
 
