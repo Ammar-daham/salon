@@ -10,6 +10,7 @@ import org.springframework.mock.web.MockHttpSession;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
@@ -409,6 +410,36 @@ class AppointmentControllerTest extends IntegrationTest
 
 		setStatus(location, admin, "LATE").andExpect(status().isBadRequest());
 		send(put(location + "/status"), admin, "{}").andExpect(status().isBadRequest());
+	}
+
+	/**
+	 * Berlin's clocks go back from 03:00 to 02:00 on 2026-10-25, so that hour happens twice. On the salon's clock,
+	 * 02:30 the first time round looks later than 02:10 the second time, though it's 40 minutes earlier: whether
+	 * an appointment has started goes by instants.
+	 */
+	@Test
+	void whetherItHasStartedGoesByTheInstantInTheHourThatHappensTwice() throws Exception
+	{
+		MockHttpSession admin = loginAs(Fixture.GLOW_ADMIN);
+		// A booking takes the earlier offset: 02:30 the first time round, 00:30 UTC.
+		String firstTimeRound = book(admin, haircut("2026-10-25T02:30"));
+		// 02:20 the second time round, 01:20 UTC, just after the first haircut ends at 01:15 UTC.
+		String secondTimeRound = book(admin, haircut("2026-10-25T09:00"));
+		jdbcTemplate.update("UPDATE appointments SET starts_at = ?, ends_at = ? WHERE id = ?",
+				OffsetDateTime.parse("2026-10-25T02:20+01:00"), OffsetDateTime.parse("2026-10-25T03:05+01:00"),
+				idOf(secondTimeRound));
+		mvc.perform(get(secondTimeRound).session(admin)).andExpect(jsonPath("$.starts_at").value("2026-10-25T02:20"));
+
+		// 02:40 the first time round: the haircut at 02:20 the second time round is 40 minutes away.
+		clock.stopAt(Instant.parse("2026-10-25T00:40:00Z"));
+		setStatus(secondTimeRound, admin, "COMPLETED")
+				.andExpect(status().isConflict())
+				.andExpect(jsonPath("$.message").value("An appointment can't be marked COMPLETED before it starts."));
+
+		// 02:10 the second time round: the haircut at 02:30 the first time round started 40 minutes ago.
+		clock.stopAt(Instant.parse("2026-10-25T01:10:00Z"));
+		setStatus(firstTimeRound, admin, "COMPLETED").andExpect(status().isOk());
+		setStatus(secondTimeRound, admin, "NO_SHOW").andExpect(status().isConflict());
 	}
 
 	@Test

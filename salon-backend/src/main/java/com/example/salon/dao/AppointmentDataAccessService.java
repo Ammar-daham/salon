@@ -14,6 +14,7 @@ import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
@@ -100,6 +101,13 @@ public class AppointmentDataAccessService implements AppointmentDao
     {
         String sql = SELECT + "WHERE a.business_id = ? AND a.id = ?";
         return jdbcTemplate.queryForObject(sql, (rs, i) -> mapRow(rs, zone), businessId, appointmentId);
+    }
+
+    @Override
+    public Instant getStartsAt(long businessId, long appointmentId)
+    {
+        return jdbcTemplate.queryForObject("SELECT starts_at FROM appointments WHERE business_id = ? AND id = ?",
+                Timestamp.class, businessId, appointmentId).toInstant();
     }
 
     @Override

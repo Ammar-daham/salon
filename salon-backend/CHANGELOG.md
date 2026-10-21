@@ -286,6 +286,11 @@ version. The version lives in [`gradle.properties`](gradle.properties); each rel
   ids pass 2147483647. They read it back by its id cut down to an `int`, so with the next id 4294967297
   they answered with address or contact 1. `/api/v1/addresses/{id}` and `/api/v1/contacts/{id}` take
   any id: one past 2147483647 is a 404 if there's no such record, instead of a 400.
+- Whether an appointment has started, which `PUT .../appointments/{id}/status` checks before it may
+  become `COMPLETED` or `NO_SHOW`, goes by instants. It compared times on the salon's clock, so in
+  the hour that happens twice when daylight saving time ends, one at 02:30 the first time round was
+  refused at 02:10 the second time round, 40 minutes after it started, and one at 02:20 the second
+  time round was allowed at 02:40 the first time round, 40 minutes before it started.
 
 ### Changed
 - Which salons a non-admin sees, the approved ones and their own, is decided in the query, so the

@@ -8,6 +8,7 @@ import com.example.salon.paging.PageQuery;
 import com.example.salon.paging.Sort;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
 
@@ -25,6 +26,12 @@ public interface AppointmentDao {
     Page<Appointment> getAppointments(Filter filter, Sort<SortBy> sort, PageQuery page, ZoneId zone);
 
     Appointment getAppointmentById(long businessId, long appointmentId, ZoneId zone);
+
+    /**
+     * When it starts, as stored. Appointment's starts_at, on the salon's clock, can't say which time round it is
+     * in the hour that happens twice when daylight saving time ends.
+     */
+    Instant getStartsAt(long businessId, long appointmentId);
 
     /** Call inside a transaction: holds the row until it ends, so changes to one appointment run one at a time. */
     void lockAppointment(long businessId, long appointmentId);

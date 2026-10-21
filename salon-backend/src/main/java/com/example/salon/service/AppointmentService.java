@@ -24,8 +24,8 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Clock;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
 
@@ -47,16 +47,18 @@ public class AppointmentService
     private final StaffDao staffDao;
     private final SalonServiceDao salonServiceDao;
     private final BusinessService businessService;
+    private final Clock clock;
 
     @Autowired
     public AppointmentService(AppointmentDao appointmentDao, CustomerDao customerDao, StaffDao staffDao,
-            SalonServiceDao salonServiceDao, BusinessService businessService)
+            SalonServiceDao salonServiceDao, BusinessService businessService, Clock clock)
     {
         this.appointmentDao = appointmentDao;
         this.customerDao = customerDao;
         this.staffDao = staffDao;
         this.salonServiceDao = salonServiceDao;
         this.businessService = businessService;
+        this.clock = clock;
     }
 
     @Transactional
@@ -152,7 +154,9 @@ public class AppointmentService
             throw new BaseException("A " + existing.status() + " appointment can't become " + status + ".",
                     ErrorCode.DUPLICATE_RESOURCE);
         boolean happened = status == AppointmentStatus.COMPLETED || status == AppointmentStatus.NO_SHOW;
-        if (happened && existing.startsAt().isAfter(LocalDateTime.now(zone)))
+        // By instants, not on the salon's clock, where the hour that happens twice in autumn would make 02:30 the
+        // first time round look later than 02:10 the second.
+        if (happened && appointmentDao.getStartsAt(businessId, appointmentId).isAfter(clock.instant()))
             throw new BaseException("An appointment can't be marked " + status + " before it starts.",
                     ErrorCode.DUPLICATE_RESOURCE);
 
