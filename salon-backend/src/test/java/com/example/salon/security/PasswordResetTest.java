@@ -171,6 +171,20 @@ class PasswordResetTest extends IntegrationTest
 	}
 
 	@Test
+	void aPasswordOverSeventyTwoBytesIsRefusedAndTheLinkStillWorks() throws Exception
+	{
+		forgot(Fixture.GLOW_EMPLOYEE);
+		String token = tokenIn(onlyMail());
+
+		// 40 characters, but 80 bytes in UTF-8: past BCrypt's limit.
+		reset(token, "ä".repeat(40))
+				.andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$.message").value(
+						"password must be at most 72 bytes in UTF-8, where a letter outside English takes 2 or more"));
+		reset(token, NEW_PASSWORD).andExpect(status().isNoContent());
+	}
+
+	@Test
 	void aLinkCannotGiveARemovedLoginBack() throws Exception
 	{
 		forgot(Fixture.GLOW_EMPLOYEE);

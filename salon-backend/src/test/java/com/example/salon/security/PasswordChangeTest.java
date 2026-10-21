@@ -103,6 +103,22 @@ class PasswordChangeTest extends IntegrationTest
 	}
 
 	@Test
+	void theLimitIsSeventyTwoBytesNotSeventyTwoCharacters() throws Exception
+	{
+		MockHttpSession session = loginAs(Fixture.GLOW_EMPLOYEE);
+		// 36 characters, 72 bytes in UTF-8: as long as BCrypt takes.
+		String longest = "ä".repeat(36);
+
+		changePassword(session, Fixture.PASSWORD, longest + "ä")
+				.andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$.message").value(
+						"new_password must be at most 72 bytes in UTF-8, where a letter outside English takes 2 or more"));
+		changePassword(session, Fixture.PASSWORD, longest).andExpect(status().isNoContent());
+
+		signIn(Fixture.GLOW_EMPLOYEE, longest).andExpect(status().isOk());
+	}
+
+	@Test
 	void itNeedsASession() throws Exception
 	{
 		mvc.perform(post("/api/v1/auth/change-password")
