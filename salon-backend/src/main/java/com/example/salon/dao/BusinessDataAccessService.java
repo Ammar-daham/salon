@@ -120,7 +120,7 @@ public class BusinessDataAccessService implements BusinessDao
     }
 
     @Override
-    public Business getBusinessById(int id) 
+    public Business getBusinessById(long id) 
     {
         String sql = """
                 SELECT id, name, description,
@@ -148,7 +148,7 @@ public class BusinessDataAccessService implements BusinessDao
     }
 
     @Override
-    public int updateBusinessById(int id, Business business) 
+    public int updateBusinessById(long id, Business business) 
     {
         // Every detail is replaced; the status has its own update.
         String sql = """
@@ -172,17 +172,17 @@ public class BusinessDataAccessService implements BusinessDao
     }
 
     @Override
-    public int updateBusinessStatus(int id, Status status)
+    public int updateBusinessStatus(long id, Status status)
     {
         return jdbcTemplate.update("UPDATE businesses SET status = ?, updated_at = now() WHERE id = ?",
                 status.name(), id);
     }
 
     @Override
-    public int deleteBusiness(int id)
+    public int deleteBusiness(long id)
     {
-        contactDao.getContactsForBusiness((long) id).forEach(contact -> contactDao.deleteContactById(contact.getId()));
-        addressDao.getAddressesForBusiness((long) id).forEach(address -> addressDao.deleteAddressById(address.getId()));
+        contactDao.getContactsForBusiness(id).forEach(contact -> contactDao.deleteContactById(contact.getId()));
+        addressDao.getAddressesForBusiness(id).forEach(address -> addressDao.deleteAddressById(address.getId()));
 
         return jdbcTemplate.update("DELETE FROM businesses WHERE id = ?", id);
     }

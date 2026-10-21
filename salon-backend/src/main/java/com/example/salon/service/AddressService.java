@@ -37,7 +37,7 @@ public class AddressService
 	{
 		AccessControl.requireAdminOfBusiness(caller, businessId);
 		// A 404, rather than the error the fk_addresses_business foreign key would give.
-		businessService.getBusinessById((int) businessId);
+		businessService.getBusinessById(businessId);
 		address.setBusinessId(businessId);
 		Long id = addressDao.addAddress(address);
 		log.info("Created address {} for business {}", id, businessId);

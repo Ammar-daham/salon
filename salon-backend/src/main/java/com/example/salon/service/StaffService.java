@@ -79,7 +79,7 @@ public class StaffService
     /** A salon's roster: public like the salon itself, so a 404 for a salon you can't see. */
     public List<Staff> getStaffForBusiness(Long businessId, AuthenticatedUser caller)
     {
-        businessService.getBusinessById(businessId.intValue(), caller);
+        businessService.getBusinessById(businessId, caller);
         List<Staff> staff = staffDao.getStaffForBusiness(businessId);
         if (!seesEmails(caller, businessId)) {
             staff.forEach(s -> s.setEmail(null));
@@ -89,7 +89,7 @@ public class StaffService
 
     public Staff getStaffById(long businessId, long staffId, AuthenticatedUser caller)
     {
-        businessService.getBusinessById((int) businessId, caller);
+        businessService.getBusinessById(businessId, caller);
         Staff staff = getStaffById(businessId, staffId);
         if (!seesEmails(caller, businessId)) {
             staff.setEmail(null);
@@ -146,7 +146,7 @@ public class StaffService
     /** The services a staff member performs: public like the salon's own list, so a 404 for a salon you can't see. */
     public List<SalonService> getServicesOfStaff(long businessId, long staffId, AuthenticatedUser caller)
     {
-        businessService.getBusinessById((int) businessId, caller);
+        businessService.getBusinessById(businessId, caller);
         getStaffById(businessId, staffId);
         return salonServiceDao.getServicesForStaff(staffId);
     }

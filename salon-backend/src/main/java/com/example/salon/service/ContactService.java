@@ -42,7 +42,7 @@ public class ContactService
 	{
 		AccessControl.requireAdminOfBusiness(caller, businessId);
 		// A 404, rather than the error the fk_contacts_business foreign key would give.
-		businessService.getBusinessById((int) businessId);
+		businessService.getBusinessById(businessId);
 		contact.setBusinessId(businessId);
 		Long id;
 		try {

@@ -72,7 +72,7 @@ public class AvailabilityService
             AuthenticatedUser caller)
     {
         AccessControl.requireStaffOfBusiness(caller, businessId);
-        Business business = businessService.getBusinessById((int) businessId);
+        Business business = businessService.getBusinessById(businessId);
         ZoneId zone = ZoneId.of(business.getTimezone());
         SalonService service = findActiveService(businessId, serviceId);
 
@@ -106,7 +106,7 @@ public class AvailabilityService
     {
         SalonService service;
         try {
-            service = salonServiceDao.getServiceById((int) businessId, (int) serviceId);
+            service = salonServiceDao.getServiceById(businessId, serviceId);
         } catch (EmptyResultDataAccessException ex) {
             throw new BaseException("Service with id " + serviceId + " not found.", ErrorCode.NOT_FOUND);
         }

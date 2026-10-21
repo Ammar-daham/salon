@@ -560,7 +560,35 @@ class RegressionTest extends IntegrationTest
 		mvc.perform(get("/api/v1/users/" + Fixture.GLOW_EMPLOYEE_ID).session(admin))
 				.andExpect(jsonPath("$.role").value("EMPLOYEE"));
 	}
-	
+
+	/**
+	 * The services cut a salon's and a service's id to an int to look them up, so 2^32 + 1 found Glow: its
+	 * hours answered 200 with Glow's timezone, its customers 200 with an empty page, and a service id of
+	 * 2^32 + 1 gave the availability of Glow's haircut. /businesses/{id} and .../services/{serviceId} took
+	 * an int, so the same ids were a 400 there.
+	 */
+	@Test
+	void salonAndServiceIdsPastTheIntRangeAreLookedUpAsTheyAre() throws Exception
+	{
+		MockHttpSession superAdmin = loginAs(Fixture.SUPER_ADMIN);
+		long wrapsToGlow = (1L << 32) + Fixture.GLOW;
+		long wrapsToHaircut = (1L << 32) + Fixture.GLOW_HAIRCUT;
+		String salon = "/api/v1/businesses/" + wrapsToGlow;
+		String service = "/api/v1/businesses/" + Fixture.GLOW + "/services/" + wrapsToHaircut;
+
+		mvc.perform(get(salon).session(superAdmin))
+				.andExpect(status().isNotFound())
+				.andExpect(jsonPath("$.message").value("Business with id " + wrapsToGlow + " not found"));
+		mvc.perform(get(salon + "/hours").session(superAdmin)).andExpect(status().isNotFound());
+		mvc.perform(get(salon + "/staff").session(superAdmin)).andExpect(status().isNotFound());
+		mvc.perform(get("/api/v1/customers?business_id=" + wrapsToGlow).session(superAdmin))
+				.andExpect(status().isNotFound());
+		mvc.perform(get(service).session(superAdmin))
+				.andExpect(status().isNotFound())
+				.andExpect(jsonPath("$.message").value("Service with id " + wrapsToHaircut + " not found."));
+		mvc.perform(get(service + "/availability").session(superAdmin)).andExpect(status().isNotFound());
+	}
+
 	/** A nested new child (id null) on a business update used to auto-unbox to an NPE / 400. */
 	@Test
 	void updatingABusinessWithANewNestedChildNoLongerCrashes() throws Exception

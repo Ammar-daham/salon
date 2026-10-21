@@ -276,6 +276,12 @@ version. The version lives in [`gradle.properties`](gradle.properties); each rel
   outside English takes 2 or more", on `POST /api/v1/users`, `POST /api/v1/auth/change-password` and
   `POST /api/v1/auth/reset-password`, instead of a 500. The limit counted characters, but BCrypt takes
   at most 72 bytes, so 40 × `ä`, 40 characters and 80 bytes, passed the check and then failed.
+- A salon or service id past 2147483647 is a 404 if there's no such salon or service, wherever it's
+  given: in a path, in `?business_id=` or in a user's `business_id`. The services cut it down to an
+  `int`, which found a different one: `GET /api/v1/businesses/4294967297/hours` answered 200 with
+  salon 1's timezone, and `GET /api/v1/businesses/1/services/4294967297/availability` with the slots
+  of service 1. `/api/v1/businesses/{id}` and `.../services/{serviceId}` took an `int`, so there the
+  same id was a 400 "id has an invalid value".
 
 ### Changed
 - Which salons a non-admin sees, the approved ones and their own, is decided in the query, so the

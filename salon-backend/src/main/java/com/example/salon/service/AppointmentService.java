@@ -164,7 +164,7 @@ public class AppointmentService
 
     private ZoneId zoneOf(long businessId)
     {
-        return ZoneId.of(businessService.getBusinessById((int) businessId).getTimezone());
+        return ZoneId.of(businessService.getBusinessById(businessId).getTimezone());
     }
 
     /** Locks it first, so of two changes at once the second sees what the first did, e.g. that it was cancelled. */
@@ -210,7 +210,7 @@ public class AppointmentService
     {
         SalonService service;
         try {
-            service = salonServiceDao.getServiceById((int) businessId, (int) serviceId);
+            service = salonServiceDao.getServiceById(businessId, serviceId);
         } catch (EmptyResultDataAccessException ex) {
             throw new BaseException("Service with id " + serviceId + " is not offered by this business.",
                     ErrorCode.BAD_REQUEST);

@@ -53,7 +53,7 @@ public class BusinessService
             throw new BaseException("Business could not be created due to a conflict.", ErrorCode.DUPLICATE_RESOURCE);
         }
         log.info("Created business {} with status {}", id, business.getStatus());
-        return getBusinessById(id.intValue());
+        return getBusinessById(id);
     }
 
     /** Admins see every salon; anyone else the approved ones and their own, counted in SQL so pages add up. */
@@ -65,7 +65,7 @@ public class BusinessService
         return businessDao.getBusinesses(filter, sort, page);
     }
 
-    public Business getBusinessById(int id, AuthenticatedUser caller) 
+    public Business getBusinessById(long id, AuthenticatedUser caller) 
     {
         Business business = getBusinessById(id);
         // 404 rather than 403, so a non-admin can't probe which unapproved salons exist.
@@ -74,7 +74,7 @@ public class BusinessService
         return business;
     }
 
-    public Business getBusinessById(int id) 
+    public Business getBusinessById(long id) 
     {
         Business business;
         try {
@@ -94,7 +94,7 @@ public class BusinessService
     }
 
     @Transactional
-    public Business updateBusinessById(int id, Business business, AuthenticatedUser caller) 
+    public Business updateBusinessById(long id, Business business, AuthenticatedUser caller) 
     {
         getBusinessById(id);
 
@@ -121,7 +121,7 @@ public class BusinessService
      * nothing.
      */
     @Transactional
-    public Business changeStatus(int id, Status status, AuthenticatedUser caller)
+    public Business changeStatus(long id, Status status, AuthenticatedUser caller)
     {
         if (!AccessControl.isSuperAdmin(caller))
             throw new AccessDeniedException("Only a super admin can change a business's status");
@@ -134,7 +134,7 @@ public class BusinessService
     }
 
     @Transactional
-    public void deleteBusiness(int id, AuthenticatedUser caller)
+    public void deleteBusiness(long id, AuthenticatedUser caller)
     {
         getBusinessById(id);
 

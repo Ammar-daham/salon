@@ -55,7 +55,7 @@ public class StaffScheduleService
     public StaffSchedule getSchedule(long businessId, long staffId, AuthenticatedUser caller)
     {
         AccessControl.requireStaffOfBusiness(caller, businessId);
-        Business business = businessService.getBusinessById((int) businessId);
+        Business business = businessService.getBusinessById(businessId);
         staffService.getStaffById(businessId, staffId);
         return new StaffSchedule(business.getTimezone(), staffScheduleDao.getScheduleForStaff(staffId));
     }
@@ -65,7 +65,7 @@ public class StaffScheduleService
             AuthenticatedUser caller)
     {
         AccessControl.requireBusinessAccess(caller, businessId);
-        Business business = businessService.getBusinessById((int) businessId);
+        Business business = businessService.getBusinessById(businessId);
         staffService.getStaffById(businessId, staffId);
 
         List<WorkingInterval> week = hours.stream().sorted(BY_DAY_THEN_START).toList();
@@ -132,7 +132,7 @@ public class StaffScheduleService
     private ZoneId requireTimeOffReader(AuthenticatedUser caller, long businessId, long staffId)
     {
         AccessControl.requireStaffOfBusiness(caller, businessId);
-        Business business = businessService.getBusinessById((int) businessId);
+        Business business = businessService.getBusinessById(businessId);
         Staff staff = staffService.getStaffById(businessId, staffId);
         if (!AccessControl.isAdmin(caller) && !AccessControl.isSelf(caller, staff.getUserId()))
             throw new AccessDeniedException("Only an admin or the staff member can see their time off");
@@ -143,7 +143,7 @@ public class StaffScheduleService
     private ZoneId requireTimeOffWriter(AuthenticatedUser caller, long businessId, long staffId, TimeOff timeOff)
     {
         AccessControl.requireBusinessAccess(caller, businessId);
-        Business business = businessService.getBusinessById((int) businessId);
+        Business business = businessService.getBusinessById(businessId);
         staffService.getStaffById(businessId, staffId);
         if (!timeOff.endsAt().isAfter(timeOff.startsAt()))
             throw new BaseException("ends_at must be after starts_at.", ErrorCode.BAD_REQUEST);
