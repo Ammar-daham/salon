@@ -95,6 +95,8 @@ public class SecurityConfig
 						// Forgetting your password means you can't sign in.
 						.requestMatchers(HttpMethod.POST, "/api/v1/auth/forgot-password", "/api/v1/auth/reset-password")
 								.permitAll()
+						// A salon owner registers before they have an account. RegistrationThrottle limits it.
+						.requestMatchers(HttpMethod.POST, "/api/v1/auth/register").permitAll()
 						.requestMatchers("/api/v1/auth/**").authenticated()
 						// Listing every user/address/contact leaks everyone's PII to any logged-in
 						// customer - keep the bulk "list all" endpoints admin-only.
