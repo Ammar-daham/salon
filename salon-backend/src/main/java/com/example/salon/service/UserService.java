@@ -95,18 +95,26 @@ public class UserService
 		return userDao.getUserById(id);
 	}
 
-	/** Every user for a super admin; for an admin, their own business's, or none without one. */
-	public Page<User> getUsers(String search, Role role, Sort<UserDao.SortBy> sort, PageQuery page,
-			AuthenticatedUser caller)
+	/**
+	 * Every user for a super admin, or one salon's with businessId; for an admin, their own business's,
+	 * whether they name it or not, or none without one. Naming another salon is refused, and naming one
+	 * that doesn't exist is a 404, as on GET /customers.
+	 */
+	public Page<User> getUsers(Long businessId, String search, Role role, Sort<UserDao.SortBy> sort,
+			PageQuery page, AuthenticatedUser caller)
 	{
-		Long businessId = null;
+		Long scope = businessId;
 		if (!AccessControl.isSuperAdmin(caller)) {
-			businessId = caller.getUser().getBusinessId();
-			if (businessId == null) {
+			Long own = caller.getUser().getBusinessId();
+			if (businessId != null && !businessId.equals(own))
+				throw new AccessDeniedException("You can only access your own business");
+			if (own == null)
 				return Page.empty(page);
-			}
+			scope = own;
 		}
-		return userDao.getUsers(new UserDao.Filter(search, role, businessId), sort, page);
+		if (businessId != null)
+			businessService.getBusinessById(businessId);
+		return userDao.getUsers(new UserDao.Filter(search, role, scope), sort, page);
 	}
 
 	public User getUserById(long id, AuthenticatedUser caller)

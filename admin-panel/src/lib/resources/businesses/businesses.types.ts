@@ -27,6 +27,18 @@ export const BUSINESS_STATUSES: BusinessStatus[] = [
 	"SUSPENDED",
 ];
 
+/** A ?status= value as a status, or undefined for anything that isn't one. */
+export function businessStatusParam(value: string | string[] | undefined): BusinessStatus | undefined {
+	return typeof value === "string" && (BUSINESS_STATUSES as string[]).includes(value)
+		? (value as BusinessStatus)
+		: undefined;
+}
+
+/** The salon list, filtered to one status or showing them all. */
+export function businessListHref(status?: BusinessStatus): string {
+	return status ? `/businesses?status=${status}` : "/businesses";
+}
+
 export interface Address {
 	id: Id;
 	street: string;

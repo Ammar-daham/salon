@@ -3,8 +3,13 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { queryKeys } from "@/lib/query/queryKeys";
 import type { Id } from "@/lib/api/types";
-import { businessesRepository, listAllBusinesses, type BusinessPageQuery } from "./businesses.api";
-import type { BusinessInput } from "./businesses.types";
+import {
+	businessesRepository,
+	changeBusinessStatus,
+	listAllBusinesses,
+	type BusinessPageQuery,
+} from "./businesses.api";
+import type { BusinessInput, BusinessStatus } from "./businesses.types";
 
 /** Every salon the caller can see, by name, e.g. for a salon picker. */
 export function useBusinesses(enabled = true) {
@@ -46,6 +51,18 @@ export function useUpdateBusiness() {
 		mutationFn: ({ id, input }: { id: Id; input: BusinessInput }) =>
 			businessesRepository.update(id, input),
 		// The PUT answers with the salon as stored, so its detail needs no refetch; the lists do.
+		onSuccess: (business, { id }) => {
+			qc.setQueryData(queryKeys.businesses.detail(id), business);
+			qc.invalidateQueries({ queryKey: queryKeys.businesses.list() });
+		},
+	});
+}
+
+export function useChangeBusinessStatus() {
+	const qc = useQueryClient();
+	return useMutation({
+		mutationFn: ({ id, status }: { id: Id; status: BusinessStatus }) => changeBusinessStatus(id, status),
+		// Answers with the salon as stored. Lists filter and count by status, so they're reloaded.
 		onSuccess: (business, { id }) => {
 			qc.setQueryData(queryKeys.businesses.detail(id), business);
 			qc.invalidateQueries({ queryKey: queryKeys.businesses.list() });

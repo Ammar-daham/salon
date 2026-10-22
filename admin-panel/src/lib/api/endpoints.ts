@@ -21,6 +21,8 @@ export const endpoints = {
 	businesses: {
 		root: "/api/v1/businesses",
 		byId: (id: number) => `/api/v1/businesses/${id}`,
+		// SUPER_ADMIN only: approve, reject, suspend or reinstate.
+		status: (id: number) => `/api/v1/businesses/${id}/status`,
 		// There is no list endpoint for services: read business.services instead.
 		services: (businessId: number) => `/api/v1/businesses/${businessId}/services`,
 		serviceById: (businessId: number, serviceId: number) =>

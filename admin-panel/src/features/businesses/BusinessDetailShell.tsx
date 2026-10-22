@@ -6,7 +6,12 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { can } from "@/lib/auth/permissions";
 import { resolveBusinessScope } from "@/lib/auth/scope";
-import { useBusiness, useDeleteBusiness } from "@/lib/resources/businesses/businesses.hooks";
+import {
+	useBusiness,
+	useChangeBusinessStatus,
+	useDeleteBusiness,
+} from "@/lib/resources/businesses/businesses.hooks";
+import { statusActions, type StatusAction } from "@/lib/resources/businesses/businesses.review";
 import {
 	BUSINESS_STATUS_LABELS,
 	BUSINESS_STATUS_TONE,
@@ -43,9 +48,11 @@ export default function BusinessDetailShell({
 	const { toast } = useToast();
 	const scope = resolveBusinessScope(user);
 	const [confirmingDelete, setConfirmingDelete] = React.useState(false);
+	const [confirmingStatus, setConfirmingStatus] = React.useState<StatusAction | null>(null);
 
 	const { data: business, isPending, isError, error, refetch } = useBusiness(id);
 	const remove = useDeleteBusiness();
+	const changeStatus = useChangeBusinessStatus();
 
 	/**
 	 * Ownership guard, enforced in one place for every tab.
@@ -83,6 +90,7 @@ export default function BusinessDetailShell({
 	}
 
 	const canDelete = can(user, "business:delete");
+	const canReview = can(user, "business:review");
 	const showBackLink = can(user, "business:list");
 
 	const tabs = [
@@ -109,6 +117,23 @@ export default function BusinessDetailShell({
 		}
 	}
 
+	async function handleStatus() {
+		if (!business || !confirmingStatus) return;
+		const action = confirmingStatus;
+		try {
+			await changeStatus.mutateAsync({ id: business.id, status: action.to });
+			toast({ tone: "success", title: action.done, description: business.name });
+		} catch (err) {
+			toast({
+				tone: "error",
+				title: `Couldn't ${action.label.toLowerCase()} salon`,
+				description: getErrorMessage(err),
+			});
+		} finally {
+			setConfirmingStatus(null);
+		}
+	}
+
 	return (
 		<BusinessContext.Provider value={id}>
 			{showBackLink && (
@@ -131,15 +156,29 @@ export default function BusinessDetailShell({
 					title={business.name}
 					description={business.description ?? undefined}
 					actions={
-						canDelete && (
-							<Button
-								variant="outline"
-								onClick={() => setConfirmingDelete(true)}
-								startIcon={<TrashBinIcon className="size-4" />}
-								className="text-error-600 hover:bg-error-50 dark:hover:bg-error-500/10"
-							>
-								Delete
-							</Button>
+						(canReview || canDelete) && (
+							<div className="flex flex-wrap gap-3">
+								{canReview &&
+									statusActions(business.status).map((action) => (
+										<Button
+											key={action.to}
+											variant={action.destructive ? "outline" : "primary"}
+											onClick={() => setConfirmingStatus(action)}
+										>
+											{action.label}
+										</Button>
+									))}
+								{canDelete && (
+									<Button
+										variant="outline"
+										onClick={() => setConfirmingDelete(true)}
+										startIcon={<TrashBinIcon className="size-4" />}
+										className="text-error-600 hover:bg-error-50 dark:hover:bg-error-500/10"
+									>
+										Delete
+									</Button>
+								)}
+							</div>
 						)
 					}
 				/>
@@ -172,6 +211,17 @@ export default function BusinessDetailShell({
 					{children}
 				</>
 			)}
+
+			<ConfirmDialog
+				isOpen={confirmingStatus != null}
+				onClose={() => setConfirmingStatus(null)}
+				onConfirm={handleStatus}
+				loading={changeStatus.isPending}
+				destructive={confirmingStatus?.destructive ?? false}
+				title={`${confirmingStatus?.label ?? "Change"} ${business?.name ?? "this salon"}?`}
+				confirmLabel={confirmingStatus?.label}
+				description={confirmingStatus?.consequence}
+			/>
 
 			<ConfirmDialog
 				isOpen={confirmingDelete}

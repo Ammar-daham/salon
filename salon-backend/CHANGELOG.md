@@ -61,8 +61,16 @@ version. The version lives in [`gradle.properties`](gradle.properties); each rel
 - `GET /api/v1/businesses/{id}/customers` answers 400 to `sort=business_name` or `-business_name`,
   as to any other order it doesn't take. Every customer on it belongs to the one salon, so it was the
   same as `sort=name`. `GET /api/v1/customers` still sorts by `business_name`.
+- An ADMIN or EMPLOYEE signs in only while their salon is `APPROVED` or `SUSPENDED`. While it's
+  `PENDING` or `REJECTED`, the right password on `POST /api/v1/auth/login` gets 403, "Your salon is
+  waiting for approval. You can sign in once it's approved." or "Your salon's registration wasn't
+  approved.", with no session and no failed sign-in counted, and a salon set back to pending or
+  rejected signs its staff out on their next request. This holds back staff a SUPER_ADMIN adds to a
+  salon before approving it, too. A SUPER_ADMIN or CUSTOMER is never held back.
 
 ### Security
+- A salon waiting for approval, or rejected or suspended, no longer shows its details to every
+  other salon's ADMIN, only to SUPER_ADMINs and its own users.
 - An ADMIN can't change the role of a SUPER_ADMIN who belongs to their salon: only a SUPER_ADMIN may
   grant SUPER_ADMIN or take it away. An ADMIN used to be stopped only from granting it.
 - Addresses and contacts are scoped to the caller's salon. A salon's may be changed or deleted only
@@ -239,6 +247,13 @@ version. The version lives in [`gradle.properties`](gradle.properties); each rel
   with the record as stored, and `/api/v1/addresses/{id}` or `/api/v1/contacts/{id}` in `Location`.
   A salon that doesn't exist is a 404, and a contact value the salon already has is a 409. A salon's
   addresses and contacts used to be addable only in `POST /api/v1/businesses`.
+- In-app notifications under `/api/v1/notifications`, for anyone signed in and only their own:
+  `GET` lists them newest first, a page at a time, with `?unread=true` for the unread ones;
+  `GET /unread-count` answers `{"count": 3}`; `PUT /{id}/read` marks one read and answers with it,
+  and another user's is a 404; `PUT /read` marks them all read and answers 204. Each has an `id`, a
+  `type`, the `business` it's about (`id` and `name`), `created_at` and `read_at`, null until read.
+  The only type is `BUSINESS_REGISTERED`, which nothing sends yet. Migration V16: a `notifications`
+  table, a row for each user told, which goes with the user and with the salon.
 
 ### Fixed
 - `app.datasource.pool-size` in the template never did anything, so the pool always had Hikari's
