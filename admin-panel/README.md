@@ -32,8 +32,9 @@ Then open http://localhost:3000. Keep it on port 3000: in development the API on
 from http://localhost:3000. If the API isn't on http://localhost:8081, copy
 [`.env.example`](.env.example) to `.env.local` and change the address there.
 
-There's no sign-up. Sign in with an account the backend already has: one from its demo data, or the
-first super admin that the backend README shows how to create.
+Sign in with an account the backend already has: one from its demo data, or the first super admin
+that the backend README shows how to create. A salon owner can register their salon at `/register`;
+they can sign in once a super admin approves it.
 
 ## Scripts
 
