@@ -23,6 +23,9 @@ app:
     link: http://localhost:3000/reset-password
     valid-for: 1h
     max-per-hour: 3
+  # Where a salon's approval email sends its admins to sign in. This is the default.
+  sign-in:
+    link: http://localhost:3000/signin
   mail:
     from: "Salonat Pro <no-reply@localhost>"
   # Migrations: a database with tables but no flyway_schema_history stops startup. Set this to

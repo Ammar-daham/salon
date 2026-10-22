@@ -8,6 +8,8 @@
 #   SALON_DB_PASSWORD
 #   SALON_ALLOWED_ORIGINS      The admin panel's origin, or several comma-separated: https://admin.example.com
 #   SALON_PASSWORD_RESET_LINK  The admin panel's reset page: https://admin.example.com/reset-password
+#   SALON_SIGN_IN_LINK         The admin panel's sign-in page, for a salon's approval email:
+#                              https://admin.example.com/signin
 #   SALON_MAIL_FROM            Who emails are from, an address the SMTP server may send as:
 #                              Salonat Pro <no-reply@example.com>
 #   SALON_SMTP_HOST            An SMTP server that takes STARTTLS, usually on port 587
@@ -37,6 +39,8 @@ app:
     allowed-origins: ${SALON_ALLOWED_ORIGINS}
   password-reset:
     link: ${SALON_PASSWORD_RESET_LINK}
+  sign-in:
+    link: ${SALON_SIGN_IN_LINK}
   mail:
     from: ${SALON_MAIL_FROM}
   # Plain HTTP gets a 403.

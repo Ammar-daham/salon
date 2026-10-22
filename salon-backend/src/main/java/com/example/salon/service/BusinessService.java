@@ -14,6 +14,7 @@ import com.example.salon.security.AuthenticatedUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -31,11 +32,13 @@ public class BusinessService
     private static final String NAME_UNIQUE = "businesses_name_key";
 
     private final BusinessDao businessDao;
+    private final ApplicationEventPublisher events;
 
     @Autowired
-    public BusinessService(BusinessDao businessDao) 
+    public BusinessService(BusinessDao businessDao, ApplicationEventPublisher events)
     {
         this.businessDao = businessDao;
+        this.events = events;
     }
 
     @Transactional
@@ -119,7 +122,7 @@ public class BusinessService
     /**
      * Approving, rejecting and suspending a salon is platform moderation, reserved for SUPER_ADMIN, and kept
      * apart from its details so a settings form can't undo it. Asking for the status it already has changes
-     * nothing.
+     * nothing. A change is published as a {@link BusinessStatusChanged}, for SalonDecisionMailer.
      */
     @Transactional
     public Business changeStatus(long id, Status status, AuthenticatedUser caller)
@@ -130,6 +133,7 @@ public class BusinessService
         if (status != existing.getStatus()) {
             businessDao.updateBusinessStatus(id, status);
             log.info("Business {} status changed from {} to {}", id, existing.getStatus(), status);
+            events.publishEvent(new BusinessStatusChanged(id, existing.getName(), existing.getStatus(), status));
         }
         return getBusinessById(id);
     }

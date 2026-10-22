@@ -145,6 +145,14 @@ public class UserDataAccessService implements UserDao
 	}
 
 	@Override
+	public List<User> getUsersWithEmail(long businessId, Role role)
+	{
+		return jdbcTemplate.query(
+				"SELECT * FROM users WHERE business_id = ? AND role = ? AND email IS NOT NULL ORDER BY id",
+				userRowMapper(), businessId, role.name());
+	}
+
+	@Override
 	public Optional<User> findByEmail(String email)
 	{
 		try {

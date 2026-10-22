@@ -150,7 +150,9 @@ public class BusinessController
      *
      * <p>{@code PUT /api/v1/businesses/{id}/status}. SUPER_ADMIN only. Any status may follow any other, and
      * asking for the status it already has changes nothing. A salon that isn't {@code APPROVED} is hidden
-     * from everyone but SUPER_ADMINs and the salon's own users.
+     * from everyone but SUPER_ADMINs and the salon's own users. Approving a pending or rejected salon, or
+     * rejecting a pending one, emails the salon's ADMINs the outcome, with a link to sign in when it's
+     * approved.
      *
      * <p>Errors: 400 if {@code status} is missing or isn't one of the four {@link Status} names; 403 for
      * anyone but a SUPER_ADMIN; 404 if there's no such salon.
