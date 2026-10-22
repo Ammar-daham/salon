@@ -6,6 +6,7 @@ import com.example.salon.paging.Page;
 import com.example.salon.paging.PageQuery;
 import com.example.salon.paging.Sort;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface UserDao
@@ -24,6 +25,9 @@ public interface UserDao
 	Optional<User> findById(long id);
 
 	Optional<User> findByEmail(String email);
+
+	/** The salon's users with the role who have an email, in the order they were added. */
+	List<User> getUsersWithEmail(long businessId, Role role);
 
 	long updateUserById(long id, User user);
 
