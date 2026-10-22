@@ -112,6 +112,9 @@ that answers with the record as stored, and `PUT /users/{id}/role`.
 - A currency picker on the salon create and settings forms (DB-08).
 - Add a client (`/customers/new`) and edit one (`/customers/:id/edit`). Admins can edit notes from
   the Notes tab and delete clients from the list; employees can add and view clients (FE-03).
+- The super admin's dashboard counts the salons waiting for review, under "Pending registrations",
+  and opens the salon list filtered to them. The list keeps its status filter in the address, as
+  `/businesses?status=PENDING`, so a refresh or a shared link shows the same salons.
 
 ### Removed
 - `banner.png`, the template's screenshot (FE-14).

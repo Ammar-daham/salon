@@ -11,6 +11,7 @@ import {
 	BUSINESS_STATUSES,
 	BUSINESS_STATUS_LABELS,
 	BUSINESS_STATUS_TONE,
+	businessListHref,
 	type Business,
 	type BusinessStatus,
 } from "@/lib/resources/businesses/businesses.types";
@@ -32,12 +33,13 @@ function cityOf(business: Business): string {
 	return business.addresses[0]?.city ?? "—";
 }
 
-export default function BusinessListView() {
+/** initialStatus comes from ?status=, e.g. the dashboard's link to salons waiting for review. */
+export default function BusinessListView({ initialStatus }: { initialStatus?: BusinessStatus }) {
 	const { user } = useAuth();
 	const router = useRouter();
 	const { toast } = useToast();
 
-	const [statusFilter, setStatusFilter] = useState<BusinessStatus | "ALL">("ALL");
+	const [statusFilter, setStatusFilter] = useState<BusinessStatus | "ALL">(initialStatus ?? "ALL");
 	const [pendingDelete, setPendingDelete] = useState<Business | null>(null);
 
 	// Searched, filtered, sorted and paged by the server (BE-15). Sort keys are the API's.
@@ -193,8 +195,11 @@ export default function BusinessListView() {
 							aria-label="Filter by status"
 							value={statusFilter}
 							onChange={(e) => {
-								setStatusFilter(e.target.value as BusinessStatus | "ALL");
+								const next = e.target.value as BusinessStatus | "ALL";
+								setStatusFilter(next);
 								table.firstPage();
+								// Kept in the address, so a refresh or a shared link shows the same filter.
+								router.replace(businessListHref(next === "ALL" ? undefined : next), { scroll: false });
 							}}
 							className="sm:w-48"
 						>
