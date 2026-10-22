@@ -56,11 +56,11 @@ public class BusinessService
         return getBusinessById(id);
     }
 
-    /** Admins see every salon; anyone else the approved ones and their own, counted in SQL so pages add up. */
+    /** Super admins see every salon; anyone else the approved ones and their own, counted in SQL so pages add up. */
     public Page<Business> getBusinesses(String search, Status status, Sort<BusinessDao.SortBy> sort, PageQuery page,
             AuthenticatedUser caller)
     {
-        BusinessDao.Filter filter = new BusinessDao.Filter(search, status, AccessControl.isAdmin(caller),
+        BusinessDao.Filter filter = new BusinessDao.Filter(search, status, AccessControl.isSuperAdmin(caller),
                 caller.getUser().getBusinessId());
         return businessDao.getBusinesses(filter, sort, page);
     }
@@ -68,7 +68,7 @@ public class BusinessService
     public Business getBusinessById(long id, AuthenticatedUser caller) 
     {
         Business business = getBusinessById(id);
-        // 404 rather than 403, so a non-admin can't probe which unapproved salons exist.
+        // 404 rather than 403, so no one but a super admin can probe which unapproved salons exist.
         if (!isVisibleTo(business, caller))
             throw new BaseException("Business with id " + id + " not found", ErrorCode.NOT_FOUND);
         return business;
@@ -85,9 +85,10 @@ public class BusinessService
         return business;
     }
 
+    /** Another salon's ADMIN doesn't see one that isn't approved: its details are the owner's until it is. */
     private static boolean isVisibleTo(Business business, AuthenticatedUser caller)
     {
-        if (AccessControl.isAdmin(caller) || business.getStatus() == Status.APPROVED)
+        if (AccessControl.isSuperAdmin(caller) || business.getStatus() == Status.APPROVED)
             return true;
         Long callerBusinessId = caller.getUser().getBusinessId();
         return callerBusinessId != null && callerBusinessId.equals(business.getId());

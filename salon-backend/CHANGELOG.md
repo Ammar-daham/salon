@@ -69,6 +69,8 @@ version. The version lives in [`gradle.properties`](gradle.properties); each rel
   salon before approving it, too. A SUPER_ADMIN or CUSTOMER is never held back.
 
 ### Security
+- A salon waiting for approval, or rejected or suspended, no longer shows its details to every
+  other salon's ADMIN, only to SUPER_ADMINs and its own users.
 - An ADMIN can't change the role of a SUPER_ADMIN who belongs to their salon: only a SUPER_ADMIN may
   grant SUPER_ADMIN or take it away. An ADMIN used to be stopped only from granting it.
 - Addresses and contacts are scoped to the caller's salon. A salon's may be changed or deleted only
