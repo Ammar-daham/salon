@@ -18,6 +18,12 @@ export function toNotification(dto: NotificationDto): AppNotification {
 	};
 }
 
+/** The bell's badge: nothing for none, the count up to 9, then "9+". */
+export function unreadBadge(count: number): string | null {
+	if (count <= 0) return null;
+	return count > 9 ? "9+" : String(count);
+}
+
 /** What a notification says, and where it leads. */
 export interface NotificationText {
 	title: string;
