@@ -10,15 +10,21 @@ public class TooManyAttemptsException extends BaseException
 {
     private final long retryAfterSeconds;
 
+    /** Too many failed sign-ins, as LoginThrottle says. */
     public TooManyAttemptsException(Duration retryAfter)
     {
-        this(Math.max(1, (retryAfter.toMillis() + 999) / 1000));
+        this("Too many failed sign-in attempts.", retryAfter);
     }
 
-    private TooManyAttemptsException(long retryAfterSeconds)
+    /** what is a sentence saying what there were too many of; how long to wait is added to it. */
+    public TooManyAttemptsException(String what, Duration retryAfter)
     {
-        super("Too many failed sign-in attempts. Try again in " + minutes(retryAfterSeconds) + ".",
-                ErrorCode.TOO_MANY_REQUESTS);
+        this(what, Math.max(1, (retryAfter.toMillis() + 999) / 1000));
+    }
+
+    private TooManyAttemptsException(String what, long retryAfterSeconds)
+    {
+        super(what + " Try again in " + minutes(retryAfterSeconds) + ".", ErrorCode.TOO_MANY_REQUESTS);
         this.retryAfterSeconds = retryAfterSeconds;
     }
 

@@ -11,6 +11,7 @@ import com.example.salon.security.AuthUserResponse;
 import com.example.salon.security.AuthenticatedUser;
 import com.example.salon.security.LoginRequest;
 import com.example.salon.security.LoginThrottle;
+import com.example.salon.security.SalonSignIn;
 import com.example.salon.service.PasswordResetService;
 import com.example.salon.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -37,6 +38,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Optional;
+
 /**
  * Signing in and out, and passwords, under {@code /api/v1/auth}.
  *
@@ -56,11 +59,12 @@ public class AuthController
 	private final PasswordEncoder passwordEncoder;
 	private final UserService userService;
 	private final PasswordResetService passwordResetService;
+	private final SalonSignIn salonSignIn;
 
 	@Autowired
 	public AuthController(AuthenticationManager authenticationManager, SecurityContextRepository securityContextRepository,
 			LoginThrottle loginThrottle, PasswordEncoder passwordEncoder, UserService userService,
-			PasswordResetService passwordResetService)
+			PasswordResetService passwordResetService, SalonSignIn salonSignIn)
 	{
 		this.authenticationManager = authenticationManager;
 		this.securityContextRepository = securityContextRepository;
@@ -68,6 +72,7 @@ public class AuthController
 		this.passwordEncoder = passwordEncoder;
 		this.userService = userService;
 		this.passwordResetService = passwordResetService;
+		this.salonSignIn = salonSignIn;
 	}
 
 	/**
@@ -75,13 +80,16 @@ public class AuthController
 	 *
 	 * <p>{@code POST /api/v1/auth/login}. Needs no session. The email's case doesn't matter, and an
 	 * account with no password set can't sign in. Any role may, a CUSTOMER included, for the customer app;
-	 * the admin panel signs a CUSTOMER out again. The session is kept in the {@code JSESSIONID} cookie; a
-	 * session the client already had gets a new id.
+	 * the admin panel signs a CUSTOMER out again. An ADMIN or EMPLOYEE signs in only while their salon is
+	 * {@code APPROVED} or {@code SUSPENDED}, not while it's {@code PENDING} or {@code REJECTED}. The session
+	 * is kept in the {@code JSESSIONID} cookie; a session the client already had gets a new id.
 	 *
 	 * <p>Errors: 401 if the email and password don't match an account that can sign in, the same answer
-	 * whether or not the email has one; 429, with {@code Retry-After} in seconds, after too many failed
-	 * sign-ins, by default 5 for one email or 20 from one address within 15 minutes. While locked, even
-	 * the right password gets 429.
+	 * whether or not the email has one; 403 for the right password of an ADMIN or EMPLOYEE whose salon is
+	 * pending ("Your salon is waiting for approval. You can sign in once it's approved.") or rejected
+	 * ("Your salon's registration wasn't approved."), with no session kept and no failed sign-in counted;
+	 * 429, with {@code Retry-After} in seconds, after too many failed sign-ins, by default 5 for one email
+	 * or 20 from one address within 15 minutes. While locked, even the right password gets 429.
 	 *
 	 * @param request the email and password, a {@link LoginRequest}
 	 * @param servletRequest the HTTP request
@@ -108,9 +116,15 @@ public class AuthController
 		}
 		attempt.succeeded();
 
-		saveSignedIn(authResult, servletRequest, servletResponse);
-
 		User user = ((AuthenticatedUser) authResult.getPrincipal()).getUser();
+		// Only after the password matched, so no one else learns where the salon stands. No session is kept.
+		Optional<String> refusal = salonSignIn.refusal(user);
+		if (refusal.isPresent()) {
+			log.info("User {} can't sign in: their salon isn't approved", user.getId());
+			throw new BaseException(refusal.get(), ErrorCode.FORBIDDEN);
+		}
+
+		saveSignedIn(authResult, servletRequest, servletResponse);
 		log.info("User {} signed in", user.getId());
 		return AuthUserResponse.from(user);
 	}

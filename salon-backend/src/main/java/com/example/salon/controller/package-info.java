@@ -24,7 +24,9 @@
  * {@code JSESSIONID} cookie, which the client sends with every request. Every endpoint needs a session
  * except {@code POST /api/v1/auth/login}, {@code POST /api/v1/auth/forgot-password},
  * {@code POST /api/v1/auth/reset-password} and {@code GET /actuator/health}; without one the answer is
- * 401. A session ends after 30 minutes without a request. A request whose {@code Origin} header isn't
+ * 401. A salon's ADMINs and EMPLOYEEs sign in only once a SUPER_ADMIN has approved the salon, and are
+ * signed out if it goes back to pending or is rejected; a suspended salon's staff still sign in. A
+ * session ends after 30 minutes without a request. A request whose {@code Origin} header isn't
  * one the server allows ({@code app.cors.allowed-origins}) is refused with 403, which is why there is no
  * CSRF token.
  *
@@ -45,7 +47,7 @@
  * the record isn't theirs to see.
  *
  * <h2>Lists</h2>
- * <p>Salons, users, customers and appointments come a page at a time:
+ * <p>Salons, users, customers, appointments and notifications come a page at a time:
  * {@code {"items": [...], "page": 1, "size": 20, "total_items": 57, "total_pages": 3}}. {@code ?page}
  * counts from 1 and {@code ?size} is 1 to 100, 20 if left out; a page past the end has no items.
  * {@code ?sort} is one of the list's keys, or {@code -key} for the other way round, and {@code ?q}
@@ -92,6 +94,8 @@
  *   <li>{@link com.example.salon.controller.CustomerController}: a salon's clients</li>
  *   <li>{@link com.example.salon.controller.AppointmentController}: appointments</li>
  *   <li>{@link com.example.salon.controller.AvailabilityController}: open times for booking a service</li>
+ *   <li>{@link com.example.salon.controller.NotificationController}: what the signed-in user is told
+ *       about</li>
  * </ul>
  */
 package com.example.salon.controller;
