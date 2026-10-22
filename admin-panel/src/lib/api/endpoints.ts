@@ -58,4 +58,11 @@ export const endpoints = {
 		root: "/api/v1/customers",
 		byId: (id: number) => `/api/v1/customers/${id}`,
 	},
+	// Only ever the signed-in user's own.
+	notifications: {
+		root: "/api/v1/notifications",
+		unreadCount: "/api/v1/notifications/unread-count",
+		read: (id: number) => `/api/v1/notifications/${id}/read`,
+		readAll: "/api/v1/notifications/read",
+	},
 } as const;
