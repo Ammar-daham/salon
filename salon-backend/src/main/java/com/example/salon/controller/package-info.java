@@ -47,7 +47,7 @@
  * the record isn't theirs to see.
  *
  * <h2>Lists</h2>
- * <p>Salons, users, customers and appointments come a page at a time:
+ * <p>Salons, users, customers, appointments and notifications come a page at a time:
  * {@code {"items": [...], "page": 1, "size": 20, "total_items": 57, "total_pages": 3}}. {@code ?page}
  * counts from 1 and {@code ?size} is 1 to 100, 20 if left out; a page past the end has no items.
  * {@code ?sort} is one of the list's keys, or {@code -key} for the other way round, and {@code ?q}
@@ -94,6 +94,8 @@
  *   <li>{@link com.example.salon.controller.CustomerController}: a salon's clients</li>
  *   <li>{@link com.example.salon.controller.AppointmentController}: appointments</li>
  *   <li>{@link com.example.salon.controller.AvailabilityController}: open times for booking a service</li>
+ *   <li>{@link com.example.salon.controller.NotificationController}: what the signed-in user is told
+ *       about</li>
  * </ul>
  */
 package com.example.salon.controller;
