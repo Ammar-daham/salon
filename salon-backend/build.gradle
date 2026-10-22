@@ -36,7 +36,8 @@ dependencies {
     implementation 'org.flywaydb:flyway-core'
     runtimeOnly 'org.flywaydb:flyway-database-postgresql'
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
-    runtimeOnly 'org.postgresql:postgresql'
+    // Compiled against, for the name of the constraint a write broke (dao.Constraints).
+    implementation 'org.postgresql:postgresql'
     annotationProcessor 'org.projectlombok:lombok'
     providedRuntime 'org.springframework.boot:spring-boot-starter-tomcat-runtime'
     testImplementation 'org.springframework.boot:spring-boot-starter-jdbc-test'
