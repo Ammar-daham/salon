@@ -111,6 +111,15 @@ export default function SignInForm({ passwordReset = false }: { passwordReset?: 
 					</div>
 				</div>
 			</form>
+			<p className="mt-5 text-center text-sm text-neutral-500 dark:text-neutral-400">
+				Running a salon?{" "}
+				<Link
+					href="/register"
+					className="font-medium text-primary-700 hover:underline dark:text-primary-300"
+				>
+					Register it
+				</Link>
+			</p>
 		</AuthPanel>
 	);
 }

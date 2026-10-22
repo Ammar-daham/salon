@@ -119,6 +119,11 @@ that answers with the record as stored, `PUT /users/{id}/role`, and `GET /users?
 - A bell in the header shows how many notifications are unread, up to "9+", checking again every
   minute and when the window comes back into focus. It opens the latest five, with "Mark all as
   read" and "View all"; opening one marks it read and goes to what it's about.
+- Salon owners register their salon and their own account at `/register`, linked from the sign-in
+  page: their name, email and password, and the salon's name, description, image, currency, time
+  zone, address and phone. A taken salon name or email shows by its field. Afterwards the page says
+  the salon is waiting for a super admin's approval, and signing in before then says so too. Needs
+  salon-backend with `POST /auth/register`.
 
 ### Removed
 - `banner.png`, the template's screenshot (FE-14).
