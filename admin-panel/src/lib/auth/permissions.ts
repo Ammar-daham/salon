@@ -18,6 +18,8 @@ export type Permission =
 	| "business:create"
 	| "business:edit"
 	| "business:delete"
+	/** Approve, reject, suspend or reinstate a salon: the platform's call, not the salon's. */
+	| "business:review"
 	| "user:list"
 	| "user:create"
 	| "user:edit"
@@ -50,6 +52,7 @@ export type Permission =
 const SUPER_ADMIN_GRANTS: Permission[] = [
 	"dashboard:view",
 	"business:list", "business:view", "business:create", "business:edit", "business:delete",
+	"business:review",
 	"user:list", "user:create", "user:edit", "user:delete",
 	"employee:list", "employee:create", "employee:edit", "employee:delete",
 	"customer:list", "customer:create", "customer:edit", "customer:delete",

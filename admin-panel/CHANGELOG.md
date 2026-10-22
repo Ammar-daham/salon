@@ -13,7 +13,7 @@ Requires salon-backend with the customers API (DB-03), migration V9 (DB-07, DB-0
 hours API with migration V10 (DB-09, DB-14), the appointments and availability APIs with
 migration V12 (DB-13, DB-14), the password endpoints with migration V13 (FE-13), the paged
 lists, `GET /customers` and named staff records (BE-15), the paged appointment list, a `PUT`
-that answers with the record as stored, and `PUT /users/{id}/role`.
+that answers with the record as stored, `PUT /users/{id}/role`, and `GET /users?business_id=`.
 
 ### Changed
 - Saving a user writes their name, then their role with `PUT /users/{id}/role` if it changed, as the
@@ -112,6 +112,10 @@ that answers with the record as stored, and `PUT /users/{id}/role`.
 - A currency picker on the salon create and settings forms (DB-08).
 - Add a client (`/customers/new`) and edit one (`/customers/:id/edit`). Admins can edit notes from
   the Notes tab and delete clients from the list; employees can add and view clients (FE-03).
+- A super admin reviews a salon from its page: a pending salon has Approve and Reject, an approved
+  one Suspend, a suspended one Reinstate and a rejected one Approve. Each asks first, saying what it
+  means for the salon and its staff, and the salon's status and the lists update straight away. The
+  overview shows the salon's admins, such as the owner who registered it, with their emails.
 
 ### Removed
 - `banner.png`, the template's screenshot (FE-14).
