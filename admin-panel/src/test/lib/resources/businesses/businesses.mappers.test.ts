@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { toBusiness, toBusinessRequest, toSalonService, type BusinessDto } from "@/lib/resources/businesses/businesses.mappers";
+import {
+	type BusinessDto,
+	toBusiness,
+	toBusinessRequest,
+	toCreateBusinessRequest,
+	toSalonService,
+} from "@/lib/resources/businesses/businesses.mappers";
 
 const dto: BusinessDto = {
 	id: 1,
@@ -115,5 +121,51 @@ describe("toBusinessRequest", () => {
 
 	it("never sends a status, which only its own endpoint changes", () => {
 		expect(toBusinessRequest({ ...input, status: "APPROVED" })).toEqual(input);
+	});
+
+	it("leaves a salon's addresses and contacts out of the update", () => {
+		const update = toBusinessRequest({ ...input, address: { street: "x", postalCode: "", city: "y", country: "z" }, phone: "1" });
+		expect(update).toEqual(input);
+	});
+});
+
+describe("toCreateBusinessRequest", () => {
+	const input = {
+		name: "Lumen Nail Bar",
+		description: null,
+		image: "https://example.test/lumen.png",
+		currency: "EUR",
+		timezone: "Europe/Berlin",
+	};
+
+	it("creates the salon with its address and phone", () => {
+		expect(
+			toCreateBusinessRequest({
+				...input,
+				address: { street: " 5 Torstr. ", postalCode: "10119", city: "Berlin", country: "Germany" },
+				phone: " +49 30 5550100 ",
+			}),
+		).toEqual({
+			...input,
+			addresses: [{ street: "5 Torstr.", city: "Berlin", country: "Germany", postal_code: "10119" }],
+			contacts: [{ type: "phone", value: "+49 30 5550100" }],
+		});
+	});
+
+	it("sends no address or phone when there's none", () => {
+		expect(toCreateBusinessRequest({ ...input, address: null, phone: "" })).toEqual({
+			...input,
+			addresses: [],
+			contacts: [],
+		});
+		const noPostalCode = toCreateBusinessRequest({
+			...input,
+			address: { street: "5 Torstr.", postalCode: " ", city: "Berlin", country: "Germany" },
+		});
+		expect(noPostalCode.addresses[0]).not.toHaveProperty("postal_code");
+	});
+
+	it("never sends a status", () => {
+		expect(toCreateBusinessRequest({ ...input, status: "APPROVED" })).not.toHaveProperty("status");
 	});
 });

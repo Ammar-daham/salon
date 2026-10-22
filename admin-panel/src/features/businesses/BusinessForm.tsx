@@ -11,6 +11,7 @@ import {
 	type BusinessInput,
 	type BusinessStatus,
 } from "@/lib/resources/businesses/businesses.types";
+import { addressErrors, hasAddress } from "@/lib/resources/businesses/businesses.validation";
 import { CURRENCY_OPTIONS } from "@/lib/utils/money";
 import { DEFAULT_TIME_ZONE, timeZoneOptions } from "@/lib/utils/timeZones";
 
@@ -21,6 +22,12 @@ export interface BusinessFormValues {
 	status: BusinessStatus;
 	currency: string;
 	timezone: string;
+	/** Create only: the salon's address and phone, both optional. */
+	street: string;
+	postalCode: string;
+	city: string;
+	country: string;
+	phone: string;
 }
 
 interface BusinessFormProps {
@@ -35,8 +42,13 @@ interface BusinessFormProps {
 
 type Errors = Partial<Record<keyof BusinessFormValues, string>>;
 
-function validate(values: BusinessFormValues): Errors {
-	const errors: Errors = {};
+function addressOf(values: BusinessFormValues) {
+	return { street: values.street, postalCode: values.postalCode, city: values.city, country: values.country };
+}
+
+function validate(values: BusinessFormValues, creating: boolean): Errors {
+	const errors: Errors = creating ? addressErrors(addressOf(values)) : {};
+	if (creating && values.phone.trim().length > 255) errors.phone = "Use at most 255 characters.";
 	if (!values.name.trim()) errors.name = "Give the salon a name.";
 	else if (values.name.trim().length > 100) errors.name = "Keep the name under 100 characters.";
 	// image is NOT NULL in the database and there is no upload endpoint, so the
@@ -60,6 +72,11 @@ export default function BusinessForm({
 		status: initial?.status ?? "PENDING",
 		currency: initial?.currency ?? "EUR",
 		timezone: initial?.timezone ?? DEFAULT_TIME_ZONE,
+		street: "",
+		postalCode: "",
+		city: "",
+		country: "",
+		phone: "",
 	});
 	const [errors, setErrors] = useState<Errors>({});
 
@@ -70,7 +87,8 @@ export default function BusinessForm({
 
 	async function handleSubmit(e: FormEvent<HTMLFormElement>) {
 		e.preventDefault();
-		const found = validate(values);
+		const creating = mode === "create";
+		const found = validate(values, creating);
 		setErrors(found);
 		if (Object.keys(found).length > 0) return;
 
@@ -82,6 +100,13 @@ export default function BusinessForm({
 			...(allowStatus ? { status: values.status } : {}),
 			currency: values.currency,
 			timezone: values.timezone,
+			// Only a new salon's: the update leaves its addresses and contacts alone.
+			...(creating
+				? {
+						address: hasAddress(addressOf(values)) ? addressOf(values) : null,
+						phone: values.phone.trim() || null,
+					}
+				: {}),
 		});
 	}
 
@@ -211,12 +236,65 @@ export default function BusinessForm({
 			</Card>
 
 			{mode === "create" && (
-				<Card title="Address and contacts">
-					<p className="text-sm text-ink-muted">
-						Addresses and contacts can&apos;t be added through the API yet — there are no
-						endpoints for creating them, and a salon&apos;s set is fixed once it exists.
-						Add them directly in the database for now.
-					</p>
+				<Card
+					title="Address and phone"
+					description="Optional. Customers see them on the salon's listing."
+				>
+					<div className="flex flex-col gap-5">
+						<Field label="Street" error={errors.street}>
+							{(p) => (
+								<TextInput
+									{...p}
+									value={values.street}
+									onChange={(e) => set("street", e.target.value)}
+									autoComplete="address-line1"
+								/>
+							)}
+						</Field>
+						<div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
+							<Field label="Postal code" error={errors.postalCode}>
+								{(p) => (
+									<TextInput
+										{...p}
+										value={values.postalCode}
+										onChange={(e) => set("postalCode", e.target.value)}
+										autoComplete="postal-code"
+									/>
+								)}
+							</Field>
+							<Field label="City" error={errors.city}>
+								{(p) => (
+									<TextInput
+										{...p}
+										value={values.city}
+										onChange={(e) => set("city", e.target.value)}
+										autoComplete="address-level2"
+									/>
+								)}
+							</Field>
+							<Field label="Country" error={errors.country}>
+								{(p) => (
+									<TextInput
+										{...p}
+										value={values.country}
+										onChange={(e) => set("country", e.target.value)}
+										autoComplete="country-name"
+									/>
+								)}
+							</Field>
+						</div>
+						<Field label="Phone" error={errors.phone}>
+							{(p) => (
+								<TextInput
+									{...p}
+									type="tel"
+									value={values.phone}
+									onChange={(e) => set("phone", e.target.value)}
+									autoComplete="tel"
+								/>
+							)}
+						</Field>
+					</div>
 				</Card>
 			)}
 

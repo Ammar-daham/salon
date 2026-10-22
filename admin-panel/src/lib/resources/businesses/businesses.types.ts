@@ -93,6 +93,14 @@ export interface SalonServiceInput {
 	isActive: boolean;
 }
 
+/** A new salon's address, as the create form takes it. */
+export interface NewAddressInput {
+	street: string;
+	postalCode: string;
+	city: string;
+	country: string;
+}
+
 export interface BusinessInput {
 	name: string;
 	description: string | null;
@@ -103,4 +111,8 @@ export interface BusinessInput {
 	currency: string;
 	/** Required: the update replaces it, like every other field. */
 	timezone: string;
+	/** Create only, and optional: the update leaves a salon's addresses and contacts alone. */
+	address?: NewAddressInput | null;
+	/** Create only, and optional: sent as the salon's one contact. */
+	phone?: string | null;
 }

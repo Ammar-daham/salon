@@ -3,7 +3,12 @@ import { endpoints } from "@/lib/api/endpoints";
 import { fetchAllPages, pageParams, toPage, type PageDto } from "@/lib/api/paging";
 import type { Id, ListParams, PageQuery, Repository } from "@/lib/api/types";
 import type { Business, BusinessInput, BusinessStatus } from "./businesses.types";
-import { toBusiness, toBusinessRequest, type BusinessDto } from "./businesses.mappers";
+import {
+	toBusiness,
+	toBusinessRequest,
+	toCreateBusinessRequest,
+	type BusinessDto,
+} from "./businesses.mappers";
 
 /** sort is name, status or created_at; q matches the name, description or a city. */
 export interface BusinessPageQuery extends PageQuery {
@@ -31,7 +36,7 @@ export const businessesRepository: Repository<Business, BusinessInput, BusinessI
 	async create(input: BusinessInput) {
 		const { data } = await apiClient.post<BusinessDto>(
 			endpoints.businesses.root,
-			toBusinessRequest(input),
+			toCreateBusinessRequest(input),
 		);
 		return toBusiness(data);
 	},
