@@ -110,6 +110,29 @@ class ListEndpointsTest extends IntegrationTest
 				.andExpect(jsonPath("$.items[*].email", contains(Fixture.GLOW_ADMIN)));
 	}
 
+	/** As for customers: a super admin narrows to one salon, an admin only ever gets their own. */
+	@Test
+	void usersCanBeListedForOneSalon() throws Exception
+	{
+		MockHttpSession superAdmin = loginAs(Fixture.SUPER_ADMIN);
+		mvc.perform(get(USERS + "?business_id=" + Fixture.URBAN).session(superAdmin))
+				.andExpect(jsonPath("$.items[*].email", contains(Fixture.URBAN_ADMIN, Fixture.URBAN_EMPLOYEE)))
+				.andExpect(jsonPath("$.total_items").value(2));
+		mvc.perform(get(USERS + "?business_id=" + Fixture.URBAN + "&role=ADMIN").session(superAdmin))
+				.andExpect(jsonPath("$.items[*].email", contains(Fixture.URBAN_ADMIN)));
+		mvc.perform(get(USERS + "?business_id=" + Fixture.SERENITY_PENDING).session(superAdmin))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.total_items").value(0));
+		mvc.perform(get(USERS + "?business_id=9999").session(superAdmin))
+				.andExpect(status().isNotFound());
+
+		MockHttpSession glowAdmin = loginAs(Fixture.GLOW_ADMIN);
+		mvc.perform(get(USERS + "?business_id=" + Fixture.GLOW).session(glowAdmin))
+				.andExpect(jsonPath("$.items[*].email", contains(Fixture.GLOW_ADMIN, Fixture.GLOW_EMPLOYEE)));
+		mvc.perform(get(USERS + "?business_id=" + Fixture.URBAN).session(glowAdmin))
+				.andExpect(status().isForbidden());
+	}
+
 	@Test
 	void aSuperAdminListsCustomersAcrossSalonsOrOfOne() throws Exception
 	{
