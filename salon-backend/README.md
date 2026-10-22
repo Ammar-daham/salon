@@ -79,8 +79,9 @@ docker run -p 8081:8081 -e SPRING_PROFILES_ACTIVE=prod -e SALON_DB_URL=... salon
 
 ### The first super admin
 
-There's no sign-up: every account is created by another admin, so the first super admin goes straight
-into the database. Make a bcrypt hash of their password, for example with Docker:
+A salon owner registers their salon and their own account with `POST /api/v1/auth/register`, and a
+super admin approves it. Every other account is created by an admin, and the first super admin, who
+approves the first salons, goes straight into the database. Make a bcrypt hash of their password, for example with Docker:
 
 ```bash
 docker run --rm httpd:2.4-alpine htpasswd -nbBC 10 "" 'their-password' | tr -d ':\n'
@@ -100,6 +101,9 @@ VALUES ('First', 'Last', 'SUPER_ADMIN', 'admin@example.com', '<the hash>');
   `Location`. A `PUT` answers 200 with the record as stored, and a `DELETE` answers 204, with no body.
 - `POST /api/v1/auth/login` with `email` and `password` starts a session; the browser keeps it in the
   `JSESSIONID` cookie and sends it with every request. `GET /api/v1/auth/me` says who's signed in.
+- `POST /api/v1/auth/register` registers a salon and its owner without a session. The salon is
+  `PENDING`, and every super admin is notified, until one approves it with
+  `PUT /api/v1/businesses/{id}/status`; only then can its owner sign in.
 - Roles are `SUPER_ADMIN` (the platform), `ADMIN` and `EMPLOYEE` (one salon), and `CUSTOMER`. Each
   endpoint's Javadoc says who may call it.
 - The lists that grow, salons, users, clients and appointments, come a page at a time:

@@ -252,7 +252,7 @@ version. The version lives in [`gradle.properties`](gradle.properties); each rel
   `GET /unread-count` answers `{"count": 3}`; `PUT /{id}/read` marks one read and answers with it,
   and another user's is a 404; `PUT /read` marks them all read and answers 204. Each has an `id`, a
   `type`, the `business` it's about (`id` and `name`), `created_at` and `read_at`, null until read.
-  The only type is `BUSINESS_REGISTERED`, which nothing sends yet. Migration V16: a `notifications`
+  The only type is `BUSINESS_REGISTERED`, sent to every SUPER_ADMIN. Migration V16: a `notifications`
   table, a row for each user told, which goes with the user and with the salon.
 - A salon's ADMINs are emailed the outcome of its review once it's stored: approving a pending or
   rejected salon sends "<name> is approved on Salonat Pro" with a link to sign in
