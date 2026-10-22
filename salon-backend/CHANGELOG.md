@@ -252,8 +252,16 @@ version. The version lives in [`gradle.properties`](gradle.properties); each rel
   `GET /unread-count` answers `{"count": 3}`; `PUT /{id}/read` marks one read and answers with it,
   and another user's is a 404; `PUT /read` marks them all read and answers 204. Each has an `id`, a
   `type`, the `business` it's about (`id` and `name`), `created_at` and `read_at`, null until read.
-  The only type is `BUSINESS_REGISTERED`, which nothing sends yet. Migration V16: a `notifications`
+  The only type is `BUSINESS_REGISTERED`, sent to every SUPER_ADMIN. Migration V16: a `notifications`
   table, a row for each user told, which goes with the user and with the salon.
+- `POST /api/v1/auth/register` lets a salon owner register their salon and their own account without
+  a session: `{"owner": {first_name, last_name, email, password}, "salon": {...}}`, the salon as for
+  `POST /api/v1/businesses`, with its addresses and contacts. It answers 202. The salon is `PENDING`
+  whatever status it asks for, the owner is its ADMIN, and every SUPER_ADMIN gets a
+  `BUSINESS_REGISTERED` notification. The owner signs in once a SUPER_ADMIN approves the salon. A
+  taken salon name or email, or a contact given twice, is a 409 that creates nothing; a bad field is
+  a 400 naming it by its path, such as `salon.name`; and more than 5 registrations from one address
+  in an hour get 429 with `Retry-After` (`app.registration.max-per-address` and `window`).
 
 ### Fixed
 - `app.datasource.pool-size` in the template never did anything, so the pool always had Hikari's

@@ -67,7 +67,24 @@ public class UserService
 			// don't run.
 			user.setBusinessId(caller.getUser().getBusinessId());
 		}
+		return createAccount(user);
+	}
 
+	/**
+	 * Creates the owner of a salon being registered, with no one signed in: an ADMIN of that salon. Only
+	 * for RegistrationService, inside the transaction that creates the salon, so a 409 here undoes it.
+	 */
+	@Transactional
+	public User addOwner(User owner, long businessId)
+	{
+		owner.setRole(Role.ADMIN);
+		owner.setBusinessId(businessId);
+		return createAccount(owner);
+	}
+
+	/** The rules every new account follows, whoever creates it. */
+	private User createAccount(User user)
+	{
 		// Every other role works in the admin panel, so has to sign in. A CUSTOMER may have both, and then
 		// can sign in too, for the customer app.
 		boolean needsCredentials = user.getRole() != Role.CUSTOMER;
