@@ -95,7 +95,15 @@ public class StaffDataAccessService implements StaffDao {
     public int deleteStaffById(long id) {
         // Soft delete: appointments keep pointing at the staff member.
         String sql = "UPDATE staff SET deleted_at = now() WHERE id = ? AND deleted_at IS NULL";
-        return jdbcTemplate.update(sql, id);
+        int row = jdbcTemplate.update(sql, id);
+        // What they'd work, do and take off goes: no read reaches a removed staff member, and one taken
+        // on again is a new staff record.
+        if (row > 0) {
+            jdbcTemplate.update("DELETE FROM staff_schedules WHERE staff_id = ?", id);
+            jdbcTemplate.update("DELETE FROM staff_services WHERE staff_id = ?", id);
+            jdbcTemplate.update("DELETE FROM staff_time_off WHERE staff_id = ?", id);
+        }
+        return row;
     }
 
     @Override
