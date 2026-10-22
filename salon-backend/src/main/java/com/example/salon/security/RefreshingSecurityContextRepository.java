@@ -20,17 +20,21 @@ import java.util.Optional;
  * trusted for its id. On every request the user is re-read from the database: a changed role or
  * business takes effect immediately, and a deleted user (or one whose login was removed) has their
  * session invalidated instead of keeping their old access until it expires. So does every session
- * that signed in before the password was changed.
+ * that signed in before the password was changed, and every session of a salon's staff once the salon is
+ * back to pending or rejected (SalonSignIn).
  */
 public class RefreshingSecurityContextRepository implements SecurityContextRepository
 {
 	private final SecurityContextRepository delegate;
 	private final UserDao userDao;
+	private final SalonSignIn salonSignIn;
 
-	public RefreshingSecurityContextRepository(SecurityContextRepository delegate, UserDao userDao)
+	public RefreshingSecurityContextRepository(SecurityContextRepository delegate, UserDao userDao,
+			SalonSignIn salonSignIn)
 	{
 		this.delegate = delegate;
 		this.userDao = userDao;
+		this.salonSignIn = salonSignIn;
 	}
 
 	@Override
@@ -93,7 +97,8 @@ public class RefreshingSecurityContextRepository implements SecurityContextRepos
 		// even setting the same password again gives a new one.
 		String signedInWith = principal.getUser().getPasswordHash();
 		Optional<User> current = userDao.findById(principal.getUser().getId())
-				.filter(user -> user.getPasswordHash() != null && user.getPasswordHash().equals(signedInWith));
+				.filter(user -> user.getPasswordHash() != null && user.getPasswordHash().equals(signedInWith))
+				.filter(user -> salonSignIn.refusal(user).isEmpty());
 
 		SecurityContext fresh = SecurityContextHolder.createEmptyContext();
 		if (current.isEmpty()) {
