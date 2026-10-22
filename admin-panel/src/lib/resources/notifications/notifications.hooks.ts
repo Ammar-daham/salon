@@ -14,11 +14,13 @@ import {
 /** How often the unread count is asked for again while the panel is open. */
 export const UNREAD_COUNT_REFRESH_MS = 60_000;
 
-export function useNotificationPage(query: NotificationPageQuery) {
+/** enabled is false until it's needed, e.g. while the bell's dropdown is closed. */
+export function useNotificationPage(query: NotificationPageQuery, enabled = true) {
 	return useQuery({
 		queryKey: queryKeys.notifications.page(query),
 		queryFn: ({ signal }) => listNotifications(query, { signal }),
 		placeholderData: keepPreviousData,
+		enabled,
 	});
 }
 

@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
 	notificationText,
 	toNotification,
+	unreadBadge,
 	type NotificationDto,
 } from "@/lib/resources/notifications/notifications.mappers";
 
@@ -46,5 +47,15 @@ describe("notificationText", () => {
 	it("still reads as something for a type it doesn't know", () => {
 		const unknown = toNotification({ ...registered, type: "SOMETHING_NEW" as NotificationDto["type"] });
 		expect(notificationText(unknown)).toEqual({ title: "Notification", body: "", href: "/notifications" });
+	});
+});
+
+describe("unreadBadge", () => {
+	it("shows nothing for none, the count up to 9, then 9+", () => {
+		expect(unreadBadge(0)).toBeNull();
+		expect(unreadBadge(1)).toBe("1");
+		expect(unreadBadge(9)).toBe("9");
+		expect(unreadBadge(10)).toBe("9+");
+		expect(unreadBadge(250)).toBe("9+");
 	});
 });

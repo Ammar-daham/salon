@@ -116,6 +116,9 @@ that answers with the record as stored, `PUT /users/{id}/role`, and `GET /users?
   "Coming in Phase 6" placeholder: for a super admin, each salon an owner registers. Unread ones
   are marked; opening one marks it read and goes to the salon, and "Mark all as read" clears them.
   It can show only the unread ones. Needs salon-backend with the notifications API (migration V16).
+- A bell in the header shows how many notifications are unread, up to "9+", checking again every
+  minute and when the window comes back into focus. It opens the latest five, with "Mark all as
+  read" and "View all"; opening one marks it read and goes to what it's about.
 
 ### Removed
 - `banner.png`, the template's screenshot (FE-14).
