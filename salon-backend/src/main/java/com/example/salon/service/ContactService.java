@@ -1,5 +1,6 @@
 package com.example.salon.service;
 
+import com.example.salon.dao.Constraints;
 import com.example.salon.dao.ContactDao;
 import com.example.salon.dao.UserDao;
 import com.example.salon.exception.BaseException;
@@ -114,8 +115,7 @@ public class ContactService
 	/** A 409 when the owner already has the value, or the exception itself for any other clash. */
 	private static RuntimeException duplicateValue(DuplicateKeyException ex)
 	{
-		String reason = ex.getMessage();
-		if (reason == null || VALUE_UNIQUE.stream().noneMatch(reason::contains))
+		if (VALUE_UNIQUE.stream().noneMatch(constraint -> Constraints.violated(ex, constraint)))
 			return ex;
 		return new BaseException("Contact already exists.", ErrorCode.DUPLICATE_RESOURCE);
 	}

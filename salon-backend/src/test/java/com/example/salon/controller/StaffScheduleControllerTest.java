@@ -179,7 +179,8 @@ class StaffScheduleControllerTest extends IntegrationTest
 		MockHttpSession admin = loginAs(Fixture.GLOW_ADMIN);
 
 		send(post(MIA + "/time-off"), admin, timeOff("2026-12-26T12:00", "2026-12-30T00:00"))
-				.andExpect(status().isConflict());
+				.andExpect(status().isConflict())
+				.andExpect(jsonPath("$.message").value("This time off overlaps another absence of the same staff member."));
 		send(post(MIA + "/time-off"), admin, timeOff("2026-12-27T00:00", "2026-12-26T00:00"))
 				.andExpect(status().isBadRequest())
 				.andExpect(jsonPath("$.message").value("ends_at must be after starts_at."));

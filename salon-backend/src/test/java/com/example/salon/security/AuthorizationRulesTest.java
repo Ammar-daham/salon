@@ -398,7 +398,30 @@ class AuthorizationRulesTest extends IntegrationTest
 		mvc.perform(post("/api/v1/users").session(loginAs(Fixture.GLOW_ADMIN))
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(newUserBody(Fixture.GLOW_EMPLOYEE, "EMPLOYEE", null)))
-				.andExpect(status().isConflict());
+				.andExpect(status().isConflict())
+				.andExpect(jsonPath("$.message").value("Email already in use."));
+	}
+
+	@Test
+	void aContactGivenTwiceOnCreateIsAConflict() throws Exception
+	{
+		String twice = """
+				"contacts": [{"type": "phone", "value": "+49 30 5550009"}, {"type": "phone", "value": "+49 30 5550009"}]""";
+
+		mvc.perform(post("/api/v1/users").session(loginAs(Fixture.GLOW_ADMIN))
+						.contentType(MediaType.APPLICATION_JSON)
+						.content("""
+								{"first_name": "New", "last_name": "User", "role": "CUSTOMER", %s}
+								""".formatted(twice)))
+				.andExpect(status().isConflict())
+				.andExpect(jsonPath("$.message").value("Contact already exists."));
+		mvc.perform(post("/api/v1/businesses").session(loginAs(Fixture.SUPER_ADMIN))
+						.contentType(MediaType.APPLICATION_JSON)
+						.content("""
+								{"name": "Lumen Nail Bar", "description": "x", "image": "x", %s}
+								""".formatted(twice)))
+				.andExpect(status().isConflict())
+				.andExpect(jsonPath("$.message").value("Contact already exists."));
 	}
 
 	@Test

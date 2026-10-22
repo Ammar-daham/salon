@@ -1,6 +1,7 @@
 package com.example.salon.service;
 
 import com.example.salon.dao.BusinessDao;
+import com.example.salon.dao.Constraints;
 import com.example.salon.exception.BaseException;
 import com.example.salon.exception.ErrorCode;
 import com.example.salon.model.Business;
@@ -44,10 +45,9 @@ public class BusinessService
         try {
             id = businessDao.addBusiness(business);
         } catch (DuplicateKeyException ex) {
-            String reason = ex.getMessage();
-            if (reason != null && reason.contains(NAME_UNIQUE))
+            if (Constraints.violated(ex, NAME_UNIQUE))
                 throw nameTaken(business);
-            if (reason != null && reason.contains("contacts_business_value_unique_idx"))
+            if (Constraints.violated(ex, "contacts_business_value_unique_idx"))
                 throw new BaseException("Contact already exists.", ErrorCode.DUPLICATE_RESOURCE);
             log.warn("Unmapped duplicate-key creating business '{}'", business.getName(), ex);
             throw new BaseException("Business could not be created due to a conflict.", ErrorCode.DUPLICATE_RESOURCE);
@@ -105,7 +105,7 @@ public class BusinessService
         try {
             row = businessDao.updateBusinessById(id, business);
         } catch (DuplicateKeyException ex) {
-            if (ex.getMessage() == null || !ex.getMessage().contains(NAME_UNIQUE))
+            if (!Constraints.violated(ex, NAME_UNIQUE))
                 throw ex;
             throw nameTaken(business);
         }
@@ -145,7 +145,7 @@ public class BusinessService
         try {
             row = businessDao.deleteBusiness(id);
         } catch (DataIntegrityViolationException ex) {
-            if (ex.getMessage() == null || !ex.getMessage().contains("fk_users_business"))
+            if (!Constraints.violated(ex, "fk_users_business"))
                 throw ex;
             // fk_users_business is ON DELETE RESTRICT; the transaction rolls back the child deletes.
             throw new BaseException("Business with id " + id + " still has staff. Remove or move them first.",

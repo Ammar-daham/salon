@@ -1,5 +1,6 @@
 package com.example.salon.service;
 
+import com.example.salon.dao.Constraints;
 import com.example.salon.dao.UserDao;
 import com.example.salon.exception.BaseException;
 import com.example.salon.exception.ErrorCode;
@@ -84,9 +85,9 @@ public class UserService
 		try {
 			id = userDao.addUser(user);
 		} catch (DuplicateKeyException ex) {
-			if (ex.getMessage().contains("contacts_user_value_unique_idx"))
+			if (Constraints.violated(ex, "contacts_user_value_unique_idx"))
 				throw new BaseException("Contact already exists.", ErrorCode.DUPLICATE_RESOURCE);
-			if (ex.getMessage().contains("users_email_lower_unique_idx"))
+			if (Constraints.violated(ex, "users_email_lower_unique_idx"))
 				throw new BaseException("Email already in use.", ErrorCode.DUPLICATE_RESOURCE);
 			throw ex;
 		}
@@ -166,7 +167,7 @@ public class UserService
 		try {
 			row = userDao.deleteUserById(id);
 		} catch (DataIntegrityViolationException ex) {
-			if (ex.getMessage() == null || !ex.getMessage().contains("fk_appointments_staff"))
+			if (!Constraints.violated(ex, "fk_appointments_staff"))
 				throw ex;
 			// Their staff record would go with the account (fk_staff_user), and appointments point at it.
 			throw new BaseException("User with id " + id + " is the staff member on appointments, "

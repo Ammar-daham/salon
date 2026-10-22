@@ -1,6 +1,7 @@
 package com.example.salon.service;
 
 import com.example.salon.dao.AppointmentDao;
+import com.example.salon.dao.Constraints;
 import com.example.salon.dao.CustomerDao;
 import com.example.salon.dao.SalonServiceDao;
 import com.example.salon.dao.StaffDao;
@@ -235,7 +236,7 @@ public class AppointmentService
 
     private static RuntimeException doubleBookingOrRethrow(DataIntegrityViolationException ex, long staffId)
     {
-        if (ex.getMessage() == null || !ex.getMessage().contains("appointments_no_double_booking"))
+        if (!Constraints.violated(ex, "appointments_no_double_booking"))
             return ex;
         return new BaseException("Staff with id " + staffId + " already has an appointment at that time.",
                 ErrorCode.DUPLICATE_RESOURCE);

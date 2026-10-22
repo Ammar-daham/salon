@@ -1,5 +1,6 @@
 package com.example.salon.service;
 
+import com.example.salon.dao.Constraints;
 import com.example.salon.dao.StaffScheduleDao;
 import com.example.salon.dao.StaffTimeOffDao;
 import com.example.salon.exception.BaseException;
@@ -161,7 +162,7 @@ public class StaffScheduleService
 
     private static RuntimeException overlapOrRethrow(DataIntegrityViolationException ex)
     {
-        if (ex.getMessage() == null || !ex.getMessage().contains("staff_time_off_no_overlap"))
+        if (!Constraints.violated(ex, "staff_time_off_no_overlap"))
             return ex;
         return new BaseException("This time off overlaps another absence of the same staff member.",
                 ErrorCode.DUPLICATE_RESOURCE);
