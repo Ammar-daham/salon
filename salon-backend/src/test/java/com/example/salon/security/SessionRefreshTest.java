@@ -22,6 +22,23 @@ class SessionRefreshTest extends IntegrationTest
 	@Autowired
 	private JdbcTemplate jdbcTemplate;
 
+	/** A salon put back to pending, or rejected, signs its staff out; a suspended one doesn't. */
+	@Test
+	void aSalonThatStopsBeingApprovedSignsItsStaffOut() throws Exception
+	{
+		MockHttpSession superAdmin = loginAs(Fixture.SUPER_ADMIN);
+		MockHttpSession glowAdmin = loginAs(Fixture.GLOW_ADMIN);
+		MockHttpSession urbanAdmin = loginAs(Fixture.URBAN_ADMIN);
+
+		setStatus(superAdmin, Fixture.GLOW, "REJECTED");
+		setStatus(superAdmin, Fixture.URBAN, "SUSPENDED");
+
+		mvc.perform(get("/api/v1/auth/me").session(glowAdmin)).andExpect(status().isUnauthorized());
+		assertThat(glowAdmin.isInvalid()).isTrue();
+		mvc.perform(get("/api/v1/auth/me").session(urbanAdmin)).andExpect(status().isOk());
+		mvc.perform(get("/api/v1/auth/me").session(superAdmin)).andExpect(status().isOk());
+	}
+
 	@Test
 	void aDemotedAdminLosesAdminAccessOnTheirExistingSession() throws Exception
 	{
@@ -70,5 +87,12 @@ class SessionRefreshTest extends IntegrationTest
 				.andExpect(status().isUnauthorized())
 				.andExpect(jsonPath("$.errorCode").value("UNAUTHORIZED"));
 		assertThat(employee.isInvalid()).isTrue();
+	}
+
+	private void setStatus(MockHttpSession superAdmin, long businessId, String status) throws Exception
+	{
+		mvc.perform(put("/api/v1/businesses/" + businessId + "/status").session(superAdmin)
+						.contentType(MediaType.APPLICATION_JSON).content("{\"status\": \"" + status + "\"}"))
+				.andExpect(status().isOk());
 	}
 }

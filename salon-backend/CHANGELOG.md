@@ -61,10 +61,12 @@ version. The version lives in [`gradle.properties`](gradle.properties); each rel
 - `GET /api/v1/businesses/{id}/customers` answers 400 to `sort=business_name` or `-business_name`,
   as to any other order it doesn't take. Every customer on it belongs to the one salon, so it was the
   same as `sort=name`. `GET /api/v1/customers` still sorts by `business_name`.
-- A salon that isn't `APPROVED` is seen only by a SUPER_ADMIN and the salon's own users. Another
-  salon's ADMIN used to see it: `GET /api/v1/businesses` now leaves it out of their list and its
-  totals, and `GET /api/v1/businesses/{id}`, with its staff, services and hours, is a 404 to them,
-  as to an EMPLOYEE.
+- An ADMIN or EMPLOYEE signs in only while their salon is `APPROVED` or `SUSPENDED`. While it's
+  `PENDING` or `REJECTED`, the right password on `POST /api/v1/auth/login` gets 403, "Your salon is
+  waiting for approval. You can sign in once it's approved." or "Your salon's registration wasn't
+  approved.", with no session and no failed sign-in counted, and a salon set back to pending or
+  rejected signs its staff out on their next request. This holds back staff a SUPER_ADMIN adds to a
+  salon before approving it, too. A SUPER_ADMIN or CUSTOMER is never held back.
 
 ### Security
 - A salon waiting for approval, or rejected or suspended, no longer shows its details to every
