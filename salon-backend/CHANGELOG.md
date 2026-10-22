@@ -61,8 +61,14 @@ version. The version lives in [`gradle.properties`](gradle.properties); each rel
 - `GET /api/v1/businesses/{id}/customers` answers 400 to `sort=business_name` or `-business_name`,
   as to any other order it doesn't take. Every customer on it belongs to the one salon, so it was the
   same as `sort=name`. `GET /api/v1/customers` still sorts by `business_name`.
+- A salon that isn't `APPROVED` is seen only by a SUPER_ADMIN and the salon's own users. Another
+  salon's ADMIN used to see it: `GET /api/v1/businesses` now leaves it out of their list and its
+  totals, and `GET /api/v1/businesses/{id}`, with its staff, services and hours, is a 404 to them,
+  as to an EMPLOYEE.
 
 ### Security
+- A salon waiting for approval, or rejected or suspended, no longer shows its details to every
+  other salon's ADMIN, only to SUPER_ADMINs and its own users.
 - An ADMIN can't change the role of a SUPER_ADMIN who belongs to their salon: only a SUPER_ADMIN may
   grant SUPER_ADMIN or take it away. An ADMIN used to be stopped only from granting it.
 - Addresses and contacts are scoped to the caller's salon. A salon's may be changed or deleted only
