@@ -760,11 +760,24 @@ class AuthorizationRulesTest extends IntegrationTest
 				.andExpect(status().isNotFound());
 	}
 
+	/** Only a super admin sees another salon that isn't approved, such as one waiting to be reviewed. */
 	@Test
-	void adminsSeeEverySalonIncludingUnapprovedOnes() throws Exception
+	void anotherSalonsAdminCannotSeeAnUnapprovedSalon() throws Exception
 	{
-		mvc.perform(get("/api/v1/businesses").session(loginAs(Fixture.GLOW_ADMIN)))
+		MockHttpSession admin = loginAs(Fixture.GLOW_ADMIN);
+		String serenity = "/api/v1/businesses/" + Fixture.SERENITY_PENDING;
+
+		mvc.perform(get("/api/v1/businesses").session(admin))
+				.andExpect(jsonPath("$.items[*].id", not(hasItem((int) Fixture.SERENITY_PENDING))))
+				.andExpect(jsonPath("$.total_items").value(2));
+		for (String path : new String[] {serenity, serenity + "/staff", serenity + "/hours"}) {
+			mvc.perform(get(path).session(admin)).andExpect(status().isNotFound());
+		}
+
+		MockHttpSession superAdmin = loginAs(Fixture.SUPER_ADMIN);
+		mvc.perform(get("/api/v1/businesses").session(superAdmin))
 				.andExpect(jsonPath("$.items[*].id", hasItem((int) Fixture.SERENITY_PENDING)));
+		mvc.perform(get(serenity).session(superAdmin)).andExpect(status().isOk());
 	}
 
 	@Test

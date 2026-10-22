@@ -25,6 +25,7 @@ const MATRIX: Record<Permission, Role[]> = {
 	"business:create": [S],
 	"business:edit": [S, A],
 	"business:delete": [S],
+	"business:review": [S],
 	"user:list": [S, A],
 	"user:create": [S, A],
 	"user:edit": [S, A],
@@ -79,6 +80,7 @@ describe("can", () => {
 			"business:list",
 			"business:create",
 			"business:delete",
+			"business:review",
 			"subscription:manage",
 			"settings:platform",
 		] as Permission[]) {

@@ -6,6 +6,8 @@ import com.example.salon.paging.Page;
 import com.example.salon.paging.PageQuery;
 import com.example.salon.paging.Sort;
 
+import java.util.Optional;
+
 public interface BusinessDao 
 {
     enum SortBy { NAME, STATUS, CREATED_AT }
@@ -21,6 +23,9 @@ public interface BusinessDao
     Page<Business> getBusinesses(Filter filter, Sort<SortBy> sort, PageQuery page);
 
     Business getBusinessById(long id);
+
+    /** The salon's status alone, or nothing if there's no such salon. */
+    Optional<Status> getStatus(long id);
 
     int updateBusinessById(long id, Business business);
 

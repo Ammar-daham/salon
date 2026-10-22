@@ -13,7 +13,7 @@ Requires salon-backend with the customers API (DB-03), migration V9 (DB-07, DB-0
 hours API with migration V10 (DB-09, DB-14), the appointments and availability APIs with
 migration V12 (DB-13, DB-14), the password endpoints with migration V13 (FE-13), the paged
 lists, `GET /customers` and named staff records (BE-15), the paged appointment list, a `PUT`
-that answers with the record as stored, and `PUT /users/{id}/role`.
+that answers with the record as stored, `PUT /users/{id}/role`, and `GET /users?business_id=`.
 
 ### Changed
 - Saving a user writes their name, then their role with `PUT /users/{id}/role` if it changed, as the
