@@ -247,6 +247,9 @@ version. The version lives in [`gradle.properties`](gradle.properties); each rel
   with the record as stored, and `/api/v1/addresses/{id}` or `/api/v1/contacts/{id}` in `Location`.
   A salon that doesn't exist is a 404, and a contact value the salon already has is a 409. A salon's
   addresses and contacts used to be addable only in `POST /api/v1/businesses`.
+- `GET /api/v1/users?business_id=` lists one salon's users for a SUPER_ADMIN, as
+  `GET /api/v1/customers?business_id=` does for customers: a salon that doesn't exist is a 404. An
+  ADMIN still gets only their own salon's, and naming another is a 403.
 
 ### Fixed
 - `app.datasource.pool-size` in the template never did anything, so the pool always had Hikari's

@@ -77,14 +77,17 @@ public class UserController
 	/**
 	 * Lists the users the caller may see, a page at a time.
 	 *
-	 * <p>{@code GET /api/v1/users}. ADMIN and SUPER_ADMIN only: a SUPER_ADMIN sees every user, an ADMIN
-	 * those of their own salon. {@code q} searches the full name and the email, ignoring case;
-	 * {@code sort} is {@code name} (first, then last name; the default), {@code email}, {@code role} or
-	 * {@code created_at}. Each user comes with their addresses and contacts.
+	 * <p>{@code GET /api/v1/users}. ADMIN and SUPER_ADMIN only: a SUPER_ADMIN sees every user, or one
+	 * salon's with {@code business_id}, and an ADMIN those of their own salon, whether they name it or not.
+	 * {@code q} searches the full name and the email, ignoring case; {@code sort} is {@code name} (first,
+	 * then last name; the default), {@code email}, {@code role} or {@code created_at}. Each user comes with
+	 * their addresses and contacts.
 	 *
-	 * <p>Errors: 400 if {@code role} isn't a role, or {@code page}, {@code size} or {@code sort} is out of
-	 * range; 403 for anyone else.
+	 * <p>Errors: 400 if {@code business_id} or {@code role} isn't valid, or {@code page}, {@code size} or
+	 * {@code sort} is out of range; 403 for anyone else, or for an ADMIN naming another salon; 404 if the
+	 * {@code business_id} salon doesn't exist.
 	 *
+	 * @param businessId only this salon's users, or nothing for every user the caller may see
 	 * @param q text to search for, or nothing for every user
 	 * @param role only users with this role, such as {@code EMPLOYEE}
 	 * @param sort the order: a key above, or {@code -key} for descending
@@ -95,6 +98,7 @@ public class UserController
 	 */
 	@GetMapping
 	public Page<User> getUsers(
+			@RequestParam(name = "business_id", required = false) Long businessId,
 			@RequestParam(required = false) String q,
 			@RequestParam(required = false) Role role,
 			@RequestParam(defaultValue = "name") String sort,
@@ -102,8 +106,8 @@ public class UserController
 			@RequestParam(required = false) Integer size,
 			@AuthenticationPrincipal AuthenticatedUser principal)
 	{
-		return userService.getUsers(q, role, Sort.parse(sort, UserDao.SortBy.class), PageQuery.of(page, size),
-				principal);
+		return userService.getUsers(businessId, q, role, Sort.parse(sort, UserDao.SortBy.class),
+				PageQuery.of(page, size), principal);
 	}
 
 	/**
