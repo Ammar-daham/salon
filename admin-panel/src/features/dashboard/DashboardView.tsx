@@ -1,14 +1,16 @@
 "use client";
 
+import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
 import { useBusinessPage } from "@/lib/resources/businesses/businesses.hooks";
 import { useUserPage } from "@/lib/resources/users/users.hooks";
 import { resolveBusinessScope } from "@/lib/auth/scope";
+import { businessListHref } from "@/lib/resources/businesses/businesses.types";
 import PageHeader from "@/components/ui/PageHeader";
 import EmptyState from "@/components/ui/EmptyState";
 import StatTile from "@/components/ui/StatTile";
 import Card from "@/components/ui/Card";
-import { BoxIcon, GroupIcon, PieChartIcon, UserCircleIcon, UserIcon } from "@/icons";
+import { BoxIcon, GroupIcon, PieChartIcon, TimeIcon, UserCircleIcon, UserIcon } from "@/icons";
 
 function greeting(): string {
 	const h = new Date().getHours();
@@ -19,16 +21,30 @@ function greeting(): string {
 
 /**
  * Platform numbers, each the total of a one-row page (BE-15): the server counts, so the dashboard
- * downloads four rows rather than every salon and user on the platform.
+ * downloads five rows rather than every salon and user on the platform.
  */
 function SuperAdminTiles() {
 	const businesses = useBusinessPage({ size: 1 });
+	const pending = useBusinessPage({ size: 1, status: "PENDING" });
 	const approved = useBusinessPage({ size: 1, status: "APPROVED" });
 	const users = useUserPage({ size: 1 });
 	const employees = useUserPage({ size: 1, role: "EMPLOYEE" });
 
 	return (
-		<div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4 md:gap-6">
+		<div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 md:gap-6">
+			<Link
+				href={businessListHref("PENDING")}
+				className="block rounded-card transition-shadow hover:shadow-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500"
+			>
+				<StatTile
+					icon={<TimeIcon className="size-5" />}
+					label="Pending registrations"
+					value={pending.data?.totalItems ?? 0}
+					hint="Waiting for your review"
+					loading={pending.isPending}
+					className="h-full"
+				/>
+			</Link>
 			<StatTile
 				icon={<BoxIcon className="size-5" />}
 				label="Total businesses"
