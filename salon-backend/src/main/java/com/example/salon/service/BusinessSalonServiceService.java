@@ -10,7 +10,6 @@ import com.example.salon.security.AuthenticatedUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,12 +38,7 @@ public class BusinessSalonServiceService
         AccessControl.requireBusinessAccess(caller, businessId);
         // A 404, rather than the 400 the fk_services_business foreign key would give.
         businessService.getBusinessById(businessId);
-        Long serviceId;
-        try {
-            serviceId = salonServiceDao.addService(businessId, salonService);
-        } catch (DuplicateKeyException ex) {
-            throw new BaseException("Service could not be created due to a conflict.", ErrorCode.DUPLICATE_RESOURCE);
-        }
+        Long serviceId = salonServiceDao.addService(businessId, salonService);
         log.info("Created service {} in business {}", serviceId, businessId);
         return getServiceById(businessId, serviceId);
     }
