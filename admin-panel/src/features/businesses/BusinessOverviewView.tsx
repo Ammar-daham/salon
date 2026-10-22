@@ -1,13 +1,51 @@
 "use client";
 
 import { useParams } from "next/navigation";
+import { useAuth } from "@/context/AuthContext";
+import { can } from "@/lib/auth/permissions";
 import { useBusiness } from "@/lib/resources/businesses/businesses.hooks";
+import { useUserPage } from "@/lib/resources/users/users.hooks";
 import { formatMoney } from "@/lib/utils/money";
 import Card from "@/components/ui/Card";
 import StatTile from "@/components/ui/StatTile";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { ListIcon, DollarLineIcon, TimeIcon } from "@/icons";
 
+/**
+ * Who runs the salon, for the super admin reviewing it: a salon an owner registered has the owner
+ * as its one admin.
+ */
+function SalonAdminsCard({ businessId }: { businessId: number }) {
+	const { data, isPending } = useUserPage({ businessId, role: "ADMIN", sort: "name", page: 1, size: 10 });
+
+	return (
+		<Card title="Salon admins" description="Who runs the salon, such as the owner who registered it.">
+			{isPending ? (
+				<Skeleton className="h-10" />
+			) : data && data.items.length > 0 ? (
+				<ul className="flex flex-col gap-3">
+					{data.items.map((admin) => (
+						<li key={admin.id} className="flex items-center justify-between gap-4">
+							<span className="text-sm font-medium text-ink">
+								{admin.firstName} {admin.lastName}
+							</span>
+							{admin.email && (
+								<a
+									href={`mailto:${admin.email}`}
+									className="truncate text-sm text-primary-700 hover:underline dark:text-primary-300"
+								>
+									{admin.email}
+								</a>
+							)}
+						</li>
+					))}
+				</ul>
+			) : (
+				<p className="text-sm text-ink-muted">No admins yet.</p>
+			)}
+		</Card>
+	);
+}
 
 export default function BusinessOverviewView() {
 	// useParams() is a plain object on the client — only the server `params` prop
@@ -15,6 +53,7 @@ export default function BusinessOverviewView() {
 	const params = useParams<{ id: string }>();
 	const id = Number(params.id);
 	const { data: business, isPending } = useBusiness(Number.isNaN(id) ? null : id);
+	const { user } = useAuth();
 
 	if (isPending || !business) {
 		return (
@@ -105,6 +144,8 @@ export default function BusinessOverviewView() {
 					)}
 				</Card>
 			</div>
+
+			{can(user, "business:review") && <SalonAdminsCard businessId={business.id} />}
 
 			<Card
 				title="Profile completeness"

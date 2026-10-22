@@ -6,9 +6,13 @@ import type { Role } from "@/lib/resources/auth/auth.types";
 import type { CreateUserInput, UpdateUserInput, User } from "./users.types";
 import { toCreateUserRequest, toUpdateUserRequest, toUser, type UserDto } from "./users.mappers";
 
-/** sort is name, email, role or created_at; q matches the name or email. */
+/**
+ * sort is name, email, role or created_at; q matches the name or email. businessId narrows a
+ * SUPER_ADMIN's list to one salon; an ADMIN only ever gets their own.
+ */
 export interface UserPageQuery extends PageQuery {
 	role?: Role;
+	businessId?: Id;
 }
 
 /**
@@ -21,7 +25,7 @@ export const usersRepository: Repository<User, CreateUserInput, UpdateUserInput,
 
 	async list(query: UserPageQuery, params?: ListParams) {
 		const { data } = await apiClient.get<PageDto<UserDto>>(endpoints.users.root, {
-			params: pageParams(query, { role: query.role }),
+			params: pageParams(query, { role: query.role, business_id: query.businessId }),
 			signal: params?.signal,
 		});
 		return toPage(data, toUser);

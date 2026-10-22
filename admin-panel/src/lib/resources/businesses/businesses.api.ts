@@ -46,6 +46,12 @@ export const businessesRepository: Repository<Business, BusinessInput, BusinessI
 	},
 };
 
+/** SUPER_ADMIN only. Any status may follow any other; answers with the salon as stored. */
+export async function changeBusinessStatus(id: Id, status: BusinessStatus): Promise<Business> {
+	const { data } = await apiClient.put<BusinessDto>(endpoints.businesses.status(id), { status });
+	return toBusiness(data);
+}
+
 /**
  * Every salon the caller can see, by name: for pickers, and for reading something per salon across
  * the platform. A platform's salons stay few enough for that; its people and clients are paged instead.
