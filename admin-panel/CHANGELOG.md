@@ -124,6 +124,10 @@ that answers with the record as stored, `PUT /users/{id}/role`, and `GET /users?
   zone, address and phone. A taken salon name or email shows by its field. Afterwards the page says
   the salon is waiting for a super admin's approval, and signing in before then says so too. Needs
   salon-backend with `POST /auth/register`.
+- Creating a salon takes its address and phone, both optional, and sends them with the salon. The
+  form used to say addresses and contacts couldn't be added through the API, which hasn't been true
+  since `POST /businesses` took them; the salon's Settings now say only that changing them
+  afterwards isn't in the panel yet.
 
 ### Removed
 - `banner.png`, the template's screenshot (FE-14).
