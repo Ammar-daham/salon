@@ -90,7 +90,7 @@ public class ContactService
 		return fetch(id);
 	}
 
-	public void delectContactById(long id, AuthenticatedUser caller)
+	public void deleteContactById(long id, AuthenticatedUser caller)
 	{
 		requireWritePermission(id, caller);
 		int row = contactDao.deleteContactById(id);

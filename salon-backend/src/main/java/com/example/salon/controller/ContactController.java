@@ -140,6 +140,6 @@ public class ContactController
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	public void deleteContactById(@PathVariable long id, @AuthenticationPrincipal AuthenticatedUser principal)
 	{
-		contactService.delectContactById(id, principal);
+		contactService.deleteContactById(id, principal);
 	}
 }
