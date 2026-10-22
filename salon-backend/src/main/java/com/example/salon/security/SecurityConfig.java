@@ -54,9 +54,10 @@ public class SecurityConfig
 	}
 
 	@Bean
-	public SecurityContextRepository securityContextRepository(UserDao userDao)
+	public SecurityContextRepository securityContextRepository(UserDao userDao, SalonSignIn salonSignIn)
 	{
-		return new RefreshingSecurityContextRepository(new HttpSessionSecurityContextRepository(), userDao);
+		return new RefreshingSecurityContextRepository(new HttpSessionSecurityContextRepository(), userDao,
+				salonSignIn);
 	}
 
 	@Bean

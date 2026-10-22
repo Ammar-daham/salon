@@ -24,7 +24,9 @@
  * {@code JSESSIONID} cookie, which the client sends with every request. Every endpoint needs a session
  * except {@code POST /api/v1/auth/login}, {@code POST /api/v1/auth/forgot-password},
  * {@code POST /api/v1/auth/reset-password} and {@code GET /actuator/health}; without one the answer is
- * 401. A session ends after 30 minutes without a request. A request whose {@code Origin} header isn't
+ * 401. A salon's ADMINs and EMPLOYEEs sign in only once a SUPER_ADMIN has approved the salon, and are
+ * signed out if it goes back to pending or is rejected; a suspended salon's staff still sign in. A
+ * session ends after 30 minutes without a request. A request whose {@code Origin} header isn't
  * one the server allows ({@code app.cors.allowed-origins}) is refused with 403, which is why there is no
  * CSRF token.
  *

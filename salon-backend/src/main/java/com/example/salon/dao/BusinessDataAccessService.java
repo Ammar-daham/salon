@@ -18,6 +18,7 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Repository
 public class BusinessDataAccessService implements BusinessDao 
@@ -131,6 +132,13 @@ public class BusinessDataAccessService implements BusinessDao
         Business business = jdbcTemplate.queryForObject(sql, (rs, i) -> mapBusiness(rs), id);
         loadChildren(List.of(business));
         return business;
+    }
+
+    @Override
+    public Optional<Status> getStatus(long id)
+    {
+        return jdbcTemplate.query("SELECT status FROM businesses WHERE id = ?",
+                (rs, i) -> Status.valueOf(rs.getString("status")), id).stream().findFirst();
     }
 
     /** Three queries however many businesses there are, rather than three per business. */
