@@ -24,8 +24,8 @@ import java.net.URI;
 /**
  * Salons, under {@code /api/v1/businesses}.
  *
- * <p>Anyone signed in may read the salons they can see: ADMIN and SUPER_ADMIN see every salon, anyone
- * else the approved ones and their own. Only a SUPER_ADMIN creates a salon or changes its status; an
+ * <p>Anyone signed in may read the salons they can see: a SUPER_ADMIN sees every salon, anyone else
+ * the approved ones and their own. Only a SUPER_ADMIN creates a salon or changes its status; an
  * ADMIN edits and deletes only their own.
  */
 @RequestMapping("api/v1/businesses")
@@ -72,8 +72,8 @@ public class BusinessController
     /**
      * Lists the salons the caller may see, a page at a time.
      *
-     * <p>{@code GET /api/v1/businesses}. Anyone signed in. ADMIN and SUPER_ADMIN see every salon; anyone
-     * else sees the approved ones and their own. Each salon comes with its addresses, contacts and
+     * <p>{@code GET /api/v1/businesses}. Anyone signed in. A SUPER_ADMIN sees every salon; anyone else,
+     * another salon's ADMIN included, sees the approved ones and their own. Each salon comes with its addresses, contacts and
      * services. {@code q} looks for the text, ignoring case, in the name, the description and the city of
      * any of the salon's addresses. {@code sort} is {@code name} (the default, ignoring case),
      * {@code status} or {@code created_at}.
@@ -105,8 +105,8 @@ public class BusinessController
     /**
      * Returns one salon, with its addresses, contacts and services.
      *
-     * <p>{@code GET /api/v1/businesses/{id}}. Anyone signed in who may see the salon: ADMIN and
-     * SUPER_ADMIN see every salon, anyone else an approved one or their own.
+     * <p>{@code GET /api/v1/businesses/{id}}. Anyone signed in who may see the salon: a SUPER_ADMIN sees
+     * every salon, anyone else an approved one or their own.
      *
      * <p>Errors: 404 if there's no such salon, or the caller may not see it.
      *
@@ -150,7 +150,7 @@ public class BusinessController
      *
      * <p>{@code PUT /api/v1/businesses/{id}/status}. SUPER_ADMIN only. Any status may follow any other, and
      * asking for the status it already has changes nothing. A salon that isn't {@code APPROVED} is hidden
-     * from everyone but ADMIN and SUPER_ADMIN users and the salon's own users.
+     * from everyone but SUPER_ADMINs and the salon's own users.
      *
      * <p>Errors: 400 if {@code status} is missing or isn't one of the four {@link Status} names; 403 for
      * anyone but a SUPER_ADMIN; 404 if there's no such salon.
