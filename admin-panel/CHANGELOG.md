@@ -112,6 +112,10 @@ that answers with the record as stored, and `PUT /users/{id}/role`.
 - A currency picker on the salon create and settings forms (DB-08).
 - Add a client (`/customers/new`) and edit one (`/customers/:id/edit`). Admins can edit notes from
   the Notes tab and delete clients from the list; employees can add and view clients (FE-03).
+- The Notifications page lists what the signed-in user has been told, newest first, in place of the
+  "Coming in Phase 6" placeholder: for a super admin, each salon an owner registers. Unread ones
+  are marked; opening one marks it read and goes to the salon, and "Mark all as read" clears them.
+  It can show only the unread ones. Needs salon-backend with the notifications API (migration V16).
 
 ### Removed
 - `banner.png`, the template's screenshot (FE-14).

@@ -2,6 +2,7 @@ import type { Id } from "@/lib/api/types";
 import type { AppointmentFilter } from "@/lib/resources/appointments/appointments.types";
 import type { BusinessPageQuery } from "@/lib/resources/businesses/businesses.api";
 import type { CustomerPageQuery } from "@/lib/resources/customers/customers.api";
+import type { NotificationPageQuery } from "@/lib/resources/notifications/notifications.api";
 import type { UserPageQuery } from "@/lib/resources/users/users.api";
 
 /**
@@ -66,6 +67,13 @@ export const queryKeys = {
 				? ([...queryKeys.employees.all, "list"] as const)
 				: ([...queryKeys.employees.all, "list", businessId] as const),
 		detail: (id: Id) => [...queryKeys.employees.all, "detail", id] as const,
+	},
+	notifications: {
+		all: ["notifications"] as const,
+		list: () => [...queryKeys.notifications.all, "list"] as const,
+		page: (query: NotificationPageQuery) => [...queryKeys.notifications.list(), query] as const,
+		// Marking one or all read invalidates `all`, so the badge drops with the list.
+		unreadCount: () => [...queryKeys.notifications.all, "unread-count"] as const,
 	},
 	stats: {
 		all: ["stats"] as const,
