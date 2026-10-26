@@ -13,6 +13,7 @@ clients will book with, which isn't built yet.
 |---|---|
 | [salon-backend](salon-backend) | The REST API: Spring Boot 4, Java 21, PostgreSQL |
 | [admin-panel](admin-panel) | Salonat Pro, the web app salon staff and platform admins use: Next.js |
+| [client-app](client-app) | Salonat, the app clients book with: Flutter. Not built yet; its design and the plan to build it are here |
 
 ## Try it
 

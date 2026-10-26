@@ -1,0 +1,43 @@
+@@head(Account details)@@
+@@root(844)@@
+  <header style="padding: 56px 20px 0; display: flex; align-items: center; justify-content: space-between; gap: 12px">
+    @@back(Profile.dc.html)@@
+    <span style="font-size: 17px; font-weight: 600">Account details</span>
+    <span style="width: 44px"></span>
+  </header>
+
+  <main style="flex-grow: 1; padding: 24px 20px; display: flex; flex-direction: column; gap: 24px">
+    <div style="display: flex; flex-direction: column; align-items: center; gap: 10px">
+      @@av(OW|88|rose)@@
+      <button type="button" style="height: 44px; border: none; background: transparent; padding: 0 8px; font-family: inherit; font-size: 15px; font-weight: 600; color: #7D4751; cursor: pointer">Add a photo</button>
+    </div>
+
+    <form style="display: flex; flex-direction: column; gap: 16px; margin: 0">
+      <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px">
+        <div style="display: flex; flex-direction: column; gap: 8px">
+          <label for="ep-first" style="font-size: 14px; font-weight: 500">First name</label>
+          <input id="ep-first" type="text" value="Olivia" autocomplete="given-name" style="height: 52px; border-radius: 12px; border: 1px solid #CEC6BD; background: #FFFFFF; padding: 0 16px; font-family: inherit; font-size: 16px; color: #2C191D; box-sizing: border-box; width: 100%">
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 8px">
+          <label for="ep-last" style="font-size: 14px; font-weight: 500">Last name</label>
+          <input id="ep-last" type="text" value="Weber" autocomplete="family-name" style="height: 52px; border-radius: 12px; border: 1px solid #CEC6BD; background: #FFFFFF; padding: 0 16px; font-family: inherit; font-size: 16px; color: #2C191D; box-sizing: border-box; width: 100%">
+        </div>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 8px">
+        <label for="ep-email" style="font-size: 14px; font-weight: 500">Email</label>
+        <input id="ep-email" type="email" value="olivia@example.com" autocomplete="email" style="height: 52px; border-radius: 12px; border: 1px solid #CEC6BD; background: #FFFFFF; padding: 0 16px; font-family: inherit; font-size: 16px; color: #2C191D; box-sizing: border-box; width: 100%">
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 8px">
+        <label for="ep-phone" style="font-size: 14px; font-weight: 500">Mobile number</label>
+        <input id="ep-phone" type="tel" value="+49 30 9990001" autocomplete="tel" aria-describedby="ep-phone-hint" style="height: 52px; border-radius: 12px; border: 2px solid #A33229; background: #FFFFFF; padding: 0 15px; font-family: inherit; font-size: 16px; color: #2C191D; box-sizing: border-box; width: 100%">
+        <span id="ep-phone-hint" style="font-size: 13px; line-height: 18px; color: #862720; display: flex; gap: 6px; align-items: flex-start">@@i(info|16)@@This looks like a landline. Salons text you about changes, so use a mobile number.</span>
+      </div>
+      <p style="margin: 0; font-size: 13px; line-height: 18px; color: #5F5852">Salons you book with see your name, phone number and email.</p>
+    </form>
+  </main>
+
+  <div style="padding: 16px 20px 34px; background: #FFFFFF; border-top: 1px solid #E4DED8">
+    @@btn(Profile.dc.html|Save changes)@@
+  </div>
+</div>
+@@foot(390|844)@@

@@ -1,0 +1,80 @@
+@@head(Rate your visit)@@
+@@root(860)@@
+  <header style="padding: 56px 20px 0; display: flex; align-items: center; justify-content: space-between; gap: 12px">
+    @@iconbtn(Bookings.dc.html|close|Close)@@
+    <span style="font-size: 17px; font-weight: 600">Rate your visit</span>
+    <span style="width: 44px"></span>
+  </header>
+
+  <main style="flex-grow: 1; padding: 20px 20px 24px; display: flex; flex-direction: column; gap: 28px">
+    <div style="display: flex; align-items: center; gap: 14px">
+      @@ph(56px|56px|12px|rose|22)@@
+      <span style="display: flex; flex-direction: column; gap: 2px">
+        <span style="font-size: 17px; font-weight: 600">Signature Haircut with Mia</span>
+        <span style="font-size: 14px; color: #5F5852">Glow Beauty Studio · Tue 20 Oct</span>
+      </span>
+    </div>
+
+    <fieldset style="border: none; margin: 0; padding: 0; display: flex; flex-direction: column; align-items: center; gap: 8px">
+      <legend style="padding: 0; margin-bottom: 12px; font-size: 18px; font-weight: 600; text-align: center; width: 100%">How was it?</legend>
+      <div style="display: flex; gap: 6px">
+        <sc-for list="{{stars}}" as="star" hint-placeholder-count="5">
+          <button type="button" aria-label="{{star.aria}}" aria-pressed="{{star.pressed}}" onClick="{{star.pick}}" style="width: 52px; height: 52px; border: none; background: transparent; padding: 0; display: flex; align-items: center; justify-content: center; cursor: pointer; {{star.look}}">
+            <svg width="40" height="40" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.6l2.55 5.2 5.75.84-4.15 4.05.98 5.72L12 16.7l-5.13 2.7.98-5.72L3.7 9.64l5.75-.84z" fill="currentColor" stroke="currentColor" stroke-width="1" stroke-linejoin="round"></path></svg>
+          </button>
+        </sc-for>
+      </div>
+      <span style="font-size: 15px; font-weight: 600; color: #7D4751">{{caption}}</span>
+    </fieldset>
+
+    <fieldset style="border: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px">
+      <legend style="padding: 0; margin-bottom: 12px; font-size: 16px; font-weight: 600">What stood out?</legend>
+      <div style="display: flex; flex-wrap: wrap; gap: 8px">
+        <sc-for list="{{tags}}" as="tag" hint-placeholder-count="6">
+          <button type="button" aria-pressed="{{tag.pressed}}" onClick="{{tag.pick}}" style="height: 38px; padding: 0 14px; border-radius: 19px; font-family: inherit; font-size: 14px; font-weight: 500; display: inline-flex; align-items: center; gap: 6px; cursor: pointer; {{tag.look}}">{{tag.label}}</button>
+        </sc-for>
+      </div>
+    </fieldset>
+
+    <div style="display: flex; flex-direction: column; gap: 8px">
+      <label for="review-text" style="font-size: 16px; font-weight: 600">Tell others about it <span style="font-weight: 400; color: #5F5852">(optional)</span></label>
+      <textarea id="review-text" rows="3" placeholder="What did you like? What could be better?" style="border-radius: 12px; border: 1px solid #CEC6BD; background: #FFFFFF; padding: 12px 16px; font-family: inherit; font-size: 16px; line-height: 22px; color: #2C191D; resize: none; box-sizing: border-box; width: 100%; height: 96px"></textarea>
+      <span style="font-size: 13px; color: #5F5852">Your review shows as Olivia W. Only guests with a completed visit can review.</span>
+    </div>
+  </main>
+
+  <div style="padding: 16px 20px 34px; background: #FFFFFF; border-top: 1px solid #E4DED8">
+    @@btn(Bookings.dc.html|Post review)@@
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":860}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const s = this.state || {};
+    const rating = s.rating ?? 4;
+    const picked = s.tags ?? ['On time', 'Great result'];
+    const words = ['Poor', 'Fair', 'Good', 'Great', 'Excellent'];
+    const stars = [1, 2, 3, 4, 5].map((n) => ({
+      aria: n === 1 ? '1 star' : n + ' stars',
+      pressed: n === rating ? 'true' : 'false',
+      look: n <= rating ? 'color: #9C5A65' : 'color: #D9D2CA',
+      pick: () => this.setState({ rating: n })
+    }));
+    const tags = ['Friendly', 'On time', 'Great result', 'Clean & calm', 'Good value', 'Easy to book'].map((label) => {
+      const on = picked.includes(label);
+      return {
+        label,
+        pressed: on ? 'true' : 'false',
+        look: on
+          ? 'background: #2C191D; color: #FFFFFF; border: 1px solid #2C191D'
+          : 'background: #FFFFFF; color: #2C191D; border: 1px solid #E4DED8',
+        pick: () => this.setState({ tags: on ? picked.filter((t) => t !== label) : picked.concat(label) })
+      };
+    });
+    return { stars, tags, caption: words[rating - 1] };
+  }
+}
+</script>
+</body>
+</html>

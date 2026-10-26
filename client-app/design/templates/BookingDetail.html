@@ -1,0 +1,72 @@
+@@head(Appointment)@@
+@@root(1100)@@
+  <header style="padding: 56px 20px 0; display: flex; align-items: center; justify-content: space-between; gap: 12px">
+    @@back(Bookings.dc.html)@@
+    <span style="font-size: 17px; font-weight: 600">Appointment</span>
+    @@iconbtn(#|share|Share appointment)@@
+  </header>
+
+  <main style="padding: 20px 20px 24px; display: flex; flex-direction: column; gap: 24px">
+    <div role="status" style="background: #FBF4E7; border-radius: 16px; padding: 14px 16px; display: flex; gap: 12px; color: #7C5113">
+      @@i(clock|22)@@
+      <span style="display: flex; flex-direction: column; gap: 4px">
+        <span style="font-size: 15px; font-weight: 600">Awaiting confirmation</span>
+        <span style="font-size: 14px; line-height: 20px">Glow Beauty Studio hasn’t confirmed yet. We’ll notify you when they do.</span>
+      </span>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 4px">
+      <h1 style="margin: 0; font-size: 28px; line-height: 34px; font-weight: 600; letter-spacing: -0.01em">Thursday 29 October</h1>
+      <span style="font-size: 16px; color: #4A443F">15:30 – 16:00 · 30 min</span>
+    </div>
+
+    <section aria-label="Details" style="background: #FFFFFF; border: 1px solid #E4DED8; border-radius: 20px; padding: 4px 16px; display: flex; flex-direction: column">
+      <div style="min-height: 60px; display: flex; align-items: center; gap: 14px; border-bottom: 1px solid #F2EEEA">
+        <span style="width: 40px; height: 40px; border-radius: 12px; background: #F9E8E4; display: flex; align-items: center; justify-content: center; flex-shrink: 0">@@i(polish|20|#7D4751)@@</span>
+        <span style="flex-grow: 1; display: flex; flex-direction: column; gap: 1px"><span style="font-size: 16px; font-weight: 600">Classic Manicure</span><span style="font-size: 14px; color: #5F5852">Shape, cuticle care and polish</span></span>
+        <span style="font-size: 16px; font-weight: 600">€25</span>
+      </div>
+      <div style="min-height: 60px; display: flex; align-items: center; gap: 14px; border-bottom: 1px solid #F2EEEA">
+        @@av(M|40|rose)@@
+        <span style="flex-grow: 1; display: flex; flex-direction: column; gap: 1px"><span style="font-size: 16px; font-weight: 600">Mia</span><span style="font-size: 14px; color: #5F5852">Senior Stylist</span></span>
+      </div>
+      <div style="min-height: 60px; display: flex; align-items: center; gap: 14px">
+        <span style="width: 40px; height: 40px; border-radius: 12px; background: #F2EEEA; display: flex; align-items: center; justify-content: center; flex-shrink: 0">@@i(note|20|#4A443F)@@</span>
+        <span style="flex-grow: 1; display: flex; flex-direction: column; gap: 1px"><span style="font-size: 16px; font-weight: 600">Your note</span><span style="font-size: 14px; color: #5F5852">Short nails, nude colour please.</span></span>
+      </div>
+    </section>
+
+    <section aria-label="Salon" style="background: #FFFFFF; border: 1px solid #E4DED8; border-radius: 20px; overflow: hidden; display: flex; flex-direction: column">
+      <div aria-hidden="true" style="position: relative; height: 120px; background: #ECE6DF; overflow: hidden">
+        <div style="position: absolute; top: 46px; left: -20px; width: 420px; height: 12px; background: #FFFFFF; transform: rotate(-8deg)"></div>
+        <div style="position: absolute; top: -20px; left: 220px; width: 12px; height: 180px; background: #FFFFFF; transform: rotate(10deg)"></div>
+        <div style="position: absolute; top: 14px; left: 36px; width: 80px; height: 50px; border-radius: 12px; background: #DCE8DD"></div>
+        <div style="position: absolute; top: 36px; left: 160px; width: 34px; height: 34px; border-radius: 17px 17px 17px 4px; transform: rotate(-45deg); background: #9C5A65; border: 3px solid #FFFFFF; box-sizing: border-box"></div>
+      </div>
+      <div style="padding: 14px 16px 16px; display: flex; flex-direction: column; gap: 14px">
+        <a href="Salon.dc.html" style="display: flex; align-items: center; gap: 8px; color: #2C191D; text-decoration: none">
+          <span style="flex-grow: 1; display: flex; flex-direction: column; gap: 2px">
+            <span style="font-size: 16px; font-weight: 600">Glow Beauty Studio</span>
+            <span style="font-size: 14px; color: #5F5852">12 Rosenthaler Str., 10119 Berlin</span>
+          </span>
+          @@i(right|20|#A79D93)@@
+        </a>
+        <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px">
+          <a href="#" style="height: 44px; border-radius: 12px; background: #F9E8E4; color: #7D4751; font-size: 15px; font-weight: 600; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 8px">@@i(nav|18)@@Directions</a>
+          <a href="tel:+49301234501" style="height: 44px; border-radius: 12px; background: #F9E8E4; color: #7D4751; font-size: 15px; font-weight: 600; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 8px">@@i(phone|18)@@Call salon</a>
+        </div>
+      </div>
+    </section>
+
+    <div style="display: flex; flex-direction: column; gap: 10px">
+      <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px">
+        <a href="#" style="height: 48px; border-radius: 12px; background: #FFFFFF; border: 1px solid #CEC6BD; box-sizing: border-box; color: #2C191D; font-size: 15px; font-weight: 600; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 8px">@@i(calplus|20)@@Add to calendar</a>
+        <a href="BookTime.dc.html" style="height: 48px; border-radius: 12px; background: #FFFFFF; border: 1px solid #CEC6BD; box-sizing: border-box; color: #2C191D; font-size: 15px; font-weight: 600; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 8px">@@i(clock|20)@@Change time</a>
+      </div>
+      <a href="CancelBooking.dc.html" style="height: 48px; border-radius: 12px; color: #A33229; font-size: 15px; font-weight: 600; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 8px">@@i(xcircle|20)@@Cancel appointment</a>
+      <span style="font-size: 13px; color: #5F5852; text-align: center">Free cancellation until Wed 28 Oct, 15:30</span>
+    </div>
+  </main>
+  @@tabbar(bookings)@@
+</div>
+@@foot(390|1100)@@

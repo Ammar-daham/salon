@@ -1,0 +1,80 @@
+@@head(Bookings)@@
+@@root(960)@@
+  <main style="padding: 56px 20px 24px; display: flex; flex-direction: column; gap: 28px">
+    <h1 style="margin: 0; padding-top: 6px; font-size: 30px; line-height: 36px; font-weight: 600; letter-spacing: -0.01em">Bookings</h1>
+
+    <section aria-labelledby="h-upcoming" style="display: flex; flex-direction: column; gap: 12px">
+      <h2 id="h-upcoming" style="margin: 0; font-size: 13px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: #5F5852">Upcoming</h2>
+
+      <a href="BookingDetail.dc.html" style="background: #FFFFFF; border: 1px solid #E4DED8; border-radius: 20px; padding: 16px; display: flex; gap: 14px; color: #2C191D; text-decoration: none">
+        <span style="width: 56px; height: 68px; border-radius: 14px; background: #F9E8E4; color: #7D4751; display: flex; flex-direction: column; align-items: center; justify-content: center; flex-shrink: 0">
+          <span style="font-size: 12px; font-weight: 600; text-transform: uppercase">Thu</span>
+          <span style="font-size: 24px; line-height: 28px; font-weight: 600">29</span>
+          <span style="font-size: 12px; font-weight: 500">Oct</span>
+        </span>
+        <span style="flex-grow: 1; display: flex; flex-direction: column; gap: 3px; min-width: 0">
+          <span style="font-size: 14px; color: #5F5852">15:30 – 16:00</span>
+          <span style="font-size: 17px; font-weight: 600">Classic Manicure</span>
+          <span style="font-size: 14px; color: #5F5852">Mia · Glow Beauty Studio</span>
+          <span style="margin-top: 6px">@@badge(wait|Awaiting confirmation)@@</span>
+        </span>
+        <span style="align-self: center">@@i(right|20|#A79D93)@@</span>
+      </a>
+
+      <a href="BookingDetail.dc.html" style="background: #FFFFFF; border: 1px solid #E4DED8; border-radius: 20px; padding: 16px; display: flex; gap: 14px; color: #2C191D; text-decoration: none">
+        <span style="width: 56px; height: 68px; border-radius: 14px; background: #F9E8E4; color: #7D4751; display: flex; flex-direction: column; align-items: center; justify-content: center; flex-shrink: 0">
+          <span style="font-size: 12px; font-weight: 600; text-transform: uppercase">Sat</span>
+          <span style="font-size: 24px; line-height: 28px; font-weight: 600">7</span>
+          <span style="font-size: 12px; font-weight: 500">Nov</span>
+        </span>
+        <span style="flex-grow: 1; display: flex; flex-direction: column; gap: 3px; min-width: 0">
+          <span style="font-size: 14px; color: #5F5852">11:00 – 11:30</span>
+          <span style="font-size: 17px; font-weight: 600">Classic Fade</span>
+          <span style="font-size: 14px; color: #5F5852">Leo · Urban Cuts Barbershop</span>
+          <span style="margin-top: 6px">@@badge(ok|Confirmed)@@</span>
+        </span>
+        <span style="align-self: center">@@i(right|20|#A79D93)@@</span>
+      </a>
+    </section>
+
+    <section aria-labelledby="h-past" style="display: flex; flex-direction: column; gap: 12px">
+      <h2 id="h-past" style="margin: 0; font-size: 13px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: #5F5852">Past</h2>
+
+      <div style="background: #FFFFFF; border: 1px solid #E4DED8; border-radius: 20px; display: flex; flex-direction: column">
+        <a href="BookingDetail.dc.html" style="padding: 16px; display: flex; gap: 14px; color: #2C191D; text-decoration: none">
+          <span style="width: 56px; height: 68px; border-radius: 14px; background: #F2EEEA; color: #4A443F; display: flex; flex-direction: column; align-items: center; justify-content: center; flex-shrink: 0">
+            <span style="font-size: 12px; font-weight: 600; text-transform: uppercase">Tue</span>
+            <span style="font-size: 24px; line-height: 28px; font-weight: 600">20</span>
+            <span style="font-size: 12px; font-weight: 500">Oct</span>
+          </span>
+          <span style="flex-grow: 1; display: flex; flex-direction: column; gap: 3px; min-width: 0">
+            <span style="font-size: 14px; color: #5F5852">10:00 – 10:45</span>
+            <span style="font-size: 17px; font-weight: 600">Signature Haircut</span>
+            <span style="font-size: 14px; color: #5F5852">Mia · Glow Beauty Studio</span>
+            <span style="margin-top: 6px">@@badge(done|Completed)@@</span>
+          </span>
+        </a>
+        <div style="padding: 0 16px 16px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px">
+          <a href="Review.dc.html" style="height: 44px; border-radius: 12px; background: #F9E8E4; color: #7D4751; font-size: 15px; font-weight: 600; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 6px">@@i(staro|18)@@Rate visit</a>
+          <a href="BookTime.dc.html" style="height: 44px; border-radius: 12px; background: #FFFFFF; border: 1px solid #CEC6BD; box-sizing: border-box; color: #2C191D; font-size: 15px; font-weight: 600; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 6px">@@i(rebook|18)@@Book again</a>
+        </div>
+      </div>
+
+      <a href="BookingDetail.dc.html" style="background: #FFFFFF; border: 1px solid #E4DED8; border-radius: 20px; padding: 16px; display: flex; gap: 14px; color: #2C191D; text-decoration: none">
+        <span style="width: 56px; height: 68px; border-radius: 14px; background: #F2EEEA; color: #4A443F; display: flex; flex-direction: column; align-items: center; justify-content: center; flex-shrink: 0">
+          <span style="font-size: 12px; font-weight: 600; text-transform: uppercase">Sat</span>
+          <span style="font-size: 24px; line-height: 28px; font-weight: 600">10</span>
+          <span style="font-size: 12px; font-weight: 500">Oct</span>
+        </span>
+        <span style="flex-grow: 1; display: flex; flex-direction: column; gap: 3px; min-width: 0">
+          <span style="font-size: 14px; color: #5F5852">12:00 – 12:20</span>
+          <span style="font-size: 17px; font-weight: 600; text-decoration: line-through; text-decoration-color: #A79D93">Beard Trim</span>
+          <span style="font-size: 14px; color: #5F5852">Sam · Urban Cuts Barbershop</span>
+          <span style="margin-top: 6px">@@badge(cancel|Cancelled by you)@@</span>
+        </span>
+      </a>
+    </section>
+  </main>
+  @@tabbar(bookings)@@
+</div>
+@@foot(390|960)@@
