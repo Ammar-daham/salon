@@ -47,9 +47,8 @@ export default function BusinessSettingsView() {
 
 			<Card className="mt-4 md:mt-6" title="Addresses and contacts">
 				<p className="text-sm text-ink-muted">
-					These can&apos;t be added or removed through the API yet — there are no create
-					endpoints for them, and an update to a row without an id silently does nothing.
-					The salon&apos;s address and contact set is fixed at creation time.
+					The salon&apos;s address and phone are set when it&apos;s created. Changing them
+					afterwards isn&apos;t in the panel yet.
 				</p>
 			</Card>
 		</div>
