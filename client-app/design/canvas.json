@@ -1,0 +1,299 @@
+{
+  "v": 3,
+  "createdOnFiles": {
+    "v": 1,
+    "at": "2026-10-26T19:40:00Z"
+  },
+  "title": "Salonat Customer App UI",
+  "launch": {
+    "view": "canvas"
+  },
+  "pages": [],
+  "boards": {
+    "Foundations.dc.html": {
+      "x": 0,
+      "y": 0,
+      "w": 1280,
+      "h": 1400,
+      "title": "Foundations"
+    },
+    "Main.dc.html": {
+      "x": 0,
+      "y": 1770,
+      "w": 390,
+      "h": 844,
+      "title": "Welcome",
+      "is_interactive": true,
+      "radius": 36
+    },
+    "SignIn.dc.html": {
+      "x": 470,
+      "y": 1770,
+      "w": 390,
+      "h": 844,
+      "title": "Sign in",
+      "is_interactive": true,
+      "radius": 36
+    },
+    "SignUp.dc.html": {
+      "x": 940,
+      "y": 1770,
+      "w": 390,
+      "h": 920,
+      "title": "Create account",
+      "is_interactive": true,
+      "radius": 36
+    },
+    "Home.dc.html": {
+      "x": 0,
+      "y": 3060,
+      "w": 390,
+      "h": 1800,
+      "title": "Home (full scroll)",
+      "is_interactive": true,
+      "radius": 36
+    },
+    "Search.dc.html": {
+      "x": 470,
+      "y": 3060,
+      "w": 390,
+      "h": 844,
+      "title": "Search",
+      "is_interactive": true,
+      "radius": 36
+    },
+    "Results.dc.html": {
+      "x": 940,
+      "y": 3060,
+      "w": 390,
+      "h": 1400,
+      "title": "Results: list",
+      "is_interactive": true,
+      "radius": 36
+    },
+    "Map.dc.html": {
+      "x": 1410,
+      "y": 3060,
+      "w": 390,
+      "h": 844,
+      "title": "Results: map",
+      "is_interactive": true,
+      "radius": 36
+    },
+    "Filters.dc.html": {
+      "x": 1880,
+      "y": 3060,
+      "w": 390,
+      "h": 844,
+      "title": "Filters",
+      "is_interactive": true,
+      "radius": 36
+    },
+    "Salon.dc.html": {
+      "x": 0,
+      "y": 5230,
+      "w": 390,
+      "h": 1260,
+      "title": "Salon: services",
+      "is_interactive": true,
+      "radius": 36
+    },
+    "SalonReviews.dc.html": {
+      "x": 470,
+      "y": 5230,
+      "w": 390,
+      "h": 1150,
+      "title": "Salon: reviews",
+      "is_interactive": true,
+      "radius": 36
+    },
+    "SalonAbout.dc.html": {
+      "x": 940,
+      "y": 5230,
+      "w": 390,
+      "h": 1520,
+      "title": "Salon: about & team",
+      "is_interactive": true,
+      "radius": 36
+    },
+    "BookStaff.dc.html": {
+      "x": 0,
+      "y": 7120,
+      "w": 390,
+      "h": 844,
+      "title": "Book 1: professional",
+      "is_interactive": true,
+      "radius": 36
+    },
+    "BookTime.dc.html": {
+      "x": 470,
+      "y": 7120,
+      "w": 390,
+      "h": 980,
+      "title": "Book 2: time",
+      "is_interactive": true,
+      "radius": 36
+    },
+    "BookReview.dc.html": {
+      "x": 940,
+      "y": 7120,
+      "w": 390,
+      "h": 1160,
+      "title": "Book 3: review",
+      "is_interactive": true,
+      "radius": 36
+    },
+    "BookDone.dc.html": {
+      "x": 1410,
+      "y": 7120,
+      "w": 390,
+      "h": 844,
+      "title": "Booked",
+      "is_interactive": true,
+      "radius": 36
+    },
+    "Bookings.dc.html": {
+      "x": 0,
+      "y": 8650,
+      "w": 390,
+      "h": 960,
+      "title": "Bookings",
+      "is_interactive": true,
+      "radius": 36
+    },
+    "BookingDetail.dc.html": {
+      "x": 470,
+      "y": 8650,
+      "w": 390,
+      "h": 1100,
+      "title": "Appointment",
+      "is_interactive": true,
+      "radius": 36
+    },
+    "CancelBooking.dc.html": {
+      "x": 940,
+      "y": 8650,
+      "w": 390,
+      "h": 844,
+      "title": "Cancel appointment",
+      "is_interactive": true,
+      "radius": 36
+    },
+    "Review.dc.html": {
+      "x": 1410,
+      "y": 8650,
+      "w": 390,
+      "h": 860,
+      "title": "Rate a visit",
+      "is_interactive": true,
+      "radius": 36
+    },
+    "Favourites.dc.html": {
+      "x": 0,
+      "y": 10120,
+      "w": 390,
+      "h": 844,
+      "title": "Favourites",
+      "is_interactive": true,
+      "radius": 36
+    },
+    "Notifications.dc.html": {
+      "x": 470,
+      "y": 10120,
+      "w": 390,
+      "h": 844,
+      "title": "Notifications",
+      "is_interactive": true,
+      "radius": 36
+    },
+    "Profile.dc.html": {
+      "x": 940,
+      "y": 10120,
+      "w": 390,
+      "h": 1140,
+      "title": "Profile",
+      "is_interactive": true,
+      "radius": 36
+    },
+    "EditProfile.dc.html": {
+      "x": 1410,
+      "y": 10120,
+      "w": 390,
+      "h": 844,
+      "title": "Account details",
+      "is_interactive": true,
+      "radius": 36
+    }
+  },
+  "order": [
+    "Main.dc.html",
+    "Foundations.dc.html",
+    "SignIn.dc.html",
+    "SignUp.dc.html",
+    "Home.dc.html",
+    "Search.dc.html",
+    "Results.dc.html",
+    "Map.dc.html",
+    "Filters.dc.html",
+    "Salon.dc.html",
+    "SalonReviews.dc.html",
+    "SalonAbout.dc.html",
+    "BookStaff.dc.html",
+    "BookTime.dc.html",
+    "BookReview.dc.html",
+    "BookDone.dc.html",
+    "Bookings.dc.html",
+    "BookingDetail.dc.html",
+    "CancelBooking.dc.html",
+    "Review.dc.html",
+    "Favourites.dc.html",
+    "Notifications.dc.html",
+    "Profile.dc.html",
+    "EditProfile.dc.html"
+  ],
+  "notes": {
+    "t1": {
+      "x": 0,
+      "y": 1520,
+      "text": "Welcome & account",
+      "kind": "title1",
+      "maxW": 1330
+    },
+    "t2": {
+      "x": 0,
+      "y": 2810,
+      "text": "Discover",
+      "kind": "title1",
+      "maxW": 2270
+    },
+    "t3": {
+      "x": 0,
+      "y": 4980,
+      "text": "Salon page",
+      "kind": "title1",
+      "maxW": 1330
+    },
+    "t4": {
+      "x": 0,
+      "y": 6870,
+      "text": "Booking",
+      "kind": "title1",
+      "maxW": 1800
+    },
+    "t5": {
+      "x": 0,
+      "y": 8400,
+      "text": "Appointments",
+      "kind": "title1",
+      "maxW": 1800
+    },
+    "t6": {
+      "x": 0,
+      "y": 9870,
+      "text": "Favourites, inbox & profile",
+      "kind": "title1",
+      "maxW": 1800
+    }
+  },
+  "designSystems": []
+}

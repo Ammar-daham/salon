@@ -1,0 +1,62 @@
+@@head(Search)@@
+@@root(844)@@
+  <header style="padding: 56px 20px 0; display: flex; flex-direction: column; gap: 12px">
+    <div style="display: flex; align-items: center; gap: 10px">
+      @@back(Home.dc.html)@@
+      <div style="flex-grow: 1; position: relative; display: flex; align-items: center">
+        <span style="position: absolute; left: 14px; display: flex">@@i(search|20|#2C191D)@@</span>
+        <label for="q" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Search a service or salon</label>
+        <input id="q" type="search" value="hair" style="width: 100%; height: 48px; border-radius: 14px; border: 2px solid #9C5A65; background: #FFFFFF; box-sizing: border-box; padding: 0 44px 0 42px; font-family: inherit; font-size: 16px; color: #2C191D">
+        <button type="button" aria-label="Clear search" style="position: absolute; right: 2px; width: 44px; height: 44px; border: none; background: transparent; color: #5F5852; display: flex; align-items: center; justify-content: center; cursor: pointer">@@i(xcircle|20)@@</button>
+      </div>
+    </div>
+    <div style="display: flex; gap: 8px">
+      @@chip(Berlin Mitte|0|pin)@@
+      @@chip(Any time|0|calendar)@@
+    </div>
+  </header>
+
+  <main style="padding: 24px 20px; display: flex; flex-direction: column; gap: 24px">
+    <section aria-labelledby="h-services" style="display: flex; flex-direction: column; gap: 4px">
+      <h2 id="h-services" style="margin: 0 0 4px; font-size: 13px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: #5F5852">Services</h2>
+      <a href="Results.dc.html" style="min-height: 48px; display: flex; align-items: center; gap: 14px; color: #2C191D; text-decoration: none; font-size: 16px">@@i(search|20|#5F5852)@@<span style="flex-grow: 1"><strong style="font-weight: 600">Hair</strong>cut</span>@@i(arrow|18|#A79D93)@@</a>
+      <a href="Results.dc.html" style="min-height: 48px; display: flex; align-items: center; gap: 14px; color: #2C191D; text-decoration: none; font-size: 16px">@@i(search|20|#5F5852)@@<span style="flex-grow: 1"><strong style="font-weight: 600">Hair</strong> colour</span>@@i(arrow|18|#A79D93)@@</a>
+      <a href="Results.dc.html" style="min-height: 48px; display: flex; align-items: center; gap: 14px; color: #2C191D; text-decoration: none; font-size: 16px">@@i(search|20|#5F5852)@@<span style="flex-grow: 1"><strong style="font-weight: 600">Hair</strong> blow-dry &amp; style</span>@@i(arrow|18|#A79D93)@@</a>
+      <a href="Results.dc.html" style="min-height: 48px; display: flex; align-items: center; gap: 14px; color: #2C191D; text-decoration: none; font-size: 16px">@@i(search|20|#5F5852)@@<span style="flex-grow: 1">Men’s <strong style="font-weight: 600">hair</strong>cut</span>@@i(arrow|18|#A79D93)@@</a>
+    </section>
+
+    <div style="height: 1px; background: #E4DED8"></div>
+
+    <section aria-labelledby="h-salons" style="display: flex; flex-direction: column; gap: 8px">
+      <h2 id="h-salons" style="margin: 0 0 4px; font-size: 13px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: #5F5852">Salons</h2>
+      <a href="Salon.dc.html" style="min-height: 56px; display: flex; align-items: center; gap: 14px; color: #2C191D; text-decoration: none">
+        @@ph(48px|48px|12px|rose|20)@@
+        <span style="flex-grow: 1; display: flex; flex-direction: column; gap: 2px">
+          <span style="font-size: 16px; font-weight: 600">Glow Beauty Studio</span>
+          <span style="font-size: 14px; color: #5F5852">Hair &amp; nails · 1.1 km</span>
+        </span>
+        @@rating(4.8|126)@@
+      </a>
+      <a href="Salon.dc.html" style="min-height: 56px; display: flex; align-items: center; gap: 14px; color: #2C191D; text-decoration: none">
+        @@ph(48px|48px|12px|blue|20)@@
+        <span style="flex-grow: 1; display: flex; flex-direction: column; gap: 2px">
+          <span style="font-size: 16px; font-weight: 600">Atelier Kiez <strong style="font-weight: 700">Hair</strong></span>
+          <span style="font-size: 14px; color: #5F5852">Hair · 2.1 km</span>
+        </span>
+        @@rating(4.6|74)@@
+      </a>
+    </section>
+
+    <div style="height: 1px; background: #E4DED8"></div>
+
+    <section aria-labelledby="h-recent" style="display: flex; flex-direction: column; gap: 4px">
+      <div style="display: flex; align-items: center; justify-content: space-between">
+        <h2 id="h-recent" style="margin: 0; font-size: 13px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: #5F5852">Recent</h2>
+        <button type="button" style="height: 44px; border: none; background: transparent; font-family: inherit; font-size: 14px; font-weight: 600; color: #7D4751; cursor: pointer; padding: 0">Clear</button>
+      </div>
+      <a href="Results.dc.html" style="min-height: 48px; display: flex; align-items: center; gap: 14px; color: #2C191D; text-decoration: none; font-size: 16px">@@i(clock|20|#5F5852)@@<span style="flex-grow: 1">Beard trim</span></a>
+      <a href="Results.dc.html" style="min-height: 48px; display: flex; align-items: center; gap: 14px; color: #2C191D; text-decoration: none; font-size: 16px">@@i(clock|20|#5F5852)@@<span style="flex-grow: 1">Gel manicure</span></a>
+    </section>
+  </main>
+</div>
+@@foot(390|844)@@

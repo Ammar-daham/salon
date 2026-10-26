@@ -1,0 +1,51 @@
+@@head(Create account)@@
+@@root(920)@@
+  <div style="flex-grow: 1; display: flex; flex-direction: column; padding: 56px 24px 32px; gap: 24px">
+    @@back(Main.dc.html)@@
+    <div style="display: flex; flex-direction: column; gap: 8px">
+      <h1 style="margin: 0; font-size: 28px; line-height: 34px; font-weight: 600; letter-spacing: -0.01em">Create your account</h1>
+      <p style="margin: 0; font-size: 15px; line-height: 22px; color: #5F5852">Salons see your name and phone number when you book.</p>
+    </div>
+
+    <form style="display: flex; flex-direction: column; gap: 16px; margin: 0">
+      <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px">
+        <div style="display: flex; flex-direction: column; gap: 8px">
+          <label for="su-first" style="font-size: 14px; font-weight: 500">First name</label>
+          <input id="su-first" type="text" value="Olivia" autocomplete="given-name" style="height: 52px; border-radius: 12px; border: 1px solid #CEC6BD; background: #FFFFFF; padding: 0 16px; font-family: inherit; font-size: 16px; color: #2C191D; box-sizing: border-box; width: 100%">
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 8px">
+          <label for="su-last" style="font-size: 14px; font-weight: 500">Last name</label>
+          <input id="su-last" type="text" value="Weber" autocomplete="family-name" style="height: 52px; border-radius: 12px; border: 1px solid #CEC6BD; background: #FFFFFF; padding: 0 16px; font-family: inherit; font-size: 16px; color: #2C191D; box-sizing: border-box; width: 100%">
+        </div>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 8px">
+        <label for="su-email" style="font-size: 14px; font-weight: 500">Email</label>
+        <input id="su-email" type="email" value="olivia@example.com" autocomplete="email" style="height: 52px; border-radius: 12px; border: 1px solid #CEC6BD; background: #FFFFFF; padding: 0 16px; font-family: inherit; font-size: 16px; color: #2C191D; box-sizing: border-box; width: 100%">
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 8px">
+        <label for="su-phone" style="font-size: 14px; font-weight: 500">Mobile number</label>
+        <div style="display: flex; gap: 8px">
+          <button type="button" aria-label="Country code, Germany +49" style="height: 52px; border-radius: 12px; border: 1px solid #CEC6BD; background: #FFFFFF; padding: 0 12px; font-family: inherit; font-size: 16px; color: #2C191D; display: flex; align-items: center; gap: 4px; flex-shrink: 0; cursor: pointer">+49@@i(down|18|#5F5852)@@</button>
+          <input id="su-phone" type="tel" value="30 9990001" autocomplete="tel-national" style="height: 52px; border-radius: 12px; border: 1px solid #CEC6BD; background: #FFFFFF; padding: 0 16px; font-family: inherit; font-size: 16px; color: #2C191D; box-sizing: border-box; width: 100%; min-width: 0">
+        </div>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 8px">
+        <label for="su-password" style="font-size: 14px; font-weight: 500">Password</label>
+        <input id="su-password" type="password" value="" placeholder="At least 8 characters" autocomplete="new-password" aria-describedby="su-password-hint" style="height: 52px; border-radius: 12px; border: 2px solid #9C5A65; background: #FFFFFF; padding: 0 15px; font-family: inherit; font-size: 16px; color: #2C191D; box-sizing: border-box; width: 100%">
+        <span id="su-password-hint" style="font-size: 13px; color: #5F5852">Use 8 or more characters.</span>
+      </div>
+      <label style="display: flex; gap: 12px; align-items: flex-start; font-size: 14px; line-height: 20px; color: #4A443F; cursor: pointer; min-height: 44px">
+        <input type="checkbox" style="width: 22px; height: 22px; margin: 0; accent-color: #9C5A65; flex-shrink: 0">
+        Send me news and offers from the salons I book with. You can change this any time.
+      </label>
+    </form>
+
+    <div style="display: flex; flex-direction: column; gap: 12px">
+      @@btn(Home.dc.html|Create account)@@
+      <p style="margin: 0; font-size: 13px; line-height: 18px; color: #5F5852; text-align: center">By creating an account you accept the <a href="#">Terms of use</a> and <a href="#">Privacy notice</a>.</p>
+    </div>
+
+    <p style="margin: auto 0 0; text-align: center; font-size: 15px; color: #5F5852">Already have an account? <a href="SignIn.dc.html" style="font-weight: 600">Sign in</a></p>
+  </div>
+</div>
+@@foot(390|920)@@

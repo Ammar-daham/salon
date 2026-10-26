@@ -1,0 +1,61 @@
+@@head(Book: choose a professional)@@
+@@root(844)@@
+  <header style="padding: 56px 20px 0; display: flex; flex-direction: column; gap: 16px">
+    <div style="display: flex; align-items: center; justify-content: space-between">
+      @@back(Salon.dc.html)@@
+      <span style="font-size: 14px; font-weight: 500; color: #5F5852">Step 1 of 3</span>
+      @@iconbtn(Salon.dc.html|close|Close booking)@@
+    </div>
+    <div aria-hidden="true" style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px">
+      <span style="height: 4px; border-radius: 2px; background: #9C5A65"></span>
+      <span style="height: 4px; border-radius: 2px; background: #E4DED8"></span>
+      <span style="height: 4px; border-radius: 2px; background: #E4DED8"></span>
+    </div>
+  </header>
+
+  <main style="flex-grow: 1; padding: 24px 20px; display: flex; flex-direction: column; gap: 20px">
+    <h1 style="margin: 0; font-size: 26px; line-height: 32px; font-weight: 600; letter-spacing: -0.01em">Who would you like?</h1>
+
+    <div style="background: #FFFFFF; border: 1px solid #E4DED8; border-radius: 16px; padding: 12px; display: flex; align-items: center; gap: 12px">
+      @@ph(48px|48px|10px|rose|20)@@
+      <div style="flex-grow: 1; display: flex; flex-direction: column; gap: 2px; min-width: 0">
+        <span style="font-size: 16px; font-weight: 600">Signature Haircut</span>
+        <span style="font-size: 14px; color: #5F5852">45 min · €45 · Glow Beauty Studio</span>
+      </div>
+      <a href="Salon.dc.html" style="font-size: 14px; font-weight: 600; min-height: 44px; display: flex; align-items: center; padding: 0 4px">Change</a>
+    </div>
+
+    <fieldset style="border: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px">
+      <legend style="padding: 0; margin-bottom: 12px; font-size: 14px; font-weight: 600; color: #5F5852; letter-spacing: 0.06em; text-transform: uppercase">Professional</legend>
+      <label style="background: #FFFFFF; border: 1px solid #E4DED8; border-radius: 16px; padding: 14px 16px; display: flex; align-items: center; gap: 14px; cursor: pointer">
+        <span style="width: 48px; height: 48px; border-radius: 24px; background: #F2EEEA; display: flex; align-items: center; justify-content: center; flex-shrink: 0">@@i(users|24|#4A443F)@@</span>
+        <span style="flex-grow: 1; display: flex; flex-direction: column; gap: 2px">
+          <span style="font-size: 16px; font-weight: 600">Anyone available</span>
+          <span style="font-size: 14px; color: #5F5852">Most free times · from Tue 09:00</span>
+        </span>
+        <input type="radio" name="staff" value="any" style="width: 22px; height: 22px; margin: 0; accent-color: #9C5A65; flex-shrink: 0">
+      </label>
+      <label style="background: #FDF6F4; border: 2px solid #9C5A65; border-radius: 16px; padding: 13px 15px; display: flex; align-items: center; gap: 14px; cursor: pointer">
+        @@av(M|48|rose)@@
+        <span style="flex-grow: 1; display: flex; flex-direction: column; gap: 2px">
+          <span style="font-size: 16px; font-weight: 600">Mia</span>
+          <span style="font-size: 14px; color: #5F5852">Senior Stylist · next free Tue 09:00</span>
+        </span>
+        <input type="radio" name="staff" value="mia" checked style="width: 22px; height: 22px; margin: 0; accent-color: #9C5A65; flex-shrink: 0">
+      </label>
+      <label style="background: #FFFFFF; border: 1px solid #E4DED8; border-radius: 16px; padding: 14px 16px; display: flex; align-items: center; gap: 14px; cursor: pointer">
+        @@av(N|48|blue)@@
+        <span style="flex-grow: 1; display: flex; flex-direction: column; gap: 2px">
+          <span style="font-size: 16px; font-weight: 600">Noah</span>
+          <span style="font-size: 14px; color: #5F5852">Colorist · next free Tue 11:15</span>
+        </span>
+        <input type="radio" name="staff" value="noah" style="width: 22px; height: 22px; margin: 0; accent-color: #9C5A65; flex-shrink: 0">
+      </label>
+    </fieldset>
+  </main>
+
+  <div style="padding: 16px 20px 34px; background: #FFFFFF; border-top: 1px solid #E4DED8">
+    @@btn(BookTime.dc.html|Continue)@@
+  </div>
+</div>
+@@foot(390|844)@@

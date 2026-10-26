@@ -1,0 +1,64 @@
+@@head(Filters)@@
+@@root(844)@@
+  <div aria-hidden="true" style="padding: 56px 20px 0; display: flex; align-items: center; gap: 10px">
+    <div style="width: 44px; height: 44px; border-radius: 22px; background: #FFFFFF; border: 1px solid #E4DED8; box-sizing: border-box"></div>
+    <div style="flex-grow: 1; height: 52px; border-radius: 14px; background: #FFFFFF; border: 1px solid #E4DED8"></div>
+  </div>
+  <div aria-hidden="true" style="position: absolute; inset: 0; background: rgba(44,25,29,0.5)"></div>
+
+  <section role="dialog" aria-modal="true" aria-labelledby="h-filters" style="position: absolute; left: 0; right: 0; bottom: 0; top: 96px; background: #FFFFFF; border-radius: 24px 24px 0 0; display: flex; flex-direction: column">
+    <div aria-hidden="true" style="align-self: center; width: 40px; height: 5px; border-radius: 3px; background: #CEC6BD; margin-top: 8px"></div>
+    <div style="padding: 4px 12px 0 20px; display: flex; align-items: center; justify-content: space-between">
+      <h2 id="h-filters" style="margin: 0; font-size: 20px; font-weight: 600">Filters</h2>
+      <a href="Results.dc.html" aria-label="Close filters" style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; color: #2C191D">@@i(close|24)@@</a>
+    </div>
+
+    <div style="flex-grow: 1; padding: 16px 20px 20px; display: flex; flex-direction: column; gap: 24px; overflow: hidden">
+      <fieldset style="border: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px">
+        <legend style="padding: 0; margin-bottom: 12px; font-size: 16px; font-weight: 600">Sort by</legend>
+        <div style="display: flex; flex-wrap: wrap; gap: 8px">
+          @@chip(Recommended|1)@@
+          @@chip(Nearest)@@
+          @@chip(Earliest free time)@@
+          @@chip(Lowest price)@@
+          @@chip(Top rated)@@
+        </div>
+      </fieldset>
+
+      <fieldset style="border: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px">
+        <legend style="padding: 0; margin-bottom: 12px; font-size: 16px; font-weight: 600">When</legend>
+        <div style="display: flex; flex-wrap: wrap; gap: 8px">
+          @@chip(Any time|1)@@
+          @@chip(Today)@@
+          @@chip(Tomorrow)@@
+          @@chip(This week)@@
+          @@chip(Pick a date|0|calendar)@@
+        </div>
+      </fieldset>
+
+      <fieldset style="border: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px">
+        <legend style="padding: 0; margin-bottom: 12px; font-size: 16px; font-weight: 600">Time of day</legend>
+        <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px">
+          @@chip(Morning)@@
+          @@chip(Afternoon|1)@@
+          @@chip(Evening)@@
+        </div>
+      </fieldset>
+
+      <div style="display: flex; flex-direction: column; gap: 12px">
+        <div style="display: flex; align-items: baseline; justify-content: space-between">
+          <label for="max-price" style="font-size: 16px; font-weight: 600">Maximum price</label>
+          <span style="font-size: 15px; font-weight: 600; color: #7D4751">€80</span>
+        </div>
+        <input id="max-price" type="range" min="0" max="150" step="5" value="80" style="width: 100%; height: 28px; margin: 0; accent-color: #9C5A65">
+        <div style="display: flex; justify-content: space-between; font-size: 13px; color: #5F5852"><span>€0</span><span>€150+</span></div>
+      </div>
+    </div>
+
+    <div style="padding: 16px 20px 34px; border-top: 1px solid #E4DED8; display: flex; align-items: center; gap: 12px">
+      <a href="Results.dc.html" style="height: 54px; padding: 0 16px; display: flex; align-items: center; font-size: 16px; font-weight: 600">Clear all</a>
+      <a href="Results.dc.html" style="flex-grow: 1; height: 54px; border-radius: 14px; background: #9C5A65; color: #FFFFFF; font-size: 16px; font-weight: 600; text-decoration: none; display: flex; align-items: center; justify-content: center">Show results</a>
+    </div>
+  </section>
+</div>
+@@foot(390|844)@@

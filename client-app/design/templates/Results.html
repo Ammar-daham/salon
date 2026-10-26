@@ -1,0 +1,96 @@
+@@head(Search results)@@
+@@root(1400)@@
+  <header style="padding: 56px 20px 0; display: flex; flex-direction: column; gap: 14px">
+    <div style="display: flex; align-items: center; gap: 10px">
+      @@back(Search.dc.html)@@
+      <a href="Search.dc.html" style="flex-grow: 1; min-width: 0; height: 52px; border-radius: 14px; background: #FFFFFF; border: 1px solid #E4DED8; box-sizing: border-box; padding: 0 14px; display: flex; align-items: center; gap: 12px; color: #2C191D; text-decoration: none">
+        @@i(search|20)@@
+        <span style="display: flex; flex-direction: column; min-width: 0">
+          <span style="font-size: 15px; font-weight: 600">Haircut</span>
+          <span style="font-size: 13px; color: #5F5852">Berlin Mitte · Any time</span>
+        </span>
+      </a>
+    </div>
+    <div style="display: flex; gap: 8px; overflow-x: auto; margin: 0 -20px; padding: 0 20px">
+      <a href="Filters.dc.html" style="height: 38px; padding: 0 14px; border-radius: 19px; background: #FFFFFF; color: #2C191D; border: 1px solid #E4DED8; box-sizing: border-box; font-size: 14px; font-weight: 500; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; flex-shrink: 0; text-decoration: none">@@i(sliders|18)@@Filters</a>
+      @@chip(Available today)@@
+      @@chip(Under €50)@@
+      @@chip(Rated 4.5+)@@
+      @@chip(Within 2 km)@@
+    </div>
+  </header>
+
+  <main style="padding: 16px 20px 24px; display: flex; flex-direction: column; gap: 16px">
+    <div style="display: flex; align-items: center; justify-content: space-between">
+      <span style="font-size: 14px; color: #5F5852">Salons near Berlin Mitte</span>
+      <button type="button" style="height: 44px; border: none; background: transparent; padding: 0; font-family: inherit; font-size: 14px; font-weight: 600; color: #2C191D; display: flex; align-items: center; gap: 4px; cursor: pointer">Recommended@@i(down|18)@@</button>
+    </div>
+
+    <article style="background: #FFFFFF; border: 1px solid #E4DED8; border-radius: 20px; overflow: hidden; display: flex; flex-direction: column">
+      <div style="position: relative">
+        <a href="Salon.dc.html" aria-label="Glow Beauty Studio" style="display: block">@@ph(100%|128px|0|rose|30)@@</a>
+        <button type="button" aria-label="Remove Glow Beauty Studio from favourites" aria-pressed="true" style="position: absolute; top: 10px; right: 10px; width: 40px; height: 40px; border-radius: 20px; border: none; background: #FFFFFF; color: #9C5A65; display: flex; align-items: center; justify-content: center; cursor: pointer">@@i(heartf|20)@@</button>
+      </div>
+      <div style="padding: 14px 16px 16px; display: flex; flex-direction: column; gap: 12px">
+        <a href="Salon.dc.html" style="display: flex; flex-direction: column; gap: 3px; color: #2C191D; text-decoration: none">
+          <span style="display: flex; align-items: center; justify-content: space-between; gap: 8px"><span style="font-size: 17px; font-weight: 600">Glow Beauty Studio</span>@@rating(4.8|126)@@</span>
+          <span style="font-size: 14px; color: #5F5852">Hair &amp; nails · 12 Rosenthaler Str. · 1.1 km</span>
+        </a>
+        <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 10px 12px; border-radius: 12px; background: #FAF8F6; font-size: 14px">
+          <span style="font-weight: 500">Signature Haircut</span>
+          <span style="color: #5F5852; white-space: nowrap">45 min · <strong style="color: #2C191D; font-weight: 600">€45</strong></span>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 8px">
+          <span style="font-size: 13px; font-weight: 500; color: #5F5852">Tomorrow, Tue 27 Oct</span>
+          <div style="display: flex; gap: 8px">@@slot(09:00|BookStaff.dc.html)@@@@slot(09:45|BookStaff.dc.html)@@@@slot(11:15|BookStaff.dc.html)@@@@slot(More|Salon.dc.html)@@</div>
+        </div>
+      </div>
+    </article>
+
+    <article style="background: #FFFFFF; border: 1px solid #E4DED8; border-radius: 20px; overflow: hidden; display: flex; flex-direction: column">
+      <div style="position: relative">
+        <a href="Salon.dc.html" aria-label="Urban Cuts Barbershop" style="display: block">@@ph(100%|128px|0|sand|30)@@</a>
+        <button type="button" aria-label="Remove Urban Cuts Barbershop from favourites" aria-pressed="true" style="position: absolute; top: 10px; right: 10px; width: 40px; height: 40px; border-radius: 20px; border: none; background: #FFFFFF; color: #9C5A65; display: flex; align-items: center; justify-content: center; cursor: pointer">@@i(heartf|20)@@</button>
+      </div>
+      <div style="padding: 14px 16px 16px; display: flex; flex-direction: column; gap: 12px">
+        <a href="Salon.dc.html" style="display: flex; flex-direction: column; gap: 3px; color: #2C191D; text-decoration: none">
+          <span style="display: flex; align-items: center; justify-content: space-between; gap: 8px"><span style="font-size: 17px; font-weight: 600">Urban Cuts Barbershop</span>@@rating(4.7|318)@@</span>
+          <span style="font-size: 14px; color: #5F5852">Barber · 45 Kastanienallee · 1.4 km</span>
+        </a>
+        <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 10px 12px; border-radius: 12px; background: #FAF8F6; font-size: 14px">
+          <span style="font-weight: 500">Classic Fade</span>
+          <span style="color: #5F5852; white-space: nowrap">30 min · <strong style="color: #2C191D; font-weight: 600">€28</strong></span>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 8px">
+          <span style="font-size: 13px; font-weight: 500; color: #2E6345">Today</span>
+          <div style="display: flex; gap: 8px">@@slot(16:15|BookStaff.dc.html)@@@@slot(16:30|BookStaff.dc.html)@@@@slot(17:45|BookStaff.dc.html)@@@@slot(More|Salon.dc.html)@@</div>
+        </div>
+      </div>
+    </article>
+
+    <article style="background: #FFFFFF; border: 1px solid #E4DED8; border-radius: 20px; overflow: hidden; display: flex; flex-direction: column">
+      <div style="position: relative">
+        <a href="Salon.dc.html" aria-label="Atelier Kiez Hair" style="display: block">@@ph(100%|128px|0|blue|30)@@</a>
+        <button type="button" aria-label="Add Atelier Kiez Hair to favourites" aria-pressed="false" style="position: absolute; top: 10px; right: 10px; width: 40px; height: 40px; border-radius: 20px; border: none; background: #FFFFFF; color: #2C191D; display: flex; align-items: center; justify-content: center; cursor: pointer">@@i(heart|20)@@</button>
+      </div>
+      <div style="padding: 14px 16px 16px; display: flex; flex-direction: column; gap: 12px">
+        <a href="Salon.dc.html" style="display: flex; flex-direction: column; gap: 3px; color: #2C191D; text-decoration: none">
+          <span style="display: flex; align-items: center; justify-content: space-between; gap: 8px"><span style="font-size: 17px; font-weight: 600">Atelier Kiez Hair</span>@@rating(4.6|74)@@</span>
+          <span style="font-size: 14px; color: #5F5852">Hair · Kastanienallee · 2.1 km</span>
+        </a>
+        <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 10px 12px; border-radius: 12px; background: #FAF8F6; font-size: 14px">
+          <span style="font-weight: 500">Cut &amp; style</span>
+          <span style="color: #5F5852; white-space: nowrap">60 min · <strong style="color: #2C191D; font-weight: 600">€58</strong></span>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 8px">
+          <span style="font-size: 13px; font-weight: 500; color: #2E6345">Today</span>
+          <div style="display: flex; gap: 8px">@@slot(15:30|BookStaff.dc.html)@@@@slot(17:00|BookStaff.dc.html)@@</div>
+        </div>
+      </div>
+    </article>
+  </main>
+
+  <a href="Map.dc.html" style="position: absolute; left: 50%; bottom: 108px; transform: translateX(-50%); height: 48px; padding: 0 20px; border-radius: 24px; background: #2C191D; color: #FFFFFF; font-size: 15px; font-weight: 600; text-decoration: none; display: flex; align-items: center; gap: 8px; box-shadow: 0 8px 24px -6px rgba(44,25,29,0.45)">@@i(map|20)@@Map</a>
+  @@tabbar(home)@@
+</div>
+@@foot(390|1400)@@

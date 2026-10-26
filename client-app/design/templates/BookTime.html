@@ -1,0 +1,152 @@
+@@head(Book: pick a time)@@
+@@root(980)@@
+  <header style="padding: 56px 20px 0; display: flex; flex-direction: column; gap: 16px">
+    <div style="display: flex; align-items: center; justify-content: space-between">
+      @@back(BookStaff.dc.html)@@
+      <span style="font-size: 14px; font-weight: 500; color: #5F5852">Step 2 of 3</span>
+      @@iconbtn(Salon.dc.html|close|Close booking)@@
+    </div>
+    <div aria-hidden="true" style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px">
+      <span style="height: 4px; border-radius: 2px; background: #9C5A65"></span>
+      <span style="height: 4px; border-radius: 2px; background: #9C5A65"></span>
+      <span style="height: 4px; border-radius: 2px; background: #E4DED8"></span>
+    </div>
+  </header>
+
+  <main style="flex-grow: 1; padding: 24px 20px; display: flex; flex-direction: column; gap: 20px">
+    <div style="display: flex; flex-direction: column; gap: 4px">
+      <h1 style="margin: 0; font-size: 26px; line-height: 32px; font-weight: 600; letter-spacing: -0.01em">Pick a time</h1>
+      <span style="font-size: 15px; color: #5F5852">Signature Haircut · 45 min</span>
+    </div>
+
+    <div role="group" aria-label="Professional" style="display: flex; gap: 8px">
+      @@chip(Anyone|0|users)@@
+      <button type="button" aria-pressed="true" style="height: 38px; padding: 0 14px 0 4px; border-radius: 19px; background: #2C191D; color: #FFFFFF; border: 1px solid #2C191D; font-family: inherit; font-size: 14px; font-weight: 500; display: inline-flex; align-items: center; gap: 8px; cursor: pointer">@@av(M|30|rose)@@Mia</button>
+      <button type="button" aria-pressed="false" style="height: 38px; padding: 0 14px 0 4px; border-radius: 19px; background: #FFFFFF; color: #2C191D; border: 1px solid #E4DED8; font-family: inherit; font-size: 14px; font-weight: 500; display: inline-flex; align-items: center; gap: 8px; cursor: pointer">@@av(N|30|blue)@@Noah</button>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 8px">
+      <div style="display: flex; align-items: center; justify-content: space-between">
+        <span style="font-size: 17px; font-weight: 600">October 2026</span>
+        <div style="display: flex; gap: 4px">
+          <button type="button" aria-label="Previous week" disabled style="width: 44px; height: 44px; border-radius: 22px; border: none; background: transparent; color: #CEC6BD; display: flex; align-items: center; justify-content: center">@@i(left|22)@@</button>
+          <button type="button" aria-label="Next week" style="width: 44px; height: 44px; border-radius: 22px; border: none; background: transparent; color: #2C191D; display: flex; align-items: center; justify-content: center; cursor: pointer">@@i(right|22)@@</button>
+        </div>
+      </div>
+      <div role="group" aria-label="Day" style="display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px">
+        <sc-for list="{{days}}" as="day" hint-placeholder-count="7">
+          <button type="button" aria-label="{{day.aria}}" aria-pressed="{{day.pressed}}" disabled="{{day.closed}}" onClick="{{day.pick}}" style="height: 68px; border-radius: 14px; border: 1px solid #E4DED8; box-sizing: border-box; font-family: inherit; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; padding: 0; cursor: pointer; {{day.look}}">
+            <span style="font-size: 12px; font-weight: 500">{{day.wd}}</span>
+            <span style="font-size: 18px; font-weight: 600">{{day.d}}</span>
+          </button>
+        </sc-for>
+      </div>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 20px">
+      <sc-for list="{{groups}}" as="g" hint-placeholder-count="3">
+        <section style="display: flex; flex-direction: column; gap: 10px">
+          <h2 style="margin: 0; font-size: 15px; font-weight: 600; color: #4A443F">{{g.name}}</h2>
+          <sc-if value="{{g.empty}}" hint-placeholder-val="{{ false }}">
+            <span style="font-size: 14px; color: #5F5852">No free times</span>
+          </sc-if>
+          <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px">
+            <sc-for list="{{g.items}}" as="s" hint-placeholder-count="4">
+              <button type="button" aria-pressed="{{s.pressed}}" onClick="{{s.pick}}" style="height: 44px; border-radius: 12px; box-sizing: border-box; font-family: inherit; font-size: 15px; font-weight: 500; cursor: pointer; {{s.look}}">{{s.t}}</button>
+            </sc-for>
+          </div>
+        </section>
+      </sc-for>
+    </div>
+  </main>
+
+  <div style="padding: 14px 20px 34px; background: #FFFFFF; border-top: 1px solid #E4DED8; display: flex; flex-direction: column; gap: 12px">
+    <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px">
+      <span style="display: flex; flex-direction: column; gap: 2px">
+        <span style="font-size: 16px; font-weight: 600">{{summary}}</span>
+        <span style="font-size: 14px; color: #5F5852">with Mia · €45</span>
+      </span>
+    </div>
+    <sc-if value="{{ready}}" hint-placeholder-val="{{ true }}">
+      @@btn(BookReview.dc.html|Continue)@@
+    </sc-if>
+    <sc-if value="{{waiting}}" hint-placeholder-val="{{ false }}">
+      <button type="button" disabled style="height: 54px; border-radius: 14px; border: none; background: #E4DED8; color: #5F5852; font-family: inherit; font-size: 16px; font-weight: 600">Choose a time to continue</button>
+    </sc-if>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":980}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const DAYS = [
+      { wd: 'Mon', d: '26', name: 'Mon 26 Oct', open: false },
+      { wd: 'Tue', d: '27', name: 'Tue 27 Oct', open: true,
+        slots: [['09:00', '09:15', '09:45', '10:30', '11:15'], ['13:00', '14:30', '15:00'], ['17:15']] },
+      { wd: 'Wed', d: '28', name: 'Wed 28 Oct', open: true,
+        slots: [['10:00', '11:30'], ['12:15', '13:45', '16:00', '16:15'], ['17:00']] },
+      { wd: 'Thu', d: '29', name: 'Thu 29 Oct', open: true,
+        slots: [['09:00', '09:30'], ['12:00', '14:00'], ['17:15']] },
+      { wd: 'Fri', d: '30', name: 'Fri 30 Oct', open: true,
+        slots: [['09:00', '09:15', '09:30', '10:15', '10:30', '11:45'], ['13:00', '13:15', '14:30', '15:45', '16:00'], ['17:00', '17:15']] },
+      { wd: 'Sat', d: '31', name: 'Sat 31 Oct', open: true,
+        slots: [['09:30', '10:45', '11:00'], ['12:30', '13:15'], []] },
+      { wd: 'Sun', d: '1', name: 'Sun 1 Nov', open: false }
+    ];
+    const s = this.state || {};
+    const dayIndex = s.day ?? 4;
+    const time = s.time === undefined ? '10:15' : s.time;
+    const sel = DAYS[dayIndex];
+
+    const days = DAYS.map((x, i) => {
+      const on = i === dayIndex;
+      let look = 'background: #FFFFFF; color: #2C191D';
+      if (!x.open) look = 'background: transparent; color: #A79D93; border-style: dashed; cursor: default';
+      if (on) look = 'background: #9C5A65; color: #FFFFFF; border-color: #9C5A65';
+      return {
+        wd: x.wd, d: x.d, look,
+        closed: !x.open,
+        pressed: on ? 'true' : 'false',
+        aria: x.open ? x.name : x.name + ', closed',
+        pick: () => this.setState({ day: i, time: null })
+      };
+    });
+
+    const names = ['Morning', 'Afternoon', 'Evening'];
+    const groups = names.map((name, gi) => {
+      const list = (sel.slots && sel.slots[gi]) || [];
+      return {
+        name,
+        empty: list.length === 0,
+        items: list.map((t) => {
+          const on = t === time;
+          return {
+            t,
+            pressed: on ? 'true' : 'false',
+            look: on
+              ? 'background: #9C5A65; color: #FFFFFF; border: 1px solid #9C5A65'
+              : 'background: #FFFFFF; color: #2C191D; border: 1px solid #E4DED8',
+            pick: () => this.setState({ time: t })
+          };
+        })
+      };
+    });
+
+    const end = (t) => {
+      const [h, m] = t.split(':').map(Number);
+      const total = h * 60 + m + 45;
+      return String(Math.floor(total / 60)).padStart(2, '0') + ':' + String(total % 60).padStart(2, '0');
+    };
+
+    return {
+      days,
+      groups,
+      ready: !!time,
+      waiting: !time,
+      summary: time ? sel.name + ' · ' + time + '–' + end(time) : sel.name
+    };
+  }
+}
+</script>
+</body>
+</html>

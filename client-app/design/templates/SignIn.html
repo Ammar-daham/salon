@@ -1,0 +1,39 @@
+@@head(Sign in)@@
+@@root(844)@@
+  <div style="flex-grow: 1; display: flex; flex-direction: column; padding: 56px 24px 32px; gap: 28px">
+    @@back(Main.dc.html)@@
+    <div style="display: flex; flex-direction: column; gap: 8px">
+      <h1 style="margin: 0; font-size: 28px; line-height: 34px; font-weight: 600; letter-spacing: -0.01em">Welcome back</h1>
+      <p style="margin: 0; font-size: 15px; line-height: 22px; color: #5F5852">Sign in to see and manage your bookings.</p>
+    </div>
+
+    <form style="display: flex; flex-direction: column; gap: 16px; margin: 0">
+      <div style="display: flex; flex-direction: column; gap: 8px">
+        <label for="si-email" style="font-size: 14px; font-weight: 500">Email</label>
+        <input id="si-email" type="email" value="olivia@example.com" autocomplete="email" style="height: 52px; border-radius: 12px; border: 1px solid #CEC6BD; background: #FFFFFF; padding: 0 16px; font-family: inherit; font-size: 16px; color: #2C191D; box-sizing: border-box; width: 100%">
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 8px">
+        <label for="si-password" style="font-size: 14px; font-weight: 500">Password</label>
+        <div style="position: relative; display: flex">
+          <input id="si-password" type="password" value="Password123!" autocomplete="current-password" style="height: 52px; border-radius: 12px; border: 2px solid #9C5A65; background: #FFFFFF; padding: 0 64px 0 15px; font-family: inherit; font-size: 16px; color: #2C191D; box-sizing: border-box; width: 100%">
+          <button type="button" style="position: absolute; right: 6px; top: 4px; height: 44px; padding: 0 12px; border: none; background: transparent; font-family: inherit; font-size: 14px; font-weight: 600; color: #7D4751; cursor: pointer">Show</button>
+        </div>
+      </div>
+      <a href="#" style="align-self: flex-end; font-size: 14px; font-weight: 500; min-height: 24px; display: flex; align-items: center">Forgot password?</a>
+    </form>
+
+    @@btn(Home.dc.html|Sign in)@@
+
+    <div style="display: flex; align-items: center; gap: 12px; color: #5F5852; font-size: 13px">
+      <span style="flex-grow: 1; height: 1px; background: #E4DED8"></span>or<span style="flex-grow: 1; height: 1px; background: #E4DED8"></span>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 12px">
+      @@btn(Home.dc.html|Continue with Apple|dark)@@
+      @@btn(Home.dc.html|Continue with Google|secondary)@@
+    </div>
+
+    <p style="margin: auto 0 0; text-align: center; font-size: 15px; color: #5F5852">New to Salonat? <a href="SignUp.dc.html" style="font-weight: 600">Create an account</a></p>
+  </div>
+</div>
+@@foot(390|844)@@

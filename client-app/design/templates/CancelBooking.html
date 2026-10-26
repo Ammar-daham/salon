@@ -1,0 +1,36 @@
+@@head(Cancel appointment)@@
+@@root(844)@@
+  <div aria-hidden="true" style="padding: 56px 20px 0; display: flex; flex-direction: column; gap: 24px">
+    <div style="display: flex; align-items: center; justify-content: space-between">
+      <div style="width: 44px; height: 44px; border-radius: 22px; background: #FFFFFF; border: 1px solid #E4DED8; box-sizing: border-box"></div>
+      <span style="font-size: 17px; font-weight: 600">Appointment</span>
+      <div style="width: 44px; height: 44px; border-radius: 22px; background: #FFFFFF; border: 1px solid #E4DED8; box-sizing: border-box"></div>
+    </div>
+    <div style="height: 94px; border-radius: 16px; background: #FBF4E7"></div>
+    <span style="font-size: 28px; font-weight: 600">Thursday 29 October</span>
+  </div>
+  <div aria-hidden="true" style="position: absolute; inset: 0; background: rgba(44,25,29,0.5)"></div>
+
+  <section role="dialog" aria-modal="true" aria-labelledby="h-cancel" aria-describedby="d-cancel" style="position: absolute; left: 0; right: 0; bottom: 0; background: #FFFFFF; border-radius: 24px 24px 0 0; padding: 8px 20px 34px; display: flex; flex-direction: column; gap: 20px">
+    <div aria-hidden="true" style="align-self: center; width: 40px; height: 5px; border-radius: 3px; background: #CEC6BD"></div>
+    <div style="display: flex; flex-direction: column; gap: 12px">
+      <span style="width: 52px; height: 52px; border-radius: 26px; background: #FBEEEC; display: flex; align-items: center; justify-content: center">@@i(xcircle|26|#A33229)@@</span>
+      <h2 id="h-cancel" style="margin: 0; font-size: 22px; line-height: 28px; font-weight: 600">Cancel this appointment?</h2>
+      <p id="d-cancel" style="margin: 0; font-size: 15px; line-height: 22px; color: #4A443F">Classic Manicure with Mia at Glow Beauty Studio, Thu 29 Oct at 15:30. It’s free to cancel until Wed 28 Oct, 15:30.</p>
+    </div>
+
+    <fieldset style="border: none; margin: 0; padding: 0; display: flex; flex-direction: column">
+      <legend style="padding: 0; margin-bottom: 8px; font-size: 15px; font-weight: 600">Why are you cancelling? <span style="font-weight: 400; color: #5F5852">(optional)</span></legend>
+      <label style="min-height: 48px; display: flex; align-items: center; gap: 12px; font-size: 15px; cursor: pointer; border-bottom: 1px solid #F2EEEA"><input type="radio" name="reason" checked style="width: 22px; height: 22px; margin: 0; accent-color: #9C5A65">My plans changed</label>
+      <label style="min-height: 48px; display: flex; align-items: center; gap: 12px; font-size: 15px; cursor: pointer; border-bottom: 1px solid #F2EEEA"><input type="radio" name="reason" style="width: 22px; height: 22px; margin: 0; accent-color: #9C5A65">I booked by mistake</label>
+      <label style="min-height: 48px; display: flex; align-items: center; gap: 12px; font-size: 15px; cursor: pointer; border-bottom: 1px solid #F2EEEA"><input type="radio" name="reason" style="width: 22px; height: 22px; margin: 0; accent-color: #9C5A65">I found another time</label>
+      <label style="min-height: 48px; display: flex; align-items: center; gap: 12px; font-size: 15px; cursor: pointer"><input type="radio" name="reason" style="width: 22px; height: 22px; margin: 0; accent-color: #9C5A65">Something else</label>
+    </fieldset>
+
+    <div style="display: flex; flex-direction: column; gap: 10px">
+      @@btn(Bookings.dc.html|Cancel appointment|danger)@@
+      @@btn(BookingDetail.dc.html|Keep appointment|secondary)@@
+    </div>
+  </section>
+</div>
+@@foot(390|844)@@
