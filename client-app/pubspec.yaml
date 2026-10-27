@@ -1,0 +1,23 @@
+name: salonat_client
+description: "Salonat, the app clients book salon appointments with."
+publish_to: 'none'
+
+# <version>+<build number>. The version is the one in CHANGELOG.md; the build number goes up with every
+# build sent to the stores. They become versionName/versionCode on Android and
+# CFBundleShortVersionString/CFBundleVersion on iOS.
+version: 0.1.0+1
+
+environment:
+  sdk: ^3.13.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
