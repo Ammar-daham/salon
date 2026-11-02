@@ -7,13 +7,13 @@
 
 A platform for running hair and beauty salons: their staff, services, opening hours, clients and
 appointments. Salons run on **Salonat Pro**, the admin panel. **Salonat** is also the name for the app
-clients will book with, which isn't built yet.
+clients book with, which is being built.
 
 | App | What it is |
 |---|---|
 | [salon-backend](salon-backend) | The REST API: Spring Boot 4, Java 21, PostgreSQL |
 | [admin-panel](admin-panel) | Salonat Pro, the web app salon staff and platform admins use: Next.js |
-| [client-app](client-app) | Salonat, the app clients book with: Flutter. Not built yet; its design and the plan to build it are here |
+| [client-app](client-app) | Salonat, the app clients book with: Flutter, for iOS and Android. So far it only starts; its design and the plan to build it are there too |
 
 ## Try it
 
@@ -43,5 +43,5 @@ To work on one app without Docker, see its own README. The
 
 - [CHANGELOG.md](CHANGELOG.md): platform milestones; each app has its own changelog
 - [brand](brand): the logo files, its colours and typefaces
-- CI builds both apps, runs their tests, checks that `docker compose` comes up with the demo data
+- CI builds the apps, runs their tests, checks that `docker compose` comes up with the demo data
   loaded, and runs the admin panel's end-to-end tests against it, on every pull request
