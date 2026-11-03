@@ -47,6 +47,22 @@ Plain http only works where you develop: in Android debug builds
 (`android/app/src/debug/AndroidManifest.xml`), and on iOS for local network addresses
 (`NSAllowsLocalNetworking` in `ios/Runner/Info.plist`). Anywhere else needs https.
 
+## Design system
+
+Screens are built from [lib/design](lib/design), the design's `Foundations` screen in code. Import
+`design/design.dart` for all of it:
+
+| File | What's in it |
+|---|---|
+| `tokens.dart` | `SalonatColors`, `SalonatRadii`, the 44 px `minTouchTarget` and the 20 px `screenMargin` |
+| `theme.dart` | `SalonatText`, the type scale, and `salonatTheme()`, which gives Material's own widgets the same look |
+| `widgets/` | `SalonatButton`, `SalonatChip`, `TimeSlot`, `StatusBadge`, `SalonatTextField`, `SalonatCard`, `SalonatTabBar`, `PhotoPlaceholder` and `InitialsAvatar` |
+| `gallery.dart` | A screen showing all of the above, opened from the start screen's Design gallery button in debug builds |
+
+Outfit is bundled in `assets/fonts/outfit` (under the SIL Open Font License, shown on the app's licences
+page), and icons come from Lucide (`lucide_icons_flutter`). The tests load Outfit too, in
+`test/flutter_test_config.dart`, so text takes the same room as in the app.
+
 ## Check it
 
 | Command | What it does |
