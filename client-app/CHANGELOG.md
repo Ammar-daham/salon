@@ -11,6 +11,11 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 ## [Unreleased]
 
 ### Added
+- The design system from the design's Foundations screen: its colours, type scale in Outfit and corner
+  sizes, and the widgets screens are built from: buttons, chips, time slots, status badges, text fields,
+  cards, the tab bar, photo placeholders and initials avatars. Everything tappable takes up at least
+  44 × 44 px.
+- A design gallery showing every widget, opened from the start screen in debug builds.
 - The Flutter project, for iOS and Android. The app opens on a placeholder screen that says booking is
   on its way; a debug build also shows the address of the API it was given.
 - The API's address is set when the app is built, with `--dart-define=API_BASE_URL=...`. Without it,
