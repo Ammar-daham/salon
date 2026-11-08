@@ -12,7 +12,9 @@ These are the starting points; the first task in each area confirms them or reco
 - **Flutter**, one app for iOS and Android, in `client-app/` (Dart package `salonat_client`). Suggested
   packages: go_router, Riverpod, dio, freezed and json_serializable, flutter_secure_storage, intl,
   url_launcher, add_2_calendar. Outfit is bundled as a font asset (it's under the OFL); icons are
-  Lucide, the closest match to the design's line icons.
+  Lucide, the closest match to the design's line icons. The models are written by hand rather than
+  with freezed and json_serializable (P4): there are few of them, the app mostly reads them, and it
+  keeps code generation and its generated files out of the build and CI.
 - **Signing in from the app uses tokens.** The API only has cookie sessions, which end after 30 minutes
   without a request, and its CSRF reasoning assumes a browser. The app signs in for an opaque token, kept
   in the API only as a SHA-256 hash (like password reset tokens) and sent as `Authorization: Bearer`. The

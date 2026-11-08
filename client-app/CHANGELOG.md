@@ -11,6 +11,10 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 ## [Unreleased]
 
 ### Added
+- The API client: salons, their opening hours, staff and free times read from salon-backend, with every
+  failed call turned into a message fit to show, and paged lists. Nothing on screen uses it yet.
+- Stand-ins for every resource the app uses, with the demo salons, for building screens before their
+  API exists. Signing in and the client's own appointments are stand-ins only for now.
 - The design system from the design's Foundations screen: its colours, type scale in Outfit and corner
   sizes, and the widgets screens are built from: buttons, chips, time slots, status badges, text fields,
   cards, the tab bar, photo placeholders and initials avatars. Everything tappable takes up at least
