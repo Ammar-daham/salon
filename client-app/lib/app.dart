@@ -2,6 +2,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'config.dart';
+import 'design/design.dart';
+import 'design/gallery.dart';
 
 /// Salonat, the app clients book with.
 class SalonatApp extends StatelessWidget {
@@ -14,12 +16,7 @@ class SalonatApp extends StatelessWidget {
     return MaterialApp(
       title: 'Salonat',
       debugShowCheckedModeBanner: false,
-      // A stand-in until the theme from the design's Foundations screen: the
-      // brand's rose on its warm ground.
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF9C5A65)),
-        scaffoldBackgroundColor: const Color(0xFFFAF8F6),
-      ),
+      theme: salonatTheme(),
       home: StartScreen(config: config),
     );
   }
@@ -47,8 +44,19 @@ class StartScreen extends StatelessWidget {
                 Text('Booking is on its way.', style: text.bodyLarge),
                 // Which API a debug build was given, so a wrong
                 // --dart-define is easy to spot.
-                if (kDebugMode)
+                if (kDebugMode) ...[
                   Text('API: ${config.apiBaseUrl}', style: text.bodySmall),
+                  const SizedBox(height: 16),
+                  SalonatButton(
+                    label: 'Design gallery',
+                    kind: ButtonKind.secondary,
+                    onPressed: () => Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                        builder: (_) => const DesignGallery(),
+                      ),
+                    ),
+                  ),
+                ],
               ],
             ),
           ),
