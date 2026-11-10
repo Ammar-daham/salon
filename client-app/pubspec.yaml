@@ -11,6 +11,8 @@ environment:
   sdk: ^3.13.0
 
 dependencies:
+  # The HTTP client salon-backend is called with.
+  dio: ^5.11.1
   flutter:
     sdk: flutter
   # The app's line icons; the design's set is drawn in the same style.

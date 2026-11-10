@@ -63,6 +63,25 @@ Outfit is bundled in `assets/fonts/outfit` (under the SIL Open Font License, sho
 page), and icons come from Lucide (`lucide_icons_flutter`). The tests load Outfit too, in
 `test/flutter_test_config.dart`, so text takes the same room as in the app.
 
+## Talking to the API
+
+| Folder | What's in it |
+|---|---|
+| [lib/api](lib/api) | `ApiClient`, which calls salon-backend with dio; `ApiException`, what every failed call becomes; `Page` and `PageQuery` for paged lists; and `Endpoints`, every path the app calls |
+| [lib/data](lib/data) | A folder per resource: its models, read from the API's JSON by hand, and its repository, an interface with an `Api…` and a `Fake…` version |
+
+Screens read data through the repositories only, so each can be built on its fake before its API
+exists, then switched over in `Repositories` (`lib/data/repositories.dart`). `Repositories.fake()`
+gives every fake, optionally with a delay so loading states show. The fakes use the demo salons from
+`salon-backend`'s seed data, and sign in as olivia@example.com with `password123`.
+
+Signing in and the client's own appointments are fakes only for now, as salon-backend can't serve
+them to the app yet: it gets token sign-in in task B2 of [the plan](docs/plan.md), and the client's
+own bookings in B6 to B8.
+
+Times from the API are on the salon's clock, with no time zone; `lib/data/salon_time.dart` reads and
+writes them, and says how to show them.
+
 ## Check it
 
 | Command | What it does |
