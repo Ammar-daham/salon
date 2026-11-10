@@ -49,5 +49,18 @@ void main() {
         );
       }
     });
+
+    test('uses the stand-ins unless told to use the API', () {
+      AppConfig resolve(String data) => AppConfig.resolve(
+        apiBaseUrl: '',
+        platform: TargetPlatform.iOS,
+        data: data,
+      );
+
+      expect(resolve('').dataSource, DataSource.fake);
+      expect(resolve('fake').dataSource, DataSource.fake);
+      expect(resolve(' api ').dataSource, DataSource.api);
+      expect(() => resolve('live'), throwsFormatException);
+    });
   });
 }
