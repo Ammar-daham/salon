@@ -110,6 +110,13 @@ version. The version lives in [`gradle.properties`](gradle.properties); each rel
   an hour (FE-13).
 
 ### Added
+- `POST /api/v1/auth/sign-up`, open without a session, creates a client's own account for the
+  customer app: `first_name`, `last_name`, `email` and `password`, under the same password rules as
+  everywhere else. The account is a `CUSTOMER` with no salon, whatever else the body says, and it
+  doesn't sign in. Answers 201 with the account and its address in `Location`; 409 when the email
+  already has an account, in any case. One address may sign up 5 times an hour
+  (`app.sign-up.max-per-address` and `app.sign-up.window`), counted apart from salon registrations;
+  then it's a 429 with `Retry-After`.
 - A `Dockerfile`: the API built with the Gradle wrapper on JDK 21 and run on a Java 21 runtime, as
   a non-root user, on port 8081, with a health check on `/actuator/health`. It's configured from the
   environment; a developer's `application.yml` is never copied into the image (BE-40).

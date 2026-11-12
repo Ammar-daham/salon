@@ -2,6 +2,7 @@ package com.example.salon.support;
 
 import com.example.salon.security.LoginThrottle;
 import com.example.salon.security.RegistrationThrottle;
+import com.example.salon.security.SignUpThrottle;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -56,13 +57,16 @@ public abstract class IntegrationTest
 	private RegistrationThrottle registrationThrottle;
 
 	@Autowired
+	private SignUpThrottle signUpThrottle;
+
+	@Autowired
 	protected RecordingMailer mailer;
 
 	@Autowired
 	protected TestClock clock;
 
 	/**
-	 * Failed sign-ins, registrations and sent emails are kept in memory, across the shared context; each test
+	 * Failed sign-ins, registrations, sign-ups and sent emails are kept in memory, across the shared context; each test
 	 * starts with none.
 	 */
 	@BeforeEach
@@ -70,6 +74,7 @@ public abstract class IntegrationTest
 	{
 		loginThrottle.reset();
 		registrationThrottle.reset();
+		signUpThrottle.reset();
 		mailer.clear();
 	}
 
