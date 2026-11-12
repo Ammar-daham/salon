@@ -23,9 +23,10 @@
  * <p>{@code POST /api/v1/auth/login} with an email and password starts a session, kept in the
  * {@code JSESSIONID} cookie, which the client sends with every request. Every endpoint needs a session
  * except {@code POST /api/v1/auth/login}, {@code POST /api/v1/auth/forgot-password},
- * {@code POST /api/v1/auth/reset-password}, {@code POST /api/v1/auth/register} and
- * {@code GET /actuator/health}; without one the answer is 401. A salon owner registers their salon and
- * their account with {@code POST /api/v1/auth/register}. A salon's ADMINs and EMPLOYEEs sign in only once
+ * {@code POST /api/v1/auth/reset-password}, {@code POST /api/v1/auth/register},
+ * {@code POST /api/v1/auth/sign-up} and {@code GET /actuator/health}; without one the answer is 401. A salon
+ * owner registers their salon and their account with {@code POST /api/v1/auth/register}, and a client
+ * creates their own account with {@code POST /api/v1/auth/sign-up}. A salon's ADMINs and EMPLOYEEs sign in only once
  * a SUPER_ADMIN has approved the salon, and are signed out if it goes back to pending or is rejected; a
  * suspended salon's staff still sign in. A session ends after 30 minutes without a request. A request
  * whose {@code Origin} header isn't one the server allows ({@code app.cors.allowed-origins}) is refused
@@ -40,8 +41,9 @@
  *       clients and appointments.</td></tr>
  *   <tr><td>{@code EMPLOYEE}</td><td>Works at one salon: sees it, adds its clients, and books and changes
  *       its appointments.</td></tr>
- *   <tr><td>{@code CUSTOMER}</td><td>A salon's client with an account. Does no salon work. Can sign in if
- *       the account has an email and password, for the customer app; the admin panel turns them away.</td></tr>
+ *   <tr><td>{@code CUSTOMER}</td><td>A client with an account: one a salon added, or one who signed up for
+ *       the customer app, with no salon. Does no salon work. Can sign in if the account has an email and
+ *       password, for the customer app; the admin panel turns them away.</td></tr>
  * </table>
  * <p>Everyone may read and change their own account and password. An {@code ADMIN} or {@code EMPLOYEE}
  * acts only on their own salon. Each endpoint says who may call it; anyone else gets 403, or 404 where
@@ -83,7 +85,7 @@
  * <ul>
  *   <li>{@link com.example.salon.controller.AuthController}: signing in and out, and passwords</li>
  *   <li>{@link com.example.salon.controller.RegistrationController}: a salon owner registering their
- *       salon</li>
+ *       salon, and a client signing up</li>
  *   <li>{@link com.example.salon.controller.UserController}: user accounts</li>
  *   <li>{@link com.example.salon.controller.AddressController},
  *       {@link com.example.salon.controller.ContactController}: addresses, phone numbers and emails</li>

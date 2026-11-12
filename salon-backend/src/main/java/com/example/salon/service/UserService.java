@@ -82,6 +82,15 @@ public class UserService
 		return createAccount(owner);
 	}
 
+	/** A client's own account, from signing up: a CUSTOMER with no salon. */
+	@Transactional
+	public User addCustomer(User client)
+	{
+		client.setRole(Role.CUSTOMER);
+		client.setBusinessId(null);
+		return createAccount(client);
+	}
+
 	/** The rules every new account follows, whoever creates it. */
 	private User createAccount(User user)
 	{
